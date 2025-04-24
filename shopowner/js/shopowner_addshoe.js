@@ -2,6 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebas
 import { getDatabase, ref as dbRef, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-storage.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyAuPALylh11cTArigeGJZmLwrFwoAsNPSI",
@@ -20,6 +22,7 @@ const db = getDatabase(app);
 const storage = getStorage(app);
 
 let shopID;
+let sname;
 
 document.addEventListener('DOMContentLoaded', () => {
     const random6DigitCode = generate6DigitCode();
@@ -30,10 +33,23 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         shopID = user.uid;
         console.log("shopID: ", shopID);
+
+        // Fetch shop name from database
+        const shopRef = dbRef(db, `AR_shoe_users/shop/${shopID}`);
+        onValue(shopRef, (snapshot) => {
+            const shopData = snapshot.val();
+            if (shopData) {
+                sname = shopData.shopName; // Set it globally
+                console.log("shopName: ", sname);
+            } else {
+                console.warn("Shop name not found for user.");
+            }
+        });
     } else {
         window.location.href = "/user_login.html";
     }
 });
+
 
 function generate6DigitCode() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -133,8 +149,10 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
             defaultImage: shoeImageUrl,
             variants: processedVariants,
             shopID: shopID,
+            shopName: sname,  // Now included
             dateAdded: new Date().toISOString()
         });
+        
 
         alert("Shoe added successfully!");
         // Reset form
