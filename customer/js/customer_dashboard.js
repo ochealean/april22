@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+// Add 'set' to your existing imports
+import { getDatabase, ref, get, onValue, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -274,83 +275,110 @@ window.closeProductModal = function() {
     document.body.classList.remove('modal-open');
 };
 
-// Add to cart function
-document.getElementById('addToCartBtn')?.addEventListener('click', function() {
-    if (!currentShoeData || selectedSize === null) return;
-    
-    const selectedVariant = currentShoeData.variants[selectedVariantIndex];
-    
-    const cartItem = {
-        shoeId: currentShoeData.shoeId,
-        shopId: currentShoeData.shopId,
-        shoeName: currentShoeData.shoeName,
-        shoeCode: currentShoeData.shoeCode,
-        variantIndex: selectedVariantIndex,
-        variantName: selectedVariant.variantName,
-        color: selectedVariant.color,
-        size: selectedSize,
-        price: selectedVariant.price,
-        image: selectedVariant.imageUrl || currentShoeData.defaultImage,
-        quantity: 1 // Default quantity
-    };
-    
-    // Here you would add to cart
-    addToCart(cartItem);
-    alert(`${currentShoeData.shoeName} (${selectedVariant.variantName}, Size ${selectedSize}) added to cart!`);
-    closeProductModal();
-});
-
-// Buy now function
-document.getElementById('buyNowBtn')?.addEventListener('click', function() {
-    if (!currentShoeData || selectedSize === null) return;
-    
-    const selectedVariant = currentShoeData.variants[selectedVariantIndex];
-    
-    const cartItem = {
-        shoeId: currentShoeData.shoeId,
-        shopId: currentShoeData.shopId,
-        shoeName: currentShoeData.shoeName,
-        shoeCode: currentShoeData.shoeCode,
-        variantIndex: selectedVariantIndex,
-        variantName: selectedVariant.variantName,
-        color: selectedVariant.color,
-        size: selectedSize,
-        price: selectedVariant.price,
-        image: selectedVariant.imageUrl || currentShoeData.defaultImage,
-        quantity: 1 // Default quantity
-    };
-    
-    // Here you would add to cart and proceed to checkout
-    addToCart(cartItem);
-    window.location.href = "/checkout.html"; // Redirect to checkout page
-});
-
-// Placeholder for addToCart function
-function addToCart(item) {
-    // Implement your cart functionality here
-    // This could be using localStorage, Firebase, or a state management solution
-    console.log("Adding to cart:", item);
-    
-    // Example using localStorage:
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    
-    // Check if item already exists in cart
-    const existingItemIndex = cart.findIndex(i => 
-        i.shoeId === item.shoeId && 
-        i.variantIndex === item.variantIndex && 
-        i.size === item.size
-    );
-    
-    if (existingItemIndex >= 0) {
-        // Update quantity if already in cart
-        cart[existingItemIndex].quantity += 1;
-    } else {
-        // Add new item to cart
-        cart.push(item);
+// Add to cart function - define this before it's used
+window.addToCart = async function(cartItem) {  // Added async here
+    const user = auth.currentUser;
+    if (!user) {
+        alert('Please login to add items to cart');
+        return false;
     }
+
+    try {
+        // 1. Update localStorage immediately with minimal data
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        
+        // Create minimal cart item
+        const minimalCartItem = {
+            shopId: cartItem.shopId,
+            shoeId: cartItem.shoeId,
+            variantIndex: cartItem.variantIndex,
+            size: cartItem.size,
+            quantity: cartItem.quantity || 1
+        };
+        
+        // Check for existing item
+        const existingIndex = cart.findIndex(i => 
+            i.shoeId === minimalCartItem.shoeId && 
+            i.variantIndex === minimalCartItem.variantIndex && 
+            i.size === minimalCartItem.size
+        );
+
+        if (existingIndex >= 0) {
+            cart[existingIndex].quantity += minimalCartItem.quantity;
+        } else {
+            cart.push(minimalCartItem);
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+
+        // 2. Update Firebase
+        const cartRef = ref(db, `AR_shoe_users/carts/${user.uid}`);
+        await set(cartRef, cart);
+        
+        console.log("Cart updated in both localStorage and Firebase");
+        return true;
+        
+    } catch (error) {
+        console.error("Error saving cart:", error);
+        alert("Failed to add item to cart");
+        return false;
+    }
+};
+
+// Then modify your existing addToCartBtn event listener to use this function
+document.getElementById('addToCartBtn').addEventListener('click', function() {
+    if (!currentShoeData || selectedSize === null) return;
     
-    localStorage.setItem('cart', JSON.stringify(cart));
-}
+    const selectedVariant = currentShoeData.variants[selectedVariantIndex];
+    const sizeInfo = selectedVariant.sizes.find(s => s.size === selectedSize);
+    
+    if (sizeInfo && sizeInfo.stock > 0) {
+        const cartItem = {
+            shopId: currentShoeData.shopId,
+            shoeId: currentShoeData.shoeId,
+            shoeName: currentShoeData.shoeName,
+            variantIndex: selectedVariantIndex,
+            variantName: selectedVariant.variantName,
+            color: selectedVariant.color,
+            size: selectedSize,
+            price: selectedVariant.price,
+            image: selectedVariant.imageUrl || currentShoeData.defaultImage,
+            quantity: 1
+        };
+        
+        // Store shopID and userID in localStorage temporarily
+        const user = auth.currentUser;
+        if (user) {
+            localStorage.setItem('currentShop', JSON.stringify({
+                shopId: currentShoeData.shopId,
+                userId: user.uid
+            }));
+        }
+        
+        // Add to cart
+        addToCart(cartItem);
+        closeProductModal();
+    }
+});
+
+// Modified Buy Now function
+document.getElementById('buyNowBtn').addEventListener('click', function() {
+    if (!currentShoeData || selectedSize === null) return;
+    
+    const minimalCartItem = {
+        shopId: currentShoeData.shopId,
+        shoeId: currentShoeData.shoeId,
+        variantIndex: selectedVariantIndex,
+        size: selectedSize,
+        quantity: 1
+    };
+    
+    // Save only the minimal data to localStorage
+    localStorage.setItem('cart', JSON.stringify([minimalCartItem]));
+    
+    // Redirect to checkout
+    window.location.href = 'checkout.html';
+});
 
 // Close modal when clicking outside
 document.addEventListener('click', function(e) {
