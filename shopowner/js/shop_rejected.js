@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logoutBtn');
     const reasonsList = document.getElementById('rejectionReasonsList');
 
+    const params = new URLSearchParams(window.location.search);
+    const shop_ID = params.get("shopID"); // di mo na need local storage
+
     // if (!userId || !shopId) {
     //     window.location.href = '/user_login.html';
     //     // walang ganyan
@@ -33,20 +36,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // }
 
     // Load rejection reasons
-    const shopRef = ref(db, `AR_shoe_users/shop/${shopId}`);
+
+    // try mong balik sa shopId na local storage mo yung shop_ID na nilagay ko para makita mo difference
+    const shopRef = ref(db, `AR_shoe_users/shop/${shop_ID}`);
     onValue(shopRef, (snapshot) => {
         if (snapshot.exists()) {
             const shop = snapshot.val();
             const rejectionReason = shop.rejectionReason || "No specific reason provided";
-            
+
             // Split reasons by newlines or bullet points
             const reasons = rejectionReason.split('\n').filter(r => r.trim() !== '');
-            
+
             if (reasons.length === 0) {
                 reasons.push("No specific reason provided");
             }
-            
-            reasonsList.innerHTML = reasons.map(reason => 
+
+            reasonsList.innerHTML = reasons.map(reason =>
                 `<li>${reason.trim()}</li>`
             ).join('');
         }
@@ -56,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     reapplyBtn.addEventListener('click', () => {
         // Redirect to registration page with shop ID for editing
         // window.location.href = `/shopowner/html/shop_reapply.html?shopId=${shopId}&reapply=true`;
-        window.location.href = `/shopowner/html/shop_reapply.html`;
+        window.location.href = `/shopowner/html/shop_reapply.html?shopID=${shop_ID}`;
     });
 
     // Logout button
