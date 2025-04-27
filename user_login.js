@@ -148,7 +148,7 @@ function checkShopStatus(uid) {
                 window.location.href = "shopowner/html/shop_pending.html"; // Redirect to pending page
             } else if (status === 'rejected') {
                 console.log("Shop status:", status); // Debugging line
-                window.location.href = "shopowner/html/shop_rejected.html"; // Redirect to rejected page
+                window.location.href = "shopowner/html/shop_rejected.html?shopID="+uid; // Redirect to rejected page
             } else {
                 // If approved, redirect to the shop dashboard
                 window.location.href = "shopowner/html/shop_dashboard.html";
