@@ -84,7 +84,7 @@ document.getElementById("confirmAction")?.addEventListener("click", function() {
                     emailjs.send('service_8i28mes', 'template_btslatu', templateParams)
                         .then(function (response) {
                             console.log('Email sent!', response.status, response.text);
-                            showNotification(`Rejection email sent to ${shopEmail}`, "success");
+                            // showNotification(`Rejection email sent to ${shopEmail}`, "success");
                             hideDialog(); // Close dialog after email is sent
                         }, function (error) {
                             console.error('Failed to send', error);

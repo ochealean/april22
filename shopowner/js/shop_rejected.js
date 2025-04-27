@@ -55,7 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Reapply button
     reapplyBtn.addEventListener('click', () => {
         // Redirect to registration page with shop ID for editing
-        window.location.href = `/shopowner/html/shopowner_register.html?shopId=${shopId}&reapply=true`;
+        // window.location.href = `/shopowner/html/shop_reapply.html?shopId=${shopId}&reapply=true`;
+        window.location.href = `/shopowner/html/shop_reapply.html`;
     });
 
     // Logout button
