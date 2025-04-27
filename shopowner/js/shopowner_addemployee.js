@@ -1,12 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-import { 
-    getAuth, 
-    onAuthStateChanged,
-    createUserWithEmailAndPassword, 
-    sendEmailVerification,
-    signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import { getApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 
 
@@ -27,11 +21,27 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
+
+// global variable to store the shop owner information
+let email;      // emailsend_1
+let messageForEmployee =
+    `Hello, you have been added as an employee. <br>
+Here are your login details:<br>
+Email: ${document.getElementById('employeeEmail').value}<br>
+Password: ${document.getElementById('employeePassword').value}<br>
+<br>
+you can log in to your account using the following link:<br>
+https://april22.vercel.app/user_login.html <br>
+Please check your email for further instructions.`;
+
+
+
+
 // Single assignment variable for shop owner
 function createSingleAssignmentVariable() {
     let valueSet = false;
     let value;
-  
+
     return {
         setValue(newValue) {
             if (!newValue) throw new Error("Value cannot be null or undefined");
@@ -122,7 +132,7 @@ document.getElementById('addEmployeeForm').addEventListener('submit', async (e) 
     // Validate password match
     const password = document.getElementById('employeePassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
-    
+
     if (password !== confirmPassword) {
         alert("Passwords don't match!");
         return;
@@ -150,24 +160,59 @@ document.getElementById('addEmployeeForm').addEventListener('submit', async (e) 
             return;
         }
 
+        // Create employee account
         const result = await createEmployeeAccount(employeeData);
-        alert(`Employee created successfully!`);
-        e.target.reset();
         
+        // Initialize EmailJS - make sure to use your actual public key
+        emailjs.init('gBZ5mCvVmgjo7wn0W'); // Your public key here
+
+
+        const templateParams = {
+            email: employeeData.email,
+            from_name: 'Your App Name',
+            reply_to: 'your-default-reply@example.com',
+            name: employeeData.name,
+            password_text: employeeData.password,
+        };
+        console.log(templateParams);
+
+        // Send email
+        const emailResponse = await emailjs.send(
+            'service_e65qjil', // Your service ID
+            'template_29nwqmg', // Your template ID
+            templateParams
+        );
+
+        console.log('Email sent!', emailResponse.status, emailResponse.text);
+        alert(`Employee created successfully! Email sent to ${employeeData.email}`);
+        
+        // Reset form
+        e.target.reset();
+
         // Clear password validation indicators
         document.querySelectorAll('#passwordRequirements li').forEach(li => {
             li.style.color = 'initial';
         });
     } catch (err) {
         console.error("Error:", err);
-        alert(`Error: ${err.message}`);
+        
+        // More specific error messages
+        if (err.code === 'auth/email-already-in-use') {
+            alert('This email is already registered');
+        } else if (err.code === 'auth/invalid-email') {
+            alert('Please enter a valid email address');
+        } else if (err.text) { // EmailJS error
+            alert('Failed to send email: ' + err.text);
+        } else {
+            alert('Error: ' + err.message);
+        }
     }
 });
 
 // Password validation
-document.getElementById('employeePassword').addEventListener('input', function() {
+document.getElementById('employeePassword').addEventListener('input', function () {
     const password = this.value;
-    
+
     // Check password requirements
     document.getElementById('reqLength').style.color = password.length >= 8 ? 'green' : 'red';
     document.getElementById('reqUppercase').style.color = /[A-Z]/.test(password) ? 'green' : 'red';
