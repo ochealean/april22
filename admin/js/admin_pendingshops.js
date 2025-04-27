@@ -227,7 +227,7 @@ function createShopRow(shopId, shop, status) {
         <td>${shop.shopName || 'N/A'}</td>
         <td>${shop.ownerName || 'N/A'}</td>
         <td>${shop.email || 'N/A'}</td>
-        <td><a href="#" class="view-link"><i class="fas fa-eye"></i> View</a></td>
+        <td><a href="#" class="view-link" data-id="${shopId}"><i class="fas fa-eye"></i> View</a></td>  
         <td>${shop.dateProcessed || 'Pending'}</td>
         ${status === 'rejected' ? `<td></td>` : ''}
         <td>
@@ -241,11 +241,201 @@ function createShopRow(shopId, shop, status) {
     `;
 
     // Add event listeners
+    row.querySelector('.view-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showShopModal(e);
+    });
     row.querySelector('.approve-btn')?.addEventListener('click', (e) => showConfirmationDialog(e, 'approve'));
     row.querySelector('.reject-btn')?.addEventListener('click', (e) => showConfirmationDialog(e, 'reject'));
 
     return row;
 }
+
+// Show shop details modal
+function showShopModal(e) {
+    e.preventDefault();
+
+    // Get the closest view-link element (in case user clicked the icon)
+    const viewLink = e.target.closest('.view-link');
+    if (!viewLink) return;
+
+    currentShopId = viewLink.getAttribute('data-id');  // Get ID from the link
+    const shopRef = ref(db, `AR_shoe_users/shop/${currentShopId}`);
+
+    onValue(shopRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const shop = snapshot.val();
+            // Add deep fallbacks
+            const safeShop = {
+                ...shop,
+                uploads: shop.uploads || {
+                    frontSideID: { url: '' },
+                    backSideID: { url: '' },
+                    licensePreview: { url: '' },
+                    permitDocument: { url: '' }
+                },
+                shopCategory: shop.shopCategory || 'N/A',
+                shopAddress: shop.shopAddress || 'N/A',
+                ownerPhone: shop.ownerPhone || '',
+                shopCity: shop.shopCity || '',
+                shopState: shop.shopState || '',
+                shopCountry: shop.shopCountry || '',
+                shopZip: shop.shopZip || ''
+            };
+            updateShopModalContent(safeShop);
+            document.getElementById('shopDetailsModal').classList.add('show');
+            document.getElementById('overlay').classList.add('show');
+        } else {
+            showNotification("Shop data not found", "error");
+        }
+    }, { onlyOnce: true });
+}
+
+function updateShopModalContent(shop) {
+    const modalContent = document.getElementById('modalShopContent');
+    const getDocUrl = (doc) => shop.uploads[doc]?.url || 'no-document.png';
+
+    modalContent.innerHTML = `
+        <div class="modal-section">
+            <h3>Basic Information</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Shop ID: </span>
+                    <span class="info-value">${currentShopId}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Shop Name: </span>
+                    <span class="info-value">${shop.shopName || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Category: </span>
+                    <span class="info-value">${shop.shopCategory || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Description: </span>
+                    <span class="info-value">${shop.shopDescription || 'N/A'}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-section">
+            <h3>Owner Information</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Name: </span>
+                    <span class="info-value">${shop.ownerName || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email: </span>
+                    <span class="info-value">${shop.email || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Phone: </span>
+                    <span class="info-value">${shop.ownerPhone ? '+63 ' + shop.ownerPhone : 'N/A'}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-section">
+            <h3>Location Details</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Address: </span>
+                    <span class="info-value">${[
+            shop.shopAddress,
+            shop.shopCity,
+            shop.shopState,
+            shop.shopCountry
+        ].filter(Boolean).join(', ') || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">ZIP Code: </span>
+                    <span class="info-value">${shop.shopZip || 'N/A'}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-section">
+            <h3>Business Documents</h3>
+            <div class="document-grid">
+                ${renderDocumentItem(getDocUrl('frontSideID'), 'Front ID')}
+                ${renderDocumentItem(getDocUrl('backSideID'), 'Back ID')}
+                ${renderDocumentItem(getDocUrl('licensePreview'), 'Business License')}
+                ${renderDocumentItem(getDocUrl('permitDocument'), 'Permit')}
+            </div>
+        </div>
+
+        <div class="modal-section">
+            <h3>Timestamps</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Registration Date: </span>
+                    <span class="info-value">${formatDisplayDate(shop.dateProcessed) || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    ${shop.status === 'approved' ? `
+                        <span class="info-label">Approval Date: </span>
+                        <span class="info-value">${formatDisplayDate(shop.dateApproved)}</span>
+                    ` : ''}
+                    
+                    ${shop.status === 'rejected' ? `
+                        <span class="info-label">Rejection Date: </span>
+                        <span class="info-value">${formatDisplayDate(shop.dateRejected)}</span>
+                    ` : ''}
+                </div>
+                <div class="info-item">
+                    ${shop.status === 'rejected' ? `
+                        <span class="info-label">Reason for Being Rejected: </span>
+                    ` : ''}
+                </div>
+                <div class="info-item">
+                    ${shop.status === 'rejected' ? `
+                        <span class="info-value">${shop.rejectionReason}</span>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// format ng date and time
+function formatDisplayDate(isoString) {
+    if (!isoString) return 'N/A';
+    
+    const date = new Date(isoString);
+    if (isNaN(date)) return 'Invalid Date';
+
+    // Format time (1:19 AM)
+    const timeString = date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+
+    // Format date (April 19, 2025)
+    const month = date.toLocaleString('default', { month: 'long' });
+    const day = date.getDate();
+    const year = date.getFullYear();
+
+    return `${timeString} ${month} ${day}, ${year}`;
+}
+
+// Add helper function
+function renderDocumentItem(url, title) {
+    return `
+    <div class="document-item">
+        <div class="document-title">${title}</div>
+        <a href="${url}" target="_blank" class="document-preview">
+            <img src="${url}" alt="${title}" 
+                 onerror="this.onerror=null;this.src='no-document.png'">
+        </a>
+    </div>`;
+}
+
+document.getElementById('closeShopModal')?.addEventListener('click', () => {
+    document.getElementById('shopDetailsModal').classList.remove('show');
+    document.getElementById('overlay').classList.remove('show');
+});
 
 // -----------------------------------------add from macmac code---------------------------------------------------
 let currentPage = 1;
@@ -510,7 +700,9 @@ confirmLogout?.addEventListener('click', function () {
     window.location.href = '/admin/html/admin_login.html';
 });
 
-document.getElementById('overlay')?.addEventListener('click', function () {
+document.getElementById('overlay')?.addEventListener('click', function() {
+    document.getElementById('confirmationDialog').classList.remove('show');
+    document.getElementById('shopDetailsModal').classList.remove('show');
     logoutDialog.classList.remove('show');
     this.classList.remove('show');
 });
@@ -520,4 +712,31 @@ document.addEventListener('DOMContentLoaded', () => {
     loadShops('pending', 'pendingShopsTableBody');
     setupSearchListeners();
     setupPagination();
+
+    // Menu toggle functionality
+    const menuBtn = document.querySelector(".menu-btn");
+    const navLinks = document.querySelector(".nav-links");
+    
+    menuBtn?.addEventListener("click", function() {
+        navLinks.classList.toggle("active");
+        menuBtn.innerHTML = navLinks.classList.contains("active") ? 
+            '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+    });
+
+    // Clear button functionality
+    const clearBtn = document.getElementById("clearSearch");
+    const searchInput = document.getElementById("shopSearch");
+    
+    clearBtn?.addEventListener("click", function(e) {
+        e.preventDefault();
+        searchInput.value = "";
+        searchInput.focus();
+        
+        // Show notification
+        showNotification("Search cleared", "success");
+        
+        // In a real application, you might want to reload the data or clear filtered results
+        // For example:
+        // resetTableData();
+    });
 });

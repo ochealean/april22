@@ -348,7 +348,7 @@ function updateShopModalContent(shop) {
             <h3>Timestamps</h3>
             <div class="info-grid">
                 <div class="info-item">
-                    <span class="info-label">Registration Date: </span>
+                    <span class="info-label">Status Changed Date: </span>
                     <span class="info-value">${formatDisplayDate(shop.dateProcessed) || 'N/A'}</span>
                 </div>
                 <div class="info-item">
@@ -414,10 +414,6 @@ function renderDocumentItem(url, title) {
 document.getElementById('closeShopModal')?.addEventListener('click', () => {
     document.getElementById('shopDetailsModal').classList.remove('show');
     document.getElementById('overlay').classList.remove('show');
-});
-
-document.getElementById('overlay')?.addEventListener('click', () => {
-    document.getElementById('shopDetailsModal').classList.remove('show');
 });
   
 
@@ -929,6 +925,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Close dialogs when clicking overlay
             document.getElementById('overlay')?.addEventListener('click', function() {
                 document.getElementById('confirmationDialog').classList.remove('show');
+                document.getElementById('shopDetailsModal').classList.remove('show');
                 logoutDialog.classList.remove('show');
                 this.classList.remove('show');
             });

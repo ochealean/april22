@@ -249,7 +249,7 @@ function updateShopModalContent(shop) {
             <h3>Timestamps</h3>
             <div class="info-grid">
                 <div class="info-item">
-                    <span class="info-label">Registration Date: </span>
+                    <span class="info-label">Status Changed Date: </span>
                     <span class="info-value">${formatDisplayDate(shop.dateProcessed) || 'N/A'}</span>
                 </div>
                 <div class="info-item">
@@ -508,28 +508,23 @@ function initializeEventListeners() {
 
     document.getElementById("cancelAction")?.addEventListener("click", hideDialog);
 
-    // Logout
-    logoutLink?.addEventListener('click', function (e) {
-        e.preventDefault();
-        logoutDialog?.classList.add('show');
-        overlay?.classList.add('show');
-    });
-
-    cancelLogout?.addEventListener('click', function () {
-        logoutDialog?.classList.remove('show');
-        overlay?.classList.remove('show');
-    });
-
-    confirmLogout?.addEventListener('click', function () {
-        window.location.href = '/admin/html/admin_login.html';
-    });
-
-    overlay?.addEventListener('click', function () {
-        // Close all modals
-        document.querySelectorAll('.modal-dialog').forEach(modal => {
-            modal.classList.remove('show');
-        });
+    overlay?.addEventListener('click', function() {
+        // Close all specific dialogs
+        document.getElementById('confirmationDialog')?.classList.remove('show');
+        document.getElementById('shopDetailsModal')?.classList.remove('show');
+        document.getElementById('logoutDialog')?.classList.remove('show');
+        document.getElementById('ModalDialog')?.classList.remove('show');
+        
+        // Also hide the overlay itself
         this.classList.remove('show');
+        
+        // Clear any rejection reason input
+        document.getElementById('rejectionReason').value = '';
+        
+        // Reset action tracking variables
+        currentAction = null;
+        currentRow = null;
+        currentShopId = null;
     });
 
     document.body.addEventListener('click', (e) => {
@@ -545,4 +540,27 @@ document.addEventListener('DOMContentLoaded', () => {
     loadShops('pending', 'pendingShopsTableBody');
     loadShops('approved', 'approvedShopsTableBody');
     loadShops('rejected', 'rejectedShopsTableBody');
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Logout functionality
+    const logoutLink = document.querySelector('a[href="/admin/html/admin_login.html"]');
+    const logoutDialog = document.getElementById('logoutDialog');
+    const cancelLogout = document.getElementById('cancelLogout');
+    const confirmLogout = document.getElementById('confirmLogout');
+
+    logoutLink?.addEventListener('click', function(e) {
+        e.preventDefault();
+        logoutDialog.classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    });
+
+    cancelLogout?.addEventListener('click', function() {
+        logoutDialog.classList.remove('show');
+        document.getElementById('overlay').classList.remove('show');
+    });
+
+    confirmLogout?.addEventListener('click', function() {
+        window.location.href = '/admin/html/admin_login.html';
+    });
 });
