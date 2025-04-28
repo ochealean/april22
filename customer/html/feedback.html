@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Feedback</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2a6496;
+            --primary-hover: #1d4b75;
+            --star-color: #FFD700;
+            --border-color: #e0e0e0;
+            --text-light: #666;
+            --text-dark: #333;
+            --bg-light: #f9f9f9;
+            --shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        .feedback-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+        
+        .feedback-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .feedback-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .shoe-details {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .shoe-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .shoe-info {
+            flex: 1;
+        }
+        
+        .shoe-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .shoe-id, .shop-name {
+            color: var(--text-light);
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .rating-section {
+            margin-bottom: 25px;
+        }
+        
+        .rating-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .stars {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .star {
+            color: #ccc;
+            font-size: 28px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .star:hover, .star.active {
+            color: var(--star-color);
+        }
+        
+        .rating-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            margin-bottom: 20px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 200px;
+            margin: 0 auto;
+        }
+        
+        .submit-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Success message */
+        .success-message {
+            display: none;
+            text-align: center;
+            color: var(--success-color);
+            margin-top: 20px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="feedback-container">
+        <div class="feedback-header">
+            <h1><i class="fas fa-comment-alt"></i> Submit Feedback</h1>
+            <p>Share your experience with this product</p>
+        </div>
+        
+        <div class="shoe-details">
+            <img src="https://example.com/shoe-image.jpg" alt="Shoe Image" class="shoe-image" id="shoeImage">
+            <div class="shoe-info">
+                <h2 class="shoe-name" id="shoeName">Running Shoe Pro 2023</h2>
+                <div class="shoe-id" id="shoeId">Product ID: SH12345</div>
+                <div class="shop-name" id="shopName">From: Elite Footwear</div>
+            </div>
+        </div>
+        
+        <form id="feedbackForm">
+            <div class="rating-section">
+                <div class="rating-title">How would you rate this product?</div>
+                <div class="stars" id="starRating">
+                    <i class="fas fa-star star" data-rating="1"></i>
+                    <i class="fas fa-star star" data-rating="2"></i>
+                    <i class="fas fa-star star" data-rating="3"></i>
+                    <i class="fas fa-star star" data-rating="4"></i>
+                    <i class="fas fa-star star" data-rating="5"></i>
+                </div>
+                <div class="rating-labels">
+                    <span>Poor</span>
+                    <span>Fair</span>
+                    <span>Good</span>
+                    <span>Very Good</span>
+                    <span>Excellent</span>
+                </div>
+                <input type="hidden" id="ratingValue" name="rating" value="0">
+            </div>
+            
+            <div class="comment-section">
+                <label for="comment" class="rating-title">Share your thoughts (optional)</label>
+                <textarea id="comment" name="comment" placeholder="What did you like or dislike about this product?"></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span>Submit Feedback</span>
+                <div class="loader" id="loader"></div>
+            </button>
+            
+            <div class="success-message" id="successMessage">
+                <i class="fas fa-check-circle"></i> Thank you for your feedback!
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Star rating functionality
+            const stars = document.querySelectorAll('.star');
+            const ratingValue = document.getElementById('ratingValue');
+            
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    ratingValue.value = rating;
+                    
+                    // Update star display
+                    stars.forEach((s, index) => {
+                        if (index < rating) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+                
+                // Hover effect
+                star.addEventListener('mouseover', function() {
+                    const hoverRating = parseInt(this.dataset.rating);
+                    stars.forEach((s, index) => {
+                        if (index < hoverRating) {
+                            s.style.color = 'var(--star-color)';
+                        }
+                    });
+                });
+                
+                star.addEventListener('mouseout', function() {
+                    const currentRating = parseInt(ratingValue.value);
+                    stars.forEach((s, index) => {
+                        if (index >= currentRating) {
+                            s.style.color = '#ccc';
+                        }
+                    });
+                });
+            });
+            
+            // Form submission
+            const feedbackForm = document.getElementById('feedbackForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const loader = document.getElementById('loader');
+            const successMessage = document.getElementById('successMessage');
+            
+            feedbackForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Validate rating
+                if (parseInt(ratingValue.value) === 0) {
+                    alert('Please select a rating');
+                    return;
+                }
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                loader.style.display = 'block';
+                submitBtn.querySelector('span').textContent = 'Submitting...';
+                
+                // Simulate API call (replace with actual fetch to your backend)
+                setTimeout(() => {
+                    console.log('Feedback submitted:', {
+                        rating: ratingValue.value,
+                        comment: document.getElementById('comment').value,
+                        shoeId: 'SH12345' // This would come from your data
+                    });
+                    
+                    // Hide loader and show success
+                    loader.style.display = 'none';
+                    submitBtn.style.display = 'none';
+                    successMessage.style.display = 'block';
+                    
+                    // Reset form after 3 seconds
+                    setTimeout(() => {
+                        feedbackForm.reset();
+                        stars.forEach(s => s.classList.remove('active'));
+                        ratingValue.value = '0';
+                        submitBtn.disabled = false;
+                        submitBtn.querySelector('span').textContent = 'Submit Feedback';
+                        submitBtn.style.display = 'flex';
+                        successMessage.style.display = 'none';
+                    }, 3000);
+                    
+                }, 1500);
+            });
+            
+            // In a real implementation, you would fetch the shoe details from your backend
+            // For now, we'll simulate it with static data
+            function loadShoeDetails() {
+                // This would come from your backend in a real implementation
+                const shoeData = {
+                    imageUrl: 'https://example.com/shoe-image.jpg',
+                    name: 'Running Shoe Pro 2023',
+                    id: 'SH12345',
+                    shop: 'Elite Footwear'
+                };
+                
+                document.getElementById('shoeImage').src = shoeData.imageUrl;
+                document.getElementById('shoeName').textContent = shoeData.name;
+                document.getElementById('shoeId').textContent = `Product ID: ${shoeData.id}`;
+                document.getElementById('shopName').textContent = `From: ${shoeData.shop}`;
+            }
+            
+            loadShoeDetails();
+        });
+    </script>
+</body>
+</html>
