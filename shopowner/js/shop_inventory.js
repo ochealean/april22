@@ -68,32 +68,39 @@ function createInventoryRow(shoeId, shoe) {
 
     // Calculate total stock from all variants
     let totalStock = 0;
-    if (shoe.variants && Array.isArray(shoe.variants)) {
-        shoe.variants.forEach(variant => {
-            if (variant.sizes && Array.isArray(variant.sizes)) {
-                variant.sizes.forEach(size => {
-                    totalStock += parseInt(size.stock) || 0;
-                });
-            }
-        });
+    let firstPrice = 'N/A';
+
+    if (shoe.variants) {
+        // Get the first variant key
+        const variantKeys = Object.keys(shoe.variants);
+        if (variantKeys.length > 0) {
+            const firstVariant = shoe.variants[variantKeys[0]];
+            firstPrice = firstVariant.price ? `$${firstVariant.price}` : 'N/A';
+
+            // Calculate total stock
+            Object.values(shoe.variants).forEach(variant => {
+                if (variant.sizes) {
+                    Object.values(variant.sizes).forEach(sizeObj => {
+                        const sizeKey = Object.keys(sizeObj)[0]; // Get the size key (e.g., "9")
+                        totalStock += sizeObj[sizeKey].stock || 0;
+                    });
+                }
+            });
+        }
     }
 
     // Format date
     const addedDate = shoe.dateAdded ? new Date(shoe.dateAdded).toLocaleDateString() : 'N/A';
 
-    // Get first variant for display
-    const firstVariant = shoe.variants && shoe.variants[0] ? shoe.variants[0] : null;
-    const price = firstVariant ? `$${firstVariant.price}` : 'N/A';
-
     row.innerHTML = `
         <td>
-            ${shoe.defaultImage ? 
-                `<img src="${shoe.defaultImage}" alt="${shoe.shoeName}" class="shoe-thumbnail">` : 
-                '<div class="no-image">No Image</div>'}
+            ${shoe.defaultImage ?
+            `<img src="${shoe.defaultImage}" alt="${shoe.shoeName}" class="shoe-thumbnail">` :
+            '<div class="no-image">No Image</div>'}
         </td>
         <td>${shoe.shoeName || 'N/A'}</td>
         <td>${shoe.shoeCode || 'N/A'}</td>
-        <td>${price}</td>
+        <td>${firstPrice}</td>
         <td>${totalStock}</td>
         <td>${addedDate}</td>
         <td class="action-buttons">
@@ -128,25 +135,26 @@ function showShoeDetails(shoeId) {
 
         // Generate variants HTML
         let variantsHtml = '';
-        if (shoe.variants && Array.isArray(shoe.variants)) {
-            shoe.variants.forEach((variant, index) => {
+        if (shoe.variants) {
+            Object.values(shoe.variants).forEach((variant, index) => {
                 let sizesHtml = '';
-                if (variant.sizes && Array.isArray(variant.sizes)) {
-                    sizesHtml = variant.sizes.map(size => 
-                        `<div class="size-item">Size ${size.size}: ${size.stock} in stock</div>`
-                    ).join('');
+                if (variant.sizes) {
+                    sizesHtml = Object.values(variant.sizes).map(sizeObj => {
+                        const sizeKey = Object.keys(sizeObj)[0]; // Get the size key (e.g., "9")
+                        return `<div class="size-item">Size ${sizeKey}: ${sizeObj[sizeKey].stock} in stock</div>`;
+                    }).join('');
                 }
 
                 variantsHtml += `
                     <div class="variant-detail">
                         <h4>${variant.variantName || 'Variant'} (${variant.color || 'No color'})</h4>
                         <p><strong>Price:</strong> $${variant.price || '0.00'}</p>
-                        ${variant.imageUrl ? 
-                            `<img src="${variant.imageUrl}" alt="${variant.variantName}" class="variant-image">` : 
-                            '<p>No variant image</p>'}
+                        ${variant.imageUrl ?
+                        `<img src="${variant.imageUrl}" alt="${variant.variantName}" class="variant-image">` :
+                        '<p>No variant image</p>'}
                         <div class="size-container">${sizesHtml}</div>
                     </div>
-                    ${index < shoe.variants.length - 1 ? '<hr>' : ''}
+                    ${index < Object.keys(shoe.variants).length - 1 ? '<hr>' : ''}
                 `;
             });
         }
@@ -159,12 +167,13 @@ function showShoeDetails(shoeId) {
             <div class="modal-body">
                 <div class="shoe-main-info">
                     <div class="shoe-image-container">
-                        ${shoe.defaultImage ? 
-                            `<img src="${shoe.defaultImage}" alt="${shoe.shoeName}" class="main-shoe-image">` : 
-                            '<p>No main image</p>'}
+                        ${shoe.defaultImage ?
+                `<img src="${shoe.defaultImage}" alt="${shoe.shoeName}" class="main-shoe-image">` :
+                '<p>No main image</p>'}
                     </div>
                     <div class="shoe-text-info">
                         <p><strong>Code:</strong> ${shoe.shoeCode || 'N/A'}</p>
+                        <p><strong>Shop Name:</strong> ${shoe.shopName || 'Unknown Shop'}</p>
                         <p><strong>Added:</strong> ${addedDate}</p>
                         <p><strong>Description:</strong></p>
                         <p>${shoe.generalDescription || 'No description available'}</p>
