@@ -25,28 +25,6 @@ let cartListener = null;
 // Hide body initially
 document.body.style.display = 'none';
 
-// Main auth state handler
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        console.log("Auth state: User is logged in", user.uid);
-        
-        // Remove previous listener if exists
-        if (userListener) off(userListener);
-        
-        try {
-            // Set up realtime listener for user data
-            await setupUserListener(user);
-        } catch (error) {
-            console.error("Error setting up user listener:", error);
-            alert("Error loading user data. Please try again.");
-        }
-    } else {
-        // User is signed out - clean up
-        cleanupListeners();
-        console.log("Auth state: User is logged out");
-        window.location.href = "/user_login.html";
-    }
-});
 
 // Set up realtime listener for user data
 async function setupUserListener(user) {
@@ -90,29 +68,28 @@ function updateUserProfile(userData) {
     document.body.style.display = '';
 }
 
-// Set up realtime cart listener
-async function setupCartListener(userId) {
-    return new Promise((resolve) => {
-        if (cartListener) off(cartListener);
-        
+// Add this function to fetch all cart items
+async function fetchAllCartItems(userId) {
+    try {
         const cartRef = ref(db, `AR_shoe_users/carts/${userId}`);
-        cartListener = onValue(cartRef, async (snapshot) => {
-            if (snapshot.exists()) {
-                let cart = snapshot.val();
-                cart = Array.isArray(cart) ? cart : Object.values(cart);
-                await processCartItems(userId, cart);
-                resolve();
-            } else {
-                showEmptyCart();
-                resolve();
-            }
-        });
-    });
+        const snapshot = await get(cartRef);
+        
+        if (snapshot.exists()) {
+            // Convert the cart object to an array if it's not already
+            const cartItems = snapshot.val();
+            return Array.isArray(cartItems) ? cartItems : Object.values(cartItems);
+        } else {
+            return []; // Return empty array if cart is empty
+        }
+    } catch (error) {
+        console.error("Error fetching cart items:", error);
+        throw error;
+    }
 }
 
-// Process cart items with real-time updates
+// Update the processCartItems function to include cartId
 async function processCartItems(userId, cart) {
-    if (cart.length === 0) {
+    if (!cart || Object.keys(cart).length === 0) {
         showEmptyCart();
         return;
     }
@@ -120,42 +97,56 @@ async function processCartItems(userId, cart) {
     showCartContainer();
     
     try {
-        const cartWithDetails = await Promise.all(cart.map(async (item) => {
+        const cartWithDetails = await Promise.all(Object.entries(cart).map(async ([cartId, item]) => {
             try {
+                // Get shoe details
                 const shoeRef = ref(db, `AR_shoe_users/shoe/${item.shopId}/${item.shoeId}`);
-                const snapshot = await get(shoeRef);
+                const shoeSnapshot = await get(shoeRef);
                 
-                if (!snapshot.exists()) {
-                    console.error(`Shoe not found: ${item.shopId}/${item.shoeId}`);
+                if (!shoeSnapshot.exists()) {
+                    console.warn(`Shoe not found: ${item.shopId}/${item.shoeId}`);
                     return null;
                 }
                 
-                const shoeData = snapshot.val();
-                const variant = shoeData.variants[item.variantIndex];
-                const sizeInfo = variant.sizes.find(s => s.size === item.size);
+                const shoeData = shoeSnapshot.val();
+                const variant = shoeData.variants[item.variantKey];
+                
+                // Get size details
+                const sizeObj = variant.sizes[item.sizeKey];
+                const sizeValue = Object.keys(sizeObj)[0];
+                const stock = sizeObj[sizeValue].stock;
                 
                 return {
                     ...item,
-                    name: shoeData.shoeName,
+                    cartId: cartId, // Preserve the cartId
+                    shoeName: shoeData.shoeName,
+                    shopName: shoeData.shopName,
                     price: parseFloat(variant.price),
                     imageUrl: variant.imageUrl || shoeData.defaultImage,
                     variantName: variant.variantName,
                     color: variant.color,
-                    availableStock: sizeInfo ? sizeInfo.stock : 0
+                    size: sizeValue,
+                    availableStock: stock,
+                    maxQuantity: stock
                 };
             } catch (error) {
-                console.error(`Error loading shoe details for ${item.shopId}/${item.shoeId}:`, error);
+                console.error(`Error processing cart item ${item.shoeId}:`, error);
                 return null;
             }
         }));
         
+        // Filter out any null items (where shoe wasn't found)
         const validCartItems = cartWithDetails.filter(item => item !== null);
         
-        if (validCartItems.length !== cart.length) {
+        // Update cart in Firebase if some items were invalid
+        if (validCartItems.length !== Object.keys(cart).length) {
             await updateCartInFirebase(userId, validCartItems);
         }
         
+        // Display the cart items
         displayCartItems(validCartItems);
+        
+        return validCartItems;
     } catch (error) {
         console.error("Error processing cart:", error);
         alert("Failed to load your cart. Please try again.");
@@ -163,7 +154,53 @@ async function processCartItems(userId, cart) {
     }
 }
 
-// Display cart items
+// Update the setupCartListener to handle the object structure
+async function setupCartListener(userId) {
+    return new Promise((resolve) => {
+        if (cartListener) off(cartListener);
+        
+        const cartRef = ref(db, `AR_shoe_users/carts/${userId}`);
+        cartListener = onValue(cartRef, async (snapshot) => {
+            if (snapshot.exists()) {
+                const cart = snapshot.val();
+                await processCartItems(userId, cart);
+                resolve(cart);
+            } else {
+                showEmptyCart();
+                resolve({});
+            }
+        }, (error) => {
+            console.error("Cart listener error:", error);
+            reject(error);
+        });
+    });
+}
+
+// Example usage in your auth state handler:
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        try {
+            // Set up user listener
+            await setupUserListener(user);
+            
+            // Fetch and process cart items
+            const cartItems = await fetchAllCartItems(user.uid);
+            await processCartItems(user.uid, cartItems);
+            
+            // Now you have all cart items available
+            console.log("All cart items:", cartItems);
+            
+        } catch (error) {
+            console.error("Initialization error:", error);
+        }
+    } else {
+        // User signed out
+        cleanupListeners();
+        window.location.href = "/user_login.html";
+    }
+});
+
+// Display cart items with checkboxes
 function displayCartItems(cartItems) {
     const cartContainer = document.getElementById('cartContainer');
     cartContainer.innerHTML = '';
@@ -171,24 +208,31 @@ function displayCartItems(cartItems) {
     const cartItemsSection = document.createElement('div');
     cartItemsSection.className = 'cart-items';
     
-    cartItems.forEach((item, index) => {
+    // Convert cart object to array if needed
+    const itemsArray = Array.isArray(cartItems) ? cartItems : Object.values(cartItems);
+    
+    itemsArray.forEach((item) => {
         const itemElement = document.createElement('div');
         itemElement.className = 'cart-item';
         itemElement.innerHTML = `
-            <img src="${item.imageUrl}" alt="${item.name}" class="cart-item-image">
+            <div class="cart-item-select">
+                <input type="checkbox" class="cart-item-checkbox" data-cartid="${item.cartId}" id="item-${item.cartId}">
+                <label for="item-${item.cartId}"></label>
+            </div>
+            <img src="${item.imageUrl}" alt="${item.shoeName}" class="cart-item-image">
             <div class="cart-item-details">
-                <h3 class="cart-item-name">${item.name}</h3>
+                <h3 class="cart-item-name">${item.shoeName}</h3>
                 <p class="cart-item-variant">${item.variantName} (${item.color}) - Size: ${item.size}</p>
                 <p class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</p>
                 
                 <div class="quantity-controls">
-                    <button class="quantity-btn" data-index="${index}" data-change="-1">-</button>
+                    <button class="quantity-btn" data-cartid="${item.cartId}" data-change="-1">-</button>
                     <input type="number" class="quantity-input" value="${item.quantity}" min="1" 
-                           max="${item.availableStock}" data-index="${index}">
-                    <button class="quantity-btn" data-index="${index}" data-change="1">+</button>
+                           max="${item.availableStock}" data-cartid="${item.cartId}">
+                    <button class="quantity-btn" data-cartid="${item.cartId}" data-change="1">+</button>
                 </div>
                 
-                <button class="remove-btn" data-index="${index}">
+                <button class="remove-btn" data-cartid="${item.cartId}">
                     <i class="fas fa-trash"></i> Remove
                 </button>
             </div>
@@ -197,7 +241,7 @@ function displayCartItems(cartItems) {
     });
     
     cartContainer.appendChild(cartItemsSection);
-    createCartSummary(cartItems);
+    createCartSummary(itemsArray);
 }
 
 // Create cart summary section
@@ -236,41 +280,20 @@ function createCartSummary(cartItems) {
     cartContainer.appendChild(cartSummarySection);
 }
 
-// Update cart in Firebase
-async function updateCartInFirebase(userId, cartItems) {
-    try {
-        const cartData = cartItems.map(item => ({
-            shopId: item.shopId,
-            shoeId: item.shoeId,
-            variantIndex: item.variantIndex,
-            size: item.size,
-            quantity: item.quantity
-        }));
-        
-        const cartRef = ref(db, `AR_shoe_users/carts/${userId}`);
-        await set(cartRef, cartData);
-    } catch (error) {
-        console.error("Error updating cart in Firebase:", error);
-        throw error;
-    }
-}
-
-// Cart manipulation functions
-async function updateQuantity(index, change) {
+// Update quantity functions to work with cartId
+async function updateQuantity(cartId, change) {
     try {
         const userId = auth.currentUser.uid;
-        const cartRef = ref(db, `AR_shoe_users/carts/${userId}`);
+        const cartRef = ref(db, `AR_shoe_users/carts/${userId}/${cartId}/quantity`);
         const snapshot = await get(cartRef);
         
         if (snapshot.exists()) {
-            let cart = snapshot.val();
-            cart = Array.isArray(cart) ? cart : Object.values(cart);
+            const currentQuantity = snapshot.val();
+            const newQuantity = currentQuantity + change;
             
-            const newQuantity = cart[index].quantity + change;
             if (newQuantity < 1) return;
             
-            cart[index].quantity = newQuantity;
-            await set(cartRef, cart);
+            await set(cartRef, newQuantity);
         }
     } catch (error) {
         console.error("Error updating quantity:", error);
@@ -278,46 +301,30 @@ async function updateQuantity(index, change) {
     }
 }
 
-async function updateQuantityInput(index, value) {
+async function updateQuantityInput(cartId, value) {
     try {
         const userId = auth.currentUser.uid;
-        const cartRef = ref(db, `AR_shoe_users/carts/${userId}`);
-        const snapshot = await get(cartRef);
+        const newQuantity = parseInt(value);
         
-        if (snapshot.exists()) {
-            let cart = snapshot.val();
-            cart = Array.isArray(cart) ? cart : Object.values(cart);
-            
-            const newQuantity = parseInt(value);
-            if (isNaN(newQuantity)) return;
-            
-            cart[index].quantity = newQuantity;
-            await set(cartRef, cart);
-        }
+        if (isNaN(newQuantity)) return;
+        
+        await set(ref(db, `AR_shoe_users/carts/${userId}/${cartId}/quantity`), newQuantity);
     } catch (error) {
         console.error("Error updating quantity:", error);
         alert("Failed to update quantity. Please try again.");
     }
 }
 
-async function removeItem(index) {
+async function removeItem(cartId) {
     try {
         const userId = auth.currentUser.uid;
-        const cartRef = ref(db, `AR_shoe_users/carts/${userId}`);
-        const snapshot = await get(cartRef);
-        
-        if (snapshot.exists()) {
-            let cart = snapshot.val();
-            cart = Array.isArray(cart) ? cart : Object.values(cart);
-            
-            cart.splice(index, 1);
-            await set(cartRef, cart);
-        }
+        await set(ref(db, `AR_shoe_users/carts/${userId}/${cartId}`), null);
     } catch (error) {
         console.error("Error removing item:", error);
         alert("Failed to remove item. Please try again.");
     }
 }
+
 
 // Helper functions
 function showEmptyCart() {
@@ -335,7 +342,7 @@ function cleanupListeners() {
     if (cartListener) off(cartListener);
 }
 
-// Event listeners setup
+// Update the event listeners to use cartId
 function setupEventListeners(userId) {
     // Logout button
     document.getElementById('logout_btn')?.addEventListener('click', async () => {
@@ -349,27 +356,79 @@ function setupEventListeners(userId) {
 
     // Delegated event listeners for cart operations
     document.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('quantity-btn')) {
-            const index = parseInt(e.target.dataset.index);
+        if (e.target.classList.contains('quantity-btn') && e.target.dataset.cartid) {
+            const cartId = e.target.dataset.cartid;
             const change = parseInt(e.target.dataset.change);
-            await updateQuantity(index, change);
+            await updateQuantity(cartId, change);
         }
         
-        if (e.target.classList.contains('remove-btn') || e.target.closest('.remove-btn')) {
+        if ((e.target.classList.contains('remove-btn') || e.target.closest('.remove-btn')) && e.target.dataset.cartid) {
             const btn = e.target.classList.contains('remove-btn') ? e.target : e.target.closest('.remove-btn');
-            const index = parseInt(btn.dataset.index);
-            await removeItem(index);
+            const cartId = btn.dataset.cartid;
+            await removeItem(cartId);
         }
     });
 
     document.addEventListener('change', async (e) => {
-        if (e.target.classList.contains('quantity-input')) {
-            const index = parseInt(e.target.dataset.index);
-            await updateQuantityInput(index, e.target.value);
+        if (e.target.classList.contains('quantity-input') && e.target.dataset.cartid) {
+            const cartId = e.target.dataset.cartid;
+            await updateQuantityInput(cartId, e.target.value);
+        }
+        
+        if (e.target.classList.contains('cart-item-checkbox')) {
+            // Handle checkbox selection if needed
+            console.log('Checkbox changed for cart item:', e.target.dataset.cartid);
         }
     });
 
-    document.getElementById('checkoutBtn')?.addEventListener('click', () => {
+    document.getElementById('checkoutBtn')?.addEventListener('click', async () => {
+        // Get selected items
+        const selectedItems = Array.from(document.querySelectorAll('.cart-item-checkbox:checked'))
+            .map(checkbox => checkbox.dataset.cartid);
+        
+        if (selectedItems.length === 0) {
+            alert('Please select at least one item to checkout');
+            return;
+        }
+        
+        // Store selected items for checkout
+        sessionStorage.setItem('selectedCartItems', JSON.stringify(selectedItems));
         window.location.href = '/checkout.html';
     });
 }
+
+// Update the addToCart function to include cartId
+window.addToCart = async function(cartItem) {
+    const user = auth.currentUser;
+    if (!user) {
+        alert('Please login to add items to cart');
+        return false;
+    }
+
+    try {
+        // Generate a unique cart item ID
+        const cartItemId = generateCartItemId();
+        
+        // Create the cart item structure
+        const cartItemData = {
+            shopId: cartItem.shopId,
+            shoeId: cartItem.shoeId,
+            variantKey: cartItem.variantKey,
+            sizeKey: cartItem.sizeKey,
+            quantity: cartItem.quantity || 1,
+            addedAt: new Date().toISOString()
+        };
+
+        // Save to Firebase with the cartItemId as key
+        const cartRef = ref(db, `AR_shoe_users/carts/${user.uid}/${cartItemId}`);
+        await set(cartRef, cartItemData);
+        
+        console.log("Item added to cart successfully");
+        return true;
+        
+    } catch (error) {
+        console.error("Error adding to cart:", error);
+        alert("Failed to add item to cart");
+        return false;
+    }
+};
