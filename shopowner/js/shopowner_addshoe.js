@@ -26,7 +26,7 @@ let sname;
 
 document.addEventListener('DOMContentLoaded', () => {
     const random6DigitCode = generate6DigitCode();
-    document.getElementById('shoeCode').value = ""+random6DigitCode;
+    document.getElementById('shoeCode').value = "" + random6DigitCode;
 });
 
 onAuthStateChanged(auth, (user) => {
@@ -68,7 +68,7 @@ document.getElementById('shoeCode').disabled = true;
 
 document.getElementById('addShoeForm').addEventListener('submit', async (event) => {
     event.preventDefault();
-    
+
     if (!shopID) {
         alert("Please wait for authentication to complete");
         return;
@@ -83,35 +83,42 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
 
     // Get all variant data
     const variantGroups = document.querySelectorAll('.variant-group');
-    const variants = [];
+    const variants = {}; // Create ONE object to hold all variants
 
     // Process each variant
-    for (const group of variantGroups) {
+    variantGroups.forEach((group, index) => {
         const variantId = group.dataset.variantId;
         const variantName = document.getElementById(`variantName_${variantId}`).value;
         const color = document.getElementById(`color_${variantId}`).value;
         const price = document.getElementById(`variantPrice_${variantId}`).value;
         const variantImageFile = document.getElementById(`variantImage_${variantId}`).files[0];
-        
+
         // Get sizes and stock for this variant
         const sizeContainer = document.getElementById(`sizeStockContainer_${variantId}`);
         const sizeItems = sizeContainer.querySelectorAll('.size-stock-item');
-        const sizes = [];
-        
-        for (const item of sizeItems) {
-            const size = item.querySelector('.size-input').value;
-            const stock = item.querySelector('.stock-input').value;
-            sizes.push({ size, stock });
-        }
+        const sizes = {};
 
-        variants.push({
+        sizeItems.forEach((item, sizeIndex) => {
+            const sizeValue = item.querySelector('.size-input').value;
+            const stock = item.querySelector('.stock-input').value;
+            
+            // Create the nested structure
+            sizes[`size_${sizeIndex}`] = {
+                [sizeValue]: {
+                    stock: parseInt(stock)
+                }
+            };
+        });
+
+        // Add to variants object with variant_X key
+        variants[`variant_${index}`] = {
             variantName,
             color,
-            price,
+            price: parseFloat(price),
             sizes,
-            variantImageFile // We'll upload this later
-        });
-    }
+            variantImageFile
+        };
+    });
 
     try {
         // Upload main shoe image if exists
@@ -121,41 +128,42 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
         }
 
         // Process each variant and upload its image
-        const variantPromises = variants.map(async (variant, index) => {
+        const variantEntries = Object.entries(variants);
+        const variantPromises = variantEntries.map(async ([key, variant]) => {
             let variantImageUrl = '';
             if (variant.variantImageFile) {
                 variantImageUrl = await uploadFile(
-                    variant.variantImageFile, 
-                    `shoes/${shopID}/${random18CharID}_${shoeCode}/variant_${index}`
+                    variant.variantImageFile,
+                    `shoes/${shopID}/${random18CharID}_${shoeCode}/${key}`
                 );
             }
             
             return {
-                variantName: variant.variantName,
-                color: variant.color,
-                price: variant.price,
-                imageUrl: variantImageUrl,
-                sizes: variant.sizes
+                [key]: {
+                    variantName: variant.variantName,
+                    color: variant.color,
+                    price: variant.price,
+                    imageUrl: variantImageUrl,
+                    sizes: variant.sizes
+                }
             };
         });
-        
-        const processedVariants = await Promise.all(variantPromises);
+
+        const processedVariants = Object.assign({}, ...await Promise.all(variantPromises));
 
         // Save all data to database
-        await set(dbRef(db, 'AR_shoe_users/shoe/' + shopID + '/' + random18CharID + "_" + shoeCode), {
+        await set(dbRef(db, `AR_shoe_users/shoe/${shopID}/${random18CharID}_${shoeCode}`), {
             shoeName: shoeName,
             shoeCode: shoeCode,
             generalDescription: shoeDescription,
             defaultImage: shoeImageUrl,
             variants: processedVariants,
             shopID: shopID,
-            shopName: sname,  // Now included
+            shopName: sname,
             dateAdded: new Date().toISOString()
         });
-        
 
         alert("Shoe added successfully!");
-        // Reset form
         document.getElementById('addShoeForm').reset();
         document.getElementById('colorVariants').innerHTML = '';
         addColorVariant();
@@ -169,10 +177,10 @@ async function uploadFile(file, path) {
     try {
         const fileRef = storageRef(storage, path);
         const uploadTask = uploadBytesResumable(fileRef, file);
-        
+
         // Wait for the upload to complete
         await uploadTask;
-        
+
         // Get the download URL
         const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
         return downloadURL;
@@ -188,7 +196,7 @@ let variantCount = 0;
 function addColorVariant() {
     variantCount++;
     const container = document.getElementById('colorVariants');
-    
+
     const variant = document.createElement('div');
     variant.className = 'variant-group';
     variant.dataset.variantId = variantCount;
@@ -227,14 +235,14 @@ function addColorVariant() {
             <i class="fas fa-trash"></i> Remove Variant
         </button>
     `;
-    
+
     container.appendChild(variant);
     addSizeInput(variantCount);
 }
 
 function addSizeInput(variantId) {
     const container = document.getElementById(`sizeStockContainer_${variantId}`);
-    
+
     const sizeItem = document.createElement('div');
     sizeItem.className = 'size-stock-item';
     sizeItem.innerHTML = `
@@ -246,7 +254,7 @@ function addSizeInput(variantId) {
             <i class="fas fa-times"></i>
         </button>
     `;
-    
+
     container.appendChild(sizeItem);
 }
 
