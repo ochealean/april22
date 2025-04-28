@@ -359,13 +359,13 @@ document.getElementById('addToCartBtn').addEventListener('click', async function
         
         const success = await addToCart(cartItem);
         if (success) {
-            closeProductModal();
+            // closeProductModal();
             alert('Item added to cart successfully!');
         }
     }
 });
 
-document.getElementById('buyNowBtn').addEventListener('click', async function() {
+document.getElementById('buyNowBtn').addEventListener('click', function() {
     if (!currentShoeData || !selectedVariantKey || !selectedSizeKey) return;
     
     const variant = currentShoeData.variants[selectedVariantKey];
@@ -373,26 +373,22 @@ document.getElementById('buyNowBtn').addEventListener('click', async function() 
     const sizeValue = Object.keys(sizeObj)[0];
     const quantity = parseInt(document.getElementById('quantity').value) || 1;
     
-    const cartItem = {
-        shopId: currentShoeData.shopId,
-        shoeId: currentShoeData.shoeId,
-        variantKey: selectedVariantKey,
-        sizeKey: selectedSizeKey,
-        shoeName: currentShoeData.shoeName,
-        variantName: variant.variantName,
-        color: variant.color,
-        size: sizeValue,
-        price: variant.price,
-        image: variant.imageUrl || currentShoeData.defaultImage,
-        quantity: quantity
-    };
+    // Create URL parameters
+    const params = new URLSearchParams();
+    params.append('shopId', currentShoeData.shopId);
+    params.append('shoeId', currentShoeData.shoeId);
+    params.append('variantKey', selectedVariantKey);
+    params.append('sizeKey', selectedSizeKey);
+    params.append('size', sizeValue);
+    params.append('quantity', quantity);
+    params.append('price', variant.price);
+    params.append('shoeName', currentShoeData.shoeName);
+    params.append('variantName', variant.variantName);
+    params.append('color', variant.color);
+    params.append('image', variant.imageUrl || currentShoeData.defaultImage);
     
-    // First add to cart
-    const success = await addToCart(cartItem);
-    if (success) {
-        // Then redirect to checkout
-        window.location.href = 'checkout.html';
-    }
+    // Redirect to checkout with parameters
+    window.location.href = `checkout.html?${params.toString()}`;
 });
 
 document.addEventListener('click', function(e) {
