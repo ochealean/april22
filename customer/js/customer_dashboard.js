@@ -375,6 +375,7 @@ document.getElementById('buyNowBtn').addEventListener('click', function() {
     
     // Create URL parameters
     const params = new URLSearchParams();
+    params.append('method', 'buyNow');
     params.append('shopId', currentShoeData.shopId);
     params.append('shoeId', currentShoeData.shoeId);
     params.append('variantKey', selectedVariantKey);

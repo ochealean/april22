@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, update, set, get, off } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 // Initialize Firebase
@@ -18,6 +18,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase(app);
 
+let userID;
+
 // Hide body initially
 document.body.style.display = 'none';
 
@@ -25,6 +27,7 @@ document.body.style.display = 'none';
 function getUrlParams() {
     const params = new URLSearchParams(window.location.search);
     return {
+        method: params.get('method'),
         shopId: params.get('shopId'),
         shoeId: params.get('shoeId'),
         variantKey: params.get('variantKey'),
@@ -45,12 +48,13 @@ onAuthStateChanged(auth, (user) => {
         // User is signed in
         console.log("Auth state: User is logged in", user.uid);
         console.log("User email: ", user.email);
+        userID = user.uid;
 
         get(ref(db, `AR_shoe_users/customer/${user.uid}`))
             .then((snapshot) => {
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
-                    
+
                     // Update profile display elements
                     if (document.getElementById('userName_display1')) {
                         document.getElementById('userName_display1').textContent = userData.firstName;
@@ -61,7 +65,7 @@ onAuthStateChanged(auth, (user) => {
                     if (document.getElementById('imageProfile')) {
                         document.getElementById('imageProfile').src = userData.profilePhoto?.profilePhoto?.url || "https://firebasestorage.googleapis.com/v0/b/opportunity-9d3bf.appspot.com/o/profile%2Fdefault_profile.png?alt=media&token=5f1a4b8c-7e6b-4f1c-8a2d-0e5f3b7c4a2e";
                     }
-                    
+
                     // Autofill checkout form fields with user data
                     if (document.getElementById('firstName')) {
                         document.getElementById('firstName').value = userData.firstName || '';
@@ -87,12 +91,12 @@ onAuthStateChanged(auth, (user) => {
                     if (document.getElementById('country')) {
                         document.getElementById('country').value = userData.country || '';
                     }
-                    
+
                     document.body.style.display = '';
-                    
+
                     // Load order summary
                     loadOrderSummary();
-                    
+
                     // Set up event listeners after form is populated
                     setupEventListeners();
                 } else {
@@ -114,12 +118,12 @@ onAuthStateChanged(auth, (user) => {
 // Function to set up all event listeners
 function setupEventListeners() {
     // Place order button
-    document.getElementById('placeOrderBtn')?.addEventListener('click', function() {
+    document.getElementById('placeOrderBtn')?.addEventListener('click', function () {
         if (validateForm()) {
             placeOrder();
         }
     });
-    
+
     // Logout button if exists
     document.getElementById('logout_btn')?.addEventListener('click', () => {
         signOut(auth).then(() => {
@@ -143,7 +147,7 @@ async function getCart(userId) {
         // 2. Fallback to Firebase (for regular cart flow)
         const cartRef = ref(db, `AR_shoe_users/carts/${userId}`);
         const snapshot = await get(cartRef);
-        
+
         if (snapshot.exists()) {
             console.log("Firebase cart data:", snapshot.val());
             let cart = snapshot.val();
@@ -158,18 +162,17 @@ async function getCart(userId) {
 }
 
 // Function to load order summary
-// Modify the loadOrderSummary function to handle URL parameters
+// Updated loadOrderSummary
+// eto yung nakikita natin na nagdidisplay ng data from database to UI
 async function loadOrderSummary() {
     const user = auth.currentUser;
     if (!user) {
         window.location.href = "/user_login.html";
         return;
     }
-    
-    // Check for URL parameters first (Buy Now flow)
+
     const urlParams = getUrlParams();
-    if (urlParams.shoeId) {
-        // Create a single-item order from URL parameters
+    if (urlParams.method === "buyNow" && urlParams.shoeId) {
         const orderItem = {
             shopId: urlParams.shopId,
             shoeId: urlParams.shoeId,
@@ -183,37 +186,34 @@ async function loadOrderSummary() {
             color: urlParams.color,
             imageUrl: urlParams.image
         };
-
         displaySingleItemOrder(orderItem);
         return;
     }
 
-    
-    
     try {
-        // Get cart from localStorage
-        const minimalCart = JSON.parse(localStorage.getItem('cart')) || [];
-        
-        if (minimalCart.length === 0) {
+        // 🔥 Fetch full cart from Firebase
+        const cartRef = ref(db, `AR_shoe_users/carts/${user.uid}`);
+        const snapshot = await get(cartRef);
+
+        if (!snapshot.exists()) {
             document.getElementById('orderItems').innerHTML = '<p>Your cart is empty</p>';
             document.getElementById('orderSummary').innerHTML = '';
             return;
         }
-        
-        // Fetch full details for each item
-        const cartWithDetails = await Promise.all(minimalCart.map(async item => {
+
+        const cartData = snapshot.val();
+        const cartArray = Array.isArray(cartData) ? cartData : Object.values(cartData);
+
+        const cartWithDetails = await Promise.all(cartArray.map(async item => {
             const shoeRef = ref(db, `AR_shoe_users/shoe/${item.shopId}/${item.shoeId}`);
-            const snapshot = await get(shoeRef);
-            
-            if (!snapshot.exists()) {
-                console.error(`Shoe not found: ${item.shopId}/${item.shoeId}`);
-                return null;
-            }
-            
-            const shoeData = snapshot.val();
+            const shoeSnap = await get(shoeRef);
+
+            if (!shoeSnap.exists()) return null;
+
+            const shoeData = shoeSnap.val();
             const variant = shoeData.variants[item.variantIndex];
             const sizeInfo = variant.sizes.find(s => s.size === item.size);
-            
+
             return {
                 ...item,
                 name: shoeData.shoeName,
@@ -224,25 +224,12 @@ async function loadOrderSummary() {
                 availableStock: sizeInfo ? sizeInfo.stock : 0
             };
         }));
-        
-        // Filter out any null items (where shoe wasn't found)
+
         const validCartItems = cartWithDetails.filter(item => item !== null);
-        
-        // Update localStorage with valid items only
-        if (validCartItems.length !== minimalCart.length) {
-            localStorage.setItem('cart', JSON.stringify(validCartItems.map(item => ({
-                shopId: item.shopId,
-                shoeId: item.shoeId,
-                variantIndex: item.variantIndex,
-                size: item.size,
-                quantity: item.quantity
-            }))));
-        }
-        
-        // Display order items
+
         const orderItemsContainer = document.getElementById('orderItems');
         orderItemsContainer.innerHTML = '';
-        
+
         validCartItems.forEach(item => {
             const itemElement = document.createElement('div');
             itemElement.className = 'cart-item';
@@ -254,50 +241,37 @@ async function loadOrderSummary() {
                     <p>Size: ${item.size}</p>
                     <p>Quantity: ${item.quantity}</p>
                     <p class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</p>
-                    ${item.availableStock < item.quantity ? 
-                        '<p class="stock-warning">Only ' + item.availableStock + ' left in stock!</p>' : ''}
+                    ${item.availableStock < item.quantity ? '<p class="stock-warning">Only ' + item.availableStock + ' left in stock!</p>' : ''}
                 </div>
             `;
             orderItemsContainer.appendChild(itemElement);
         });
-        
-        // Calculate and display order summary
+
         const subtotal = validCartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const tax = subtotal * 0.1; // 10% tax
-        const shipping = 5.00; // Flat rate shipping
+        const tax = subtotal * 0.1;
+        const shipping = 5.00;
         const total = subtotal + tax + shipping;
-        
+
         document.getElementById('orderSummary').innerHTML = `
-            <div class="order-summary-item">
-                <span>Subtotal</span>
-                <span>$${subtotal.toFixed(2)}</span>
-            </div>
-            <div class="order-summary-item">
-                <span>Tax (10%)</span>
-                <span>$${tax.toFixed(2)}</span>
-            </div>
-            <div class="order-summary-item">
-                <span>Shipping</span>
-                <span>$${shipping.toFixed(2)}</span>
-            </div>
-            <div class="order-summary-item order-total">
-                <span>Total</span>
-                <span>$${total.toFixed(2)}</span>
-            </div>
+            <div class="order-summary-item"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>
+            <div class="order-summary-item"><span>Tax (10%)</span><span>$${tax.toFixed(2)}</span></div>
+            <div class="order-summary-item"><span>Shipping</span><span>$${shipping.toFixed(2)}</span></div>
+            <div class="order-summary-item order-total"><span>Total</span><span>$${total.toFixed(2)}</span></div>
         `;
-        
+
     } catch (error) {
         console.error("Error loading order summary:", error);
         alert("Failed to load your cart. Please try again.");
     }
 }
 
+
 // Form validation function
 function validateForm() {
     const shippingForm = document.getElementById('shippingForm');
     const requiredFields = shippingForm.querySelectorAll('[required]');
     let isValid = true;
-    
+
     requiredFields.forEach(field => {
         if (!field.value.trim()) {
             field.style.borderColor = 'red';
@@ -306,88 +280,130 @@ function validateForm() {
             field.style.borderColor = '#ddd';
         }
     });
-    
+
     if (!isValid) {
         alert('Please fill in all required fields');
         return false;
     }
-    
+
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
-    
+
     if (!paymentMethod) {
         alert('Please select a payment method');
         return false;
     }
-    
+
     return true;
 }
 
-// Helper function to generate order ID
+// Helper function to generate unique Order ID (ORD-lengthInt13-charLength6)
 function generateOrderId() {
     // Create a timestamp (milliseconds since epoch)
     const timestamp = Date.now().toString();
-    
-    // Generate a random alphanumeric string
+
+    // Generate a random alphanumeric string (length 6)
     const randomStr = Math.random().toString(36).substr(2, 6).toUpperCase();
-    
-    // Combine them to create a unique order ID
+
+    // Combine them to create a unique order ID (ORD-lengthInt13-charLength6)
     return `ORD-${timestamp}-${randomStr}`;
 }
 
 // Function to place order
-// Modify the placeOrder function to handle single item orders
 async function placeOrder() {
     const user = auth.currentUser;
     if (!user) {
         window.location.href = "/user_login.html";
         return;
     }
-    
+
+    // Collect form values (shipping information)
+    const shippingInfo = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value,
+        city: document.getElementById('city').value,
+        zip: document.getElementById('zip').value,
+        country: document.getElementById('country').value
+    };
+
+    // Collect order summary from URL (for "buyNow" flow)
+    const urlParams = getUrlParams();
+    const orderItem = {
+        shopId: urlParams.shopId,
+        shoeId: urlParams.shoeId,
+        variantKey: urlParams.variantKey,
+        sizeKey: urlParams.sizeKey,
+        size: urlParams.size,
+        quantity: urlParams.quantity,
+        price: urlParams.price,
+        name: urlParams.shoeName,
+        variantName: urlParams.variantName,
+        color: urlParams.color,
+        imageUrl: urlParams.image
+    };
+
+    // Create order ID
+    const orderId = generateOrderId();
+
+    // Create the order object to save to Firebase
+    const order = {
+        orderId: orderId,
+        userId: user.uid,
+        shippingInfo: shippingInfo,
+        items: [orderItem], // Single item for "buyNow" case
+        totalAmount: (orderItem.price * orderItem.quantity) + 5.00 + ((orderItem.price * orderItem.quantity) * 0.1), // Subtotal + shipping + tax
+        date: new Date().toISOString()
+    };
+
     try {
-        // Check for URL parameters first (Buy Now flow)
-        const urlParams = getUrlParams();
-        let orderItems = [];
-        
-        if (urlParams.shoeId) {
-            // Single item order from URL parameters
-            orderItems = [{
-                shopId: urlParams.shopId,
-                shoeId: urlParams.shoeId,
-                variantKey: urlParams.variantKey,
-                sizeKey: urlParams.sizeKey,
-                size: urlParams.size,
-                quantity: urlParams.quantity,
-                price: urlParams.price,
-                name: urlParams.shoeName,
-                variantName: urlParams.variantName,
-                color: urlParams.color,
-                imageUrl: urlParams.image
-            }];
-        } else {
-            // Existing cart loading logic...
-            let minimalCart = JSON.parse(localStorage.getItem('cart')) || [];
-            // ... rest of cart loading logic ...
+        // Set the order in the user's transaction node in Firebase
+        await set(ref(db, `AR_shoe_users/transactions/${user.uid}/${orderId}`), order);
+
+        // After successfully placing the order, reduce stock for each ordered item
+        await reduceStock(order.items);
+
+        // Optionally: Clear the cart after placing the order (if not 'buyNow')
+        if (urlParams.method !== 'buyNow') {
+            await set(ref(db, `AR_shoe_users/carts/${user.uid}`), null);
         }
-        
-        // Rest of your existing order placement logic...
-        // Get shipping info
-        const shippingInfo = {
-            firstName: document.getElementById('firstName').value,
-            lastName: document.getElementById('lastName').value,
-            address: document.getElementById('address').value,
-            city: document.getElementById('city').value,
-            zip: document.getElementById('zip').value,
-            country: document.getElementById('country').value,
-            phone: document.getElementById('phone').value,
-            email: document.getElementById('email').value
-        };
-        
-        // ... rest of your order creation and placement code ...
+
+        // Show order confirmation modal
+        showOrderConfirmationModal(order);
     } catch (error) {
         console.error("Error placing order:", error);
-        alert("Failed to place order. Please try again.");
+        alert("Error placing your order. Please try again.");
     }
 }
+
+// Helper function to reduce stock after placing the order
+async function reduceStock(orderItems) {
+    for (const item of orderItems) {
+        const stockRef = ref(db, `AR_shoe_users/shoe/${item.shopId}/${item.shoeId}/variants/${item.variantKey}/sizes/${item.sizeKey}/${item.size}`);
+
+        // Use get() to fetch stock data once
+        try {
+            const snapshot = await get(stockRef);
+            if (snapshot.exists()) {
+                const stockData = snapshot.val();
+                const newStock = stockData.stock - item.quantity;
+
+                console.log("New stock for item:", item.shoeId, "is", newStock);
+
+                // Update the stock in Firebase
+                await update(stockRef, {
+                    stock: newStock
+                });
+            } else {
+                console.error("Stock data not found for item:", item);
+            }
+        } catch (error) {
+            console.error("Error fetching stock data:", error);
+        }
+    }
+}
+
 
 // Function to show order confirmation modal
 function showOrderConfirmationModal(order) {
@@ -397,54 +413,55 @@ function showOrderConfirmationModal(order) {
     const modalOrderSummary = document.getElementById('modalOrderSummary');
     const continueShoppingBtn = document.getElementById('continueShoppingBtn');
     const closeModal = document.querySelector('.close-modal');
-    
+
     // Set order details in modal
     orderIdDisplay.textContent = order.orderId;
     orderEmailDisplay.textContent = order.shippingInfo.email;
-    
+
     // Create order summary for modal
     modalOrderSummary.innerHTML = `
         <div class="order-summary-item">
             <span>Subtotal</span>
-            <span>$${order.subtotal}</span>
+            <span>$${(order.items[0].price * order.items[0].quantity).toFixed(2)}</span>
         </div>
         <div class="order-summary-item">
             <span>Tax (10%)</span>
-            <span>$${order.tax}</span>
+            <span>$${((order.items[0].price * order.items[0].quantity) * 0.1).toFixed(2)}</span>
         </div>
         <div class="order-summary-item">
             <span>Shipping</span>
-            <span>$${order.shipping}</span>
+            <span>$5.00</span>
         </div>
         <div class="order-summary-item order-total">
             <span>Total</span>
-            <span>$${order.total}</span>
+            <span>$${order.totalAmount.toFixed(2)}</span>
         </div>
     `;
-    
+
     // Show modal
     modal.style.display = 'block';
-    
+
     // Close modal when clicking X
-    closeModal.onclick = function() {
+    closeModal.onclick = function () {
         modal.style.display = 'none';
         window.location.href = '/customer/html/customer_dashboard.html'; // Redirect to dashboard
     }
-    
+
     // Continue shopping button
-    continueShoppingBtn.onclick = function() {
+    continueShoppingBtn.onclick = function () {
         modal.style.display = 'none';
         window.location.href = '/customer/html/customer_dashboard.html'; // Redirect to dashboard
     }
-    
+
     // Close modal when clicking outside
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         if (event.target == modal) {
             modal.style.display = 'none';
             window.location.href = '/customer/html/customer_dashboard.html'; // Redirect to dashboard
         }
     }
 }
+
 
 // Helper function to update stock after purchase
 // Helper function to update stock after purchase
@@ -454,21 +471,21 @@ async function updateStock(cartItems) {
         await Promise.all(cartItems.map(async item => {
             const shoeRef = ref(db, `AR_shoe_users/shoe/${item.shopId}/${item.shoeId}`);
             const snapshot = await get(shoeRef);
-            
+
             if (snapshot.exists()) {
                 const shoeData = snapshot.val();
                 const variant = shoeData.variants[item.variantIndex];
                 const sizeIndex = variant.sizes.findIndex(s => s.size === item.size);
-                
+
                 if (sizeIndex !== -1) {
                     // Create a reference to the specific size's stock
-                    const stockRef = ref(db, 
+                    const stockRef = ref(db,
                         `AR_shoe_users/shoe/${item.shopId}/${item.shoeId}/variants/${item.variantIndex}/sizes/${sizeIndex}/stock`
                     );
-                    
+
                     // Calculate new stock value
                     const newStock = variant.sizes[sizeIndex].stock - item.quantity;
-                    
+
                     // Update just this stock value
                     await set(stockRef, newStock);
                 }
@@ -489,7 +506,7 @@ function findSizeIndex(sizesArray, size) {
 function displaySingleItemOrder(item) {
     const orderItemsContainer = document.getElementById('orderItems');
     orderItemsContainer.innerHTML = '';
-    
+
     const itemElement = document.createElement('div');
     itemElement.className = 'cart-item';
     itemElement.innerHTML = `
@@ -503,13 +520,13 @@ function displaySingleItemOrder(item) {
         </div>
     `;
     orderItemsContainer.appendChild(itemElement);
-    
+
     // Calculate and display order summary
     const subtotal = item.price * item.quantity;
     const tax = subtotal * 0.1; // 10% tax
     const shipping = 5.00; // Flat rate shipping
     const total = subtotal + tax + shipping;
-    
+
     document.getElementById('orderSummary').innerHTML = `
         <div class="order-summary-item">
             <span>Subtotal</span>
