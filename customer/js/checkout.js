@@ -21,6 +21,24 @@ const db = getDatabase(app);
 // Hide body initially
 document.body.style.display = 'none';
 
+// Add this at the beginning of your checkout.js, after the imports
+function getUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        shopId: params.get('shopId'),
+        shoeId: params.get('shoeId'),
+        variantKey: params.get('variantKey'),
+        sizeKey: params.get('sizeKey'),
+        size: params.get('size'),
+        quantity: parseInt(params.get('quantity')) || 1,
+        price: parseFloat(params.get('price')) || 0,
+        shoeName: params.get('shoeName'),
+        variantName: params.get('variantName'),
+        color: params.get('color'),
+        image: params.get('image')
+    };
+}
+
 // Check auth state and load user data
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -140,13 +158,37 @@ async function getCart(userId) {
 }
 
 // Function to load order summary
-// Modified function to load order summary with full data from Firebase
+// Modify the loadOrderSummary function to handle URL parameters
 async function loadOrderSummary() {
     const user = auth.currentUser;
     if (!user) {
         window.location.href = "/user_login.html";
         return;
     }
+    
+    // Check for URL parameters first (Buy Now flow)
+    const urlParams = getUrlParams();
+    if (urlParams.shoeId) {
+        // Create a single-item order from URL parameters
+        const orderItem = {
+            shopId: urlParams.shopId,
+            shoeId: urlParams.shoeId,
+            variantKey: urlParams.variantKey,
+            sizeKey: urlParams.sizeKey,
+            size: urlParams.size,
+            quantity: urlParams.quantity,
+            price: urlParams.price,
+            name: urlParams.shoeName,
+            variantName: urlParams.variantName,
+            color: urlParams.color,
+            imageUrl: urlParams.image
+        };
+
+        displaySingleItemOrder(orderItem);
+        return;
+    }
+
+    
     
     try {
         // Get cart from localStorage
@@ -293,7 +335,7 @@ function generateOrderId() {
 }
 
 // Function to place order
-// Function to place order
+// Modify the placeOrder function to handle single item orders
 async function placeOrder() {
     const user = auth.currentUser;
     if (!user) {
@@ -302,59 +344,32 @@ async function placeOrder() {
     }
     
     try {
-        // First check localStorage
-        let minimalCart = JSON.parse(localStorage.getItem('cart')) || [];
+        // Check for URL parameters first (Buy Now flow)
+        const urlParams = getUrlParams();
+        let orderItems = [];
         
-        // If localStorage is empty, check Firebase
-        if (minimalCart.length === 0) {
-            minimalCart = await getCart(user.uid);
+        if (urlParams.shoeId) {
+            // Single item order from URL parameters
+            orderItems = [{
+                shopId: urlParams.shopId,
+                shoeId: urlParams.shoeId,
+                variantKey: urlParams.variantKey,
+                sizeKey: urlParams.sizeKey,
+                size: urlParams.size,
+                quantity: urlParams.quantity,
+                price: urlParams.price,
+                name: urlParams.shoeName,
+                variantName: urlParams.variantName,
+                color: urlParams.color,
+                imageUrl: urlParams.image
+            }];
+        } else {
+            // Existing cart loading logic...
+            let minimalCart = JSON.parse(localStorage.getItem('cart')) || [];
+            // ... rest of cart loading logic ...
         }
         
-        if (minimalCart.length === 0) {
-            alert('Your cart is empty');
-            return;
-        }
-        
-        // Fetch full details for each item
-        const cartWithDetails = await Promise.all(minimalCart.map(async item => {
-            const shoeRef = ref(db, `AR_shoe_users/shoe/${item.shopId}/${item.shoeId}`);
-            const snapshot = await get(shoeRef);
-            
-            if (!snapshot.exists()) {
-                console.error(`Shoe not found: ${item.shopId}/${item.shoeId}`);
-                return null;
-            }
-            
-            const shoeData = snapshot.val();
-            const variant = shoeData.variants[item.variantIndex];
-            const sizeInfo = variant.sizes.find(s => s.size === item.size);
-            
-            return {
-                ...item,
-                name: shoeData.shoeName,
-                price: parseFloat(variant.price),
-                imageUrl: variant.imageUrl || shoeData.defaultImage,
-                variantName: variant.variantName,
-                color: variant.color,
-                availableStock: sizeInfo ? sizeInfo.stock : 0
-            };
-        }));
-        
-        // Filter out any null items (where shoe wasn't found)
-        const validCartItems = cartWithDetails.filter(item => item !== null);
-        
-        if (validCartItems.length === 0) {
-            alert('No valid items in your cart');
-            return;
-        }
-        
-        // Check stock availability
-        const outOfStockItems = validCartItems.filter(item => item.availableStock < item.quantity);
-        if (outOfStockItems.length > 0) {
-            alert(`Some items in your cart don't have enough stock. Please adjust quantities.`);
-            return;
-        }
-        
+        // Rest of your existing order placement logic...
         // Get shipping info
         const shippingInfo = {
             firstName: document.getElementById('firstName').value,
@@ -367,46 +382,7 @@ async function placeOrder() {
             email: document.getElementById('email').value
         };
         
-        // Get payment info
-        const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-        const paymentInfo = { method: paymentMethod };
-        
-        // Calculate order totals
-        const subtotal = validCartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const tax = subtotal * 0.1; // 10% tax
-        const shipping = 5.00; // Flat rate shipping
-        const total = subtotal + tax + shipping;
-        
-        // Create order object
-        const order = {
-            orderId: generateOrderId(),
-            date: new Date().toISOString(),
-            items: validCartItems,
-            shippingInfo,
-            paymentInfo,
-            subtotal: subtotal.toFixed(2),
-            tax: tax.toFixed(2),
-            shipping: shipping.toFixed(2),
-            total: total.toFixed(2),
-            status: 'processing',
-            userId: user.uid
-        };
-        
-        // Save order to Firebase
-        const orderRef = ref(db, `AR_shoe_users/transactions/${user.uid}/${order.orderId}`);
-        await set(orderRef, order);
-        
-        // Update stock in database
-        await updateStock(validCartItems);
-        
-        // Clear cart
-        localStorage.removeItem('cart');
-        const cartRef = ref(db, `AR_shoe_users/carts/${user.uid}`);
-        await set(cartRef, []);
-        
-        // Show confirmation modal instead of redirecting
-        showOrderConfirmationModal(order);
-        
+        // ... rest of your order creation and placement code ...
     } catch (error) {
         console.error("Error placing order:", error);
         alert("Failed to place order. Please try again.");
@@ -507,4 +483,49 @@ async function updateStock(cartItems) {
 // Helper function to find size index
 function findSizeIndex(sizesArray, size) {
     return sizesArray.findIndex(s => s.size === size);
+}
+
+// Helper function to display single item order from URL parameters
+function displaySingleItemOrder(item) {
+    const orderItemsContainer = document.getElementById('orderItems');
+    orderItemsContainer.innerHTML = '';
+    
+    const itemElement = document.createElement('div');
+    itemElement.className = 'cart-item';
+    itemElement.innerHTML = `
+        <img src="${item.imageUrl}" alt="${item.name}" class="cart-item-image">
+        <div class="cart-item-details">
+            <h4>${item.name}</h4>
+            <p>${item.variantName} (${item.color})</p>
+            <p>Size: ${item.size}</p>
+            <p>Quantity: ${item.quantity}</p>
+            <p class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</p>
+        </div>
+    `;
+    orderItemsContainer.appendChild(itemElement);
+    
+    // Calculate and display order summary
+    const subtotal = item.price * item.quantity;
+    const tax = subtotal * 0.1; // 10% tax
+    const shipping = 5.00; // Flat rate shipping
+    const total = subtotal + tax + shipping;
+    
+    document.getElementById('orderSummary').innerHTML = `
+        <div class="order-summary-item">
+            <span>Subtotal</span>
+            <span>$${subtotal.toFixed(2)}</span>
+        </div>
+        <div class="order-summary-item">
+            <span>Tax (10%)</span>
+            <span>$${tax.toFixed(2)}</span>
+        </div>
+        <div class="order-summary-item">
+            <span>Shipping</span>
+            <span>$${shipping.toFixed(2)}</span>
+        </div>
+        <div class="order-summary-item order-total">
+            <span>Total</span>
+            <span>$${total.toFixed(2)}</span>
+        </div>
+    `;
 }
