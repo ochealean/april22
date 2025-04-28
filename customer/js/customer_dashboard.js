@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-// Add 'set' to your existing imports
 import { getDatabase, ref, get, onValue, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { increment, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAuPALylh11cTArigeGJZmLwrFwoAsNPSI",
@@ -14,7 +14,6 @@ const firebaseConfig = {
     measurementId: "G-QC2JSR1FJW"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase(app);
@@ -23,10 +22,6 @@ document.body.style.display = 'none';
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // User is signed in
-        console.log("Auth state: User is logged in", user.uid);
-        console.log("User email: ", user.email);
-
         get(ref(db, `AR_shoe_users/customer/${user.uid}`))
             .then((snapshot) => {
                 if (snapshot.exists()) {
@@ -35,8 +30,6 @@ onAuthStateChanged(auth, (user) => {
                     document.getElementById('userName_display2').textContent = userData.firstName + " " + userData.lastName;
                     document.getElementById('imageProfile').src = userData.profilePhoto?.profilePhoto?.url || "https://firebasestorage.googleapis.com/v0/b/opportunity-9d3bf.appspot.com/o/profile%2Fdefault_profile.png?alt=media&token=5f1a4b8c-7e6b-4f1c-8a2d-0e5f3b7c4a2e";
                     document.body.style.display = '';
-                    
-                    // Load all shoes after user data is loaded
                     loadAllShoes();
                 } else {
                     alert("Account does not exist");
@@ -44,13 +37,10 @@ onAuthStateChanged(auth, (user) => {
                 }
             });
     } else {
-        // User is signed out
-        console.log("Auth state: User is logged out");
         window.location.href = "/user_login.html";
     }
 });
 
-// Function to load all shoes from all shop owners
 function loadAllShoes() {
     const shoesRef = ref(db, 'AR_shoe_users/shoe/');
     
@@ -58,16 +48,14 @@ function loadAllShoes() {
         const shoesContainer = document.getElementById('shoesContainer');
         if (!shoesContainer) return;
         
-        shoesContainer.innerHTML = ''; // Clear previous content
+        shoesContainer.innerHTML = '';
         
         if (snapshot.exists()) {
             const allShoes = [];
             
-            // Iterate through each shop
             snapshot.forEach((shopSnapshot) => {
                 const shopId = shopSnapshot.key;
                 
-                // Iterate through each shoe in the shop
                 shopSnapshot.forEach((shoeSnapshot) => {
                     const shoeData = shoeSnapshot.val();
                     shoeData.shopId = shopId;
@@ -76,7 +64,6 @@ function loadAllShoes() {
                 });
             });
             
-            // Display shoes in the UI
             if (allShoes.length > 0) {
                 allShoes.forEach(shoe => {
                     displayShoe(shoe);
@@ -90,38 +77,34 @@ function loadAllShoes() {
     });
 }
 
-// Function to display a single shoe in the UI
 function displayShoe(shoe) {
     const shoesContainer = document.getElementById('shoesContainer');
-    
-    // Create shoe card
     const shoeCard = document.createElement('div');
     shoeCard.className = 'shoe-card';
     
-    // Use the first variant's image if no default image exists
-    const displayImage = shoe.defaultImage || 
-                        (shoe.variants && shoe.variants.length > 0 && shoe.variants[0].imageUrl) || 
-                        'https://via.placeholder.com/300';
+    // Get first variant for display
+    const firstVariantKey = Object.keys(shoe.variants)[0];
+    const firstVariant = shoe.variants[firstVariantKey];
     
-    // Get the lowest price from all variants
-    let lowestPrice = null;
-    if (shoe.variants && shoe.variants.length > 0) {
-        lowestPrice = Math.min(...shoe.variants.map(v => parseFloat(v.price)));
-    }
+    // Get lowest price
+    let lowestPrice = Infinity;
+    Object.values(shoe.variants).forEach(variant => {
+        if (variant.price < lowestPrice) {
+            lowestPrice = variant.price;
+        }
+    });
     
     shoeCard.innerHTML = `
         <div class="shoe-image">
-            <img src="${displayImage}" alt="${shoe.shoeName}">
+            <img src="${shoe.defaultImage || firstVariant.imageUrl || 'https://via.placeholder.com/300'}" alt="${shoe.shoeName}">
         </div>
         <div class="shoe-details">
             <h3>${shoe.shoeName}</h3>
             <p class="shoe-code">Code: ${shoe.shoeCode}</p>
             <p class="shoe-description">${shoe.generalDescription || 'No description available'}</p>
-            ${lowestPrice ? `<p class="shoe-price">From $${lowestPrice.toFixed(2)}</p>` : '<p class="shoe-price">Price not available</p>'}
+            <p class="shoe-price">From $${lowestPrice.toFixed(2)}</p>
             <div class="shoe-variants">
-                ${shoe.variants && shoe.variants.length > 0 ? 
-                    `<p>Available in ${shoe.variants.length} color${shoe.variants.length > 1 ? 's' : ''}</p>` : 
-                    '<p>No variants available</p>'}
+                <p>Available in ${Object.keys(shoe.variants).length} color${Object.keys(shoe.variants).length > 1 ? 's' : ''}</p>
             </div>
             <button class="btn-view" onclick="viewShoeDetails('${shoe.shopId}', '${shoe.shoeId}')">
                 View Details
@@ -132,12 +115,10 @@ function displayShoe(shoe) {
     shoesContainer.appendChild(shoeCard);
 }
 
-// Global variables to track selected options
-let selectedVariantIndex = 0;
-let selectedSize = null;
+let selectedVariantKey = null;
+let selectedSizeKey = null;
 let currentShoeData = null;
 
-// Enhanced viewShoeDetails function
 window.viewShoeDetails = async function(shopId, shoeId) {
     const shoeRef = ref(db, `AR_shoe_users/shoe/${shopId}/${shoeId}`);
     
@@ -152,14 +133,11 @@ window.viewShoeDetails = async function(shopId, shoeId) {
         currentShoeData.shopId = shopId;
         currentShoeData.shoeId = shoeId;
         
-        // Reset selection
-        selectedVariantIndex = 0;
-        selectedSize = null;
+        // Select first variant by default
+        selectedVariantKey = Object.keys(currentShoeData.variants)[0];
+        selectedSizeKey = null;
         
-        // Update modal content
-        updateProductModalContent(currentShoeData);
-        
-        // Show modal
+        updateProductModalContent();
         document.getElementById('productDetailsModal').classList.add('show');
         document.body.classList.add('modal-open');
         
@@ -169,17 +147,14 @@ window.viewShoeDetails = async function(shopId, shoeId) {
     }
 };
 
-function updateProductModalContent(shoe) {
-    // Set modal title
-    document.getElementById('productModalTitle').textContent = shoe.shoeName;
-    
-    // Get first variant for default display
-    const defaultVariant = shoe.variants[selectedVariantIndex];
+function updateProductModalContent() {
+    const shoe = currentShoeData;
+    const variant = shoe.variants[selectedVariantKey];
     
     // Generate variants HTML
-    let variantsHtml = shoe.variants.map((variant, index) => `
-        <div class="variant-option ${index === selectedVariantIndex ? 'selected' : ''}" 
-             onclick="selectVariant(${index})">
+    let variantsHtml = Object.entries(shoe.variants).map(([key, variant]) => `
+        <div class="variant-option ${key === selectedVariantKey ? 'selected' : ''}" 
+             onclick="selectVariant('${key}')">
             <div class="variant-header">
                 <span class="variant-name">${variant.variantName}</span>
                 <span class="variant-price">$${variant.price}</span>
@@ -189,29 +164,54 @@ function updateProductModalContent(shoe) {
                 <span>Color: ${variant.color}</span>
             </div>
             <div class="variant-sizes">
-                ${variant.sizes.map(size => `
-                    <div class="size-option 
-                        ${size.stock <= 0 ? 'out-of-stock' : ''}
-                        ${selectedVariantIndex === index && selectedSize === size.size ? 'selected' : ''}"
-                        onclick="event.stopPropagation(); selectSize(${index}, '${size.size}')">
-                        ${size.size}
-                        ${size.stock > 0 ? `(${size.stock})` : '(out)'}
-                    </div>
-                `).join('')}
+                ${Object.entries(variant.sizes).map(([sizeKey, sizeObj]) => {
+                    const sizeValue = Object.keys(sizeObj)[0];
+                    const stock = sizeObj[sizeValue].stock;
+                    return `
+                        <div class="size-option 
+                            ${stock <= 0 ? 'out-of-stock' : ''}
+                            ${key === selectedVariantKey && selectedSizeKey === sizeKey ? 'selected' : ''}"
+                            onclick="event.stopPropagation(); selectSize('${key}', '${sizeKey}')">
+                            ${sizeValue}
+                            ${stock > 0 ? `(${stock})` : '(out)'}
+                        </div>
+                    `;
+                }).join('')}
             </div>
         </div>
     `).join('');
     
-    // Set modal body content
+    // Get available stock for selected size
+    let availableStock = 0;
+    if (selectedSizeKey) {
+        const sizeObj = variant.sizes[selectedSizeKey];
+        const sizeValue = Object.keys(sizeObj)[0];
+        availableStock = sizeObj[sizeValue].stock;
+    }
+    
+    // Set modal content
+    document.getElementById('productModalTitle').textContent = shoe.shoeName;
     document.getElementById('productModalBody').innerHTML = `
         <div class="product-details-container">
             <div class="product-main-image">
-                <img src="${defaultVariant.imageUrl || shoe.defaultImage || 'https://via.placeholder.com/300'}">
+                <img src="${variant.imageUrl || shoe.defaultImage || 'https://via.placeholder.com/300'}">
             </div>
             <div class="product-info">
                 <h2 class="product-name">Shop Name: ${shoe.shopName}</h2>
                 <div class="product-code">Product Code: ${shoe.shoeCode}</div>
-                <div class="product-price">$${defaultVariant.price}</div>
+                <div class="product-price">$${variant.price}</div>
+                
+                <!-- Add quantity selector -->
+                <div class="quantity-selector" ${!selectedSizeKey ? 'style="display:none;"' : ''}>
+                    <label for="quantity">Quantity:</label>
+                    <div class="quantity-controls">
+                        <button type="button" class="quantity-btn minus" onclick="adjustQuantity(-1)">-</button>
+                        <input type="number" id="quantity" name="quantity" min="1" max="${availableStock}" value="1" onchange="validateQuantity()">
+                        <button type="button" class="quantity-btn plus" onclick="adjustQuantity(1)">+</button>
+                    </div>
+                    <div class="available-stock">Available: ${availableStock}</div>
+                </div>
+                
                 <div class="product-description">
                     <h4>Description</h4>
                     <p>${shoe.generalDescription || 'No description available'}</p>
@@ -224,39 +224,41 @@ function updateProductModalContent(shoe) {
         </div>
     `;
     
-    // Update button states based on selection
     updateButtonStates();
 }
 
-// Function to select a variant
-window.selectVariant = function(index) {
-    selectedVariantIndex = index;
-    selectedSize = null; // Reset size selection when variant changes
-    updateProductModalContent(currentShoeData);
+window.selectVariant = function(variantKey) {
+    selectedVariantKey = variantKey;
+    selectedSizeKey = null;
+    updateProductModalContent();
 };
 
-// Function to select a size
-window.selectSize = function(variantIndex, size) {
-    if (variantIndex !== selectedVariantIndex) {
-        selectedVariantIndex = variantIndex;
-    }
+window.selectSize = function(variantKey, sizeKey) {
+    selectedVariantKey = variantKey;
     
-    // Check if size is in stock
-    const variant = currentShoeData.variants[variantIndex];
-    const sizeInfo = variant.sizes.find(s => s.size === size);
+    // Check stock
+    const sizeObj = currentShoeData.variants[variantKey].sizes[sizeKey];
+    const sizeValue = Object.keys(sizeObj)[0];
+    const stock = sizeObj[sizeValue].stock;
     
-    if (sizeInfo && sizeInfo.stock > 0) {
-        selectedSize = size;
-        updateProductModalContent(currentShoeData);
+    if (stock > 0) {
+        selectedSizeKey = sizeKey;
+        updateProductModalContent();
+        
+        // Show quantity selector and set max value
+        const quantitySelector = document.querySelector('.quantity-selector');
+        if (quantitySelector) {
+            quantitySelector.style.display = 'block';
+            document.getElementById('quantity').max = stock;
+        }
     }
 };
 
-// Function to update button states
 function updateButtonStates() {
     const addToCartBtn = document.getElementById('addToCartBtn');
     const buyNowBtn = document.getElementById('buyNowBtn');
     
-    if (selectedSize === null) {
+    if (selectedSizeKey === null) {
         addToCartBtn.disabled = true;
         buyNowBtn.disabled = true;
         addToCartBtn.title = "Please select a size first";
@@ -269,14 +271,27 @@ function updateButtonStates() {
     }
 }
 
-// Close modal function
 window.closeProductModal = function() {
     document.getElementById('productDetailsModal').classList.remove('show');
     document.body.classList.remove('modal-open');
 };
 
-// Add to cart function - define this before it's used
-window.addToCart = async function(cartItem) {  // Added async here
+function generate18CharID() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 18; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+}
+
+// Example usage:
+const unique18CharID = generate18CharID();
+console.log(unique18CharID); // Outputs something like 'Ab3XyZ89QlMnO1pRsT'
+
+
+// Replace the existing addToCart function with this:
+window.addToCart = async function(cartItem) {
     const user = auth.currentUser;
     if (!user) {
         alert('Please login to add items to cart');
@@ -284,110 +299,108 @@ window.addToCart = async function(cartItem) {  // Added async here
     }
 
     try {
-        // 1. Update localStorage immediately with minimal data
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        // Generate a unique cart item ID
+        const cartItemId = generate18CharID();
         
-        // Create minimal cart item
-        const minimalCartItem = {
+        // Create the cart item structure
+        const cartItemData = {
             shopId: cartItem.shopId,
             shoeId: cartItem.shoeId,
-            variantIndex: cartItem.variantIndex,
+            variantKey: cartItem.variantKey,
+            sizeKey: cartItem.sizeKey,
+            shoeName: cartItem.shoeName,
+            variantName: cartItem.variantName,
+            color: cartItem.color,
             size: cartItem.size,
-            quantity: cartItem.quantity || 1
+            price: cartItem.price,
+            image: cartItem.image,
+            quantity: cartItem.quantity || 1,
+            addedAt: new Date().toISOString()
         };
-        
-        // Check for existing item
-        const existingIndex = cart.findIndex(i => 
-            i.shoeId === minimalCartItem.shoeId && 
-            i.variantIndex === minimalCartItem.variantIndex && 
-            i.size === minimalCartItem.size
-        );
 
-        if (existingIndex >= 0) {
-            cart[existingIndex].quantity += minimalCartItem.quantity;
-        } else {
-            cart.push(minimalCartItem);
-        }
+        // Save to Firebase
+        const cartRef = ref(db, `AR_shoe_users/carts/${user.uid}/${cartItemId}`);
+        await set(cartRef, cartItemData);
         
-        localStorage.setItem('cart', JSON.stringify(cart));
-
-        // 2. Update Firebase
-        const cartRef = ref(db, `AR_shoe_users/carts/${user.uid}`);
-        await set(cartRef, cart);
-        
-        console.log("Cart updated in both localStorage and Firebase");
+        console.log("Item added to cart successfully");
         return true;
         
     } catch (error) {
-        console.error("Error saving cart:", error);
+        console.error("Error adding to cart:", error);
         alert("Failed to add item to cart");
         return false;
     }
 };
 
-// Then modify your existing addToCartBtn event listener to use this function
-document.getElementById('addToCartBtn').addEventListener('click', function() {
-    if (!currentShoeData || selectedSize === null) return;
+// Update the addToCartBtn event listener:
+document.getElementById('addToCartBtn').addEventListener('click', async function() {
+    if (!currentShoeData || !selectedVariantKey || !selectedSizeKey) return;
     
-    const selectedVariant = currentShoeData.variants[selectedVariantIndex];
-    const sizeInfo = selectedVariant.sizes.find(s => s.size === selectedSize);
+    const variant = currentShoeData.variants[selectedVariantKey];
+    const sizeObj = variant.sizes[selectedSizeKey];
+    const sizeValue = Object.keys(sizeObj)[0];
+    const stock = sizeObj[sizeValue].stock;
+    const quantity = parseInt(document.getElementById('quantity').value) || 1;
     
-    if (sizeInfo && sizeInfo.stock > 0) {
+    if (stock > 0 && quantity > 0 && quantity <= stock) {
         const cartItem = {
             shopId: currentShoeData.shopId,
             shoeId: currentShoeData.shoeId,
+            variantKey: selectedVariantKey,
+            sizeKey: selectedSizeKey,
             shoeName: currentShoeData.shoeName,
-            variantIndex: selectedVariantIndex,
-            variantName: selectedVariant.variantName,
-            color: selectedVariant.color,
-            size: selectedSize,
-            price: selectedVariant.price,
-            image: selectedVariant.imageUrl || currentShoeData.defaultImage,
-            quantity: 1
+            variantName: variant.variantName,
+            color: variant.color,
+            size: sizeValue,
+            price: variant.price,
+            image: variant.imageUrl || currentShoeData.defaultImage,
+            quantity: quantity
         };
         
-        // Store shopID and userID in localStorage temporarily
-        const user = auth.currentUser;
-        if (user) {
-            localStorage.setItem('currentShop', JSON.stringify({
-                shopId: currentShoeData.shopId,
-                userId: user.uid
-            }));
+        const success = await addToCart(cartItem);
+        if (success) {
+            closeProductModal();
+            alert('Item added to cart successfully!');
         }
-        
-        // Add to cart
-        addToCart(cartItem);
-        closeProductModal();
     }
 });
 
-// Modified Buy Now function
-document.getElementById('buyNowBtn').addEventListener('click', function() {
-    if (!currentShoeData || selectedSize === null) return;
+document.getElementById('buyNowBtn').addEventListener('click', async function() {
+    if (!currentShoeData || !selectedVariantKey || !selectedSizeKey) return;
     
-    const minimalCartItem = {
+    const variant = currentShoeData.variants[selectedVariantKey];
+    const sizeObj = variant.sizes[selectedSizeKey];
+    const sizeValue = Object.keys(sizeObj)[0];
+    const quantity = parseInt(document.getElementById('quantity').value) || 1;
+    
+    const cartItem = {
         shopId: currentShoeData.shopId,
         shoeId: currentShoeData.shoeId,
-        variantIndex: selectedVariantIndex,
-        size: selectedSize,
-        quantity: 1
+        variantKey: selectedVariantKey,
+        sizeKey: selectedSizeKey,
+        shoeName: currentShoeData.shoeName,
+        variantName: variant.variantName,
+        color: variant.color,
+        size: sizeValue,
+        price: variant.price,
+        image: variant.imageUrl || currentShoeData.defaultImage,
+        quantity: quantity
     };
     
-    // Save only the minimal data to localStorage
-    localStorage.setItem('cart', JSON.stringify([minimalCartItem]));
-    
-    // Redirect to checkout
-    window.location.href = 'checkout.html';
+    // First add to cart
+    const success = await addToCart(cartItem);
+    if (success) {
+        // Then redirect to checkout
+        window.location.href = 'checkout.html';
+    }
 });
 
-// Close modal when clicking outside
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('modal')) {
         closeProductModal();
     }
 });
 
-// Close modal with Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeProductModal();
@@ -401,3 +414,28 @@ document.getElementById('logout_btn').addEventListener('click', () => {
         console.error("Error signing out: ", error);
     });
 });
+
+window.adjustQuantity = function(change) {
+    const quantityInput = document.getElementById('quantity');
+    let newValue = parseInt(quantityInput.value) + change;
+    const max = parseInt(quantityInput.max);
+    
+    if (newValue < 1) newValue = 1;
+    if (newValue > max) newValue = max;
+    
+    quantityInput.value = newValue;
+};
+
+window.validateQuantity = function() {
+    const quantityInput = document.getElementById('quantity');
+    let value = parseInt(quantityInput.value);
+    const max = parseInt(quantityInput.max);
+    
+    if (isNaN(value) || value < 1) {
+        value = 1;
+    } else if (value > max) {
+        value = max;
+    }
+    
+    quantityInput.value = value;
+};
