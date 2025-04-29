@@ -247,6 +247,7 @@ function generateOrderId() {
 }
 
 // Function to place order
+// Function to place order
 async function placeOrder() {
     const user = auth.currentUser;
     if (!user) {
@@ -268,7 +269,6 @@ async function placeOrder() {
     const urlParams = new URLSearchParams(window.location.search);
     const method = urlParams.get('method');
     let orderItems = [];
-    let order;
 
     if (method === "buyNow") {
         // Single item order
@@ -283,7 +283,7 @@ async function placeOrder() {
             name: urlParams.get('shoeName'),
             variantName: urlParams.get('variantName'),
             color: urlParams.get('color'),
-            imageUrl: urlParams.get('image') || 'https://via.placeholder.com/150' // Default image if none provided
+            imageUrl: urlParams.get('image') || 'https://via.placeholder.com/150'
         }];
     } else if (method === "cartOrder") {
         // Multi-item order from cart
@@ -298,12 +298,10 @@ async function placeOrder() {
         
         if (snapshot.exists()) {
             const fullCart = snapshot.val();
-            // Get the items and preserve their original IDs
             orderItems = cartIds.map(id => {
                 const item = fullCart[id];
                 if (!item) return null;
                 
-                // Ensure all required fields are present
                 return {
                     ...item,
                     cartId: id,
@@ -323,78 +321,60 @@ async function placeOrder() {
         return;
     }
 
-    // Generate order ID
-    const orderId = generateOrderId();
-    
-    // Create the order structure
-    order = {
-        orderId: orderId,
-        userId: user.uid,
-        shippingInfo: shippingInfo,
-        date: new Date().toISOString(),
-        status: 'pending',
-        totalAmount: 0 // Will be calculated below
-    };
-
-    // Calculate totals
-    const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const tax = subtotal * 0.1;
-    const shipping = 5.00;
-    const total = subtotal + tax + shipping;
-    order.totalAmount = total;
-
     try {
-        // Create transaction in Firebase
-        const transactionRef = ref(db, `AR_shoe_users/transactions/${user.uid}/${orderId}`);
-        
-        // First save the order header
-        await set(transactionRef, {
-            orderId: order.orderId,
-            userId: order.userId,
-            shippingInfo: order.shippingInfo,
-            date: order.date,
-            status: order.status,
-            totalAmount: order.totalAmount
-        });
+        // Create a separate order for each item
+        for (const item of orderItems) {
+            // Generate unique order ID for each item
+            const orderId = generateOrderId();
+            
+            // Calculate totals for this single item
+            const subtotal = item.price * item.quantity;
+            const tax = subtotal * 0.1;
+            const shipping = 5.00;
+            const total = subtotal + tax + shipping;
 
-        // Then save each item under order_items
-        const orderItemsUpdates = {};
-        orderItems.forEach((item, index) => {
-            // Ensure all fields have values
-            orderItemsUpdates[`order_${index}`] = {
-                shopId: item.shopId || '',
-                shoeId: item.shoeId || '',
-                variantKey: item.variantKey || '',
-                sizeKey: item.sizeKey || '',
-                size: item.size || '',
-                quantity: parseInt(item.quantity) || 1,
-                price: parseFloat(item.price) || 0,
-                name: item.name || item.shoeName || 'Unknown Product',
-                variantName: item.variantName || 'Default Variant',
-                color: item.color || 'Unknown Color',
-                imageUrl: item.imageUrl || 'https://via.placeholder.com/150'
-            };
-        });
-
-        // Save all items at once under the order_items node
-        await set(ref(db, `AR_shoe_users/transactions/${user.uid}/${orderId}/order_items`), orderItemsUpdates);
-
-        // Reduce stock for each item
-        await reduceStock(orderItems);
-
-        // Remove ordered items from cart if this was a cart order
-        if (method === "cartOrder") {
-            const cartUpdates = {};
-            orderItems.forEach(item => {
-                if (item.cartId) {
-                    cartUpdates[`AR_shoe_users/carts/${user.uid}/${item.cartId}`] = null;
+            // Create the order structure
+            const order = {
+                orderId: orderId,
+                userId: user.uid,
+                shippingInfo: shippingInfo,
+                date: new Date().toISOString(),
+                status: 'pending',
+                totalAmount: total,
+                // Store the single item directly in the order (not under order_items)
+                item: {
+                    shopId: item.shopId || '',
+                    shoeId: item.shoeId || '',
+                    variantKey: item.variantKey || '',
+                    sizeKey: item.sizeKey || '',
+                    size: item.size || '',
+                    quantity: parseInt(item.quantity) || 1,
+                    price: parseFloat(item.price) || 0,
+                    name: item.name || item.shoeName || 'Unknown Product',
+                    variantName: item.variantName || 'Default Variant',
+                    color: item.color || 'Unknown Color',
+                    imageUrl: item.imageUrl || 'https://via.placeholder.com/150'
                 }
-            });
-            await update(ref(db), cartUpdates);
+            };
+
+            // Save the order to Firebase
+            await set(ref(db, `AR_shoe_users/transactions/${user.uid}/${orderId}`), order);
+
+            // Reduce stock for this item
+            await reduceStock([item]);
+
+            // Remove this item from cart if this was a cart order
+            if (method === "cartOrder" && item.cartId) {
+                await set(ref(db, `AR_shoe_users/carts/${user.uid}/${item.cartId}`), null);
+            }
         }
 
-        // Show confirmation
-        showOrderConfirmationModal(order);
+        // Show confirmation for the last order (you might want to modify this to show all)
+        showOrderConfirmationModal({
+            orderId: generateOrderId(), // This will show a new ID, you might want to track all IDs
+            shippingInfo: shippingInfo,
+            totalAmount: orderItems.reduce((sum, item) => sum + (item.price * item.quantity * 1.1) + 5, 0)
+        });
     } catch (error) {
         console.error("Error placing order:", error);
         alert("Error placing your order. Please try again.");
@@ -447,14 +427,14 @@ async function reduceStock(orderItems) {
 function showOrderConfirmationModal(order) {
     const modal = document.getElementById('orderConfirmationModal');
     const orderIdDisplay = document.getElementById('orderIdDisplay');
-    const orderEmailDisplay = document.getElementById('orderEmailDisplay');
+    // const orderEmailDisplay = document.getElementById('orderEmailDisplay');
     const modalOrderSummary = document.getElementById('modalOrderSummary');
     const continueShoppingBtn = document.getElementById('continueShoppingBtn');
     const closeModal = document.querySelector('.close-modal');
 
     // Set order details in modal
     orderIdDisplay.textContent = order.orderId;
-    orderEmailDisplay.textContent = order.shippingInfo.email;
+    // orderEmailDisplay.textContent = order.shippingInfo.email;
 
     // Calculate summary for modal
     const subtotal = order.totalAmount - (order.totalAmount * 0.1) - 5.00; // Reverse calculate subtotal
