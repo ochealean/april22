@@ -35,6 +35,7 @@ async function loadCart(userId) {
     const cartRef = ref(db, `AR_shoe_users/carts/${userId}`);
     onValue(cartRef, async (snapshot) => {
         if (!snapshot.exists()) {
+            createCartSummary();
             showEmptyCart();
             return;
         }
@@ -81,9 +82,12 @@ async function loadCart(userId) {
 
 function renderCart() {
     const cartContainer = document.getElementById("cartContainer");
+    const cartSummaryContainer = document.getElementById("cartsummarycontainer");
     cartContainer.innerHTML = "";
+    cartSummaryContainer.innerHTML = "";
 
     if (cartItems.length === 0) {
+        createCartSummary();
         showEmptyCart();
         return;
     }
@@ -145,10 +149,26 @@ function renderCart() {
 
     createCartSummary();
     attachCartListeners();
+
+    
+document.getElementById("checkoutBtn").addEventListener("click", () => {
+    const checkedCartIds = Array.from(document.querySelectorAll('.cart-item-checkbox:checked'))
+        .map((cb, index) => [`cartOrder_${index + 1}`, cb.dataset.cartid]);
+
+    if (checkedCartIds.length === 0) {
+        alert("Please select at least one item to proceed to checkout.");
+        return;
+    }
+
+    const params = new URLSearchParams([["method", "cartOrder"], ...checkedCartIds]);
+    window.location.href = `checkout.html?${params.toString()}`;
+});
+
 }
 
 function createCartSummary() {
-    const cartContainer = document.getElementById("cartContainer");
+    // const cartContainer = document.getElementById("cartContainer");
+    const cartSummaryContainer = document.getElementById("cartsummarycontainer");
     const summary = document.createElement('div');
     summary.className = 'cart-summary';
     summary.id = 'cart-summary';
@@ -171,9 +191,12 @@ function createCartSummary() {
             <span id="total">$0.00</span>
         </div>
         <button class="checkout-btn" id="checkoutBtn">Proceed to Checkout</button>
+        <a href="/customer/html/customer_dashboard.html" class="continue-shopping">
+                <i class="fas fa-arrow-left"></i> Continue Shopping
+            </a>
     `;
 
-    cartContainer.appendChild(summary);
+    cartSummaryContainer.appendChild(summary);
 
     updateTotals();
 }
