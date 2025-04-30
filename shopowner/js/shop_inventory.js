@@ -219,7 +219,7 @@ function deleteShoe(shoeId) {
 }
 
 function editShoe(shoeId) {
-    window.location.href = `/shopowner/html/shopowner_addshoe.html?edit=${shoeId}`;
+    window.location.href = `/shopowner/html/shopowner_editshoe.html?edit=${shoeId}`;
 }
 
 // Initialize when DOM is loaded
