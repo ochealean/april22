@@ -1,0 +1,296 @@
+version ni mac 4/30/25 7:30pm
+- add editshoe html
+- add orders html css
+- add history html css 
+- add version.txt
+
+
+note 
+deepseek js for editshoe html<script>
+        <script>
+        // Example: get the user role from localStorage or backend
+        const userRole = localStorage.getItem('userRole'); // "employee", "manager", "owner"
+      
+        document.addEventListener("DOMContentLoaded", () => {
+            // Role-based access control
+            const userRole = localStorage.getItem('userRole');
+            if (userRole === "employee") {
+                document.querySelectorAll(".manager, .shopowner").forEach(el => el.style.display = "none");
+            } else if (userRole === "manager") {
+                document.querySelectorAll(".shopowner").forEach(el => el.style.display = "none");
+            }
+
+            // Check if shop is approved
+            // const shopStatus = localStorage.getItem('shopStatus');
+
+            // if (shopStatus !== 'approved') {
+            //     alert('Your shop must be approved before editing products');
+            //     window.location.href = 'shop_dashboard.html';
+            // }
+
+            // Get shoe ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const shoeId = urlParams.get('id');
+            
+            if (!shoeId) {
+                alert('No shoe selected for editing');
+                window.location.href = 'shop_inventory.html';
+                return;
+            }
+
+            // Load shoe data
+            loadShoeData(shoeId);
+
+            // Prevent default form submission
+            document.getElementById('editShoeForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleFormSubmit();
+            });
+        });
+
+        function loadShoeData(shoeId) {
+            const shoes = JSON.parse(localStorage.getItem('shoes')) || [];
+            const shoe = shoes.find(s => s.id === shoeId);
+            
+            if (!shoe) {
+                alert('Shoe not found');
+                window.location.href = 'shop_inventory.html';
+                return;
+            }
+
+            // Fill main form
+            document.getElementById('shoeId').value = shoe.id;
+            document.getElementById('shoeName').value = shoe.name;
+            document.getElementById('shoeCode').value = shoe.code;
+            document.getElementById('shoeDescription').value = shoe.description;
+            
+            // Show current image if exists
+            if (shoe.image && shoe.image !== 'default-shoe.jpg') {
+                const currentImageDiv = document.getElementById('currentShoeImage');
+                currentImageDiv.innerHTML = `
+                    <p>Current Image:</p>
+                    <img src="/uploads/shoes/${shoe.image}" alt="${shoe.name}" style="max-width: 200px;">
+                `;
+            }
+
+            // Clear any existing variants
+            document.getElementById('colorVariants').innerHTML = '';
+            
+            // Add variants
+            shoe.variants.forEach((variant, index) => {
+                addColorVariant();
+                
+                const variantId = index + 1;
+                document.getElementById(`variantName_${variantId}`).value = variant.variantName;
+                document.getElementById(`color_${variantId}`).value = variant.color;
+                document.getElementById(`variantPrice_${variantId}`).value = variant.price;
+                
+                // Show current variant image if exists
+                if (variant.image && variant.image !== 'default-variant.jpg') {
+                    const variantGroup = document.querySelector(`.variant-group[data-variant-id="${variantId}"]`);
+                    if (variantGroup) {
+                        const imageInput = variantGroup.querySelector(`#variantImage_${variantId}`);
+                        imageInput.insertAdjacentHTML('afterend', `
+                            <div class="current-image">
+                                <p>Current Image:</p>
+                                <img src="/uploads/variants/${variant.image}" alt="${variant.variantName}" style="max-width: 200px;">
+                            </div>
+                        `);
+                    }
+                }
+                
+                // Add sizes
+                const sizeContainer = document.getElementById(`sizeStockContainer_${variantId}`);
+                sizeContainer.innerHTML = '';
+                
+                variant.sizes.forEach(size => {
+                    const sizeItem = document.createElement('div');
+                    sizeItem.className = 'size-stock-item';
+                    sizeItem.innerHTML = `
+                        <span>Size:</span>
+                        <input type="number" class="size-input" step="0.5" min="1" placeholder="Size" value="${size.size}" required>
+                        <span>Stock:</span>
+                        <input type="number" class="stock-input" min="0" placeholder="Qty" value="${size.stock}" required>
+                        <button type="button" class="btn-remove-small" onclick="removeSizeInput(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    sizeContainer.appendChild(sizeItem);
+                });
+            });
+        }
+
+        let variantCount = 0;
+
+        function addColorVariant() {
+            variantCount++;
+            const container = document.getElementById('colorVariants');
+            
+            const variant = document.createElement('div');
+            variant.className = 'variant-group';
+            variant.dataset.variantId = variantCount;
+            variant.innerHTML = `
+                <div class="form-group">
+                    <label for="variantName_${variantCount}">Variant Name</label>
+                    <input type="text" id="variantName_${variantCount}" required placeholder="e.g., Red Blazing, Stealth Black">
+                </div>
+                
+                <div class="form-group">
+                    <label for="color_${variantCount}">Color</label>
+                    <input type="text" id="color_${variantCount}" required placeholder="e.g., Red, Black">
+                </div>
+                
+                <div class="form-group">
+                    <label for="variantPrice_${variantCount}">Price ($)</label>
+                    <input type="number" id="variantPrice_${variantCount}" step="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="variantImage_${variantCount}">Variant Image</label>
+                    <input type="file" id="variantImage_${variantCount}" accept="image/*">
+                </div>
+                
+                <div class="form-group">
+                    <label>Sizes & Stock</label>
+                    <div class="size-stock-container" id="sizeStockContainer_${variantCount}">
+                        <!-- Size inputs will be added here -->
+                    </div>
+                    <button type="button" class="btn-secondary btn-add-size" onclick="addSizeInput(${variantCount})">
+                        <i class="fas fa-plus"></i> Add Size
+                    </button>
+                </div>
+                
+                <button type="button" class="btn-remove" onclick="removeVariant(this)">
+                    <i class="fas fa-trash"></i> Remove Variant
+                </button>
+            `;
+            
+            container.appendChild(variant);
+            addSizeInput(variantCount);
+        }
+
+        function handleFormSubmit() {
+            // Validate main form
+            const shoeId = document.getElementById('shoeId').value;
+            const shoeName = document.getElementById('shoeName').value.trim();
+            const shoeCode = document.getElementById('shoeCode').value.trim();
+            const shoeDescription = document.getElementById('shoeDescription').value.trim();
+            
+            if (!shoeName || !shoeCode || !shoeDescription) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            // Validate shoe code is numeric
+            if (!/^\d+$/.test(shoeCode)) {
+                alert('Shoe code must contain numbers only');
+                return;
+            }
+            
+            // Validate variants
+            const variantGroups = document.querySelectorAll('.variant-group');
+            const variants = [];
+            
+            for (const group of variantGroups) {
+                const variantId = group.dataset.variantId;
+                const variantName = document.getElementById(`variantName_${variantId}`).value.trim();
+                const color = document.getElementById(`color_${variantId}`).value.trim();
+                const price = parseFloat(document.getElementById(`variantPrice_${variantId}`).value);
+                const imageFile = document.getElementById(`variantImage_${variantId}`).files[0];
+                
+                if (!variantName || !color || isNaN(price)) {
+                    alert('Please fill all variant fields with valid data');
+                    return;
+                }
+                
+                // Get sizes and stock
+                const sizeContainer = document.getElementById(`sizeStockContainer_${variantId}`);
+                const sizeItems = sizeContainer.querySelectorAll('.size-stock-item');
+                const sizes = [];
+                
+                for (const item of sizeItems) {
+                    const size = parseFloat(item.querySelector('.size-input').value);
+                    const stock = parseInt(item.querySelector('.stock-input').value);
+                    
+                    if (isNaN(size) || isNaN(stock)) {
+                        alert('Please enter valid size and stock values');
+                        return;
+                    }
+                    
+                    sizes.push({
+                        size: size,
+                        stock: stock
+                    });
+                }
+                
+                if (sizes.length === 0) {
+                    alert('Please add at least one size for each variant');
+                    return;
+                }
+                
+                variants.push({
+                    variantName: variantName,
+                    color: color,
+                    price: price,
+                    image: imageFile ? imageFile.name : 'default-variant.jpg',
+                    sizes: sizes
+                });
+            }
+            
+            // Create shoe object
+            const shoeData = {
+                id: shoeId,
+                name: shoeName,
+                code: shoeCode,
+                description: shoeDescription,
+                image: document.getElementById('shoeImage').files[0]?.name || 'default-shoe.jpg',
+                variants: variants,
+                dateAdded: new Date().toISOString(),
+                shopId: localStorage.getItem('shopId')
+            };
+
+            // Update in localStorage
+            let shoes = JSON.parse(localStorage.getItem('shoes')) || [];
+            shoes = shoes.filter(s => s.id !== shoeId); // Remove old version
+            shoes.push(shoeData); // Add updated version
+            localStorage.setItem('shoes', JSON.stringify(shoes));
+
+            // Show success message
+            alert('Shoe updated successfully!');
+            
+            // Redirect to inventory
+            window.location.href = 'shop_inventory.html';
+        }
+
+        function addSizeInput(variantId) {
+            const container = document.getElementById(`sizeStockContainer_${variantId}`);
+            
+            const sizeItem = document.createElement('div');
+            sizeItem.className = 'size-stock-item';
+            sizeItem.innerHTML = `
+                <span>Size:</span>
+                <input type="number" class="size-input" step="0.5" min="1" placeholder="Size" required>
+                <span>Stock:</span>
+                <input type="number" class="stock-input" min="0" placeholder="Qty" required>
+                <button type="button" class="btn-remove-small" onclick="removeSizeInput(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(sizeItem);
+        }
+        
+        function removeSizeInput(button) {
+            button.parentElement.remove();
+        }
+        
+        function removeVariant(button) {
+            if (document.querySelectorAll('.variant-group').length > 1) {
+                button.closest('.variant-group').remove();
+            } else {
+                alert('You must have at least one color variant');
+            }
+        }
+    </script>
+      
+    <script src="/shopowner/js/shopowner_editshoe.js" type="module"></script>
