@@ -120,7 +120,7 @@ function createOrderRow(order) {
         `;
     } else if (status === 'accepted') { // line 123 redirect to track.html
         actionButtons = `
-            <button class="btn btn-track" onclick="">
+            <button class="btn btn-track" onclick="trackbtn('${order.orderId}', '${order.userId}')">
                 <i class="fas fa-plus"></i> Add Track Status
             </button>
         `;
@@ -165,6 +165,9 @@ window.showRejectModal = function(orderId, userId) {
     currentUserId = userId;
     modal.style.display = 'block';
 };
+
+window.trackbtn = function(orderID, userId) {window.location.href = `trackform.html?orderID=${orderID}&userID=${userId}`;
+}
 
 
 // Reject order function

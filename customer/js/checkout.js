@@ -173,6 +173,8 @@ async function loadOrderSummary() {
         displaySingleItemOrder(orderItem);
     } 
     else if (method === "cartOrder") {
+        const urlParams = new URLSearchParams(window.location.search);
+        console.log("URL Parameters:", urlParams);
         // Handle cart order flow
         const cartIds = getCartOrderIds();
         if (cartIds.length > 0) {
@@ -276,6 +278,7 @@ async function placeOrder() {
             shopId: urlParams.get('shopId'),
             shoeId: urlParams.get('shoeId'),
             variantKey: urlParams.get('variantKey'),
+            shopName: urlParams.get('shopName'),
             sizeKey: urlParams.get('sizeKey'),
             size: urlParams.get('size'),
             quantity: parseInt(urlParams.get('quantity')) || 1,
@@ -300,6 +303,7 @@ async function placeOrder() {
             const fullCart = snapshot.val();
             orderItems = cartIds.map(id => {
                 const item = fullCart[id];
+                console.log("Item from cart:", item);
                 if (!item) return null;
                 
                 return {
@@ -308,7 +312,7 @@ async function placeOrder() {
                     name: item.name || item.shoeName || 'Unknown Product',
                     variantName: item.variantName || 'Default Variant',
                     color: item.color || 'Unknown Color',
-                    imageUrl: item.imageUrl || 'https://via.placeholder.com/150',
+                    imageUrl: item.image || 'https://via.placeholder.com/150',
                     price: parseFloat(item.price) || 0,
                     quantity: parseInt(item.quantity) || 1
                 };
@@ -341,11 +345,11 @@ async function placeOrder() {
                 date: new Date().toISOString(),
                 status: 'pending',
                 totalAmount: total,
-                // Store the single item directly in the order (not under order_items)
                 item: {
                     shopId: item.shopId || '',
                     shoeId: item.shoeId || '',
                     variantKey: item.variantKey || '',
+                    shopName: item.shopName || '',
                     sizeKey: item.sizeKey || '',
                     size: item.size || '',
                     quantity: parseInt(item.quantity) || 1,
@@ -353,9 +357,11 @@ async function placeOrder() {
                     name: item.name || item.shoeName || 'Unknown Product',
                     variantName: item.variantName || 'Default Variant',
                     color: item.color || 'Unknown Color',
-                    imageUrl: item.imageUrl || 'https://via.placeholder.com/150'
+                    imageUrl: item.imageUrl // Directly use the cart item's imageUrl
                 }
             };
+
+            console.log("Order to be saved:", order);
 
             // Save the order to Firebase
             await set(ref(db, `AR_shoe_users/transactions/${user.uid}/${orderId}`), order);

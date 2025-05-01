@@ -410,6 +410,7 @@ document.getElementById('buyNowBtn').addEventListener('click', function () {
     params.append('shoeId', currentShoeData.shoeId);
     params.append('variantKey', selectedVariantKey);
     params.append('sizeKey', selectedSizeKey);
+    params.append('shopName', currentShoeData.shopName);
     params.append('size', sizeValue);
     params.append('quantity', quantity);
     params.append('price', variant.price);
