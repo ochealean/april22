@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browse Shoes | Shoe Portal</title>
+    <title>My Favorites | Shoe Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -89,66 +89,51 @@
             padding: 2rem;
         }
 
-        /* Search Section */
-        .search-container {
-            background-color: white;
-            padding: 1.5rem;
-            border-radius: var(--radius-md);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
-        }
-
-        .search-bar {
+        /* Empty State */
+        .empty-state {
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            background-color: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
             margin-bottom: 1rem;
+            color: var(--text-primary);
         }
 
-        .search-input {
-            flex-grow: 1;
-            padding: 0.8rem 1rem;
-            border: 1px solid var(--light-gray);
-            border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-            font-size: 1rem;
-            outline: none;
-            transition: var(--transition);
+        .empty-description {
+            color: var(--gray-dark);
+            margin-bottom: 2rem;
+            max-width: 500px;
         }
 
-        .search-input:focus {
-            border-color: var(--primary);
-        }
-
-        .search-btn {
+        .browse-btn {
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 0 1.5rem;
-            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--radius-sm);
             cursor: pointer;
             transition: var(--transition);
+            text-decoration: none;
+            font-weight: 500;
         }
 
-        .search-btn:hover {
+        .browse-btn:hover {
             background-color: var(--primary-dark);
-        }
-
-        .search-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .tag {
-            background-color: var(--light-gray);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .tag:hover {
-            background-color: var(--primary);
-            color: white;
         }
 
         /* Products Grid */
@@ -242,10 +227,9 @@
             background-color: var(--primary-dark);
         }
 
-        /* Add this to your existing CSS */
         .wishlist-btn {
-            background-color: var(--gray-light);
-            color: var(--dark);
+            background-color: #f8d7da;
+            color: #dc3545;
             border: none;
             width: 40px;
             height: 40px;
@@ -257,15 +241,8 @@
             justify-content: center;
         }
 
-        .wishlist-btn:hover {
-            background-color: #f8d7da; /* Light red background on hover */
-            color: #721c24; /* Dark red text on hover */
-        }
-
-        .wishlist-btn.active,
         .wishlist-btn .fas.fa-heart {
-            background-color: #f8d7da;
-            color: #dc3545; /* Bright red when active */
+            color: #dc3545;
         }
 
         /* Responsive */
@@ -334,7 +311,7 @@
                 <a href="/customer/html/customer_dashboard.html" class="nav-item">
                     <i class="fas fa-home"></i> Dashboard
                 </a>
-                <a href="/customer/html/browse.html" class="nav-item active">
+                <a href="/customer/html/browse.html" class="nav-item">
                     <i class="fas fa-shopping-bag"></i> Browse Shoes
                 </a>
                 <a href="/customer/html/orders.html" class="nav-item">
@@ -346,7 +323,7 @@
                 <a href="/customer/html/history.html" class="nav-item">
                     <i class="fas fa-history"></i> Order History
                 </a>
-                <a href="/customer/html/wishlist.html" class="nav-item">
+                <a href="/customer/html/favorites.html" class="nav-item active">
                     <i class="fas fa-heart"></i> Wishlist
                 </a>
                 <a href="/chatbot/html/chatbot.html" class="nav-item">
@@ -363,42 +340,30 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Search Section -->
-            <div class="search-container">
-                <div class="search-bar">
-                    <input type="text" class="search-input" placeholder="Search for shoes...">
-                    <button class="search-btn">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-                <div class="search-tags">
-                    <div class="tag">Running</div>
-                    <div class="tag">Basketball</div>
-                    <div class="tag">Casual</div>
-                    <div class="tag">Nike</div>
-                    <div class="tag">Adidas</div>
-                    <div class="tag">Under Armour</div>
-                    <div class="tag">Men</div>
-                    <div class="tag">Women</div>
-                    <div class="tag">On Sale</div>
-                </div>
-            </div>
-
-            <!-- Products Section -->
+            <!-- Favorites Section -->
             <div class="products-section">
                 <div class="products-header">
-                    <h2 class="section-title">All Shoes</h2>
+                    <h2 class="section-title">My Wishlist</h2>
                     <select class="sort-options">
-                        <option>Sort by: Popular</option>
-                        <option>Sort by: Newest</option>
+                        <option>Sort by: Recently Added</option>
                         <option>Sort by: Price Low to High</option>
                         <option>Sort by: Price High to Low</option>
-                        <option>Sort by: Rating</option>
                     </select>
                 </div>
 
+                <!-- Empty State (shown when no favorites) -->
+                <!-- <div class="empty-state">
+                    <i class="fas fa-heart empty-icon"></i>
+                    <h3 class="empty-title">Your wishlist is empty</h3>
+                    <p class="empty-description">
+                        You haven't added any items to your wishlist yet. Browse our collection and click the heart icon to save your favorites.
+                    </p>
+                    <a href="/customer/html/browse.html" class="browse-btn">Browse Shoes</a>
+                </div> -->
+
+                <!-- Favorites Grid (shown when items exist) -->
                 <div class="products-grid">
-                    <!-- Product Card 1 -->
+                    <!-- Favorite Item 1 -->
                     <div class="product-card">
                         <img src="/images/shoe1.png" alt="Nike Air Max" class="product-image">
                         <div class="product-info">
@@ -407,12 +372,12 @@
                             <div class="product-price">$150.00</div>
                             <div class="product-actions">
                                 <button class="add-to-cart">Add to Cart</button>
-                                <button class="wishlist-btn"><i class="far fa-heart"></i></button>
+                                <button class="wishlist-btn"><i class="fas fa-heart"></i></button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Product Card 2 -->
+                    <!-- Favorite Item 2 -->
                     <div class="product-card">
                         <img src="/images/shoe1.png" alt="Adidas Ultraboost" class="product-image">
                         <div class="product-info">
@@ -421,40 +386,12 @@
                             <div class="product-price">$180.00</div>
                             <div class="product-actions">
                                 <button class="add-to-cart">Add to Cart</button>
-                                <button class="wishlist-btn"><i class="far fa-heart"></i></button>
+                                <button class="wishlist-btn"><i class="fas fa-heart"></i></button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Product Card 3 -->
-                    <div class="product-card">
-                        <img src="/images/shoe1.png" alt="Puma RS-X" class="product-image">
-                        <div class="product-info">
-                            <div class="product-shop">Urban Kicks</div>
-                            <h3 class="product-name">Puma RS-X Reinvention</h3>
-                            <div class="product-price">$110.00</div>
-                            <div class="product-actions">
-                                <button class="add-to-cart">Add to Cart</button>
-                                <button class="wishlist-btn"><i class="far fa-heart"></i></button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 4 -->
-                    <div class="product-card">
-                        <img src="/images/shoe1.png" alt="New Balance 574" class="product-image">
-                        <div class="product-info">
-                            <div class="product-shop">Classic Sneakers</div>
-                            <h3 class="product-name">New Balance 574 Core</h3>
-                            <div class="product-price">$85.00</div>
-                            <div class="product-actions">
-                                <button class="add-to-cart">Add to Cart</button>
-                                <button class="wishlist-btn"><i class="far fa-heart"></i></button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 5 -->
+                    <!-- Favorite Item 3 -->
                     <div class="product-card">
                         <img src="/images/shoe1.png" alt="Converse Chuck 70" class="product-image">
                         <div class="product-info">
@@ -463,49 +400,7 @@
                             <div class="product-price">$95.00</div>
                             <div class="product-actions">
                                 <button class="add-to-cart">Add to Cart</button>
-                                <button class="wishlist-btn"><i class="far fa-heart"></i></button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 6 -->
-                    <div class="product-card">
-                        <img src="/images/shoe1.png" alt="Vans Old Skool" class="product-image">
-                        <div class="product-info">
-                            <div class="product-shop">Skate Shop</div>
-                            <h3 class="product-name">Vans Old Skool Classic</h3>
-                            <div class="product-price">$65.00</div>
-                            <div class="product-actions">
-                                <button class="add-to-cart">Add to Cart</button>
-                                <button class="wishlist-btn"><i class="far fa-heart"></i></button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 7 -->
-                    <div class="product-card">
-                        <img src="/images/shoe1.png" alt="Reebok Classic" class="product-image">
-                        <div class="product-info">
-                            <div class="product-shop">Vintage Kicks</div>
-                            <h3 class="product-name">Reebok Classic Leather</h3>
-                            <div class="product-price">$75.00</div>
-                            <div class="product-actions">
-                                <button class="add-to-cart">Add to Cart</button>
-                                <button class="wishlist-btn"><i class="far fa-heart"></i></button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 8 -->
-                    <div class="product-card">
-                        <img src="/images/shoe1.png" alt="Asics Gel-Kayano" class="product-image">
-                        <div class="product-info">
-                            <div class="product-shop">Running Pro</div>
-                            <h3 class="product-name">Asics Gel-Kayano 28</h3>
-                            <div class="product-price">$160.00</div>
-                            <div class="product-actions">
-                                <button class="add-to-cart">Add to Cart</button>
-                                <button class="wishlist-btn"><i class="far fa-heart"></i></button>
+                                <button class="wishlist-btn"><i class="fas fa-heart"></i></button>
                             </div>
                         </div>
                     </div>
@@ -515,35 +410,11 @@
     </div>
 
     <script>
-        // Simple JavaScript for demo purposes
         document.addEventListener('DOMContentLoaded', function() {
             // Logout button
             document.getElementById('logout_btn').addEventListener('click', function() {
                 alert('Logging out...');
                 // In real implementation, this would call your logout function
-            });
-            
-            // Search functionality
-            const searchInput = document.querySelector('.search-input');
-            const searchBtn = document.querySelector('.search-btn');
-            
-            searchBtn.addEventListener('click', function() {
-                const searchTerm = searchInput.value.trim();
-                if (searchTerm) {
-                    alert(`Searching for: ${searchTerm}`);
-                    // In real implementation, this would filter products
-                }
-            });
-            
-            // Tag click functionality
-            const tags = document.querySelectorAll('.tag');
-            tags.forEach(tag => {
-                tag.addEventListener('click', function() {
-                    const tagText = this.textContent;
-                    searchInput.value = tagText;
-                    alert(`Filtering by: ${tagText}`);
-                    // In real implementation, this would filter products
-                });
             });
             
             // Add to cart buttons
@@ -556,13 +427,22 @@
                 });
             });
             
-            // Wishlist buttons
+            // Remove from wishlist functionality
             document.querySelectorAll('.wishlist-btn').forEach(button => {
                 button.addEventListener('click', function() {
-                    const icon = this.querySelector('i');
-                    icon.classList.toggle('far');
-                    icon.classList.toggle('fas');
-                    this.classList.toggle('active');
+                    const productCard = this.closest('.product-card');
+                    const productName = productCard.querySelector('.product-name').textContent;
+                    
+                    if (confirm(`Remove ${productName} from your wishlist?`)) {
+                        productCard.remove();
+                        alert(`${productName} removed from wishlist`);
+                        
+                        // Check if we should show empty state
+                        if (document.querySelectorAll('.product-card').length === 0) {
+                            // In a real app, you would dynamically show the empty state
+                            alert('Your wishlist is now empty');
+                        }
+                    }
                 });
             });
         });

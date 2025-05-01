@@ -7,3 +7,8 @@ version ni mac 4/30/25 7:30pm
 
 note 
 - inadd ko yung css mo sa shop_dashboard.css dun sa shop_order.css na ginawa ko, ikaw na bahala umayos
+
+
+version ni mac 5/1/25 7:53pm
+- edit customer html sidebar
+- add wishlist.html
