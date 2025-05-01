@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, onValue, set, get, off } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, onValue, update, set, get, off } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 // Your Firebase config
@@ -118,7 +118,14 @@ function createOrderRow(order) {
                 <i class="fas fa-times"></i> Reject
             </button>
         `;
-    } else {
+    } else if (status === 'accepted') { // line 123 redirect to track.html
+        actionButtons = `
+            <button class="btn btn-track" onclick="">
+                <i class="fas fa-plus"></i> Add Track Status
+            </button>
+        `;
+    }
+     else {
         actionButtons = `<span class="no-actions">No actions available</span>`;
     }
 

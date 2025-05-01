@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Profile | Shop Owner</title>
+    <link rel="stylesheet" href="/shopowner/css/shop_dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Profile-specific styles */
+        .profile-container {
+            background-color: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        
+        .profile-avatar {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+            background-color: var(--gray-light);
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .avatar-upload {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            text-align: center;
+            padding: 0.5rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .avatar-upload input {
+            display: none;
+        }
+        
+        .profile-info {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .profile-name {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+        }
+        
+        .profile-email {
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .profile-stats {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray-dark);
+        }
+        
+        /* Form styles */
+        .profile-form {
+            margin-top: 2rem;
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        .form-section:last-child {
+            border-bottom: none;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--gray);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--gray);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            background-color: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.8rem center;
+            background-size: 1rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .btn-save {
+            background-color: var(--success);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-save:hover {
+            background-color: #1e8449;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-cancel {
+            background-color: var(--gray-light);
+            color: var(--text-primary);
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .btn-cancel:hover {
+            background-color: var(--gray);
+        }
+        
+        /* Document upload styles */
+        .document-upload {
+            margin-top: 1rem;
+        }
+        
+        .document-preview {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--gray-light);
+            border-radius: var(--radius-sm);
+        }
+        
+        .document-icon {
+            font-size: 2rem;
+            color: var(--gray-dark);
+        }
+        
+        .document-info {
+            flex: 1;
+        }
+        
+        .document-name {
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+        
+        .document-upload-date {
+            font-size: 0.8rem;
+            color: var(--gray-dark);
+        }
+        
+        .document-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-view, .btn-replace {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .btn-view {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+        
+        .btn-replace {
+            background-color: white;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        /* Password change section */
+        .password-toggle {
+            position: relative;
+        }
+        
+        .password-toggle-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--gray-dark);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-stats {
+                justify-content: center;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="logo">SHOE PORTAL</div>
+            <div class="nav-items">
+                <a href="/shopowner/html/shop_dashboard.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="/shopowner/html/shopowner_addshoe.html" class="nav-item">
+                    <i class="fas fa-shoe-prints"></i> Add Shoe
+                </a>
+                <a id="addemployeebtn" href="/shopowner/html/shopowner_addemployee.html" class="nav-item shopowner">
+                    <i class="fas fa-users"></i> Add Employee
+                </a>
+                <a href="/shopowner/html/shop_inventory.html" class="nav-item">
+                    <i class="fas fa-box"></i> Inventory
+                </a>
+                <a href="/shopowner/html/shop_order.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a>
+                <a href="/extras/devonprocess.html" class="nav-item manager">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+                <a href="/shopowner/html/shopprofile.html" class="nav-item active">
+                    <i class="fas fa-cog"></i> Profile Settings
+                </a>
+                <a id="logout_btn" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1><i class="fas fa-user-cog"></i> Profile Settings</h1>
+                <div class="user-profile">
+                    <img id="imageProfile" src="#" alt="Profile" class="user-avatar">
+                    <span id="userName_display2">Elite Footwear</span>
+                </div>
+            </div>
+
+            <!-- Profile Container -->
+            <div class="profile-container">
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <img src="/images/shop_logo.jpg" alt="Shop Logo">
+                        <label class="avatar-upload">
+                            <i class="fas fa-camera"></i> Change
+                            <input type="file" accept="image/*">
+                        </label>
+                    </div>
+                    
+                    <div class="profile-info">
+                        <h2 class="profile-name">Elite Footwear</h2>
+                        <div class="profile-email">elitefootwear@example.com</div>
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">42</div>
+                                <div class="stat-label">Orders</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">28</div>
+                                <div class="stat-label">Products</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">4.8</div>
+                                <div class="stat-label">Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Form -->
+                <form class="profile-form" id="profileForm">
+                    <!-- Shop Information Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-store"></i> Shop Information</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="shopName" class="form-label">Shop Name</label>
+                                <input type="text" id="shopName" class="form-control" value="Elite Footwear">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="shopCategory" class="form-label">Shop Category</label>
+                                <select id="shopCategory" class="form-select">
+                                    <option value="sneakers" selected>Sneakers</option>
+                                    <option value="formal">Formal Shoes</option>
+                                    <option value="boots">Boots</option>
+                                    <option value="sports">Sports Shoes</option>
+                                    <option value="sandals">Sandals</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="shopDescription" class="form-label">Shop Description</label>
+                            <textarea id="shopDescription" class="form-control" rows="4">Premium sneakers and footwear for the modern urban lifestyle. We specialize in limited edition releases and high-quality materials.</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-address-card"></i> Contact Information</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ownerName" class="form-label">Owner Name</label>
+                                <input type="text" id="ownerName" class="form-control" value="Juan Dela Cruz">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="ownerEmail" class="form-label">Email</label>
+                                <input type="email" id="ownerEmail" class="form-control" value="elitefootwear@example.com">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ownerPhone" class="form-label">Phone Number</label>
+                                <div class="phone-input-container">
+                                    <span class="country-code">+63</span>
+                                    <input type="tel" id="ownerPhone" class="form-control" value="9123456789" maxlength="10">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="website" class="form-label">Website (Optional)</label>
+                                <input type="url" id="website" class="form-control" value="https://elitefootwear.com">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location Information Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-map-marker-alt"></i> Location Information</h3>
+                        
+                        <div class="form-group">
+                            <label for="shopAddress" class="form-label">Shop Address</label>
+                            <input type="text" id="shopAddress" class="form-control" value="123 Shoe Street, Makati">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="shopCity" class="form-label">City</label>
+                                <input type="text" id="shopCity" class="form-control" value="Makati">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="shopState" class="form-label">State/Province</label>
+                                <input type="text" id="shopState" class="form-control" value="Metro Manila">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="shopZip" class="form-label">ZIP/Postal Code</label>
+                                <input type="text" id="shopZip" class="form-control" value="1200">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="shopCountry" class="form-label">Country</label>
+                                <select id="shopCountry" class="form-select">
+                                    <option value="Philippines" selected>Philippines</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Business Documents Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-file-contract"></i> Business Documents</h3>
+                        
+                        <div class="document-upload">
+                            <label class="form-label">Mayor's Permit / Business License</label>
+                            <div class="document-preview">
+                                <i class="fas fa-file-pdf document-icon"></i>
+                                <div class="document-info">
+                                    <div class="document-name">business_license_2023.pdf</div>
+                                    <div class="document-upload-date">Uploaded: January 15, 2023</div>
+                                </div>
+                                <div class="document-actions">
+                                    <button type="button" class="btn-view"><i class="fas fa-eye"></i> View</button>
+                                    <button type="button" class="btn-replace"><i class="fas fa-sync"></i> Replace</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="document-upload">
+                            <label class="form-label">Tax Identification Number</label>
+                            <input type="text" id="taxId" class="form-control" value="123-456-789-000">
+                        </div>
+                        
+                        <div class="document-upload">
+                            <label class="form-label">Business Permit</label>
+                            <div class="document-preview">
+                                <i class="fas fa-file-image document-icon"></i>
+                                <div class="document-info">
+                                    <div class="document-name">business_permit_2023.jpg</div>
+                                    <div class="document-upload-date">Uploaded: January 15, 2023</div>
+                                </div>
+                                <div class="document-actions">
+                                    <button type="button" class="btn-view"><i class="fas fa-eye"></i> View</button>
+                                    <button type="button" class="btn-replace"><i class="fas fa-sync"></i> Replace</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password Change Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-lock"></i> Change Password</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group password-toggle">
+                                <label for="currentPassword" class="form-label">Current Password</label>
+                                <input type="password" id="currentPassword" class="form-control">
+                                <i class="fas fa-eye password-toggle-icon" id="toggleCurrentPassword"></i>
+                            </div>
+                            
+                            <div class="form-group password-toggle">
+                                <label for="newPassword" class="form-label">New Password</label>
+                                <input type="password" id="newPassword" class="form-control">
+                                <i class="fas fa-eye password-toggle-icon" id="toggleNewPassword"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group password-toggle">
+                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" class="form-control">
+                            <i class="fas fa-eye password-toggle-icon" id="toggleConfirmPassword"></i>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel">Cancel</button>
+                        <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Password toggle functionality
+            function setupPasswordToggle(inputId, toggleId) {
+                const passwordInput = document.getElementById(inputId);
+                const toggleIcon = document.getElementById(toggleId);
+                
+                toggleIcon.addEventListener('click', function() {
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        toggleIcon.classList.remove('fa-eye');
+                        toggleIcon.classList.add('fa-eye-slash');
+                    } else {
+                        passwordInput.type = 'password';
+                        toggleIcon.classList.remove('fa-eye-slash');
+                        toggleIcon.classList.add('fa-eye');
+                    }
+                });
+            }
+            
+            setupPasswordToggle('currentPassword', 'toggleCurrentPassword');
+            setupPasswordToggle('newPassword', 'toggleNewPassword');
+            setupPasswordToggle('confirmPassword', 'toggleConfirmPassword');
+            
+            // Avatar upload preview
+            const avatarUpload = document.querySelector('.avatar-upload input');
+            const avatarPreview = document.querySelector('.profile-avatar img');
+            
+            avatarUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        avatarPreview.src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Form submission
+            document.getElementById('profileForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                // In a real app, this would send data to your backend
+                alert('Profile changes saved successfully!');
+            });
+            
+            // Cancel button
+            document.querySelector('.btn-cancel').addEventListener('click', function() {
+                if (confirm('Are you sure you want to discard your changes?')) {
+                    // In a real app, this would reset the form
+                    window.location.reload();
+                }
+            });
+            
+            // Logout button
+            document.getElementById('logout_btn').addEventListener('click', function() {
+                alert('Logging out...');
+                // In real implementation, this would call your logout function
+            });
+            
+            // Document view/replace buttons
+            document.querySelectorAll('.btn-view').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    alert('Viewing document...');
+                    // In a real app, this would open the document
+                });
+            });
+            
+            document.querySelectorAll('.btn-replace').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    alert('Replace document functionality would go here');
+                    // In a real app, this would open a file upload dialog
+                });
+            });
+        });
+    </script>
+</body>
+</html>

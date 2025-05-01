@@ -521,6 +521,11 @@ body {
     color: white;
 }
 
+.btn-track {
+    background-color: var(--primary);
+    color: white;
+}
+
 .btn-reject {
     background-color: #dc3545;
     color: white;

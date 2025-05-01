@@ -162,12 +162,12 @@ function createOrderCard(order) {
     if (order.status.toLowerCase() === 'pending') {
         actionButtons = `
             <button class="btn btn-cancel" onclick="cancelOrder('${order.id}')">Cancel Order</button>
-            <button class="btn btn-contact" onclick="contactSeller('${order.item?.shopId || ''}')">Contact Seller</button>
+            
         `;
     } else if (order.status.toLowerCase() === 'accepted' || order.status.toLowerCase() === 'shipped') {
         actionButtons = `
             <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
-            <button class="btn btn-contact" onclick="contactSeller('${order.item?.shopId || ''}')">Contact Seller</button>
+            
         `;
     } else if (order.status.toLowerCase() === 'delivered') {
         actionButtons = `

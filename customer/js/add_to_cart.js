@@ -120,7 +120,7 @@ function renderCart() {
 
                     <div class="cta-btn">
                         <button class="delete-btn" data-cartid="${item.cartId}"><i class="fas fa-trash"></i> Delete</button> <!--  Added this line -->
-                        <button class="feedback-btn" data-cartid="${item.cartId}"><i class="fas fa-comment-alt"></i> Submit a Feedback </button>
+                        <button class="feedback-btn" data-cartid="${item.cartId}"><i class="fas fa-info-circle"></i> View Details </button>
                     </div>
                 </div>
 `;
