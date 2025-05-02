@@ -158,6 +158,7 @@ function displayOrderCard(order, userId) {
     // Get the item(s)
     const items = order.item ? [order.item] : (order.order_items ? Object.values(order.order_items) : []);
     
+    console.log('Items:', items);
     // Generate HTML for each item
     const itemsHTML = items.map(item => `
         <div class="order-item">
@@ -178,7 +179,7 @@ function displayOrderCard(order, userId) {
             <div class="rejection-info">
                 <div class="rejection-title">
                     <i class="fas fa-store-alt"></i>
-                    <span>Rejected by: <span class="rejection-shop">${item?.shopName || 'Shop'}</span></span>
+                    <span>Rejected by: <span class="rejection-shop">${order.item.shopName || 'Shop'}</span></span>
                 </div>
                 <div class="rejection-reason">
                     <strong>Reason:</strong> ${order.rejectionReason || 'No reason provided'}
