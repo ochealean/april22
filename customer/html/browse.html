@@ -546,15 +546,16 @@
                 });
             });
             
+            // need to update dapat sa cart muna di sa orders agad pag niclick to 
             // Add to cart buttons
-            const addToCartButtons = document.querySelectorAll('.add-to-cart');
-            addToCartButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const productName = this.closest('.product-card').querySelector('.product-name').textContent;
-                    alert(`Added ${productName} to cart`);
-                    // In real implementation, this would add to cart
-                });
-            });
+            // const addToCartButtons = document.querySelectorAll('.add-to-cart');
+            // addToCartButtons.forEach(button => {
+            //     button.addEventListener('click', function() {
+            //         const productName = this.closest('.product-card').querySelector('.product-name').textContent;
+            //         alert(`Added ${productName} to cart`);
+            //         // In real implementation, this would add to cart
+            //     });
+            // });
             
             // Wishlist buttons
             document.querySelectorAll('.wishlist-btn').forEach(button => {
