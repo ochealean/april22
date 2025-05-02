@@ -155,7 +155,7 @@ function displayOrderCard(order, userId) {
             statusText = 'Processing';
     }
     
-    // Get the item(s) - your structure has either 'item' or 'order_items'
+    // Get the item(s)
     const items = order.item ? [order.item] : (order.order_items ? Object.values(order.order_items) : []);
     
     // Generate HTML for each item
@@ -178,7 +178,7 @@ function displayOrderCard(order, userId) {
             <div class="rejection-info">
                 <div class="rejection-title">
                     <i class="fas fa-store-alt"></i>
-                    <span>Rejected by: <span class="rejection-shop">${order.item?.shopName}</span></span>
+                    <span>Rejected by: <span class="rejection-shop">${item?.shopName || 'Shop'}</span></span>
                 </div>
                 <div class="rejection-reason">
                     <strong>Reason:</strong> ${order.rejectionReason || 'No reason provided'}
@@ -186,7 +186,6 @@ function displayOrderCard(order, userId) {
             </div>
         `;
     }
-    console.log(order);
     
     // Generate cancellation info if order was cancelled
     if (order.status === 'cancelled') {
@@ -227,7 +226,7 @@ function displayOrderCard(order, userId) {
     
     // Create the order card HTML
     const orderCardHTML = `
-        <div class="order-card">
+        <div class="order-card" data-order-id="${order.orderId}">
             <div class="order-header">
                 <div>
                     <span class="order-id">Order #${order.orderId}</span>
@@ -285,7 +284,6 @@ function setupEventListeners(userId) {
     const timeFilter = document.getElementById('timeFilter');
     if (timeFilter) {
         timeFilter.addEventListener('change', (e) => {
-            // You would implement time-based filtering here
             console.log('Time filter changed to:', e.target.value);
         });
     }
@@ -294,7 +292,6 @@ function setupEventListeners(userId) {
     const searchInput = document.querySelector('.search-orders');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
-            // You would implement search functionality here
             console.log('Searching for:', e.target.value);
         });
     }
@@ -310,6 +307,17 @@ function setupEventListeners(userId) {
             });
         });
     }
+    
+    // Track order button click handler
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-track')) {
+            const orderCard = e.target.closest('.order-card');
+            if (orderCard) {
+                const orderId = orderCard.getAttribute('data-order-id');
+                window.location.href = `/customer/html/track.html?orderId=${orderId}&userId=${userId}`;
+            }
+        }
+    });
 }
 
 // Function to display order details when order ID is provided

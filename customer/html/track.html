@@ -302,23 +302,23 @@
                         <div class="package-meta">
                             <div class="meta-item">
                                 <span class="meta-label">Order Number</span>
-                                <span class="meta-value">#ORD-2001</span>
+                                <span class="meta-value"></span>
                             </div>
                             <div class="meta-item">
                                 <span class="meta-label">Price</span>
-                                <span class="meta-value">$119.99</span>
+                                <span class="meta-value"></span>
                             </div>
                             <div class="meta-item">
                                 <span class="meta-label">Quantity</span>
-                                <span class="meta-value">1</span>
+                                <span class="meta-value"></span>
                             </div>
                             <div class="meta-item">
                                 <span class="meta-label">Size</span>
-                                <span class="meta-value">9.5</span>
+                                <span class="meta-value"></span>
                             </div>
                             <div class="meta-item">
                                 <span class="meta-label">Color</span>
-                                <span class="meta-value">Panda</span>
+                                <span class="meta-value"></span>
                             </div>
                         </div>
                     </div>
@@ -414,15 +414,15 @@
                         <h3><i class="fas fa-store"></i> Seller Information</h3>
                         <div class="info-item">
                             <div class="info-label">Shop Name</div>
-                            <div class="info-value">Elite Footwear</div>
+                            <div id="seller_info1" class="info-value"></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Address</div>
-                            <div class="info-value">456 Shoe Lane<br>Portland, OR 97201</div>
+                            <div id="seller_info2" class="info-value">456 Shoe Lane<br>Portland, OR 97201</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Contact</div>
-                            <div class="info-value">(555) 987-6543<br>support@elitefootwear.com</div>
+                            <div id="seller_info3" class="info-value">(555) 987-6543<br>support@elitefootwear.com</div>
                         </div>
                     </div>
                     
@@ -449,7 +449,7 @@
     <!-- Google Maps API -->
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
     
-    <script>
+    <!-- <script>
         // Initialize Google Map
         function initMap() {
             // Map coordinates (example route from seller to buyer)
@@ -587,7 +587,9 @@
         document.getElementById('logout_btn').addEventListener('click', function() {
             alert('Logging out...');
             // In real implementation, this would call your logout function
-        });
-    </script>
+        }); 
+    </script> -->
+
+    <script src="/customer/js/track.js" type="module"></script>
 </body>
 </html>
