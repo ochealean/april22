@@ -166,9 +166,9 @@ function createOrderCard(order) {
         `;
     } else if (order.status.toLowerCase() === 'accepted' || order.status.toLowerCase() === 'shipped') {
         actionButtons = `
-            <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
-            
-        `;
+    <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
+`;
+
     } else if (order.status.toLowerCase() === 'delivered') {
         actionButtons = `
             <button class="btn btn-review" onclick="leaveReview('${order.item?.shopId || ''}', '${order.item?.shoeId || ''}')">Leave Review</button>
@@ -297,8 +297,13 @@ window.contactSeller = function (shopId) {
     alert(`Redirecting to chat with shop ID: ${shopId}`);
 };
 
-window.trackOrder = function (orderId) {
-    alert(`Tracking for order: ${orderId}`);
+window.trackOrder = function(orderId) {
+    const user = auth.currentUser;
+    if (!user) {
+        window.location.href = "/user_login.html";
+        return;
+    }
+    window.location.href = `/customer/html/track.html?orderId=${orderId}&userId=${user.uid}`;
 };
 
 window.startReturn = function (orderId) {
