@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - Customer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2c3e50;
+            --accent: #e74c3c;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --error: #c0392b;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray: #bdc3c7;
+            --gray-light: #ecf0f1;
+            --gray-dark: #7f8c8d;
+            --text-primary: #2c3e50;
+            --text-secondary: #34495e;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--gray-light);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--secondary);
+            color: var(--light);
+            padding: 2rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .logo {
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .nav-item {
+            padding: 0.8rem 1rem;
+            margin: 0.5rem 0;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: block;
+            color: var(--light);
+            text-decoration: none;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--primary-dark);
+            color: var(--light);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem;
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .back-btn i {
+            margin-right: 0.5rem;
+        }
+
+        .back-btn:hover {
+            color: var(--primary-dark);
+        }
+
+        /* Product Details Container */
+        .product-details-container {
+            background-color: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .product-main-image {
+            width: 100%;
+            height: auto;
+            max-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .product-main-image img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .product-name {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .product-shop {
+            font-size: 1rem;
+            color: var(--gray-dark);
+        }
+
+        .product-code {
+            font-size: 0.9rem;
+            color: var(--gray-dark);
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0.5rem 0;
+        }
+
+        .product-description {
+            margin: 1rem 0;
+        }
+
+        .product-description h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .product-description p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Quantity Selector */
+        .quantity-selector {
+            margin: 1rem 0;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .quantity-btn {
+            width: 40px;
+            height: 40px;
+            background-color: var(--gray-light);
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quantity-btn:hover {
+            background-color: var(--gray);
+        }
+
+        #quantity {
+            width: 60px;
+            height: 40px;
+            text-align: center;
+            border: 1px solid var(--gray);
+            border-left: none;
+            border-right: none;
+            font-size: 1rem;
+        }
+
+        .available-stock {
+            font-size: 0.9rem;
+            color: var(--gray-dark);
+            margin-top: 0.5rem;
+        }
+
+        /* Variants */
+        .variant-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .variant-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+
+        .color-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .color-option {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--gray);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            background-color: white;
+        }
+
+        .color-option.selected {
+            border-color: var(--primary);
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .color-option.selected::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            opacity: 0;
+        }
+
+        .variant-name {
+            font-size: 0.9rem;
+            color: var(--gray-dark);
+            margin-top: 0.5rem;
+        }
+
+        .size-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .size-option {
+            min-width: 50px;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid var(--gray);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .size-option.selected {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .size-label {
+            font-weight: 500;
+        }
+
+        .size-stock {
+            font-size: 0.7rem;
+            margin-top: 0.2rem;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            flex-grow: 1;
+            gap: 5px;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+            flex-grow: 1;
+            gap: 5px;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--dark);
+        }
+
+        .wishlist-btn {
+            width: 50px;
+            background-color: var(--gray-light);
+            color: var(--dark);
+        }
+
+        .wishlist-btn:hover, .wishlist-btn.active {
+            background-color: #f8d7da;
+            color: #dc3545;
+        }
+
+        .wishlist-btn i.fas {
+            color: #dc3545;
+        }
+
+        /* Reviews Section */
+        .reviews-section {
+            margin-top: 2rem;
+            background-color: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            padding: 2rem;
+        }
+
+        .reviews-header {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .reviews-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .review-filters {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stars-filter {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--gray-light);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .stars-filter:hover {
+            background-color: var(--gray);
+        }
+
+        .stars-filter.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .stars-filter .stars {
+            color: var(--warning);
+        }
+
+        .stars-filter .text {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .review-item {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .review-author {
+            font-weight: 600;
+        }
+
+        .review-date {
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+        }
+
+        .review-stars {
+            color: var(--warning);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1200px) {
+            .product-details-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-main-image {
+                max-height: 400px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard {
+                grid-template-columns: 80px 1fr;
+            }
+            
+            .sidebar {
+                padding: 1rem 0.5rem;
+            }
+            
+            .logo {
+                font-size: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .nav-item {
+                padding: 0.5rem;
+                text-align: center;
+                font-size: 0.8rem;
+            }
+            
+            .nav-item i {
+                display: block;
+                margin: 0 auto 0.3rem;
+                font-size: 1rem;
+            }
+            
+            .nav-item span {
+                display: none;
+            }
+            
+            .main-content {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                height: auto;
+                position: relative;
+                padding: 1rem;
+            }
+            
+            .nav-items {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+            
+            .nav-item {
+                margin: 0;
+                padding: 0.5rem;
+                font-size: 0.9rem;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 60px;
+            }
+            
+            .nav-item i {
+                margin-bottom: 0.3rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .product-details-container {
+                padding: 1.5rem;
+            }
+            
+            .product-name {
+                font-size: 1.5rem;
+            }
+            
+            .reviews-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .review-filters {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .stars-filter {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .product-details-container {
+                padding: 1rem;
+            }
+            
+            .product-name {
+                font-size: 1.3rem;
+            }
+            
+            .product-price {
+                font-size: 1.3rem;
+            }
+            
+            .variant-title {
+                font-size: 1rem;
+            }
+            
+            .color-options, .size-options {
+                gap: 0.5rem;
+            }
+            
+            .color-option {
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .size-option {
+                min-width: 40px;
+                padding: 0.3rem;
+                font-size: 0.9rem;
+            }
+            
+            .btn {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .reviews-title {
+                font-size: 1.3rem;
+            }
+            
+            .stars-filter {
+                padding: 0.5rem;
+                font-size: 0.8rem;
+            }
+            
+            .stars-filter .text {
+                display: none;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .nav-item {
+                min-width: 50px;
+                padding: 0.3rem;
+                font-size: 0.7rem;
+            }
+            
+            .nav-item i {
+                font-size: 0.9rem;
+            }
+            
+            .product-main-image {
+                height: auto;
+            }
+            
+            .quantity-btn {
+                width: 30px;
+                height: 30px;
+            }
+            
+            #quantity {
+                width: 40px;
+                height: 30px;
+            }
+            
+            .btn {
+                padding: 0.7rem 0.8rem;
+            }
+            
+            .wishlist-btn {
+                width: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="logo">SHOE PORTAL</div>
+            <div class="nav-items">
+                <a href="/customer/html/customer_dashboard.html" class="nav-item">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="/customer/html/browse.html" class="nav-item active">
+                    <i class="fas fa-shopping-bag"></i> Browse Shoes
+                </a>
+                <a href="/customer/html/orders.html" class="nav-item">
+                    <i class="fas fa-receipt"></i> My Orders
+                </a>
+                <a href="/customer/html/add_to_cart.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i> My Cart
+                </a>
+                <a href="/customer/html/history.html" class="nav-item">
+                    <i class="fas fa-history"></i> Order History
+                </a>
+                <a href="/customer/html/wishlist.html" class="nav-item">
+                    <i class="fas fa-heart"></i> Wishlist
+                </a>
+                <a href="/chatbot/html/chatbot.html" class="nav-item">
+                    <i class="fas fa-comment"></i> Chatbot
+                </a>
+                <a href="/extras/devonprocess.html" class="nav-item">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a id="logout_btn" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <a href="/customer/html/browse.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Browse
+            </a>
+            
+            <div class="product-details-container">
+                <!-- LEFT COLUMN -->
+                <div class="product-left">
+                    <div class="product-main-image">
+                        <img src="/images/shoe1.png" alt="Nike Air Max 270 React" id="mainProductImage">
+                    </div>
+                    <div class="product-variants">
+                        <h3>Available Variants</h3>
+                        <div class="variant-options" id="variantOptions">
+                            <!-- Variants will be populated by JavaScript -->
+                        </div>
+                         <!-- Color Selection -->
+                         <div class="variant-section">
+                            <div class="variant-title">Select Color</div>
+                            <div class="color-options" id="colorOptions">
+                                <!-- Color options will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <!-- Size Selection -->
+                        <div class="variant-section">
+                            <div class="variant-title">Select Size</div>
+                            <div class="size-options" id="sizeOptions">
+                                <!-- Size options will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- RIGHT COLUMN -->
+                <div class="product-info">
+                    <h1 class="product-name" id="productName">Nike Air Max 270 React</h1>
+                    <div class="product-shop" id="productShop">Shop Name: Elite Footwear</div>
+                    <div class="product-code" id="productCode">Product Code: NIKE-AM270-001</div>
+                    <div class="product-price" id="productPrice">₱150.00</div>
+                    
+                    <div class="quantity-selector" id="quantitySelector">
+                        <label for="quantity">Quantity:</label>
+                        <div class="quantity-controls">
+                            <button type="button" class="quantity-btn minus" onclick="adjustQuantity(-1)">-</button>
+                            <input type="number" id="quantity" name="quantity" min="1" value="1" onchange="validateQuantity()">
+                            <button type="button" class="quantity-btn plus" onclick="adjustQuantity(1)">+</button>
+                        </div>
+                        <div class="available-stock" id="availableStock">Available: 25</div>
+                    </div>
+                    
+                    <div class="product-description">
+                        <h4>Description</h4>
+                        <p id="productDescription">The Nike Air Max 270 React combines the oversized Air Max 270 cushioning with React foam for an incredibly comfortable and responsive feel. The breathable mesh upper provides lightweight support, while the bold colors and design make a statement wherever you go.</p>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="addToCart()">
+                            <i class="fas fa-shopping-cart"></i>  Add to Cart
+                        </button>
+                        <button class="btn btn-secondary" onclick="buyNow()">
+                            <i class="fas fa-bolt"></i>  Buy Now
+                        </button>
+                        <button class="btn wishlist-btn" id="wishlistBtn" onclick="toggleWishlist()">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reviews Section -->
+            <div class="reviews-section">
+                <div class="reviews-header">
+                    <h2 class="reviews-title">Customer Reviews</h2>
+                    <div class="review-filters">
+                        <div class="stars-filter" data-rating="5" onclick="filterReviews(5)">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="text">5 Stars</div>
+                        </div>
+                        <div class="stars-filter" data-rating="4" onclick="filterReviews(4)">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <div class="text">4 Stars</div>
+                        </div>
+                        <div class="stars-filter" data-rating="3" onclick="filterReviews(3)">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <div class="text">3 Stars</div>
+                        </div>
+                        <div class="stars-filter" data-rating="0" onclick="filterReviews(0)">
+                            <div class="text">All Reviews</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="reviewsContainer">
+                    <div class="review-item" data-rating="5">
+                        <div class="review-header">
+                            <span class="review-author">John D.</span>
+                            <span class="review-date">April 15, 2023</span>
+                        </div>
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p>These are the most comfortable shoes I've ever worn! The cushioning is amazing and they look great too.</p>
+                    </div>
+                    
+                    <div class="review-item" data-rating="4">
+                        <div class="review-header">
+                            <span class="review-author">Sarah M.</span>
+                            <span class="review-date">March 28, 2023</span>
+                        </div>
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <p>Love the look and feel, but they run a half size small. I'd recommend going up a size.</p>
+                    </div>
+
+                    <div class="review-item" data-rating="5">
+                        <div class="review-header">
+                            <span class="review-author">Michael T.</span>
+                            <span class="review-date">May 10, 2023</span>
+                        </div>
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p>Absolutely fantastic shoes! Worth every penny. The comfort is unmatched.</p>
+                    </div>
+
+                    <div class="review-item" data-rating="3">
+                        <div class="review-header">
+                            <span class="review-author">Emma R.</span>
+                            <span class="review-date">June 2, 2023</span>
+                        </div>
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <p>Good shoes but not as comfortable as I expected. The design is nice though.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample product data - in a real app this would come from your backend
+        const product = {
+            shoeName: "Nike Air Max 270 React",
+            shopName: "Elite Footwear",
+            shoeCode: "NIKE-AM270-001",
+            price: 150.00,
+            defaultImage: "/images/shoe1.png",
+            generalDescription: "The Nike Air Max 270 React combines the oversized Air Max 270 cushioning with React foam for an incredibly comfortable and responsive feel. The breathable mesh upper provides lightweight support, while the bold colors and design make a statement wherever you go.",
+            colors: [
+                {
+                    name: "Black",
+                    variantName: "Black/Anthracite",
+                    imageUrl: "/images/shoe1.png",
+                    sizes: [
+                        { size: "US 7", stock: 5, price: 150.00 },
+                        { size: "US 8", stock: 8, price: 150.00 },
+                        { size: "US 9", stock: 10, price: 150.00 },
+                        { size: "US 10", stock: 3, price: 150.00 }
+                    ]
+                },
+                {
+                    name: "White",
+                    variantName: "White/University Red",
+                    imageUrl: "/images/shoe2.png?text=White",
+                    sizes: [
+                        { size: "US 8", stock: 7, price: 150.00 },
+                        { size: "US 9", stock: 5, price: 150.00 },
+                        { size: "US 10", stock: 5, price: 150.00 }
+                    ]
+                },
+                {
+                    name: "Red",
+                    variantName: "University Red/Black",
+                    imageUrl: "/images/shoe3.png?text=Red",
+                    sizes: [
+                        { size: "US 9", stock: 2, price: 150.00 },
+                        { size: "US 10", stock: 4, price: 150.00 },
+                        { size: "US 11", stock: 6, price: 150.00 }
+                    ]
+                },
+                {
+                    name: "Blue",
+                    variantName: "Obsidian/White",
+                    imageUrl: "/images/shoe1.png?text=Blue",
+                    sizes: [
+                        { size: "US 8", stock: 3, price: 150.00 },
+                        { size: "US 9", stock: 4, price: 150.00 },
+                        { size: "US 10", stock: 2, price: 150.00 }
+                    ]
+                }
+            ],
+            reviews: [
+                {
+                    author: "John D.",
+                    date: "April 15, 2023",
+                    rating: 5,
+                    comment: "These are the most comfortable shoes I've ever worn! The cushioning is amazing and they look great too."
+                },
+                {
+                    author: "Sarah M.",
+                    date: "March 28, 2023",
+                    rating: 4,
+                    comment: "Love the look and feel, but they run a half size small. I'd recommend going up a size."
+                }
+            ]
+        };
+
+        // Initialize the page with product data
+        function initializePage() {
+            // Set product info
+            document.getElementById('productName').textContent = product.shoeName;
+            document.getElementById('productShop').textContent = `Shop Name: ${product.shopName}`;
+            document.getElementById('productCode').textContent = `Product Code: ${product.shoeCode}`;
+            document.getElementById('productPrice').textContent = `₱${product.price.toFixed(2)}`;
+            document.getElementById('productDescription').textContent = product.generalDescription;
+            document.getElementById('mainProductImage').src = product.defaultImage;
+            
+            // Populate color options
+            populateColorOptions();
+            
+            // Populate reviews
+            populateReviews();
+            
+            // Set up event listeners
+            setupEventListeners();
+        }
+
+        // Populate color options
+        function populateColorOptions() {
+            const colorOptions = document.getElementById('colorOptions');
+            colorOptions.innerHTML = '';
+            
+            product.colors.forEach((color, index) => {
+                const colorElement = document.createElement('div');
+                colorElement.className = 'color-option';
+                colorElement.innerHTML = `
+                    <div>${color.name}</div>
+                    <div class="variant-name">${color.variantName}</div>
+                `;
+                colorElement.dataset.colorIndex = index;
+                colorElement.addEventListener('click', function() {
+                    selectColor(this, color, index);
+                });
+                colorOptions.appendChild(colorElement);
+            });
+            
+            // Select first color by default and show its sizes
+            if (product.colors.length > 0) {
+                const firstColor = colorOptions.firstChild;
+                firstColor.classList.add('selected');
+                populateSizeOptions(0);
+            }
+        }
+
+        // Color selection
+        function selectColor(element, color, colorIndex) {
+            // Remove selected class from all colors
+            document.querySelectorAll('.color-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked color
+            element.classList.add('selected');
+            
+            // Update product image
+            document.getElementById('mainProductImage').src = color.imageUrl;
+            
+            // Populate size options for this color
+            populateSizeOptions(colorIndex);
+            
+            // Reset quantity selector
+            document.getElementById('quantity').value = 1;
+        }
+
+        // Populate size options for selected color
+        function populateSizeOptions(colorIndex) {
+            const sizeOptions = document.getElementById('sizeOptions');
+            sizeOptions.innerHTML = ''; // Clear existing sizes
+            
+            product.colors[colorIndex].sizes.forEach((size, index) => {
+                const sizeElement = document.createElement('div');
+                sizeElement.className = 'size-option';
+                sizeElement.innerHTML = `
+                    <span class="size-label">${size.size}</span>
+                    <span class="size-stock">${size.stock} left</span>
+                `;
+                sizeElement.dataset.colorIndex = colorIndex;
+                sizeElement.dataset.sizeIndex = index;
+                sizeElement.addEventListener('click', function() {
+                    selectSize(this, colorIndex, index);
+                });
+                sizeOptions.appendChild(sizeElement);
+            });
+            
+            // Select first size by default
+            if (product.colors[colorIndex].sizes.length > 0) {
+                const firstSize = sizeOptions.firstChild;
+                firstSize.classList.add('selected');
+                updateStockInfo(colorIndex, 0);
+            }
+        }
+
+        // Size selection
+        function selectSize(element, colorIndex, sizeIndex) {
+            // Remove selected class from all sizes
+            document.querySelectorAll('.size-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked size
+            element.classList.add('selected');
+            
+            // Update stock info and quantity max
+            updateStockInfo(colorIndex, sizeIndex);
+        }
+
+        // Update stock information and quantity max
+        function updateStockInfo(colorIndex, sizeIndex) {
+            const selectedSize = product.colors[colorIndex].sizes[sizeIndex];
+            document.getElementById('availableStock').textContent = `Available: ${selectedSize.stock}`;
+            document.getElementById('quantity').max = selectedSize.stock;
+            
+            // Reset quantity if it exceeds new max
+            const quantityInput = document.getElementById('quantity');
+            if (parseInt(quantityInput.value) > selectedSize.stock) {
+                quantityInput.value = selectedSize.stock;
+            }
+        }
+
+        // Quantity adjustment
+        function adjustQuantity(change) {
+            const quantityInput = document.getElementById('quantity');
+            let newValue = parseInt(quantityInput.value) + change;
+            const max = parseInt(quantityInput.max) || 100;
+            
+            if (newValue < 1) newValue = 1;
+            if (newValue > max) newValue = max;
+            
+            quantityInput.value = newValue;
+        }
+
+        // Validate quantity input
+        function validateQuantity() {
+            const quantityInput = document.getElementById('quantity');
+            let value = parseInt(quantityInput.value);
+            const max = parseInt(quantityInput.max) || 100;
+            
+            if (isNaN(value)) value = 1;
+            if (value < 1) value = 1;
+            if (value > max) value = max;
+            
+            quantityInput.value = value;
+        }
+
+        // Populate reviews
+        function populateReviews() {
+            const reviewsContainer = document.getElementById('reviewsContainer');
+            reviewsContainer.innerHTML = '';
+            
+            product.reviews.forEach(review => {
+                const reviewElement = document.createElement('div');
+                reviewElement.className = 'review-item';
+                
+                // Create stars HTML
+                let starsHtml = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= review.rating) {
+                        starsHtml += '<i class="fas fa-star"></i>';
+                    } else {
+                        starsHtml += '<i class="far fa-star"></i>';
+                    }
+                }
+                
+                reviewElement.innerHTML = `
+                    <div class="review-header">
+                        <span class="review-author">${review.author}</span>
+                        <span class="review-date">${review.date}</span>
+                    </div>
+                    <div class="review-stars">
+                        ${starsHtml}
+                    </div>
+                    <p>${review.comment}</p>
+                `;
+                
+                reviewsContainer.appendChild(reviewElement);
+            });
+        }
+
+        // Wishlist toggle
+        function toggleWishlist() {
+            const btn = document.getElementById('wishlistBtn');
+            const icon = btn.querySelector('i');
+            
+            btn.classList.toggle('active');
+            icon.classList.toggle('far');
+            icon.classList.toggle('fas');
+            
+            if (btn.classList.contains('active')) {
+                alert('Added to your wishlist!');
+            } else {
+                alert('Removed from your wishlist!');
+            }
+        }
+
+        // Add to cart function
+        function addToCart() {
+            const selectedColor = document.querySelector('.color-option.selected');
+            const selectedSize = document.querySelector('.size-option.selected');
+            
+            if (!selectedColor || !selectedSize) {
+                alert('Please select both color and size first');
+                return;
+            }
+            
+            const colorIndex = selectedColor.dataset.colorIndex;
+            const sizeIndex = selectedSize.dataset.sizeIndex;
+            const selectedVariant = product.colors[colorIndex].sizes[sizeIndex];
+            const selectedColorData = product.colors[colorIndex];
+            
+            const productName = document.getElementById('productName').textContent;
+            const color = selectedColorData.name;
+            const variantName = selectedColorData.variantName;
+            const size = selectedVariant.size;
+            const quantity = document.getElementById('quantity').value;
+            const price = selectedVariant.price.toFixed(2);
+            
+            alert(`Added ${quantity} ${productName} (${variantName}, ${size}) to your cart. Total: ₱${(quantity * price).toFixed(2)}`);
+            // In a real implementation, this would add the item to the cart
+        }
+
+        // Buy now function
+        function buyNow() {
+            const selectedColor = document.querySelector('.color-option.selected');
+            const selectedSize = document.querySelector('.size-option.selected');
+            
+            if (!selectedColor || !selectedSize) {
+                alert('Please select both color and size first');
+                return;
+            }
+            
+            const colorIndex = selectedColor.dataset.colorIndex;
+            const sizeIndex = selectedSize.dataset.sizeIndex;
+            const selectedVariant = product.colors[colorIndex].sizes[sizeIndex];
+            const selectedColorData = product.colors[colorIndex];
+            
+            const productName = document.getElementById('productName').textContent;
+            const color = selectedColorData.name;
+            const variantName = selectedColorData.variantName;
+            const size = selectedVariant.size;
+            const quantity = document.getElementById('quantity').value;
+            const price = selectedVariant.price.toFixed(2);
+            
+            alert(`Proceeding to checkout with ${quantity} ${productName} (${variantName}, ${size}). Total: ₱${(quantity * price).toFixed(2)}`);
+            // In a real implementation, this would redirect to checkout
+        }
+
+        // Filter reviews by star rating
+        function filterReviews(rating) {
+            // Update active filter button
+            document.querySelectorAll('.stars-filter').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.rating) === rating) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Show/hide reviews based on filter
+            document.querySelectorAll('.review-item').forEach(review => {
+                if (rating === 0 || parseInt(review.dataset.rating) === rating) {
+                    review.style.display = 'block';
+                } else {
+                    review.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize the page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            // Set "All Reviews" as active by default
+            document.querySelector('.stars-filter[data-rating="0"]').classList.add('active');
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Logout button
+            document.getElementById('logout_btn').addEventListener('click', function() {
+                alert('Logging out...');
+                // In real implementation, this would call your logout function
+            });
+            
+            // Back button
+            document.querySelector('.back-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                // In a real implementation, this would navigate back
+                window.history.back();
+            });
+        }
+
+        // Initialize the page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>
