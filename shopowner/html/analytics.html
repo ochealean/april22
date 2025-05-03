@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - Shop Owner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
+    <style>
+        :root {
+            --primary-color: #2a6496;
+            --primary-hover: #1d4b75;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --light-gray: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background-color: #2a6496;
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100%;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .nav-item {
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        
+        .search-bar {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            width: 300px;
+            outline: none;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        /* Analytics Content */
+        .analytics-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .analytics-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .filter-btn {
+            padding: 5px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn:hover {
+            background-color: var(--light-gray);
+        }
+        
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Data Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .data-table th {
+            background-color: var(--light-gray);
+            font-weight: 600;
+        }
+        
+        .data-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+        
+        .badge-warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+        
+        .badge-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .analytics-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">SHOP DASHBOARD</div>
+            <div class="nav-items">
+                <a href="/shopowner/html/shop_dashboard.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="/shopowner/html/shopowner_addshoe.html" class="nav-item">
+                    <i class="fas fa-shoe-prints"></i> Add Shoe
+                </a>
+                <a id="addemployeebtn" href="/shopowner/html/shopowner_addemployee.html" class="nav-item shopowner">
+                    <i class="fas fa-users"></i> Add Employee
+                </a>
+                <a href="/shopowner/html/shop_inventory.html" class="nav-item">
+                    <i class="fas fa-box"></i> Inventory
+                </a>
+                <a href="/shopowner/html/shop_order.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a>
+                <a href="/shopowner/html/analytics.html" class="nav-item active manager">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+                <a href="/shopowner/html/shopprofile.html" class="nav-item">
+                    <i class="fas fa-cog"></i> Profile Settings
+                </a>
+                <a id="logout_btn" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>Shop Analytics</h1>
+                <input type="text" class="search-bar" placeholder="Search analytics...">
+                <div class="user-profile">
+                    <img id="imageProfile" src="#" alt="Profile" class="user-avatar">
+                    <span id="userName_display2">Shop Manager</span>
+                </div>
+            </div>
+            
+            <div class="analytics-container">
+                <!-- Sales Chart -->
+                <div class="analytics-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Daily Sales</h2>
+                        <div class="filter-controls">
+                            <button class="filter-btn active" data-period="day">Today</button>
+                            <button class="filter-btn" data-period="week">Week</button>
+                            <button class="filter-btn" data-period="month">Month</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Inventory Status -->
+                <div class="analytics-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Inventory Status</h2>
+                        <div class="filter-controls">
+                            <button class="filter-btn active" data-filter="all">All</button>
+                            <button class="filter-btn" data-filter="low">Low Stock</button>
+                            <button class="filter-btn" data-filter="out">Out of Stock</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="inventoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Inventory Changes -->
+            <div class="analytics-card">
+                <div class="card-header">
+                    <h2 class="card-title">Recent Inventory Changes</h2>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Shoe</th>
+                            <th>Action</th>
+                            <th>User</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryChanges">
+                        <!-- Data will be loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Top Selling Products -->
+            <div class="analytics-card">
+                <div class="card-header">
+                    <h2 class="card-title">Top Selling Products</h2>
+                    <div class="filter-controls">
+                        <button class="filter-btn active" data-top-filter="day">Today</button>
+                        <button class="filter-btn" data-top-filter="week">Week</button>
+                        <button class="filter-btn" data-top-filter="month">Month</button>
+                    </div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Shoe</th>
+                            <th>Color Variant</th>
+                            <th>Units Sold</th>
+                            <th>Revenue</th>
+                            <th>% of Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topSellingProducts">
+                        <!-- Data will be loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize charts
+            const salesCtx = document.getElementById('salesChart').getContext('2d');
+            const inventoryCtx = document.getElementById('inventoryChart').getContext('2d');
+            
+            // Sample data - replace with real data from your backend
+            const salesData = {
+                day: [5, 10, 7, 12, 8, 15, 20],
+                week: [45, 60, 55, 70, 65, 80, 90],
+                month: [300, 350, 400, 380, 420, 450, 500, 480, 520, 550, 600, 650]
+            };
+            
+            const inventoryData = {
+                labels: ['Running', 'Basketball', 'Casual', 'Training', 'Sandals'],
+                datasets: [{
+                    data: [120, 80, 150, 90, 60],
+                    backgroundColor: [
+                        '#2a6496',
+                        '#28a745',
+                        '#ffc107',
+                        '#17a2b8',
+                        '#dc3545'
+                    ]
+                }]
+            };
+            
+            // Sales Chart
+            const salesChart = new Chart(salesCtx, {
+                type: 'line',
+                data: {
+                    labels: ['9AM', '12PM', '3PM', '6PM', '9PM', '12AM', '3PM'],
+                    datasets: [{
+                        label: 'Sales',
+                        data: salesData.day,
+                        borderColor: '#2a6496',
+                        backgroundColor: 'rgba(42, 100, 150, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Inventory Chart
+            const inventoryChart = new Chart(inventoryCtx, {
+                type: 'doughnut',
+                data: inventoryData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+            
+            // Filter buttons functionality
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const parent = this.parentElement;
+                    parent.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update charts based on filter
+                    const period = this.dataset.period;
+                    if (period) {
+                        salesChart.data.datasets[0].data = salesData[period];
+                        if (period === 'week') {
+                            salesChart.data.labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                        } else if (period === 'month') {
+                            salesChart.data.labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        } else {
+                            salesChart.data.labels = ['9AM', '12PM', '3PM', '6PM', '9PM', '12AM', '3PM'];
+                        }
+                        salesChart.update();
+                    }
+                    
+                    // Filter inventory table
+                    const filter = this.dataset.filter;
+                    if (filter) {
+                        // You would filter your inventory data here
+                        console.log(`Filter inventory by: ${filter}`);
+                    }
+                });
+            });
+            
+            // Load inventory changes data
+            const inventoryChanges = [
+                { date: '2023-06-15 10:30', shoe: 'Running Pro 2023', action: 'Stock Added', user: 'admin', quantity: 50, status: 'completed' },
+                { date: '2023-06-15 09:15', shoe: 'Basketball Elite', action: 'Stock Updated', user: 'manager', quantity: -10, status: 'completed' },
+                { date: '2023-06-14 16:45', shoe: 'Casual Walkers', action: 'New Shoe Added', user: 'admin', quantity: 100, status: 'completed' },
+                { date: '2023-06-14 14:20', shoe: 'Training Flex', action: 'Stock Warning', user: 'system', quantity: 5, status: 'warning' },
+                { date: '2023-06-13 11:10', shoe: 'Summer Sandals', action: 'Out of Stock', user: 'system', quantity: 0, status: 'danger' }
+            ];
+            
+            const inventoryChangesTable = document.getElementById('inventoryChanges');
+            inventoryChanges.forEach(item => {
+                const row = document.createElement('tr');
+                
+                let statusClass = 'badge-success';
+                if (item.status === 'warning') statusClass = 'badge-warning';
+                if (item.status === 'danger') statusClass = 'badge-danger';
+                
+                row.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.shoe}</td>
+                    <td>${item.action}</td>
+                    <td>${item.user}</td>
+                    <td>${item.quantity}</td>
+                    <td><span class="badge ${statusClass}">${item.action}</span></td>
+                `;
+                inventoryChangesTable.appendChild(row);
+            });
+            
+            // Load top selling products
+            const topProducts = [
+                { rank: 1, shoe: 'Running Pro 2023', variant: 'Black/Red', sold: 45, revenue: 4500, percent: 32 },
+                { rank: 2, shoe: 'Basketball Elite', variant: 'White/Blue', sold: 32, revenue: 3840, percent: 23 },
+                { rank: 3, shoe: 'Casual Walkers', variant: 'Gray', sold: 28, revenue: 2240, percent: 16 },
+                { rank: 4, shoe: 'Training Flex', variant: 'Black', sold: 18, revenue: 1620, percent: 12 },
+                { rank: 5, shoe: 'Summer Sandals', variant: 'Brown', sold: 12, revenue: 840, percent: 6 }
+            ];
+            
+            const topProductsTable = document.getElementById('topSellingProducts');
+            topProducts.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.rank}</td>
+                    <td>${item.shoe}</td>
+                    <td>${item.variant}</td>
+                    <td>${item.sold}</td>
+                    <td>$${item.revenue.toLocaleString()}</td>
+                    <td>${item.percent}%</td>
+                `;
+                topProductsTable.appendChild(row);
+            });
+        });
+    </script>
+</body>
+</html>
