@@ -94,12 +94,16 @@ function loadOrders(userId) {
 function createOrderCard(order) {
     if (!order) return null;
 
+    const status = order.status.toLowerCase();
+
+    // Skip rendering if status is rejected, delivered, or cancelled
+    if (['rejected', 'delivered', 'cancelled'].includes(status)) return null;
+
     const orderCard = document.createElement('div');
     orderCard.className = 'order-card';
-    orderCard.dataset.status = order.status.toLowerCase();
+    orderCard.dataset.status = status;
     orderCard.dataset.orderId = order.id;
 
-    // Format date
     const orderDate = new Date(order.date || Date.now());
     const formattedDate = orderDate.toLocaleDateString('en-US', {
         year: 'numeric',
@@ -109,10 +113,9 @@ function createOrderCard(order) {
         minute: '2-digit'
     });
 
-    // Status class and text
     let statusClass = '';
     let statusText = '';
-    switch (order.status.toLowerCase()) {
+    switch (status) {
         case 'pending':
             statusClass = 'status-processing';
             statusText = 'Processing';
@@ -125,20 +128,11 @@ function createOrderCard(order) {
             statusClass = 'status-shipped';
             statusText = 'Shipped';
             break;
-        case 'delivered':
-            statusClass = 'status-delivered';
-            statusText = 'Delivered';
-            break;
-        case 'cancelled':
-            statusClass = 'status-cancelled';
-            statusText = 'Cancelled';
-            break;
         default:
-            statusClass = 'status-processing';
-            statusText = 'Processing';
+            statusClass = 'status-shipped';
+            statusText = 'Shipped';
     }
 
-    // Create order item HTML
     let orderItemHTML = '';
     if (order.item) {
         const fallbackImage = "https://cdn-icons-png.flaticon.com/512/11542/11542598.png";
@@ -157,24 +151,18 @@ function createOrderCard(order) {
     `;
     }
 
-    // Create appropriate action buttons based on status
     let actionButtons = '';
-    if (order.status.toLowerCase() === 'pending') {
+
+    if (status === 'pending') {
         actionButtons = `
             <button class="btn btn-cancel" onclick="cancelOrder('${order.id}')">Cancel Order</button>
-            
         `;
-    } else if (order.status.toLowerCase() === 'accepted' || order.status.toLowerCase() === 'shipped') {
+    } else if (status !== 'pending') {
         actionButtons = `
-    <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
-`;
-
-    } else if (order.status.toLowerCase() === 'delivered') {
-        actionButtons = `
-            <button class="btn btn-review" onclick="leaveReview('${order.item?.shopId || ''}', '${order.item?.shoeId || ''}')">Leave Review</button>
+            <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
             <button class="btn btn-return" onclick="startReturn('${order.id}')">Start Return</button>
         `;
-    }
+    } 
 
     orderCard.innerHTML = `
         <div class="order-header">
@@ -199,6 +187,8 @@ function createOrderCard(order) {
 
     return orderCard;
 }
+
+
 
 function setupOrderFilters() {
     const filterSelect = document.getElementById('activeFilter');

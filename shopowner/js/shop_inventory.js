@@ -19,6 +19,7 @@ const db = getDatabase(app);
 
 let shopLoggedin;
 
+document.getElementById("addemployeebtn").style.display = "none";
 // Expose functions to global scope
 window.showShoeDetails = showShoeDetails;
 window.editShoe = editShoe;

@@ -117,9 +117,9 @@ function setupEventListeners() {
 
 // Load order data from Firebase
 function loadOrderData() {
-    const orderRef = ref(db, `AR_shoe_users/transactions/${userID}/${orderID}`);
-    
-    onValue(orderRef, (snapshot) => {
+    const userOrdersRef = ref(db, `AR_shoe_users/transactions/${userID}/${orderID}`);
+
+    onValue(userOrdersRef, (snapshot) => {
         const data = snapshot.val();
         if (!data) {
             alert("Order not found");
@@ -133,6 +133,7 @@ function loadOrderData() {
         onlyOnce: false // Keep listening for updates
     });
 }
+
 
 // Update order information display
 function updateOrderInfo(data) {
@@ -250,9 +251,12 @@ function addStatusUpdate() {
         message,
         location: location || null
     };
+    const updatesStatus = {
+        status: status
+    };
 
     const updatesRef = ref(db, `AR_shoe_users/transactions/${userID}/${orderID}/statusUpdates`);
-    
+
     push(updatesRef, updateData)
         .then(() => {
             domElements.updateModal.style.display = "none";
@@ -262,6 +266,12 @@ function addStatusUpdate() {
             console.error("Error adding status update:", error);
             alert("Failed to add status update");
         });
+
+        console.log("ref update data:",` AR_shoe_users/transactions/${userID}/${orderID}`);
+    const updatesStatusRef = ref(db, `AR_shoe_users/transactions/${userID}/${orderID}`);
+
+    update(updatesStatusRef, updatesStatus)
+    console.log(updatesStatus);
 }
 
 // Delete a status update

@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // User is signed in, load their profile and orders
             loadUserProfile(user.uid);
             loadOrderHistory(user.uid);
-            
+
             // Set up event listeners
             setupEventListeners(user.uid);
         } else {
@@ -44,7 +44,7 @@ function loadUserProfile(userId) {
     onValue(userRef, (snapshot) => {
         if (snapshot.exists()) {
             const userData = snapshot.val();
-            
+
             // Update profile picture if available
             const profileImg = document.getElementById('imageProfile');
             if (userData.profilePhoto?.profilePhoto?.url) {
@@ -52,7 +52,7 @@ function loadUserProfile(userId) {
             } else {
                 profileImg.src = "https://via.placeholder.com/150";
             }
-            
+
             // Update username display
             const userNameDisplay = document.getElementById('userName_display2');
             if (userData.firstName && userData.lastName) {
@@ -67,10 +67,10 @@ function loadUserProfile(userId) {
 // Load order history for the user
 function loadOrderHistory(userId, statusFilter = 'all') {
     const ordersRef = ref(db, `AR_shoe_users/transactions/${userId}`);
-    
+
     onValue(ordersRef, (snapshot) => {
         const purchaseHistoryContainer = document.querySelector('.purchase-history');
-        
+
         if (!snapshot.exists()) {
             // No orders found
             purchaseHistoryContainer.innerHTML = `
@@ -83,10 +83,10 @@ function loadOrderHistory(userId, statusFilter = 'all') {
             `;
             return;
         }
-        
+
         // Clear existing content
         purchaseHistoryContainer.innerHTML = '';
-        
+
         // Convert orders to array and sort by date (newest first)
         const orders = [];
         snapshot.forEach((orderSnapshot) => {
@@ -94,14 +94,14 @@ function loadOrderHistory(userId, statusFilter = 'all') {
             order.orderId = orderSnapshot.key;
             orders.push(order);
         });
-        
+
         orders.sort((a, b) => new Date(b.date) - new Date(a.date));
-        
+
         // Filter orders based on status
-        const filteredOrders = statusFilter === 'all' 
-            ? orders 
+        const filteredOrders = statusFilter === 'all'
+            ? orders
             : orders.filter(order => order.status === statusFilter);
-        
+
         if (filteredOrders.length === 0) {
             purchaseHistoryContainer.innerHTML = `
                 <div class="empty-history">
@@ -112,7 +112,7 @@ function loadOrderHistory(userId, statusFilter = 'all') {
             `;
             return;
         }
-        
+
         // Display each order
         filteredOrders.forEach(order => {
             displayOrderCard(order, userId);
@@ -123,24 +123,27 @@ function loadOrderHistory(userId, statusFilter = 'all') {
 // Display a single order card
 function displayOrderCard(order, userId) {
     const purchaseHistoryContainer = document.querySelector('.purchase-history');
-    
+
+    // Skip rendering if status is rejected, delivered, or cancelled
+    if (['rejected', 'delivered', 'cancelled'].includes(status)) return null;
+
     // Format date
     const orderDate = new Date(order.date).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
     });
-    
+
     // Determine status class and text
     let statusClass, statusText;
-    switch (order.status) {
-        case 'accepted':
-            statusClass = 'status-shipped';
-            statusText = 'Processing';
-            break;
+    switch (order.status.toLowerCase()) {
         case 'rejected':
             statusClass = 'status-rejected';
             statusText = 'Rejected by Shop';
+            break;
+        case 'delivered':
+            statusClass = 'status-delivered';
+            statusText = 'Delivered';
             break;
         case 'completed':
             statusClass = 'status-delivered';
@@ -154,10 +157,10 @@ function displayOrderCard(order, userId) {
             statusClass = 'status-processing';
             statusText = 'Processing';
     }
-    
+
     // Get the item(s)
     const items = order.item ? [order.item] : (order.order_items ? Object.values(order.order_items) : []);
-    
+
     console.log('Items:', items);
     // Generate HTML for each item
     const itemsHTML = items.map(item => `
@@ -171,7 +174,7 @@ function displayOrderCard(order, userId) {
             <div class="item-quantity">Qty: ${item.quantity || 1}</div>
         </div>
     `).join('');
-    
+
     // Generate rejection info if order was rejected
     let rejectionHTML = '';
     if (order.status === 'rejected') {
@@ -187,7 +190,7 @@ function displayOrderCard(order, userId) {
             </div>
         `;
     }
-    
+
     // Generate cancellation info if order was cancelled
     if (order.status === 'cancelled') {
         rejectionHTML = `
@@ -202,7 +205,7 @@ function displayOrderCard(order, userId) {
             </div>
         `;
     }
-    
+
     // Determine which buttons to show based on order status
     let actionButtons = '';
     if (order.status === 'delivered') {
@@ -211,20 +214,17 @@ function displayOrderCard(order, userId) {
             <button class="btn btn-reorder">Reorder</button>
             <button class="btn btn-review">Leave Review</button>
         `;
-    } else if (order.status === 'rejected') {
+    } else if (order.status === 'rejected' || order.status === 'cancelled') {
         actionButtons = `
             <button class="btn btn-reorder">Find Similar</button>
         `;
-    } else if (order.status === 'cancelled') {
-        actionButtons = `
-            <button class="btn btn-reorder">Reorder Items</button>
-        `;
     } else {
         actionButtons = `
-            <button class="btn btn-track">Track Order</button>
+            <button class="btn btn-track">Leave Review</button>
+            <button class="btn btn-reorder">Re-order</button>
         `;
     }
-    
+
     // Create the order card HTML
     const orderCardHTML = `
         <div class="order-card" data-order-id="${order.orderId}">
@@ -249,7 +249,7 @@ function displayOrderCard(order, userId) {
             </div>
         </div>
     `;
-    
+
     // Add the order card to the container
     purchaseHistoryContainer.insertAdjacentHTML('beforeend', orderCardHTML);
 }
@@ -257,17 +257,17 @@ function displayOrderCard(order, userId) {
 // Helper function to get shop name
 function getShopName(shopId) {
     if (!shopId) return 'Unknown Shop';
-    
+
     const shopRef = ref(db, `AR_shoe_users/shop/${shopId}`);
     let shopName = 'Loading...';
-    
+
     onValue(shopRef, (snapshot) => {
         if (snapshot.exists()) {
             const shopData = snapshot.val();
             shopName = shopData.shopName || 'Unknown Shop';
         }
     }, { onlyOnce: true });
-    
+
     return shopName;
 }
 
@@ -280,7 +280,7 @@ function setupEventListeners(userId) {
             loadOrderHistory(userId, e.target.value);
         });
     }
-    
+
     // Time filter change
     const timeFilter = document.getElementById('timeFilter');
     if (timeFilter) {
@@ -288,7 +288,7 @@ function setupEventListeners(userId) {
             console.log('Time filter changed to:', e.target.value);
         });
     }
-    
+
     // Search functionality
     const searchInput = document.querySelector('.search-orders');
     if (searchInput) {
@@ -296,7 +296,7 @@ function setupEventListeners(userId) {
             console.log('Searching for:', e.target.value);
         });
     }
-    
+
     // Logout button
     const logoutBtn = document.getElementById('logout_btn');
     if (logoutBtn) {
@@ -308,28 +308,28 @@ function setupEventListeners(userId) {
             });
         });
     }
-    
+
     // Track order button click handler
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (e.target.classList.contains('btn-track')) {
             const orderCard = e.target.closest('.order-card');
             if (orderCard) {
                 const orderId = orderCard.getAttribute('data-order-id');
-                window.location.href = `/customer/html/track.html?orderId=${orderId}&userId=${userId}`;
+                window.location.href = `/customer/html/feedback.html?orderId=${orderId}&userId=${userId}`;
             }
         }
     });
 }
 
 // Function to display order details when order ID is provided
-window.displayOrderDetails = function(orderId, userId) {
+window.displayOrderDetails = function (orderId, userId) {
     const orderRef = ref(db, `AR_shoe_users/transactions/${userId}/${orderId}`);
-    
+
     onValue(orderRef, (snapshot) => {
         if (snapshot.exists()) {
             const order = snapshot.val();
             order.orderId = orderId;
-            
+
             // Clear the container and display just this order
             const purchaseHistoryContainer = document.querySelector('.purchase-history');
             purchaseHistoryContainer.innerHTML = '';
