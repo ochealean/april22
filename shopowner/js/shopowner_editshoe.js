@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-storage.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-storage.js";
 // Firebase config
 const firebaseConfig = {
     apiKey: "AIzaSyAuPALylh11cTArigeGJZmLwrFwoAsNPSI",
@@ -83,38 +83,87 @@ document.getElementById('updateShoeBtn').addEventListener('click', async () => {
     const shoeRefPath = `AR_shoe_users/shoe/${shopLoggedin}/${shoeId}`;
     const shoeRef = ref(db, shoeRefPath);
 
-    const shoeName = shoeNameInput.value.trim();
-    const shoeCode = shoeCodeInput.value.trim();
-    const shoeDesc = shoeDescriptionInput.value.trim();
-
-    const defaultImageFile = document.getElementById('defaultShoeImage')?.files?.[0];
-    let defaultImageUrl = currentImageDiv.querySelector('img')?.src;
-
-    if (defaultImageFile) {
-        const filePath = `shoes/${shopLoggedin}/${Date.now()}_${defaultImageFile.name}`;
-        const imageRef = storageRef(storage, filePath);
-        const snapshot = await uploadBytes(imageRef, defaultImageFile);
-        defaultImageUrl = await getDownloadURL(snapshot.ref);
+    // Get current data first
+    const currentShoeData = (await get(shoeRef)).val();
+    if (!currentShoeData) {
+        alert("Shoe data not found!");
+        return;
     }
 
-    const variants = {};
-    document.querySelectorAll('.variant-group').forEach((group, index) => {
-        const variantId = `variant_${index}`;
-        const variantName = group.querySelector(`#variantName_${index + 1}`)?.value || '';
-        const color = group.querySelector(`#color_${index + 1}`)?.value || '';
-        const price = parseFloat(group.querySelector(`#variantPrice_${index + 1}`)?.value) || 0;
-        const imageFile = group.querySelector(`#variantImage_${index + 1}`)?.files?.[0];
-        const prevImage = group.querySelector('img')?.src;
+    // Main image handling - UPDATED SOLUTION
+    const defaultImageFile = document.getElementById('shoeImage').files[0];
+    let defaultImageUrl = currentShoeData.defaultImage;
 
+    if (defaultImageFile) {
+        try {
+            console.log("Starting main image update process...");
+
+            // 1. Delete old image if exists - USING CORRECT PATH EXTRACTION
+            if (defaultImageUrl) {
+                try {
+                    console.log("Attempting to delete old main image...");
+                    const oldImagePath = getPathFromUrl(defaultImageUrl);
+                    if (oldImagePath) {
+                        const oldImageRef = storageRef(storage, oldImagePath);
+                        await deleteObject(oldImageRef);
+                        console.log("Old main image deleted successfully");
+                    } else {
+                        console.log("Could not extract path from old image URL");
+                    }
+                } catch (deleteError) {
+                    console.log("Old main image not found or already deleted:", deleteError.message);
+                }
+            }
+
+            // 2. Upload new image with consistent naming
+            console.log("Uploading new main image...");
+            const filePath = `shoes/${shopLoggedin}/${shoeId}/main_image`; // Fixed filename
+            const imageRef = storageRef(storage, filePath);
+            const snapshot = await uploadBytes(imageRef, defaultImageFile);
+
+            // 3. Get new URL
+            defaultImageUrl = await getDownloadURL(snapshot.ref);
+            console.log("New image URL:", defaultImageUrl);
+
+            // 4. Update UI immediately
+            if (currentImageDiv) {
+                currentImageDiv.innerHTML = `<img src="${defaultImageUrl}" style="max-width:200px">`;
+            }
+        } catch (error) {
+            console.error("Main image update failed:", error);
+            alert("Failed to update main image. Please try again.");
+            return;
+        }
+    }
+
+    // Process variants
+    const variants = {};
+    const variantGroups = document.querySelectorAll('.variant-group');
+
+    for (let i = 0; i < variantGroups.length; i++) {
+        const group = variantGroups[i];
+        const variantId = `variant_${i}`;
+        const variantName = group.querySelector(`#variantName_${i + 1}`)?.value || '';
+        const color = group.querySelector(`#color_${i + 1}`)?.value || '';
+        const price = parseFloat(group.querySelector(`#variantPrice_${i + 1}`)?.value) || 0;
+        const imageFile = group.querySelector(`#variantImage_${i + 1}`)?.files?.[0];
+        const prevImage = currentShoeData.variants?.[variantId]?.imageUrl;
+
+        // Process sizes
         const sizes = {};
         group.querySelectorAll('.size-stock-item').forEach(item => {
             const size = item.querySelector('.size-input')?.value;
-            const stock = parseInt(item.querySelector('.stock-input')?.value || '0');
+            const addedStock = parseInt(item.querySelector('.stock-input')?.value || '0');
+            const currentStock = parseInt(item.querySelector('.current-stock')?.textContent || '0');
+
             if (size) {
-                sizes[`size_${size}`] = { [size]: { stock } };
+                const newTotalStock = addedStock ? currentStock + addedStock : currentStock;
+                sizes[`size_${size}`] = { [size]: { stock: newTotalStock } };
             }
+
         });
 
+        // Initialize variant data
         variants[variantId] = {
             variantName,
             color,
@@ -123,42 +172,71 @@ document.getElementById('updateShoeBtn').addEventListener('click', async () => {
             imageUrl: prevImage // Default to existing
         };
 
+        // Handle variant image update
         if (imageFile) {
-            variants[variantId]._imageFile = imageFile; // Temporarily store for upload later
-        }
-    });
+            try {
+                // Clean up old variant images
+                if (prevImage) {
+                    try {
+                        const oldImageRef = storageRef(storage, getPathFromUrl(prevImage));
+                        await deleteObject(oldImageRef);
+                    } catch (error) {
+                        console.log(`Old variant image not found: ${error.message}`);
+                    }
+                }
+                // Add these checks before the update operation
+                console.log("Attempting to update main image for shoe:", shoeId);
+                console.log("Shop ID:", shopLoggedin);
+                console.log("Current image URL:", defaultImageUrl);
+                console.log("New image file:", defaultImageFile ? defaultImageFile.name : "none");
 
-    // Upload new variant images if needed
-    for (const [id, variant] of Object.entries(variants)) {
-        if (variant._imageFile) {
-            const filePath = `shoes/${shopLoggedin}/variants/${Date.now()}_${variant._imageFile.name}`;
-            const imageRef = storageRef(storage, filePath);
-            const snapshot = await uploadBytes(imageRef, variant._imageFile);
-            variant.imageUrl = await getDownloadURL(snapshot.ref);
-            delete variant._imageFile;
+                // Upload new variant image
+                const variantImageName = `${variantId}`; // fixed name per variant slot
+                const filePath = `shoes/${shopLoggedin}/${shoeId}/${variantImageName}`;
+                const imageRef = storageRef(storage, filePath);
+                const snapshot = await uploadBytes(imageRef, imageFile);
+                variants[variantId].imageUrl = await getDownloadURL(snapshot.ref);
+            } catch (error) {
+                console.error(`Error updating variant image:`, error);
+                alert(`Failed to update image for variant ${variantName}`);
+                return;
+            }
         }
     }
 
-    // Prepare final data
-    const updatedShoeData = {
-        shoeName,
-        shoeCode,
-        generalDescription: shoeDesc,
-        defaultImage: defaultImageUrl,
-        variants
-    };
-
-    // Save to Firebase
+    // Update database
     try {
-        await set(shoeRef, updatedShoeData);
-        console.log("Set successful");
+        await set(shoeRef, {
+            ...currentShoeData,
+            shoeName: shoeNameInput.value.trim(),
+            shoeCode: shoeCodeInput.value.trim(),
+            generalDescription: shoeDescriptionInput.value.trim(),
+            defaultImage: defaultImageUrl,
+            variants
+        });
         alert("Shoe updated successfully!");
-        window.location.href = '/shopowner/html/shop_inventory.html'; // Redirect after success
+        window.location.href = '/shopowner/html/shop_inventory.html';
     } catch (err) {
         console.error("Error updating shoe:", err);
         alert("Failed to update shoe.");
     }
 });
+
+// Helper function to extract path from URL
+function getPathFromUrl(url) {
+    if (!url) return null;
+    try {
+        const base = "https://firebasestorage.googleapis.com/v0/b/opportunity-9d3bf.firebasestorage.app/o/";
+        if (url.startsWith(base)) {
+            return decodeURIComponent(url.split(base)[1].split("?")[0]);
+        }
+        return null;
+    } catch (error) {
+        console.error("Error parsing URL:", error);
+        return null;
+    }
+}
+
 
 function addColorVariantWithData(variantData = {}, index = variantCount) {
     variantCount++;
@@ -229,8 +307,8 @@ function addSizeInput(variantId, size = '', stock = '') {
     sizeItem.innerHTML = `
         <span>Size:</span>
         <input type="number" class="size-input" step="0.5" min="1" placeholder="Size" value="${size}" required>
-        <span>Stock:</span>
-        <input type="number" class="stock-input" min="0" placeholder="Qty" value="${stock}" required>
+        <p>Stocks: <span class="current-stock">${stock}</span></p>
+        <input type="number" class="stock-input" min="0" placeholder="Add Stock (Qty)">
         <button type="button" class="btn-remove-small" onclick="removeSizeInput(this)">
             <i class="fas fa-times"></i>
         </button>

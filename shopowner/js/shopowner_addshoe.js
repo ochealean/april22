@@ -163,10 +163,10 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
             dateAdded: new Date().toISOString()
         });
 
-        alert("Shoe added successfully!");
         document.getElementById('addShoeForm').reset();
         document.getElementById('colorVariants').innerHTML = '';
         addColorVariant();
+        alert("Shoe added successfully!");
     } catch (error) {
         console.error("Error adding shoe: ", error);
         alert("Error adding shoe: " + error.message);

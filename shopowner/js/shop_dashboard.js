@@ -41,9 +41,9 @@ async function viewOrderDetails(orderId) {
             const userOrders = userSnapshot.val();
             if (userOrders[orderId]) {
                 const order = userOrders[orderId];
-                const items = order.order_items ? Object.values(order.order_items) : 
-                             order.item ? [order.item] : [];
-                
+                const items = order.order_items ? Object.values(order.order_items) :
+                    order.item ? [order.item] : [];
+
                 if (items.some(item => item.shopId === shopLoggedin)) {
                     currentUserId = userSnapshot.key; // Set the currentUserId here
                     foundOrder = {
@@ -69,7 +69,7 @@ async function viewOrderDetails(orderId) {
 
 function loadRecentOrders() {
     const ordersRef = ref(db, 'AR_shoe_users/transactions');
-    
+
     // Use onValue for real-time updates
     onValue(ordersRef, (snapshot) => {
         if (!snapshot.exists()) {
@@ -82,9 +82,9 @@ function loadRecentOrders() {
             const userOrders = userSnapshot.val();
             for (const orderId in userOrders) {
                 const order = userOrders[orderId];
-                const items = order.order_items ? Object.values(order.order_items) : 
-                             order.item ? [order.item] : [];
-                
+                const items = order.order_items ? Object.values(order.order_items) :
+                    order.item ? [order.item] : [];
+
                 if (items.some(item => item.shopId === shopLoggedin)) {
                     orders.push({
                         ...order,
@@ -95,7 +95,7 @@ function loadRecentOrders() {
             }
         });
 
-        const recentOrders = orders.sort((a, b) => 
+        const recentOrders = orders.sort((a, b) =>
             new Date(b.date) - new Date(a.date)
         ).slice(0, 5);
 
@@ -110,8 +110,8 @@ function displayRecentOrders(orders) {
     const ordersTable = document.querySelector('.order-table tbody');
     if (!ordersTable) return;
 
-    ordersTable.innerHTML = orders.length === 0 ? 
-        '<tr><td colspan="6" style="text-align: center;">No orders found</td></tr>' : 
+    ordersTable.innerHTML = orders.length === 0 ?
+        '<tr><td colspan="6" style="text-align: center;">No orders found</td></tr>' :
         orders.map(order => {
             const customerName = order.shippingInfo ?
                 `${order.shippingInfo.firstName} ${order.shippingInfo.lastName}` :
@@ -123,13 +123,13 @@ function displayRecentOrders(orders) {
                 day: 'numeric'
             });
 
-            const amount = order.totalAmount ? 
+            const amount = order.totalAmount ?
                 `$${order.totalAmount.toFixed(2)}` : '$0.00';
 
             const status = order.status || 'pending';
             const statusClass = status === 'completed' ? 'shipped' :
                 status === 'processing' ? 'pending' :
-                status === 'cancelled' ? 'cancelled' : 'pending';
+                    status === 'cancelled' ? 'cancelled' : 'pending';
 
             return `
                 <tr>
@@ -160,9 +160,9 @@ async function getAllOrdersByShopId(shopId) {
             const userOrders = userSnapshot.val();
             for (const orderId in userOrders) {
                 const order = userOrders[orderId];
-                const items = order.order_items ? Object.values(order.order_items) : 
-                             order.item ? [order.item] : [];
-                
+                const items = order.order_items ? Object.values(order.order_items) :
+                    order.item ? [order.item] : [];
+
                 if (items.some(item => item.shopId === shopId)) {
                     orders.push({
                         ...order,
@@ -197,16 +197,16 @@ function loadShopStats() {
             snapshot.forEach((childSnapshot) => {
                 totalProducts++;
                 const shoe = childSnapshot.val();
-                
+
                 if (shoe.variants) {
-                    const variants = Array.isArray(shoe.variants) ? 
+                    const variants = Array.isArray(shoe.variants) ?
                         shoe.variants : Object.values(shoe.variants || {});
-                    
+
                     variants.forEach(variant => {
                         if (variant.sizes) {
-                            const sizes = Array.isArray(variant.sizes) ? 
+                            const sizes = Array.isArray(variant.sizes) ?
                                 variant.sizes : Object.values(variant.sizes || {});
-                            
+
                             sizes.forEach(size => {
                                 totalStock += parseInt(size.stock) || 0;
                             });
@@ -217,7 +217,7 @@ function loadShopStats() {
 
             const productsElement = document.querySelector('.stats-grid .stat-card:nth-child(3) .value');
             const stockElement = document.querySelector('.stats-grid .stat-card:nth-child(4) .value');
-            
+
             if (productsElement) productsElement.textContent = totalProducts;
             if (stockElement) stockElement.textContent = totalStock;
         }
@@ -237,9 +237,10 @@ function loadRecentProducts() {
                 shoes.push(shoe);
             });
 
-            const recentShoes = shoes.sort((a, b) => 
-                new Date(b.dateAdded || 0) - new Date(a.dateAdded || 0)
-                .slice(0, 4));
+            const recentShoes = shoes
+                .sort((a, b) => new Date(b.dateAdded || 0) - new Date(a.dateAdded || 0))
+                .slice(0, 4);
+
 
             displayRecentProducts(recentShoes, recentAddedContainer);
         } else if (recentAddedContainer) {
@@ -257,12 +258,12 @@ function displayRecentProducts(shoes, container) {
     }
 
     let html = '<div class="product-list">';
-    
+
     shoes.forEach(shoe => {
         // Get variants - handle both array and object formats
-        const variants = shoe.variants 
-            ? (Array.isArray(shoe.variants) 
-                ? shoe.variants 
+        const variants = shoe.variants
+            ? (Array.isArray(shoe.variants)
+                ? shoe.variants
                 : Object.values(shoe.variants || {}))
             : [];
 
@@ -274,10 +275,10 @@ function displayRecentProducts(shoes, container) {
         html += `
         <div class="product-card">
             <div class="product-image">
-                ${imageUrl 
-                    ? `<img src="${imageUrl}" alt="${shoe.shoeName}" class="shoe-thumbnail">`
-                    : '<div class="no-image">No Image</div>'
-                }
+                ${imageUrl
+                ? `<img src="${imageUrl}" alt="${shoe.shoeName}" class="shoe-thumbnail">`
+                : '<div class="no-image">No Image</div>'
+            }
             </div>
             <div class="product-info">
                 <div class="product-title">${shoe.shoeName || 'No Name'}</div>
@@ -426,11 +427,11 @@ onAuthStateChanged(auth, async (user) => {
             if (snapshot.exists()) {
                 const userData = snapshot.val();
                 shopLoggedin = userData.shopId;
-                
+
                 if (userData.role === "employee" || userData.role === "manager") {
                     document.getElementById("addemployeebtn").style.display = "none";
                 }
-                
+
                 await loadShopDashboard();
             } else {
                 shopLoggedin = user.uid;
