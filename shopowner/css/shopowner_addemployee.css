@@ -129,6 +129,28 @@ body {
   box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
+.phone-input-container {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.country-code {
+  padding: 0 10px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid #ccc;
+}
+
+.phone-input-container input {
+  border: none;
+  flex: 1;
+  padding: 10px;
+}
+
 /* Password Fields */
 .password-toggle {
   position: absolute;

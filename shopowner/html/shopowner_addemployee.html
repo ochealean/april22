@@ -66,7 +66,11 @@
 
                 <div class="form-group">
                     <label for="employeePhone">Phone Number</label>
-                    <input type="tel" id="employeePhone" placeholder="e.g., (123) 456-7890">
+                    <div class="phone-input-container">
+                        <span class="country-code">+63</span>
+                        <input type="tel" id="employeePhone" placeholder="e.g., 9123456789" maxlength="10">
+                    </div>
+                    <small>Enter your 10-digit Philippine mobile number (without +63)</small>
                 </div>
 
                 <div class="form-group">
@@ -171,10 +175,27 @@
                 document.querySelectorAll(".shopowner").forEach(el => el.style.display = "none");
             }
 
-            // Phone number formatting
-            document.getElementById('employeePhone').addEventListener('input', function (e) {
-                const x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
-                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+            // Philippine phone number formatting
+            document.getElementById('employeePhone').addEventListener('input', function(e) {
+                // Remove all non-digit characters
+                let phoneNumber = e.target.value.replace(/\D/g, '');
+                
+                // Limit to 10 digits (Philippine mobile numbers are 10 digits without country code)
+                if (phoneNumber.length > 10) {
+                    phoneNumber = phoneNumber.substring(0, 10);
+                }
+                
+                // Update the input value with just the digits
+                e.target.value = phoneNumber;
+            });
+
+            // You can also add this to format it properly when submitting
+            document.getElementById('addEmployeeForm').addEventListener('submit', function(e) {
+                const phoneInput = document.getElementById('employeePhone');
+                if (phoneInput.value) {
+                    // Format as +639XXXXXXXXX before submitting
+                    phoneInput.value = '+63' + phoneInput.value;
+                }
             });
         });
     </script>
