@@ -443,7 +443,6 @@ body {
 
 /* Orders Page Styles */
 .container {
-    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -475,7 +474,7 @@ body {
 }
 
 .order-table th {
-    background-color: #f5f5f5;
+    background-color: var(--secondary);
     font-weight: bold;
 }
 

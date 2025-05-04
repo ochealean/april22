@@ -134,6 +134,7 @@
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
         }
         
         .card-header {
@@ -141,14 +142,14 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--gray);
             padding-bottom: 10px;
         }
         
         .card-title {
             font-size: 1.2rem;
             font-weight: 600;
-            color: var(--primary-color);
+            color: var(--primary);
         }
         
         .filter-controls {
@@ -158,21 +159,22 @@
         
         .filter-btn {
             padding: 5px 15px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--gray);
             border-radius: 20px;
             background-color: white;
             cursor: pointer;
             transition: all 0.3s;
+            font-size: 0.8rem;
         }
         
         .filter-btn:hover {
-            background-color: var(--light-gray);
+            background-color: var(--gray-light);
         }
         
         .filter-btn.active {
-            background-color: var(--primary-color);
+            background-color: var(--primary);
             color: white;
-            border-color: var(--primary-color);
+            border-color: var(--primary);
         }
         
         .chart-container {
@@ -186,16 +188,17 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            font-size: 0.9rem;
         }
         
         .data-table th, .data-table td {
             padding: 12px 15px;
             text-align: left;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--gray);
         }
         
         .data-table th {
-            background-color: var(--light-gray);
+            background-color: var(--gray-light);
             font-weight: 600;
         }
         
@@ -211,9 +214,14 @@
             font-weight: 500;
         }
         
+        .badge-primary {
+            background-color: rgba(0, 123, 255, 0.1);
+            color: #007bff;
+        }
+        
         .badge-success {
             background-color: rgba(40, 167, 69, 0.1);
-            color: var(--success-color);
+            color: var(--success);
         }
         
         .badge-warning {
@@ -223,7 +231,7 @@
         
         .badge-danger {
             background-color: rgba(220, 53, 69, 0.1);
-            color: var(--danger-color);
+            color: var(--error);
         }
         
         /* Responsive */
@@ -331,28 +339,30 @@
                 </table>
             </div>
             
-            <!-- Top Selling Products -->
+            <!-- Recent Sales -->
             <div class="analytics-card">
                 <div class="card-header">
-                    <h2 class="card-title">Top Selling Products</h2>
+                    <h2 class="card-title">Recent Sales</h2>
                     <div class="filter-controls">
-                        <button class="filter-btn active" data-top-filter="day">Today</button>
-                        <button class="filter-btn" data-top-filter="week">Week</button>
-                        <button class="filter-btn" data-top-filter="month">Month</button>
+                        <button class="filter-btn active" data-recent-filter="day">Today</button>
+                        <button class="filter-btn" data-recent-filter="week">Week</button>
+                        <button class="filter-btn" data-recent-filter="month">Month</button>
                     </div>
                 </div>
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>Shoe</th>
-                            <th>Color Variant</th>
-                            <th>Units Sold</th>
-                            <th>Revenue</th>
-                            <th>% of Total</th>
+                            <th>Date/Time</th>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            <th>Size</th>
+                            <th>Qty</th>
+                            <th>Amount</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody id="topSellingProducts">
+                    <tbody id="recentSales">
                         <!-- Data will be loaded dynamically -->
                     </tbody>
                 </table>
@@ -458,7 +468,6 @@
                     // Filter inventory table
                     const filter = this.dataset.filter;
                     if (filter) {
-                        // You would filter your inventory data here
                         console.log(`Filter inventory by: ${filter}`);
                     }
                 });
@@ -492,27 +501,92 @@
                 inventoryChangesTable.appendChild(row);
             });
             
-            // Load top selling products
-            const topProducts = [
-                { rank: 1, shoe: 'Running Pro 2023', variant: 'Black/Red', sold: 45, revenue: 4500, percent: 32 },
-                { rank: 2, shoe: 'Basketball Elite', variant: 'White/Blue', sold: 32, revenue: 3840, percent: 23 },
-                { rank: 3, shoe: 'Casual Walkers', variant: 'Gray', sold: 28, revenue: 2240, percent: 16 },
-                { rank: 4, shoe: 'Training Flex', variant: 'Black', sold: 18, revenue: 1620, percent: 12 },
-                { rank: 5, shoe: 'Summer Sandals', variant: 'Brown', sold: 12, revenue: 840, percent: 6 }
+            // Load recent sales data
+            const recentSales = [
+                { 
+                    date: '2023-06-15 14:30', 
+                    orderId: 'ORD-2023-1564', 
+                    customer: 'Juan Dela Cruz', 
+                    product: 'Running Pro 2023 (Black/Red)', 
+                    size: 'US 9', 
+                    quantity: 1, 
+                    amount: 4500, 
+                    status: 'completed' 
+                },
+                { 
+                    date: '2023-06-15 13:15', 
+                    orderId: 'ORD-2023-1563', 
+                    customer: 'Maria Santos', 
+                    product: 'Casual Walkers (Gray)', 
+                    size: 'US 7', 
+                    quantity: 2, 
+                    amount: 3200, 
+                    status: 'completed' 
+                },
+                { 
+                    date: '2023-06-15 11:45', 
+                    orderId: 'ORD-2023-1562', 
+                    customer: 'Pedro Bautista', 
+                    product: 'Basketball Elite (White/Blue)', 
+                    size: 'US 10', 
+                    quantity: 1, 
+                    amount: 3840, 
+                    status: 'shipped' 
+                },
+                { 
+                    date: '2023-06-15 10:20', 
+                    orderId: 'ORD-2023-1561', 
+                    customer: 'Ana Reyes', 
+                    product: 'Training Flex (Black)', 
+                    size: 'US 8', 
+                    quantity: 1, 
+                    amount: 1620, 
+                    status: 'processing' 
+                },
+                { 
+                    date: '2023-06-14 16:50', 
+                    orderId: 'ORD-2023-1560', 
+                    customer: 'Luis Gonzales', 
+                    product: 'Summer Sandals (Brown)', 
+                    size: 'US 9', 
+                    quantity: 1, 
+                    amount: 840, 
+                    status: 'completed' 
+                }
             ];
             
-            const topProductsTable = document.getElementById('topSellingProducts');
-            topProducts.forEach(item => {
+            const recentSalesTable = document.getElementById('recentSales');
+            recentSales.forEach(item => {
                 const row = document.createElement('tr');
+                
+                let statusClass = 'badge-success';
+                if (item.status === 'processing') statusClass = 'badge-warning';
+                if (item.status === 'shipped') statusClass = 'badge-primary';
+                
                 row.innerHTML = `
-                    <td>${item.rank}</td>
-                    <td>${item.shoe}</td>
-                    <td>${item.variant}</td>
-                    <td>${item.sold}</td>
-                    <td>$${item.revenue.toLocaleString()}</td>
-                    <td>${item.percent}%</td>
+                    <td>${item.date}</td>
+                    <td>${item.orderId}</td>
+                    <td>${item.customer}</td>
+                    <td>${item.product}</td>
+                    <td>${item.size}</td>
+                    <td>${item.quantity}</td>
+                    <td>₱${item.amount.toLocaleString()}</td>
+                    <td><span class="badge ${statusClass}">${item.status}</span></td>
                 `;
-                topProductsTable.appendChild(row);
+                recentSalesTable.appendChild(row);
+            });
+            
+            // Recent sales filter buttons functionality
+            document.querySelectorAll('[data-recent-filter]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const parent = this.parentElement;
+                    parent.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const filter = this.dataset.recentFilter;
+                    console.log(`Filter recent sales by: ${filter}`);
+                    // In a real app, you would fetch filtered data from your backend here
+                });
             });
         });
     </script>
