@@ -480,6 +480,41 @@ body {
     text-decoration: underline;
 }
 
+/* Password Input Container */
+.password-input-container {
+    position: relative;
+    width: 95%;
+}
+
+.password-input-container input {
+    width: 100%;
+    padding-right: 40px; /* Space for the button */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 5px;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.toggle-password:hover {
+    color: var(--primary);
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.toggle-password:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(110, 142, 251, 0.3);
+}
+
 /* Password Strength */
 .password-strength {
     margin-top: 0.75rem;
