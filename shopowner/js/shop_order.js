@@ -89,6 +89,7 @@ function displayOrders(orders) {
 
 // Create order row HTML
 function createOrderRow(order) {
+    console.log(order.item.quantity);
     const customerName = order.shippingInfo ?
         `${order.shippingInfo.firstName} ${order.shippingInfo.lastName}` :
         'Unknown Customer';
@@ -171,7 +172,7 @@ window.trackbtn = function(orderID, userId) {window.location.href = `trackform.h
 
 
 // Reject order function
-window.rejectOrder = async function() {
+window.rejectOrder = async function () {
     const reason = document.getElementById('rejectionReason').value.trim();
     if (!reason) {
         alert('Please provide a reason for rejection');
@@ -180,6 +181,40 @@ window.rejectOrder = async function() {
 
     try {
         const orderRef = ref(db, `AR_shoe_users/transactions/${currentUserId}/${currentOrderId}`);
+        const orderSnap = await get(orderRef);
+
+        if (!orderSnap.exists()) {
+            alert("Order not found");
+            return;
+        }
+
+        const orderData = orderSnap.val();
+        const items = orderData.order_items ? Object.values(orderData.order_items) : 
+                      orderData.item ? [orderData.item] : [];
+
+        // Loop through each item and add quantity back to stock
+        for (const item of items) {
+            // Construct the correct path to the stock in your database structure
+            const stockPath = `AR_shoe_users/shoe/${item.shopId}/${item.shoeId}/variants/${item.variantKey}/sizes/${item.sizeKey}/${item.size}/stock`;
+            const stockRef = ref(db, stockPath);
+            
+            const stockSnap = await get(stockRef);
+            
+            if (stockSnap.exists()) {
+                const currentStock = stockSnap.val();
+                if (typeof currentStock === 'number') {
+                    const updatedStock = currentStock + (item.quantity || 1);
+                    await set(stockRef, updatedStock);
+                    console.log(`Updated stock for ${item.shoeId} size ${item.size}: ${currentStock} -> ${updatedStock}`);
+                } else {
+                    console.error(`Invalid stock value for ${item.shoeId}:`, currentStock);
+                }
+            } else {
+                console.error(`Stock path not found: ${stockPath}`);
+            }
+        }
+
+        // Update order status to rejected
         await update(orderRef, {
             status: 'rejected',
             rejectionReason: reason,
@@ -188,12 +223,13 @@ window.rejectOrder = async function() {
 
         document.getElementById('rejectionReason').value = '';
         document.getElementById('rejectModal').style.display = 'none';
-        alert('Order rejected successfully');
+        alert('Order rejected and stock updated successfully');
     } catch (error) {
         console.error("Error rejecting order:", error);
         alert("Failed to reject order");
     }
 };
+
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
