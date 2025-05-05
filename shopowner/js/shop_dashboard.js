@@ -268,7 +268,7 @@ function displayRecentProducts(shoes, container) {
             : [];
 
         const firstVariant = variants[0] || null;
-        const price = firstVariant ? `$${firstVariant.price}` : '$0.00';
+        const price = firstVariant ? `₱${firstVariant.price}` : '₱0.00';
         const color = firstVariant ? firstVariant.color : 'No color';
         const imageUrl = shoe.defaultImage || (firstVariant ? firstVariant.imageUrl : null);
 

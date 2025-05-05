@@ -101,7 +101,7 @@ function createOrderRow(order) {
     });
 
     const amount = order.totalAmount ? 
-        `$${order.totalAmount.toFixed(2)}` : '$0.00';
+        `₱${order.totalAmount.toFixed(2)}` : '₱0.00';
 
     const status = order.status || 'pending';
     const statusClass = status === 'completed' ? 'shipped' :

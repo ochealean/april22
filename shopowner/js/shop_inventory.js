@@ -76,7 +76,7 @@ function createInventoryRow(shoeId, shoe) {
         const variantKeys = Object.keys(shoe.variants);
         if (variantKeys.length > 0) {
             const firstVariant = shoe.variants[variantKeys[0]];
-            firstPrice = firstVariant.price ? `$${firstVariant.price}` : 'N/A';
+            firstPrice = firstVariant.price ? `₱${firstVariant.price}` : 'N/A';
 
             // Calculate total stock
             Object.values(shoe.variants).forEach(variant => {
