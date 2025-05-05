@@ -30,6 +30,7 @@ const colorOptions = document.getElementById("colorOptions");
 const sizeOptions = document.getElementById("sizeOptions");
 const wishlistBtn = document.getElementById("wishlistBtn");
 const mainProductImage = document.getElementById("mainProductImage");
+const reviewsList = document.getElementById("reviewsContainer"); 
 
 // URL Params
 const urlParams = new URLSearchParams(window.location.search);
@@ -48,6 +49,7 @@ function loadProductDetails() {
             productData = snapshot.val();
             updateProductInfo();
             loadVariants();
+            loadCustomerReviews();  // Load reviews after product details are fetched
         } else {
             console.log("Product not found.");
         }
@@ -103,29 +105,107 @@ function updatePriceAndSizes(variantKey) {
     console.log("variant.sizes:", variant.sizes);
 
     for (const sizeKey in variant.sizes) {
-        const stockInfo = variant.sizes[sizeKey];
+        const stock = typeof variant.sizes[sizeKey] === 'object' ? variant.sizes[sizeKey].stock : variant.sizes[sizeKey];
         const btn = document.createElement("button");
-        btn.textContent = `${sizeKey} (${stockInfo.stock} left)`; // ❌ stockInfo.stock is undefined
+        btn.textContent = `${sizeKey} (${stock} left)`;
         sizeOptions.appendChild(btn);
-      }
-      
+    }
     
 }
 
-// Quantity adjustment
-function adjustQuantity(amount) {
-    const quantityInput = document.getElementById("quantity");
-    let quantity = parseInt(quantityInput.value);
-    quantity = isNaN(quantity) ? 1 : quantity + amount;
-    if (quantity < 1) quantity = 1;
-    quantityInput.value = quantity;
+// Load customer reviews from Firebase
+function loadCustomerReviews() {
+    const feedbackRef = ref(db, `AR_shoe_users/feedbacks`);
+
+    get(feedbackRef).then(snapshot => {
+        if (snapshot.exists()) {
+            const feedbacks = snapshot.val();
+            displayReviews(feedbacks);
+        } else {
+            reviewsList.innerHTML = "<p>No reviews yet.</p>";
+        }
+    }).catch(error => {
+        console.error("Error loading reviews:", error);
+        reviewsList.innerHTML = "<p>Failed to load reviews. Please try again later.</p>";
+    });
 }
 
-function validateQuantity() {
-    const quantityInput = document.getElementById("quantity");
-    let quantity = parseInt(quantityInput.value);
-    if (quantity < 1 || isNaN(quantity)) {
-        quantityInput.value = 1;
+function getCustomernameUsingID(userID) {
+    const userRef = ref(db, `AR_shoe_users/customer/${userID}`);
+    return get(userRef).then(snapshot => {
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            return `${userData.firstName} ${userData.lastName}` || "Anonymous User";  // Return display name or default to "Anonymous User"
+        } else {
+            return "Anonymous User";  // Default if user not found
+        }
+    }).catch(error => {
+        console.error("Error fetching user data:", error);
+        return "Anonymous User";  // Default if error occurs
+    });
+}
+
+// Display reviews on the page
+async function displayReviews(feedbacks) {
+    if (reviewsList) reviewsList.innerHTML = '';
+    
+    // First collect all reviews we need to display
+    const reviewsToDisplay = [];
+    
+    for (const userId in feedbacks) {
+        for (const orderID in feedbacks[userId]) {
+            const feedback = feedbacks[userId][orderID];
+            if (feedback.shoeID === shoeID) {
+                reviewsToDisplay.push({
+                    userId,
+                    feedback
+                });
+            }
+        }
+    }
+
+    // If no reviews, show message
+    if (reviewsToDisplay.length === 0) {
+        reviewsList.innerHTML = "<p>No reviews yet.</p>";
+        return;
+    }
+
+    // Process each review asynchronously
+    for (const review of reviewsToDisplay) {
+        try {
+            // Await the username lookup
+            const username = await getCustomernameUsingID(review.userId);
+            // Create review element
+            const reviewDiv = document.createElement("div");
+            reviewDiv.classList.add("review");
+
+            // Create rating stars
+            const starDiv = document.createElement("div");
+            for (let i = 1; i <= 5; i++) {
+                const star = document.createElement("span");
+                star.classList.add("star");
+                star.textContent = i <= review.feedback.rating ? "★" : "☆";
+                starDiv.appendChild(star);
+            }
+
+            // Review content
+            const commentDiv = document.createElement("p");
+            commentDiv.textContent = review.feedback.comment || "No comment provided.";
+            
+            const reviewerDiv = document.createElement("p");
+            reviewerDiv.textContent = `Reviewed by: ${username}`;
+
+            // Append elements
+            reviewDiv.appendChild(starDiv);
+            reviewDiv.appendChild(commentDiv);
+            reviewDiv.appendChild(reviewerDiv);
+
+            reviewsList.appendChild(reviewDiv);
+            
+        } catch (error) {
+            console.error("Error processing review:", error);
+            // Optionally show an error message for this review
+        }
     }
 }
 
