@@ -42,6 +42,7 @@ async function loadCart(userId) {
         }
 
         const cartData = snapshot.val();
+        console.log("Cart data:", cartData);
         cartItems = await Promise.all(Object.entries(cartData).map(async ([cartId, item]) => {
             try {
                 const shoeRef = ref(db, `AR_shoe_users/shoe/${item.shopId}/${item.shoeId}`);
