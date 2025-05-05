@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,9 +22,9 @@
             --gray-dark: #7f8c8d;
             --text-primary: #2c3e50;
             --text-secondary: #34495e;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             --radius-sm: 4px;
             --radius-md: 8px;
@@ -78,7 +79,8 @@
             text-decoration: none;
         }
 
-        .nav-item:hover, .nav-item.active {
+        .nav-item:hover,
+        .nav-item.active {
             background-color: var(--primary-dark);
             color: var(--light);
         }
@@ -358,7 +360,8 @@
             color: var(--dark);
         }
 
-        .wishlist-btn:hover, .wishlist-btn.active {
+        .wishlist-btn:hover,
+        .wishlist-btn.active {
             background-color: #f8d7da;
             color: #dc3545;
         }
@@ -455,7 +458,7 @@
             .product-details-container {
                 grid-template-columns: 1fr;
             }
-            
+
             .product-main-image {
                 max-height: 400px;
             }
@@ -465,32 +468,32 @@
             .dashboard {
                 grid-template-columns: 80px 1fr;
             }
-            
+
             .sidebar {
                 padding: 1rem 0.5rem;
             }
-            
+
             .logo {
                 font-size: 1rem;
                 margin-bottom: 1rem;
             }
-            
+
             .nav-item {
                 padding: 0.5rem;
                 text-align: center;
                 font-size: 0.8rem;
             }
-            
+
             .nav-item i {
                 display: block;
                 margin: 0 auto 0.3rem;
                 font-size: 1rem;
             }
-            
+
             .nav-item span {
                 display: none;
             }
-            
+
             .main-content {
                 padding: 1.5rem;
             }
@@ -500,20 +503,20 @@
             .dashboard {
                 grid-template-columns: 1fr;
             }
-            
+
             .sidebar {
                 height: auto;
                 position: relative;
                 padding: 1rem;
             }
-            
+
             .nav-items {
                 display: flex;
                 flex-wrap: wrap;
                 justify-content: center;
                 gap: 0.5rem;
             }
-            
+
             .nav-item {
                 margin: 0;
                 padding: 0.5rem;
@@ -523,33 +526,33 @@
                 align-items: center;
                 min-width: 60px;
             }
-            
+
             .nav-item i {
                 margin-bottom: 0.3rem;
             }
-            
+
             .action-buttons {
                 flex-direction: column;
             }
-            
+
             .product-details-container {
                 padding: 1.5rem;
             }
-            
+
             .product-name {
                 font-size: 1.5rem;
             }
-            
+
             .reviews-header {
                 flex-direction: column;
                 align-items: flex-start;
             }
-            
+
             .review-filters {
                 width: 100%;
                 justify-content: space-between;
             }
-            
+
             .stars-filter {
                 flex: 1;
                 justify-content: center;
@@ -560,52 +563,53 @@
             .main-content {
                 padding: 1rem;
             }
-            
+
             .product-details-container {
                 padding: 1rem;
             }
-            
+
             .product-name {
                 font-size: 1.3rem;
             }
-            
+
             .product-price {
                 font-size: 1.3rem;
             }
-            
+
             .variant-title {
                 font-size: 1rem;
             }
-            
-            .color-options, .size-options {
+
+            .color-options,
+            .size-options {
                 gap: 0.5rem;
             }
-            
+
             .color-option {
                 padding: 0.5rem;
                 font-size: 0.9rem;
             }
-            
+
             .size-option {
                 min-width: 40px;
                 padding: 0.3rem;
                 font-size: 0.9rem;
             }
-            
+
             .btn {
                 padding: 0.8rem 1rem;
                 font-size: 0.9rem;
             }
-            
+
             .reviews-title {
                 font-size: 1.3rem;
             }
-            
+
             .stars-filter {
                 padding: 0.5rem;
                 font-size: 0.8rem;
             }
-            
+
             .stars-filter .text {
                 display: none;
             }
@@ -617,35 +621,36 @@
                 padding: 0.3rem;
                 font-size: 0.7rem;
             }
-            
+
             .nav-item i {
                 font-size: 0.9rem;
             }
-            
+
             .product-main-image {
                 height: auto;
             }
-            
+
             .quantity-btn {
                 width: 30px;
                 height: 30px;
             }
-            
+
             #quantity {
                 width: 40px;
                 height: 30px;
             }
-            
+
             .btn {
                 padding: 0.7rem 0.8rem;
             }
-            
+
             .wishlist-btn {
                 width: 40px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="dashboard">
         <!-- Sidebar Navigation -->
@@ -687,71 +692,64 @@
             <a href="/customer/html/browse.html" class="back-btn">
                 <i class="fas fa-arrow-left"></i> Back to Browse
             </a>
-            
+
             <div class="product-details-container">
                 <!-- LEFT COLUMN -->
                 <div class="product-left">
                     <div class="product-main-image">
-                        <img src="/images/shoe1.png" alt="Nike Air Max 270 React" id="mainProductImage">
+                        <img src="" alt="Product Image" id="mainProductImage">
                     </div>
                     <div class="product-variants">
                         <h3>Available Variants</h3>
-                        <div class="variant-options" id="variantOptions">
-                            <!-- Variants will be populated by JavaScript -->
-                        </div>
-                         <!-- Color Selection -->
-                         <div class="variant-section">
+                        <div class="variant-options" id="variantOptions"></div>
+                        <div class="variant-section">
                             <div class="variant-title">Select Color</div>
-                            <div class="color-options" id="colorOptions">
-                                <!-- Color options will be populated by JavaScript -->
-                            </div>
+                            <div class="color-options" id="colorOptions"></div>
                         </div>
-                        
-                        <!-- Size Selection -->
                         <div class="variant-section">
                             <div class="variant-title">Select Size</div>
-                            <div class="size-options" id="sizeOptions">
-                                <!-- Size options will be populated by JavaScript -->
-                            </div>
+                            <div class="size-options" id="sizeOptions"></div>
                         </div>
                     </div>
                 </div>
                 <!-- RIGHT COLUMN -->
                 <div class="product-info">
-                    <h1 class="product-name" id="productName">Nike Air Max 270 React</h1>
-                    <div class="product-shop" id="productShop">Shop Name: Elite Footwear</div>
-                    <div class="product-code" id="productCode">Product Code: NIKE-AM270-001</div>
-                    <div class="product-price" id="productPrice">₱150.00</div>
-                    
+                    <h1 class="product-name" id="productName"></h1>
+                    <div class="product-shop" id="productShop"></div>
+                    <div class="product-code" id="productCode"></div>
+                    <div class="product-price" id="productPrice"></div>
+
                     <div class="quantity-selector" id="quantitySelector">
                         <label for="quantity">Quantity:</label>
                         <div class="quantity-controls">
                             <button type="button" class="quantity-btn minus" onclick="adjustQuantity(-1)">-</button>
-                            <input type="number" id="quantity" name="quantity" min="1" value="1" onchange="validateQuantity()">
+                            <input type="number" id="quantity" name="quantity" min="1" value="1"
+                                onchange="validateQuantity()">
                             <button type="button" class="quantity-btn plus" onclick="adjustQuantity(1)">+</button>
                         </div>
-                        <div class="available-stock" id="availableStock">Available: 25</div>
+                        <div class="available-stock" id="availableStock"></div>
                     </div>
-                    
+
                     <div class="product-description">
                         <h4>Description</h4>
-                        <p id="productDescription">The Nike Air Max 270 React combines the oversized Air Max 270 cushioning with React foam for an incredibly comfortable and responsive feel. The breathable mesh upper provides lightweight support, while the bold colors and design make a statement wherever you go.</p>
+                        <p id="productDescription"></p>
                     </div>
-                    
+
                     <div class="action-buttons">
-                        <button class="btn btn-primary" onclick="addToCart()">
-                            <i class="fas fa-shopping-cart"></i>  Add to Cart
+                        <button class="btn btn-primary" id="addToCartBtn">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
                         </button>
-                        <button class="btn btn-secondary" onclick="buyNow()">
-                            <i class="fas fa-bolt"></i>  Buy Now
+                        <button class="btn btn-secondary" id="buyNowBtn">
+                            <i class="fas fa-bolt"></i> Buy Now
                         </button>
                         <button class="btn wishlist-btn" id="wishlistBtn" onclick="toggleWishlist()">
                             <i class="far fa-heart"></i>
                         </button>
                     </div>
                 </div>
+
             </div>
-            
+
             <!-- Reviews Section -->
             <div class="reviews-section">
                 <div class="reviews-header">
@@ -792,7 +790,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div id="reviewsContainer">
                     <div class="review-item" data-rating="5">
                         <div class="review-header">
@@ -806,9 +804,10 @@
                             <i class="fas fa-star"></i>
                             <i class="fas fa-star"></i>
                         </div>
-                        <p>These are the most comfortable shoes I've ever worn! The cushioning is amazing and they look great too.</p>
+                        <p>These are the most comfortable shoes I've ever worn! The cushioning is amazing and they look
+                            great too.</p>
                     </div>
-                    
+
                     <div class="review-item" data-rating="4">
                         <div class="review-header">
                             <span class="review-author">Sarah M.</span>
@@ -1223,4 +1222,5 @@
     </script> -->
     <script src="/customer/js/shoedetails.js" type="module"></script>
 </body>
+
 </html>
