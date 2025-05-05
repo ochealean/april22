@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Fill shoe details
     document.getElementById('shoeImage').src = orderData.item.imageUrl;
     document.getElementById('shoeName').textContent = orderData.item.name;
-    document.getElementById('shoeId').textContent = `Product ID: ${orderData.item.shoeID}`;
+    document.getElementById('shoeId').textContent = `Product ID: ${orderData.item.shoeId}`;
     document.getElementById('shopName').textContent = `From: ${orderData.item.shopName}`;
 
     // Get the authenticated user
@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const feedbackData = {
             orderID: userID,
-            shoeID: orderID,
+            shoeID: orderData.item.shoeId,
             rating,
             comment,
             timestamp: Date.now()
