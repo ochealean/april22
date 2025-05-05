@@ -153,14 +153,23 @@ document.getElementById('updateShoeBtn').addEventListener('click', async () => {
         const sizes = {};
         group.querySelectorAll('.size-stock-item').forEach(item => {
             const size = item.querySelector('.size-input')?.value;
-            const addedStock = parseInt(item.querySelector('.stock-input')?.value || '0');
+            const stockInput = item.querySelector('.stock-input');
+            const resetTriggered = stockInput.dataset.reset === 'true';
+
+            const addedStock = parseInt(stockInput?.value || '0');
             const currentStock = parseInt(item.querySelector('.current-stock')?.textContent || '0');
 
             if (size) {
-                const newTotalStock = addedStock ? currentStock + addedStock : currentStock;
+                let newTotalStock = currentStock;
+                if (resetTriggered) {
+                    newTotalStock = addedStock || 0; // if user entered new value, use it; else, 0
+                } else if (addedStock) {
+                    newTotalStock = currentStock + addedStock;
+                }
+
                 sizes[`size_${size}`] = { [size]: { stock: newTotalStock } };
             }
-
+            stockInput.dataset.reset = 'false';
         });
 
         // Initialize variant data
@@ -309,6 +318,9 @@ function addSizeInput(variantId, size = '', stock = '') {
         <input type="number" class="size-input" step="0.5" min="1" placeholder="Size" value="${size}" required>
         <p>Stocks: <span class="current-stock">${stock}</span></p>
         <input type="number" class="stock-input" min="0" placeholder="Add Stock (Qty)">
+        <button type="button" class="btn-reset-small" onclick="resetStock(this)">
+            <i class="fas fa-undo"></i> Reset
+        </button>
         <button type="button" class="btn-remove-small" onclick="removeSizeInput(this)">
             <i class="fas fa-times"></i>
         </button>
@@ -316,6 +328,17 @@ function addSizeInput(variantId, size = '', stock = '') {
 
     container.appendChild(sizeItem);
 }
+
+function resetStock(button) {
+    const stockSpan = button.parentElement.querySelector('.current-stock');
+    const stockInput = button.parentElement.querySelector('.stock-input');
+
+    stockSpan.textContent = '0'; // visually show reset
+    stockInput.value = ''; // explicitly set to 0 for processing
+    stockInput.dataset.reset = 'true'; // mark it as reset
+}
+
+
 
 function removeSizeInput(button) {
     button.parentElement.remove();
@@ -350,3 +373,4 @@ window.addSizeInput = addSizeInput;
 window.removeSizeInput = removeSizeInput;
 window.removeVariant = removeVariant;
 window.addColorVariantWithData = addColorVariantWithData;
+window.resetStock = resetStock;
