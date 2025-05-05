@@ -426,9 +426,12 @@ onAuthStateChanged(auth, async (user) => {
         onValue(userRef, async (snapshot) => {
             if (snapshot.exists()) {
                 const userData = snapshot.val();
+                console.log(userData.role);
                 shopLoggedin = userData.shopId;
 
-                if (userData.role === "employee" || userData.role === "manager") {
+                if (userData.role.toLowerCase() === "manager") {
+                    document.getElementById("addemployeebtn").style.display = "none";
+                }else if(userData.role.toLowerCase() === "salesperson") {
                     document.getElementById("addemployeebtn").style.display = "none";
                 }
 
