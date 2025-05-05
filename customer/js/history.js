@@ -124,10 +124,8 @@ function loadOrderHistory(userId, statusFilter = 'all') {
 function displayOrderCard(order, userId) {
     const purchaseHistoryContainer = document.querySelector('.purchase-history');
 
-    // Skip rendering if status is not rejected, delivered, or cancelled
-    if (!['rejected', 'delivered', 'cancelled'].includes(order.status.toLowerCase())) {
-        return;
-    }
+    // Skip rendering if status is rejected, delivered, or cancelled
+    if (['rejected', 'delivered', 'cancelled'].includes(status)) return null;
 
     // Format date
     const orderDate = new Date(order.date).toLocaleDateString('en-US', {
@@ -147,12 +145,16 @@ function displayOrderCard(order, userId) {
             statusClass = 'status-delivered';
             statusText = 'Delivered';
             break;
+        case 'completed':
+            statusClass = 'status-delivered';
+            statusText = 'Delivered';
+            break;
         case 'cancelled':
             statusClass = 'status-cancelled';
             statusText = 'Cancelled';
             break;
         default:
-            return; // If the status is not one of the three, we don't render it.
+            return null; // Skip rendering for other statuses
     }
 
     // Get the item(s)
@@ -205,13 +207,13 @@ function displayOrderCard(order, userId) {
 
     // Determine which buttons to show based on order status
     let actionButtons = '';
-    if (order.status === 'delivered') {
+    if (order.status.toLowerCase() === 'delivered') {
         actionButtons = `
             <button class="btn btn-track">Track Order</button>
             <button class="btn btn-reorder">Reorder</button>
             <button class="btn btn-review">Leave Review</button>
         `;
-    } else if (order.status === 'rejected' || order.status === 'cancelled') {
+    } else if (order.status.toLowerCase() === 'rejected' || order.status.toLowerCase() === 'cancelled') {
         actionButtons = `
             <button class="btn btn-reorder">Find Similar</button>
         `;
@@ -245,7 +247,6 @@ function displayOrderCard(order, userId) {
     // Add the order card to the container
     purchaseHistoryContainer.insertAdjacentHTML('beforeend', orderCardHTML);
 }
-
 
 // Helper function to get shop name
 function getShopName(shopId) {
