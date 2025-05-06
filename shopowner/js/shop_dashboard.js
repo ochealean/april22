@@ -433,6 +433,7 @@ onAuthStateChanged(auth, async (user) => {
                     document.getElementById("addemployeebtn").style.display = "none";
                 }else if(userData.role.toLowerCase() === "salesperson") {
                     document.getElementById("addemployeebtn").style.display = "none";
+                    document.getElementById("analyticsbtn").style.display = "none";
                 }
 
                 await loadShopDashboard();

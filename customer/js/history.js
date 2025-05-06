@@ -209,7 +209,6 @@ function displayOrderCard(order, userId) {
     let actionButtons = '';
     if (order.status.toLowerCase() === 'delivered') {
         actionButtons = `
-            <button class="btn btn-track">Track Order</button>
             <button class="btn btn-reorder">Reorder</button>
             <button class="btn btn-review">Leave Review</button>
         `;
@@ -305,7 +304,7 @@ function setupEventListeners(userId) {
 
     // Track order button click handler
     document.addEventListener('click', function (e) {
-        if (e.target.classList.contains('btn-track')) {
+        if (e.target.classList.contains('btn-review')) {
             const orderCard = e.target.closest('.order-card');
             if (orderCard) {
                 const orderId = orderCard.getAttribute('data-order-id');

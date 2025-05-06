@@ -129,8 +129,8 @@ function createOrderCard(order) {
             statusText = 'Shipped';
             break;
         default:
-            statusClass = 'status-shipped';
-            statusText = 'Shipped';
+            statusClass = 'status-approved';
+            statusText = 'Approved';
     }
 
     let orderItemHTML = '';
