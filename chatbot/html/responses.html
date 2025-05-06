@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2c3e50;
+            --accent: #e74c3c;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --error: #c0392b;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray: #bdc3c7;
+            --gray-light: #ecf0f1;
+            --gray-dark: #7f8c8d;
+            --text-primary: #2c3e50;
+            --text-secondary: #34495e;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+        
+        /* Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html, body {
+            min-height: 100%;
+            min-width: 350px;
+            margin: 0;
+            padding: 0;
+            overflow-y: visible;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--gray-light);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+        
+        /* Navigation */
+        nav {
+            background-color: var(--secondary);
+            color: white;
+            box-shadow: var(--shadow-lg);
+            padding: 0 15px;
+            position: sticky;
+            top: 0;
+            z-index: 800;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .nav-links {
+            display: flex;
+            transition: all 0.3s ease;
+            gap: 15px;
+        }
+        
+        .nav-links li {
+            list-style: none;
+            position: relative;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 12px 18px;
+            display: block;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 3px;
+        }
+        
+        .right-menu {
+            margin-right: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .username-display {
+            font-weight: bold;
+            position: relative;
+            padding-right: 10px;
+        }
+        
+        .username-display::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: translateY(-50%) scale(1); opacity: 1; }
+            50% { transform: translateY(-50%) scale(1.3); opacity: 0.7; }
+            100% { transform: translateY(-50%) scale(1); opacity: 1; }
+        }
+        
+        .menu-btn {
+            font-size: 24px;
+            cursor: pointer;
+            display: none;
+            transition: var(--transition);
+        }
+        
+        .menu-btn:hover {
+            transform: rotate(90deg);
+        }
+        
+        /* Container */
+        .container {
+            padding: 70px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            position: relative;
+        }
+        
+        /* Table Styles */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            margin: 20px 0 30px 0;
+        }
+        
+        .table-container:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            vertical-align: middle;
+        }
+        
+        th {
+            background-color: var(--secondary);
+            color: white;
+            font-weight: 600;
+            top: 0;
+            z-index: 10;
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        th:hover {
+            background-color: var(--dark);
+        }
+        
+        th::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            opacity: 0.7;
+        }
+        
+        tr {
+            transition: var(--transition);
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        tr:last-child {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        /* Buttons */
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .approve-btn {
+            margin: 2.5px;
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .approve-btn:hover {
+            background-color: #229954;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .cancel-btn {
+            margin: 2.5px;
+            background-color: var(--gray-dark);
+            color: white;
+        }
+        
+        .cancel-btn:hover {
+            background-color: var(--gray);
+        }
+        
+        .clear-btn {
+            background-color: var(--accent);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .clear-btn:hover {
+            background-color: var(--error);
+        }
+        
+        .edit-btn {
+            background-color: var(--primary);
+            color: white;
+            margin-right: 5px;
+        }
+        
+        .edit-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .delete-btn {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            background-color: var(--error);
+        }
+        
+        .response-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        /* Modal Styles */
+        .response-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            z-index: 10001;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .response-modal.active {
+            display: block;
+        }
+        
+        .response-input {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .clear-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 0.5rem;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: var(--radius-md);
+            color: white;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            z-index: 10003;
+            opacity: 0;
+            transform: translateY(-50px);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            max-width: 350px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .notification.success {
+            background-color: var(--success);
+        }
+        
+        .notification.error {
+            background-color: var(--error);
+        }
+        
+        /* Confirmation Dialog */
+        .confirmation-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: white;
+            padding: 30px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            z-index: 10002;
+            max-width: 450px;
+            width: 90%;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .confirmation-dialog.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            backdrop-filter: blur(3px);
+        }
+        
+        .overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .nav-links {
+                position: fixed;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background-color: var(--secondary);
+                flex-direction: column;
+                align-items: stretch;
+                padding: 0;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+                gap: 0;
+            }
+            
+            .nav-links.active {
+                max-height: 500px;
+                padding: 15px 0;
+            }
+            
+            .nav-links a {
+                padding: 15px 25px;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+            
+            .menu-btn {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            th, td {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            button {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="notification" class="notification"></div>
+    
+    <div id="confirmationDialog" class="confirmation-dialog">
+        <p id="dialogMessage">Are you sure you want to delete this response?</p>
+        <div class="confirmation-buttons">
+            <button id="cancelAction" class="cancel-btn"><i class="fas fa-times"></i> Cancel</button>
+            <button id="confirmAction" class="approve-btn"><i class="fas fa-check"></i> Confirm</button>
+        </div>
+    </div>
+
+    <div id="overlay" class="overlay"></div>
+
+    <nav>
+        <div class="nav-header">
+            <ul class="nav-links">
+                <li><a href="/admin/html/admin_dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="/admin/html/admin_pendingshops.html"><i class="fas fa-clock"></i> Pending Shops</a></li>
+                <li><a href="/admin/html/admin_approvedshops.html"><i class="fas fa-check-circle"></i> Approved Shops</a></li>
+                <li><a href="/admin/html/admin_rejectedshops.html"><i class="fas fa-times-circle"></i> Rejected Shops</a></li>
+                <li><a href="/admin/html/admin_chatbot.html" class="active"><i class="fas fa-robot"></i> Chatbot Manager</a></li>
+                <li><a href="/admin/html/admin_login.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+            <div class="right-menu">
+                <span class="username-display">Admin</span>
+                <div class="menu-btn"><i class="fas fa-bars"></i></div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="responseModal" class="response-modal">
+        <div class="modal-header">
+            <h3 id="modalTitle">Add New Response</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="response-form-group">
+                <input type="text" id="modalKeyword" class="response-input" placeholder="Enter keyword (single word)">
+                <div class="response-list" id="responseList">
+                    <textarea id="responseTextarea" class="response-input" 
+                          placeholder="Enter responses (one per line)"></textarea>
+                    <div class="clear-container">
+                        <button class="clear-btn" id="clearResponses">
+                            <i class="fas fa-eraser"></i> Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="cancel-btn" id="cancelModal">Cancel</button>
+                <button class="approve-btn" id="saveModalResponse">Save Response</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 class="animate-slide"><i class="fas fa-robot"></i> Chatbot Response Manager</h1>
+        
+        <section id="chatbot-crud" class="animate-fade">
+            <button class="add-response-btn" id="openResponseModal">
+                <i class="fas fa-plus"></i> Add Response
+            </button>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-id-badge"></i> ID</th>
+                            <th><i class="fas fa-key"></i> Keyword</th>
+                            <th><i class="fas fa-comment-dots"></i> Responses</th>
+                            <th><i class="fas fa-tools"></i> Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="chatbotTableBody">
+                        <!-- Responses populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let responses = JSON.parse(localStorage.getItem('chatbotResponses')) || [];
+        let currentEditId = null;
+        let deleteCallback = null;
+
+        const notification = document.getElementById('notification');
+        const confirmationDialog = document.getElementById('confirmationDialog');
+        const overlay = document.getElementById('overlay');
+        const responseModal = document.getElementById('responseModal');
+        const modalTitle = document.getElementById('modalTitle');
+
+        document.addEventListener('DOMContentLoaded', initChatbot);
+
+        function initChatbot() {
+            responses = responses.map(r => {
+                if (typeof r.response === 'string') {
+                    return { ...r, responses: [r.response] };
+                }
+                return r;
+            });
+            localStorage.setItem('chatbotResponses', JSON.stringify(responses));
+            renderChatbotTable();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            document.querySelector('.menu-btn').addEventListener('click', () => {
+                document.querySelector('.nav-links').classList.toggle('active');
+            });
+            
+            document.getElementById('openResponseModal').addEventListener('click', () => {
+                currentEditId = null;
+                modalTitle.textContent = 'Add New Response';
+                resetModal();
+                openModal();
+            });
+            
+            document.querySelector('.close-modal').addEventListener('click', closeModal);
+            document.getElementById('cancelModal').addEventListener('click', closeModal);
+            overlay.addEventListener('click', closeModal);
+            document.getElementById('clearResponses').addEventListener('click', resetTextarea);
+            document.getElementById('saveModalResponse').addEventListener('click', saveResponse);
+            document.getElementById('confirmAction').addEventListener('click', handleConfirmDelete);
+            document.getElementById('cancelAction').addEventListener('click', closeConfirmationDialog);
+        }
+
+        function openModal() {
+            responseModal.classList.add('active');
+            overlay.classList.add('show');
+        }
+
+        function closeModal() {
+            responseModal.classList.remove('active');
+            overlay.classList.remove('show');
+        }
+
+        function resetTextarea() {
+            document.getElementById('responseTextarea').value = '';
+        }
+
+        function saveResponse() {
+            const keyword = document.getElementById('modalKeyword').value.trim();
+            const responsesText = document.getElementById('responseTextarea').value.trim();
+            const responsesArray = responsesText.split('\n').filter(Boolean);
+
+            if (!keyword || responsesArray.length === 0) {
+                showNotification('Please fill in the keyword and at least one response', 'error');
+                return;
+            }
+
+            const newResponse = {
+                id: currentEditId || Date.now(),
+                keyword,
+                responses: responsesArray
+            };
+
+            if (currentEditId) {
+                const index = responses.findIndex(r => r.id == currentEditId);
+                responses[index] = newResponse;
+            } else {
+                responses.push(newResponse);
+            }
+
+            localStorage.setItem('chatbotResponses', JSON.stringify(responses));
+            showNotification(`Response ${currentEditId ? 'updated' : 'added'} successfully`, 'success');
+            renderChatbotTable();
+            closeModal();
+        }
+
+        function openEditResponse(id) {
+            const response = responses.find(r => r.id == id);
+            if (!response) return;
+
+            currentEditId = id;
+            modalTitle.textContent = 'Edit Response';
+            document.getElementById('modalKeyword').value = response.keyword;
+            document.getElementById('responseTextarea').value = response.responses.join('\n');
+            openModal();
+        }
+
+        function resetModal() {
+            document.getElementById('modalKeyword').value = '';
+            document.getElementById('responseTextarea').value = '';
+        }
+
+        function renderChatbotTable() {
+            const tbody = document.getElementById('chatbotTableBody');
+            tbody.innerHTML = responses.length ? 
+                responses.map(response => `
+                    <tr>
+                        <td>${response.id}</td>
+                        <td>${response.keyword}</td>
+                        <td>${response.responses.join('<br>')}</td>
+                        <td>
+                            <div class="response-actions">
+                                <button class="edit-btn" onclick="openEditResponse('${response.id}')">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="delete-btn" onclick="confirmDelete('${response.id}')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('') : 
+                `<tr><td colspan="4" style="text-align:center;color:var(--gray-dark)">No responses added yet</td></tr>`;
+        }
+
+        function confirmDelete(id) {
+            showConfirmationDialog('Delete this response?', () => {
+                responses = responses.filter(r => r.id != id);
+                localStorage.setItem('chatbotResponses', JSON.stringify(responses));
+                renderChatbotTable();
+                showNotification('Response deleted', 'success');
+            });
+        }
+
+        function handleConfirmDelete() {
+            deleteCallback?.();
+            closeConfirmationDialog();
+        }
+
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+
+        function showConfirmationDialog(message, callback) {
+            document.getElementById('dialogMessage').textContent = message;
+            confirmationDialog.classList.add('show');
+            overlay.classList.add('show');
+            deleteCallback = callback;
+        }
+
+        function closeConfirmationDialog() {
+            confirmationDialog.classList.remove('show');
+            overlay.classList.remove('show');
+        }
+
+        window.openEditResponse = openEditResponse;
+        window.confirmDelete = confirmDelete;
+    </script>
+</body>
+</html>
