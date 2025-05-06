@@ -1,8 +1,6 @@
-// Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAuPALylh11cTArigeGJZmLwrFwoAsNPSI",
     authDomain: "opportunity-9d3bf.firebaseapp.com",
@@ -14,7 +12,6 @@ const firebaseConfig = {
     measurementId: "G-QC2JSR1FJW"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const chatbotResponsesRef = ref(db, 'AR_shoe_users/chatbot/responses');
@@ -22,89 +19,70 @@ const chatbotResponsesRef = ref(db, 'AR_shoe_users/chatbot/responses');
 // DOM Elements
 const inputField = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
+const chatMessages = document.getElementById('chat-messages');
+
 let faqResponses = {
-    "default": `<div class="troubleshooting-section">
-        I'm sorry, I couldn't find an answer to that question. Here are some topics I can help with:<br><br>
-        <strong>Features:</strong><br>
-        - AR virtual try-on experience<br>
-        - Shoe customization options<br>
-        - Product information<br><br>
-        <strong>Orders:</strong><br>
-        - Sizing guide<br>
-        - Shipping information<br>
-        - Returns & exchanges<br>
-        - Payment methods<br><br>
-        <strong>Help:</strong><br>
-        - Order issues<br>
-        - Product problems<br>
-        - Website troubleshooting<br><br>
-        Try asking about one of these topics or click the quick questions above!
-        </div>`
+    default: createDefaultResponse()
 };
 
-// Load responses from Firebase
+function createDefaultResponse() {
+    return `<div class="troubleshooting-section">
+        I'm sorry, I couldn't find an answer to that question. Here are some topics I can help with:<br><br>
+        <strong>Features:</strong> AR try-on, Customization, Products<br>
+        <strong>Orders:</strong> Shipping, Returns, Payments<br>
+        <strong>Help:</strong> Issues, Problems, Troubleshooting<br><br>
+        Try asking about one of these topics or click any quick question above!
+        </div>`;
+}
+
 function loadResponsesFromFirebase() {
     onValue(chatbotResponsesRef, (snapshot) => {
-        const responses = snapshot.val();
-        if (responses) {
-            // Convert Firebase responses to our format
-            faqResponses = Object.entries(responses).reduce((acc, [id, response]) => {
-                acc[response.keyword.toLowerCase()] = response.responses.join('<br>');
-                return acc;
-            }, {});
-            
-            // Keep the default response
-            faqResponses["default"] = faqResponses["default"] || `<div class="troubleshooting-section">
-                I'm sorry, I couldn't find an answer to that question. Please try another question.
-                </div>`;
-        }
+        const responses = snapshot.val() || {};
+        
+        // Transform the Firebase data into our FAQ format
+        faqResponses = Object.values(responses).reduce((acc, response) => {
+            if (response.keyword && response.responses) {
+                const keyword = response.keyword.toLowerCase();
+                acc[keyword] = Array.isArray(response.responses) 
+                    ? response.responses.join('<br>')
+                    : response.responses;
+            }
+            return acc;
+        }, {});
+        
+        // Ensure we always have a default response
+        faqResponses.default = faqResponses.default || createDefaultResponse();
+        
+        console.log("Loaded responses:", faqResponses); // Debug logging
+    }, (error) => {
+        console.error("Error loading responses:", error);
     });
 }
 
-// Initialize the chatbot
-function initChatbot() {
-    loadResponsesFromFirebase();
-    setupEventListeners();
+function getBestResponse(input) {
+    const lowerInput = input.toLowerCase().trim();
     
-    // Initial greeting
-    setTimeout(() => {
-        displayMessage('bot', `Welcome to SmartFit's Help Center! 👟<br><br>I can help you with:<br><strong>Features:</strong> AR try-on, Customization, Products<br><strong>Orders:</strong> Shipping, Returns, Payments<br><strong>Help:</strong> Issues, Problems, Troubleshooting<br><br>Try asking about our services or click any quick question above!`);
-    }, 1000);
+    // 1. Check for exact keyword match
+    if (faqResponses[lowerInput]) {
+        return faqResponses[lowerInput];
+    }
+    
+    // 2. Check for partial matches
+    const matchingKey = Object.keys(faqResponses).find(key => 
+        key !== 'default' && lowerInput.includes(key)
+    );
+    
+    return matchingKey ? faqResponses[matchingKey] : faqResponses.default;
 }
 
-// Set up event listeners
-function setupEventListeners() {
-    // Send message when Enter is pressed or button clicked
-    inputField.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
-    
-    sendButton.addEventListener('click', sendMessage);
-    
-    // Quick question buttons
-    document.querySelectorAll('.quick-questions button').forEach(button => {
-        button.addEventListener('click', function() {
-            const question = this.textContent;
-            askQuestion(question);
-        });
-    });
+function displayMessage(sender, message) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `${sender}-message`;
+    msgDiv.innerHTML = message;
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Ask a question
-function askQuestion(question) {
-    const keyword = question.toLowerCase();
-    displayMessage('user', question);
-    
-    // Simulate typing delay
-    setTimeout(() => {
-        const response = faqResponses[keyword] || faqResponses.default;
-        displayMessage('bot', response);
-    }, 500);
-}
-
-// Send a message
 function sendMessage() {
     const userInput = inputField.value.trim();
     if (!userInput) return;
@@ -112,36 +90,53 @@ function sendMessage() {
     displayMessage('user', userInput);
     inputField.value = '';
     
-    // Find best matching response
-    let response = faqResponses.default;
-    const lowerInput = userInput.toLowerCase();
-    
-    // Check for exact matches first
-    for (const [key, answer] of Object.entries(faqResponses)) {
-        if (lowerInput.includes(key)) {
-            response = answer;
-            break;
-        }
-    }
-    
-    // Simulate typing delay
     setTimeout(() => {
+        const response = getBestResponse(userInput);
         displayMessage('bot', response);
     }, 500);
 }
 
-// Display a message in the chat
-function displayMessage(sender, message) {
-    const chatDiv = document.getElementById('chat-messages');
-    const msgDiv = document.createElement('div');
-    msgDiv.className = sender + '-message';
-    msgDiv.innerHTML = message;
-    chatDiv.appendChild(msgDiv);
-    chatDiv.scrollTop = chatDiv.scrollHeight;
+function askQuestion(question) {
+    displayMessage('user', question);
+    
+    setTimeout(() => {
+        const response = getBestResponse(question);
+        displayMessage('bot', response);
+    }, 500);
 }
 
-// Make functions available globally
+function setupEventListeners() {
+    inputField.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+    
+    sendButton.addEventListener('click', sendMessage);
+    
+    // Setup quick question buttons
+    document.querySelectorAll('.quick-questions button').forEach(button => {
+        button.addEventListener('click', () => {
+            askQuestion(button.textContent);
+        });
+    });
+}
+
+function initChatbot() {
+    loadResponsesFromFirebase();
+    setupEventListeners();
+    
+    // Initial greeting after short delay
+    setTimeout(() => {
+        displayMessage('bot', `Welcome to SmartFit's Help Center! 👟<br><br>
+            How can I assist you today? Try asking about:<br>
+            - AR shoe try-on<br>
+            - Order status<br>
+            - Returns policy<br>
+            - Product customization`);
+    }, 1000);
+}
+
+// Make functions available globally if needed
 window.askQuestion = askQuestion;
 
-// Initialize when DOM is loaded
+// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', initChatbot);

@@ -65,7 +65,17 @@ function loadResponsesFromFirebase() {
     });
 }
 
-// Save response to Firebase
+// Generate a 7-character alphanumeric ID (letters and digits)
+function generateCustomId() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let id = '';
+    for (let i = 0; i < 25; i++) {
+        id += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return id;
+}
+
+// Modified save function with custom ID
 function saveResponseToFirebase() {
     const keyword = document.getElementById('modalKeyword').value.trim();
     const responsesText = document.getElementById('responseTextarea').value.trim();
@@ -93,17 +103,27 @@ function saveResponseToFirebase() {
                 showNotification('Error updating response: ' + error.message, 'error');
             });
     } else {
-        // Add new response
-        push(chatbotRef, responseData)
-            .then(() => {
-                showNotification('Response added successfully', 'success');
-                closeModal();
-            })
-            .catch((error) => {
-                showNotification('Error adding response: ' + error.message, 'error');
-            });
+        // Generate a custom 7-character ID and ensure it's unique
+        const newId = generateCustomId();
+        const newRef = ref(db, `AR_shoe_users/chatbot/responses/${newId}`);
+        get(newRef).then(snapshot => {
+            if (snapshot.exists()) {
+                showNotification('ID conflict. Please try again.', 'error');
+            } else {
+                // Save using set() with custom ID
+                update(newRef, responseData)
+                    .then(() => {
+                        showNotification('Response added successfully', 'success');
+                        closeModal();
+                    })
+                    .catch((error) => {
+                        showNotification('Error adding response: ' + error.message, 'error');
+                    });
+            }
+        });
     }
 }
+
 
 // Render the chatbot table
 function renderChatbotTable(responses) {
@@ -118,7 +138,7 @@ function renderChatbotTable(responses) {
         <tr>
             <td>${id}</td>
             <td>${response.keyword}</td>
-            <td>${response.responses.join('<br>')}</td>
+            <td class="responseTD">${response.responses.join('<br>')}</td>
             <td>
                 <div class="response-actions">
                     <button class="edit-btn" onclick="openEditResponse('${id}')">
