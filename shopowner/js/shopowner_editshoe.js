@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, get, set, update, onValue} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-storage.js";
 // Firebase config
@@ -30,47 +30,82 @@ const shoeDescriptionInput = document.getElementById('shoeDescription');
 const currentImageDiv = document.getElementById('currentShoeImage');
 const variantsContainer = document.getElementById('colorVariants');
 
-
+// Global variables
+let shopLoggedin; // shop ID of the logged-in user
+let roleLoggedin; // role of the logged-in user
+let sname; //shop name
+let USERID;
 let variantCount = 0;
 
 // Fetch and populate the form once authenticated
 onAuthStateChanged(auth, (user) => {
-    if (!user) {
-        window.location.href = '/user_login.html';
-        return;
-    }
+    if (user) {
+        // Fetch shop name from database
+        USERID = user.uid;
+        const shopRef = ref(db, `AR_shoe_users/employees/${user.uid}`);
+        onValue(shopRef, (snapshot) => {
+            const shopData = snapshot.val();
+            console.log("shopData: ", shopData);
 
-    const shopLoggedin = user.uid;
-    const shoeRef = ref(db, `AR_shoe_users/shoe/${shopLoggedin}/${shoeId}`);
+            // this will run if the user a Employee NOT a shop owner
+            if (shopData) {
+                roleLoggedin = shopData.role;
+                shopLoggedin = shopData.shopId;
+                console.log("shopLoggedin: ", shopLoggedin);
+                sname = shopData.shopName || ''; // Initialize with empty string if not available
 
-    get(shoeRef).then((snapshot) => {
-        if (!snapshot.exists()) {
-            alert("Shoe not found.");
-            return;
-        }
-
-        // Directly access values without storing into new object/array
-        const shoeData = snapshot.val();
-
-        // Populate fields directly
-        document.getElementById('shoeName').value = shoeData.shoeName ?? '';
-        document.getElementById('shoeCode').value = shoeData.shoeCode ?? '';
-        document.getElementById('shoeDescription').value = shoeData.generalDescription ?? '';
-
-        if (shoeData.defaultImage) {
-            document.getElementById('currentShoeImage').innerHTML = `<img src="${shoeData.defaultImage}" style="max-width:200px">`;
-        }
-
-        if (shoeData.variants) {
-            for (const variant of Object.values(shoeData.variants)) {
-                window.addColorVariantWithData(variant);
+                // Set role-based UI elements
+                if (shopData.role.toLowerCase() === "manager") {
+                    document.getElementById("addemployeebtn").style.display = "none";
+                } else if (shopData.role.toLowerCase() === "salesperson") {
+                    document.getElementById("addemployeebtn").style.display = "none";
+                    document.getElementById("analyticsbtn").style.display = "none";
+                }
+            } else {
+                // this will run if the user is a shop owner
+                shopLoggedin = user.uid;
+                roleLoggedin = "Shop Owner"; // Default role
+                sname = 'Shop Owner'; // Default shop name
             }
-        }
 
-    }).catch((error) => {
-        console.error("Error getting shoe data:", error);
-        alert("Failed to load shoe data.");
-    });
+            // Load shoe data to edit (moved inside the onValue callback)
+            const shoeRef = ref(db, `AR_shoe_users/shoe/${shopLoggedin}/${shoeId}`);
+            get(shoeRef).then((snapshot) => {
+                if (!snapshot.exists()) {
+                    alert("Shoe not found.");
+                    return;
+                }
+
+                const shoeData = snapshot.val();
+
+                // Populate fields directly
+                shoeNameInput.value = shoeData.shoeName ?? '';
+                shoeCodeInput.value = shoeData.shoeCode ?? '';
+                shoeDescriptionInput.value = shoeData.generalDescription ?? '';
+
+                if (shoeData.defaultImage) {
+                    currentImageDiv.innerHTML = `<img src="${shoeData.defaultImage}" style="max-width:200px">`;
+                }
+
+                if (shoeData.variants) {
+                    for (const variant of Object.values(shoeData.variants)) {
+                        addColorVariantWithData(variant);
+                    }
+                }
+
+            }).catch((error) => {
+                console.error("Error getting shoe data:", error);
+                alert("Failed to load shoe data.");
+            });
+
+        }, (error) => {
+            console.error("Error fetching shop data:", error);
+            shopLoggedin = user.uid; // Fallback to user UID
+            sname = 'Unknown Shop';
+        });
+    } else {
+        window.location.href = "/user_login.html";
+    }
 });
 
 
@@ -79,7 +114,6 @@ document.getElementById('updateShoeBtn').addEventListener('click', async () => {
     const user = auth.currentUser;
     if (!user) return alert("Not logged in.");
 
-    const shopLoggedin = user.uid;
     const shoeRefPath = `AR_shoe_users/shoe/${shopLoggedin}/${shoeId}`;
     const shoeRef = ref(db, shoeRefPath);
 
@@ -167,7 +201,12 @@ document.getElementById('updateShoeBtn').addEventListener('click', async () => {
                     newTotalStock = currentStock + addedStock;
                 }
 
-                sizes[`size_${size}`] = { [size]: { stock: newTotalStock } };
+                sizes[`size_${size}`] = { [size]: { 
+                    LastUpdatedBy: roleLoggedin,
+                    userId: USERID,
+                    actionValue: "Stock Updated",
+                    LastUpdatedAt: new Date().toISOString(),
+                    stock: newTotalStock } };
             }
             stockInput.dataset.reset = 'false';
         });

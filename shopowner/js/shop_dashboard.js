@@ -424,20 +424,30 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         const userRef = ref(db, `AR_shoe_users/employees/${user.uid}`);
         onValue(userRef, async (snapshot) => {
+            // this will be called if the user is NOT a shop owner but an employee
             if (snapshot.exists()) {
                 const userData = snapshot.val();
                 console.log(userData.role);
+
+                // setting the shopId of the logged in user
                 shopLoggedin = userData.shopId;
 
+                // Load Order Count in html dashboard
+                const orders = await getAllOrdersByShopId(shopLoggedin);
+                document.getElementById("orderValuedisplay").textContent = orders.length || 0;
+
+                // Hiding buttons based on role
                 if (userData.role.toLowerCase() === "manager") {
                     document.getElementById("addemployeebtn").style.display = "none";
-                }else if(userData.role.toLowerCase() === "salesperson") {
+                } else if (userData.role.toLowerCase() === "salesperson") {
                     document.getElementById("addemployeebtn").style.display = "none";
                     document.getElementById("analyticsbtn").style.display = "none";
                 }
 
                 await loadShopDashboard();
             } else {
+                
+                // this will be called if the user is a shop owner
                 shopLoggedin = user.uid;
                 try {
                     const orders = await getAllOrdersByShopId(shopLoggedin);

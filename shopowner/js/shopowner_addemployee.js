@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebas
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import { getApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 
 // Firebase config
@@ -33,6 +34,7 @@ Password: ${document.getElementById('employeePassword').value}<br>
 you can log in to your account using the following link:<br>
 https://april22.vercel.app/user_login.html <br>
 Please check your email for further instructions.`;
+let sname; // shopname
 
 
 
@@ -62,7 +64,12 @@ let shopOwnerPassword = null;
 // Listen for auth state changes
 onAuthStateChanged(auth, (user) => {
     if (user) {
+        const shopRef = ref(db, `AR_shoe_users/shop/${user.uid}`);
         try {
+            onValue(shopRef, (snapshot) => {
+                const shopData = snapshot.val();
+                sname = shopData.shopName;
+            });
             shopOwnerVar.setValue({
                 uid: user.uid,
                 email: user.email
@@ -108,6 +115,7 @@ async function createEmployeeAccount(employeeData) {
             phone: employeeData.phone,
             password: employeeData.password,
             shopId: shopOwnerVar.getValue().uid,
+            shopName: sname,
             dateAdded: new Date().toISOString(),
             status: 'active'
         });

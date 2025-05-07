@@ -17,9 +17,11 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-let shopLoggedin;
+// Global variables
+let shopLoggedin; // shop ID of the logged-in user
+let roleLoggedin; // role of the logged-in user
+let sname; //shop name
 
-document.getElementById("addemployeebtn").style.display = "none";
 // Expose functions to global scope
 window.showShoeDetails = showShoeDetails;
 window.editShoe = editShoe;
@@ -29,8 +31,40 @@ window.addNewShoe = addNewShoe;
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        shopLoggedin = user.uid;
-        loadInventory('inventoryTableBody');
+        // Fetch shop name from database
+        const shopRef = ref(db, `AR_shoe_users/employees/${user.uid}`);
+        onValue(shopRef, (snapshot) => {
+            const shopData = snapshot.val();
+            console.log("shopData: ", shopData);
+
+            // this will run if the user a Employee NOT a shop owner
+            if (shopData) {
+                roleLoggedin = shopData.role;
+                shopLoggedin = shopData.shopId;
+                console.log("shopLoggedin: ", shopLoggedin);
+                sname = shopData.shopName || ''; // Initialize with empty string if not available
+
+                // Set role-based UI elements
+                if (shopData.role.toLowerCase() === "manager") {
+                    document.getElementById("addemployeebtn").style.display = "none";
+                } else if (shopData.role.toLowerCase() === "salesperson") {
+                    document.getElementById("addemployeebtn").style.display = "none";
+                    document.getElementById("analyticsbtn").style.display = "none";
+                }
+                
+                loadInventory('inventoryTableBody');
+            } else {
+                // this will run if the user is a shop owner
+                shopLoggedin = user.uid;
+                loadInventory('inventoryTableBody');
+                roleLoggedin = "Shop Owner"; // Default role
+                sname = 'Shop Owner'; // Default shop name
+            }
+        }, (error) => {
+            console.error("Error fetching shop data:", error);
+            shopLoggedin = user.uid; // Fallback to user UID
+            sname = 'Unknown Shop';
+        });
     } else {
         window.location.href = "/user_login.html";
     }
@@ -47,6 +81,7 @@ function loadInventory(tableBodyId) {
     if (!tbody) return;
 
     onValue(inventoryRef, (snapshot) => {
+        console.log("Inventory snapshot:", snapshot.val());
         tbody.innerHTML = '';
 
         if (!snapshot.exists()) {

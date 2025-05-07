@@ -18,24 +18,50 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-let shopLoggedin;
+// Global variables
+let shopLoggedin; // shop ID of the logged-in user
+let roleLoggedin; // role of the logged-in user
+let sname; //shop name
 let currentOrderId = null;
 let currentUserId = null;
 
 // Initialize the page
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        const userRef = ref(db, `AR_shoe_users/employees/${user.uid}`);
-        onValue(userRef, (snapshot) => {
-            if (snapshot.exists()) {
-                const userData = snapshot.val();
-                shopLoggedin = userData.shopId;
+        // Fetch shop name from database
+        const shopRef = ref(db, `AR_shoe_users/employees/${user.uid}`);
+        onValue(shopRef, (snapshot) => {
+            const shopData = snapshot.val();
+            console.log("shopData: ", shopData);
+
+            // this will run if the user a Employee NOT a shop owner
+            if (shopData) {
+                roleLoggedin = shopData.role;
+                shopLoggedin = shopData.shopId;
+                console.log("shopLoggedin: ", shopLoggedin);
+                sname = shopData.shopName || ''; // Initialize with empty string if not available
+
+                // Set role-based UI elements
+                if (shopData.role.toLowerCase() === "manager") {
+                    document.getElementById("addemployeebtn").style.display = "none";
+                } else if (shopData.role.toLowerCase() === "salesperson") {
+                    document.getElementById("addemployeebtn").style.display = "none";
+                    document.getElementById("analyticsbtn").style.display = "none";
+                }
+
                 loadOrders();
             } else {
+                // this will run if the user is a shop owner
+                roleLoggedin = "Shop Owner"; // Default role
+                sname = 'Shop Owner'; // Default shop name
                 shopLoggedin = user.uid;
                 loadOrders();
             }
-        }, { onlyOnce: true });
+        }, (error) => {
+            console.error("Error fetching shop data:", error);
+            shopLoggedin = user.uid; // Fallback to user UID
+            sname = 'Unknown Shop';
+        });
     } else {
         window.location.href = "/user_login.html";
     }
@@ -46,7 +72,7 @@ function loadOrders() {
     const ordersRef = ref(db, 'AR_shoe_users/transactions');
     onValue(ordersRef, (snapshot) => {
         if (!snapshot.exists()) {
-            document.getElementById('ordersTableBody').innerHTML = 
+            document.getElementById('ordersTableBody').innerHTML =
                 '<tr><td colspan="6" style="text-align: center;">No orders found</td></tr>';
             return;
         }
@@ -56,9 +82,9 @@ function loadOrders() {
             const userOrders = userSnapshot.val();
             for (const orderId in userOrders) {
                 const order = userOrders[orderId];
-                const items = order.order_items ? Object.values(order.order_items) : 
-                             order.item ? [order.item] : [];
-                
+                const items = order.order_items ? Object.values(order.order_items) :
+                    order.item ? [order.item] : [];
+
                 if (items.some(item => item.shopId === shopLoggedin)) {
                     orders.push({
                         ...order,
@@ -76,11 +102,11 @@ function loadOrders() {
 // Display orders with filtering
 function displayOrders(orders) {
     const statusFilter = document.getElementById('statusFilter').value;
-    const filteredOrders = statusFilter === 'all' 
-        ? orders 
+    const filteredOrders = statusFilter === 'all'
+        ? orders
         : orders.filter(order => order.status === statusFilter);
 
-    const sortedOrders = filteredOrders.sort((a, b) => 
+    const sortedOrders = filteredOrders.sort((a, b) =>
         new Date(b.date) - new Date(a.date));
 
     const tbody = document.getElementById('ordersTableBody');
@@ -100,13 +126,13 @@ function createOrderRow(order) {
         day: 'numeric'
     });
 
-    const amount = order.totalAmount ? 
+    const amount = order.totalAmount ?
         `₱${order.totalAmount.toFixed(2)}` : '₱0.00';
 
     const status = order.status || 'pending';
     const statusClass = status === 'completed' ? 'shipped' :
         status === 'processing' ? 'pending' :
-        status === 'cancelled' ? 'cancelled' : 'pending';
+            status === 'cancelled' ? 'cancelled' : 'pending';
 
     // Action buttons based on status
     let actionButtons = '';
@@ -119,15 +145,14 @@ function createOrderRow(order) {
                 <i class="fas fa-times"></i> Reject
             </button>
         `;
-    } else if (status === 'accepted') { // line 123 redirect to track.html
+    }else if (status === 'rejected' || status === 'cancelled'){
+        actionButtons = `<span class="no-actions">No actions available</span>`;
+    }else{ // line 123 redirect to track.html
         actionButtons = `
             <button class="btn btn-track" onclick="trackbtn('${order.orderId}', '${order.userId}')">
                 <i class="fas fa-plus"></i> Add Track Status
             </button>
         `;
-    }
-     else {
-        actionButtons = `<span class="no-actions">No actions available</span>`;
     }
 
     return `
@@ -143,7 +168,7 @@ function createOrderRow(order) {
 }
 
 // Accept order function
-window.acceptOrder = async function(orderId, userId) {
+window.acceptOrder = async function (orderId, userId) {
     try {
         const orderRef = ref(db, `AR_shoe_users/transactions/${userId}/${orderId}`);
         await update(orderRef, {
@@ -158,7 +183,7 @@ window.acceptOrder = async function(orderId, userId) {
 };
 
 // Show reject modal
-window.showRejectModal = function(orderId, userId) {
+window.showRejectModal = function (orderId, userId) {
     const modal = document.getElementById('rejectModal');
     if (!modal) return;
 
@@ -167,11 +192,13 @@ window.showRejectModal = function(orderId, userId) {
     modal.style.display = 'block';
 };
 
-window.trackbtn = function(orderID, userId) {window.location.href = `trackform.html?orderID=${orderID}&userID=${userId}`;
+window.trackbtn = function (orderID, userId) {
+    window.location.href = `trackform.html?orderID=${orderID}&userID=${userId}`;
 }
 
 
 // Reject order function
+// Reject order function - UPDATED STOCK PATH
 window.rejectOrder = async function () {
     const reason = document.getElementById('rejectionReason').value.trim();
     if (!reason) {
@@ -189,22 +216,33 @@ window.rejectOrder = async function () {
         }
 
         const orderData = orderSnap.val();
-        const items = orderData.order_items ? Object.values(orderData.order_items) : 
-                      orderData.item ? [orderData.item] : [];
+        const items = orderData.order_items ? Object.values(orderData.order_items) :
+            orderData.item ? [orderData.item] : [];
 
         // Loop through each item and add quantity back to stock
         for (const item of items) {
-            // Construct the correct path to the stock in your database structure
-            const stockPath = `AR_shoe_users/shoe/${item.shopId}/${item.shoeId}/variants/${item.variantKey}/sizes/${item.sizeKey}/${item.size}/stock`;
+            // Corrected stock path based on your database structure
+            const stockPath = `AR_shoe_users/shoe/${item.shopId}/${item.shoeId}/variants/${item.variantKey}/sizes/size_${item.size}`;
             const stockRef = ref(db, stockPath);
-            
+
             const stockSnap = await get(stockRef);
-            
+
             if (stockSnap.exists()) {
-                const currentStock = stockSnap.val();
+                const sizeData = stockSnap.val();
+                const currentStock = sizeData[item.size]?.stock || 0;
+                
                 if (typeof currentStock === 'number') {
                     const updatedStock = currentStock + (item.quantity || 1);
-                    await set(stockRef, updatedStock);
+                    
+                    // Update using the correct path structure
+                    await update(stockRef, {
+                        [item.size]: {
+                            stock: updatedStock,
+                            LastUpdatedBy: roleLoggedin,
+                            LastUpdatedAt: new Date().toISOString()
+                        }
+                    });
+                    
                     console.log(`Updated stock for ${item.shoeId} size ${item.size}: ${currentStock} -> ${updatedStock}`);
                 } else {
                     console.error(`Invalid stock value for ${item.shoeId}:`, currentStock);

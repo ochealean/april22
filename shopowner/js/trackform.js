@@ -1,5 +1,7 @@
+// Use consistent versions (all v10.11.0)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
 import { getDatabase, ref, onValue, push, update, remove } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAuPALylh11cTArigeGJZmLwrFwoAsNPSI",
@@ -12,8 +14,15 @@ const firebaseConfig = {
     measurementId: "G-QC2JSR1FJW"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);  // Now this will work properly
 const db = getDatabase(app);
+
+// Global variables
+let shopLoggedin; // shop ID of the logged-in user
+let roleLoggedin; // role of the logged-in user
+let sname; //shop name
 
 // Get orderID and userID from URL
 const urlParams = new URLSearchParams(window.location.search);
@@ -24,6 +33,48 @@ if (!orderID || !userID) {
     alert("Missing orderID or userID in URL");
     throw new Error("No orderID or userID provided");
 }
+
+
+
+// Initialize the page
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // Fetch shop name from database
+        const shopRef = ref(db, `AR_shoe_users/employees/${user.uid}`);
+        onValue(shopRef, (snapshot) => {
+            const shopData = snapshot.val();
+            console.log("shopData: ", shopData);
+
+            // this will run if the user a Employee NOT a shop owner
+            if (shopData) {
+                roleLoggedin = shopData.role;
+                shopLoggedin = shopData.shopId;
+                console.log("shopLoggedin: ", shopLoggedin);
+                sname = shopData.shopName || ''; // Initialize with empty string if not available
+
+                // Set role-based UI elements
+                if (shopData.role.toLowerCase() === "manager") {
+                    document.getElementById("addemployeebtn").style.display = "none";
+                } else if (shopData.role.toLowerCase() === "salesperson") {
+                    document.getElementById("addemployeebtn").style.display = "none";
+                    document.getElementById("analyticsbtn").style.display = "none";
+                }
+
+            } else {
+                // this will run if the user is a shop owner
+                roleLoggedin = "Shop Owner"; // Default role
+                sname = 'Shop Owner'; // Default shop name
+                shopLoggedin = user.uid;
+            }
+        }, (error) => {
+            console.error("Error fetching shop data:", error);
+            shopLoggedin = user.uid; // Fallback to user UID
+            sname = 'Unknown Shop';
+        });
+    } else {
+        window.location.href = "/user_login.html";
+    }
+});
 
 // DOM elements
 const domElements = {

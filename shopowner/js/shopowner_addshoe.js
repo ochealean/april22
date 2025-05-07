@@ -1,10 +1,12 @@
+// shopowner_addshoe.js - Cleaned up version without local storage
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref as dbRef, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-storage.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import { onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-
+// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAuPALylh11cTArigeGJZmLwrFwoAsNPSI",
     authDomain: "opportunity-9d3bf.firebaseapp.com",
@@ -16,41 +18,76 @@ const firebaseConfig = {
     measurementId: "G-QC2JSR1FJW"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
-let shopID;
-let sname;
+// Global variables
+let shopLoggedin; // shop ID of the logged-in user
+let roleLoggedin; // role of the logged-in user
+let sname; //shop name
+let variantCount = 0;
 
+// DOM Content Loaded event
 document.addEventListener('DOMContentLoaded', () => {
+    // Generate and set random 6-digit code for shoe
     const random6DigitCode = generate6DigitCode();
     document.getElementById('shoeCode').value = "" + random6DigitCode;
+    
+    // Role-based access control
+    const userRole = localStorage.getItem('userRole');
+    if (userRole === "employee") {
+        document.querySelectorAll(".manager, .shopowner").forEach(el => el.style.display = "none");
+    } else if (userRole === "manager") {
+        document.querySelectorAll(".shopowner").forEach(el => el.style.display = "none");
+    }
+
+    // Add first color variant by default
+    addColorVariant();
+
 });
 
+// Firebase authentication state change handler
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        shopID = user.uid;
-        console.log("shopID: ", shopID);
-
         // Fetch shop name from database
-        const shopRef = dbRef(db, `AR_shoe_users/shop/${shopID}`);
+        const shopRef = dbRef(db, `AR_shoe_users/employees/${user.uid}`);
         onValue(shopRef, (snapshot) => {
             const shopData = snapshot.val();
+            console.log("shopData: ", shopData);
+            
+            // this will run if the user a Employee NOT a shop owner
             if (shopData) {
-                sname = shopData.shopName; // Set it globally
-                console.log("shopName: ", sname);
+                roleLoggedin = shopData.role;
+                shopLoggedin = shopData.shopId;
+                sname = shopData.shopName || ''; // Initialize with empty string if not available
+                
+                // Set role-based UI elements
+                if (shopData.role.toLowerCase() === "manager") {
+                    document.getElementById("addemployeebtn").style.display = "none";
+                } else if (shopData.role.toLowerCase() === "salesperson") {
+                    document.getElementById("addemployeebtn").style.display = "none";
+                    document.getElementById("analyticsbtn").style.display = "none";
+                }
             } else {
-                console.warn("Shop name not found for user.");
+                // this will run if the user is a shop owner
+                shopLoggedin = user.uid;
+                roleLoggedin = "Shop Owner"; // Default role
+                sname = 'Shop Owner'; // Default shop name
             }
+        }, (error) => {
+            console.error("Error fetching shop data:", error);
+            shopLoggedin = user.uid; // Fallback to user UID
+            sname = 'Unknown Shop';
         });
     } else {
         window.location.href = "/user_login.html";
     }
 });
 
-
+// Helper functions
 function generate6DigitCode() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -64,12 +101,11 @@ function generate18CharID() {
     return result;
 }
 
-document.getElementById('shoeCode').disabled = true;
-
+// Form submission handler for Firebase
 document.getElementById('addShoeForm').addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    if (!shopID) {
+    if (!shopLoggedin) {
         alert("Please wait for authentication to complete");
         return;
     }
@@ -101,7 +137,7 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
         sizeItems.forEach((item, sizeIndex) => {
             const sizeValue = item.querySelector('.size-input').value;
             const stock = item.querySelector('.stock-input').value;
-            
+
             // Create the nested structure
             sizes[`size_${sizeIndex}`] = {
                 [sizeValue]: {
@@ -124,7 +160,7 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
         // Upload main shoe image if exists
         let shoeImageUrl = '';
         if (shoeImageFile) {
-            shoeImageUrl = await uploadFile(shoeImageFile, `shoes/${shopID}/${random18CharID}_${shoeCode}/main_image`);
+            shoeImageUrl = await uploadFile(shoeImageFile, `shoes/${shopLoggedin}/${random18CharID}_${shoeCode}/main_image`);
         }
 
         // Process each variant and upload its image
@@ -134,10 +170,10 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
             if (variant.variantImageFile) {
                 variantImageUrl = await uploadFile(
                     variant.variantImageFile,
-                    `shoes/${shopID}/${random18CharID}_${shoeCode}/${key}`
+                    `shoes/${shopLoggedin}/${random18CharID}_${shoeCode}/${key}`
                 );
             }
-            
+
             return {
                 [key]: {
                     variantName: variant.variantName,
@@ -152,14 +188,15 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
         const processedVariants = Object.assign({}, ...await Promise.all(variantPromises));
 
         // Save all data to database
-        await set(dbRef(db, `AR_shoe_users/shoe/${shopID}/${random18CharID}_${shoeCode}`), {
+        await set(dbRef(db, `AR_shoe_users/shoe/${shopLoggedin}/${random18CharID}_${shoeCode}`), {
             shoeName: shoeName,
             shoeCode: shoeCode,
             generalDescription: shoeDescription,
             defaultImage: shoeImageUrl,
             variants: processedVariants,
-            shopID: shopID,
+            shopLoggedin: shopLoggedin,
             shopName: sname,
+            roleWhoAdded: roleLoggedin,
             dateAdded: new Date().toISOString()
         });
 
@@ -173,6 +210,7 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
     }
 });
 
+// File upload function
 async function uploadFile(file, path) {
     try {
         const fileRef = storageRef(storage, path);
@@ -190,9 +228,7 @@ async function uploadFile(file, path) {
     }
 }
 
-// Variant and size management functions (same as in your HTML)
-let variantCount = 0;
-
+// Variant management functions
 function addColorVariant() {
     variantCount++;
     const container = document.getElementById('colorVariants');
@@ -269,3 +305,9 @@ function removeVariant(button) {
         alert('You must have at least one color variant');
     }
 }
+
+// At the end of your module (after defining the functions):
+window.addSizeInput = addSizeInput;
+window.removeSizeInput = removeSizeInput;
+window.removeVariant = removeVariant;
+window.addColorVariant = addColorVariant;
