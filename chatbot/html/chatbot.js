@@ -20,6 +20,7 @@ const chatbotResponsesRef = ref(db, 'AR_shoe_users/chatbot/responses');
 const inputField = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
 const chatMessages = document.getElementById('chat-messages');
+const quickQuestionsContainer = document.querySelector('.quick-questions .question-categories');
 
 let faqResponses = {};
 let responseKeys = {}; // Store both the response data and their Firebase keys
@@ -47,7 +48,9 @@ function loadResponsesFromFirebase() {
                     response: Array.isArray(response.responses) 
                         ? response.responses.join('<br>')
                         : response.responses,
-                    firebaseKey: key
+                    firebaseKey: key,
+                    popularity: response.popularity || 0,
+                    lastQuestionSentence: response.lastQuestionSentence || response.keyword
                 };
             }
             return acc;
@@ -56,12 +59,69 @@ function loadResponsesFromFirebase() {
         // Ensure we always have a default response
         faqResponses.default = {
             response: createDefaultResponse(),
-            firebaseKey: null
+            firebaseKey: null,
+            popularity: 0,
+            lastQuestionSentence: "Help topics"
         };
+        
+        // Update popular questions display
+        updatePopularQuestions();
         
     }, (error) => {
         console.error("Error loading responses:", error);
     });
+}
+
+function updatePopularQuestions() {
+    // Clear existing questions
+    quickQuestionsContainer.innerHTML = '';
+    
+    // Create a container for popular questions
+    const popularQuestionsDiv = document.createElement('div');
+    popularQuestionsDiv.className = 'popular-questions';
+    
+    // Create header
+    const header = document.createElement('h4');
+    header.textContent = 'Popular Questions';
+    popularQuestionsDiv.appendChild(header);
+    
+    // Get all responses as array and sort by popularity (descending)
+    const responsesArray = Object.values(faqResponses)
+        .filter(response => response.lastQuestionSentence && response.popularity > 0)
+        .sort((a, b) => b.popularity - a.popularity)
+        .slice(0, 10); // Limit to top 10
+    
+    if (responsesArray.length === 0) {
+        // If no popular questions yet, show some default suggestions
+        const defaultQuestions = [
+            "How does the AR try-on work?",
+            "What are my shipping options?",
+            "How do returns work?",
+            "Can I customize my shoes?"
+        ];
+        
+        defaultQuestions.forEach(question => {
+            const button = createQuestionButton(question);
+            popularQuestionsDiv.appendChild(button);
+        });
+    } else {
+        // Add the popular questions
+        responsesArray.forEach(response => {
+            const button = createQuestionButton(response.lastQuestionSentence);
+            popularQuestionsDiv.appendChild(button);
+        });
+    }
+    
+    quickQuestionsContainer.appendChild(popularQuestionsDiv);
+}
+
+function createQuestionButton(question) {
+    const button = document.createElement('button');
+    button.textContent = question;
+    button.addEventListener('click', () => {
+        askQuestion(question);
+    });
+    return button;
 }
 
 function getBestResponse(input) {
@@ -69,7 +129,7 @@ function getBestResponse(input) {
     
     // 1. Check for exact keyword match
     if (faqResponses[lowerInput]) {
-        incrementPopularity(faqResponses[lowerInput].firebaseKey);
+        updateResponseUsage(faqResponses[lowerInput].firebaseKey, input);
         return faqResponses[lowerInput].response;
     }
     
@@ -79,14 +139,14 @@ function getBestResponse(input) {
     );
     
     if (matchingKey) {
-        incrementPopularity(faqResponses[matchingKey].firebaseKey);
+        updateResponseUsage(faqResponses[matchingKey].firebaseKey, input);
         return faqResponses[matchingKey].response;
     }
     
     return faqResponses.default.response;
 }
 
-function incrementPopularity(responseKey) {
+function updateResponseUsage(responseKey, question) {
     if (!responseKey) return; // Skip if no valid key (like for default response)
     
     const responseRef = ref(db, `AR_shoe_users/chatbot/responses/${responseKey}`);
@@ -95,14 +155,17 @@ function incrementPopularity(responseKey) {
         if (response) {
             const currentPopularity = response.popularity || 0;
             update(responseRef, {
-                popularity: currentPopularity + 1
+                popularity: currentPopularity + 1,
+                lastQuestionSentence: question // Store the last question asked
+            }).then(() => {
+                // Refresh popular questions after update
+                loadResponsesFromFirebase();
             }).catch(error => {
-                console.error("Error updating popularity:", error);
+                console.error("Error updating response usage:", error);
             });
         }
     });
 }
-
 
 function displayMessage(sender, message) {
     const msgDiv = document.createElement('div');
@@ -140,13 +203,6 @@ function setupEventListeners() {
     });
     
     sendButton.addEventListener('click', sendMessage);
-    
-    // Setup quick question buttons
-    document.querySelectorAll('.quick-questions button').forEach(button => {
-        button.addEventListener('click', () => {
-            askQuestion(button.textContent);
-        });
-    });
 }
 
 function initChatbot() {

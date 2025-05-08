@@ -33,6 +33,7 @@ let deleteCallback = null;
 function initChatbotManager() {
     setupEventListeners();
     loadResponsesFromFirebase();
+    window.openEditLastQuestion = openEditLastQuestion; // Make it globally available
 }
 
 // Set up event listeners
@@ -90,6 +91,7 @@ function saveResponseToFirebase() {
         keyword,
         responses: responsesArray,
         popularity: 0, // Initialize popularity counter
+        lastQuestionSentence: "", // Initialize last question
         timestamp: serverTimestamp()
     };
 
@@ -126,12 +128,67 @@ function saveResponseToFirebase() {
 }
 
 
-// Render the chatbot table
+function openEditLastQuestion(id) {
+    get(ref(db, `AR_shoe_users/chatbot/responses/${id}`))
+        .then((snapshot) => {
+            const response = snapshot.val();
+            if (!response) return;
+
+            currentEditId = id;
+            modalTitle.textContent = 'Edit Last Question';
+            
+            // Create modal content specifically for editing last question
+            const modalBody = document.querySelector('.modal-body');
+            modalBody.innerHTML = `
+                <div class="response-form-group">
+                    <label for="editLastQuestion">Last Question:</label>
+                    <input type="text" id="editLastQuestion" class="response-input" 
+                           value="${response.lastQuestionSentence || ''}">
+                </div>
+                <div class="modal-actions">
+                    <button class="cancel-btn" id="cancelModal">Cancel</button>
+                    <button class="approve-btn" id="saveLastQuestion">Save</button>
+                </div>
+            `;
+
+            // Set up event listeners for the new buttons
+            document.getElementById('cancelModal').addEventListener('click', closeModal);
+            document.getElementById('saveLastQuestion').addEventListener('click', () => {
+                saveLastQuestion(id);
+            });
+
+            openModal();
+        })
+        .catch((error) => {
+            showNotification('Error loading response: ' + error.message, 'error');
+        });
+}
+
+function saveLastQuestion(id) {
+    const lastQuestion = document.getElementById('editLastQuestion').value.trim();
+    
+    if (!lastQuestion) {
+        showNotification('Please enter a question', 'error');
+        return;
+    }
+
+    update(ref(db, `AR_shoe_users/chatbot/responses/${id}`), {
+        lastQuestionSentence: lastQuestion
+    })
+    .then(() => {
+        showNotification('Last question updated successfully', 'success');
+        closeModal();
+    })
+    .catch((error) => {
+        showNotification('Error updating last question: ' + error.message, 'error');
+    });
+}
+
 function renderChatbotTable(responses) {
     const tbody = document.getElementById('chatbotTableBody');
 
     if (!responses || Object.keys(responses).length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--gray-dark)">No responses added yet</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--gray-dark)">No responses added yet</td></tr>`;
         return;
     }
 
@@ -141,6 +198,14 @@ function renderChatbotTable(responses) {
             <td>${response.keyword}</td>
             <td class="responseTD">${response.responses.join('<br>')}</td>
             <td>${response.popularity || 0}</td>
+            <td class="last-question">
+                <div class="last-question-content">
+                    ${response.lastQuestionSentence || "Never used"}
+                </div>
+                <button class="edit-question-btn" onclick="openEditLastQuestion('${id}')">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </td>
             <td>
                 <div class="response-actions">
                     <button class="edit-btn" onclick="openEditResponse('${id}')">

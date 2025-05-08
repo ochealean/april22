@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Chatbot - Customer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -19,9 +20,9 @@
             --gray-dark: #7f8c8d;
             --text-primary: #2c3e50;
             --text-secondary: #34495e;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             --radius-sm: 4px;
             --radius-md: 8px;
@@ -76,7 +77,8 @@
             text-decoration: none;
         }
 
-        .nav-item:hover, .nav-item.active {
+        .nav-item:hover,
+        .nav-item.active {
             background-color: var(--primary-dark);
             color: var(--light);
         }
@@ -125,14 +127,14 @@
             object-fit: cover;
             border: 2px solid var(--primary);
         }
-        
+
         #faq-container {
             background-color: white;
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-md);
             padding: 25px;
         }
-        
+
         #chat-messages {
             height: 500px;
             overflow-y: auto;
@@ -143,13 +145,13 @@
             background-color: var(--light);
             scroll-behavior: smooth;
         }
-        
+
         #user-input-container {
             display: flex;
             gap: 10px;
             margin-top: 15px;
         }
-        
+
         #user-input {
             flex-grow: 1;
             padding: 12px 15px;
@@ -158,13 +160,13 @@
             font-size: 16px;
             transition: var(--transition);
         }
-        
+
         #user-input:focus {
             border-color: var(--primary);
             outline: none;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
-        
+
         #send-button {
             padding: 12px 25px;
             background-color: var(--primary);
@@ -176,11 +178,11 @@
             font-weight: 500;
             transition: var(--transition);
         }
-        
+
         #send-button:hover {
             background-color: var(--primary-dark);
         }
-        
+
         .user-message {
             margin: 12px 0;
             padding: 12px 18px;
@@ -191,7 +193,7 @@
             word-wrap: break-word;
             box-shadow: var(--shadow-sm);
         }
-        
+
         .bot-message {
             margin: 12px 0;
             padding: 12px 18px;
@@ -202,37 +204,37 @@
             box-shadow: var(--shadow-sm);
             border-left: 3px solid var(--primary);
         }
-        
+
         .quick-questions {
             margin-top: 30px;
             padding-top: 20px;
             border-top: 1px solid var(--gray);
         }
-        
+
         .quick-questions h3 {
             color: var(--secondary);
             margin-bottom: 15px;
             font-size: 18px;
         }
-        
+
         .quick-questions .question-categories {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
             margin-bottom: 20px;
         }
-        
+
         .quick-questions .category {
             flex: 1;
             min-width: 250px;
         }
-        
+
         .quick-questions h4 {
             color: var(--primary);
             margin-bottom: 10px;
             font-size: 16px;
         }
-        
+
         .quick-questions button {
             background: none;
             border: 1px solid var(--primary);
@@ -247,12 +249,12 @@
             width: 100%;
             text-align: left;
         }
-        
+
         .quick-questions button:hover {
             background-color: var(--primary);
             color: white;
         }
-        
+
         .link-button {
             display: inline-block;
             margin-top: 10px;
@@ -264,11 +266,11 @@
             font-size: 14px;
             transition: var(--transition);
         }
-        
+
         .link-button:hover {
             background-color: #27ae60;
         }
-        
+
         .feature-highlight {
             background-color: #fff9e6;
             padding: 15px;
@@ -276,7 +278,7 @@
             margin: 15px 0;
             border-left: 4px solid var(--warning);
         }
-        
+
         .troubleshooting-section {
             background-color: #f0f7ff;
             padding: 15px;
@@ -284,54 +286,84 @@
             margin: 15px 0;
             border-left: 4px solid var(--primary);
         }
-        
+
         .troubleshooting-item {
             margin-bottom: 10px;
         }
-        
+
         .troubleshooting-item strong {
             color: var(--secondary);
+        }
+
+        .popular-questions {
+            width: 100%;
+        }
+
+        .popular-questions h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .popular-questions button {
+            background: none;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            margin: 5px 5px 5px 0;
+            display: inline-block;
+            text-align: left;
+        }
+
+        .popular-questions button:hover {
+            background-color: var(--primary);
+            color: white;
         }
 
         @media (max-width: 768px) {
             .dashboard {
                 grid-template-columns: 1fr;
             }
-            
+
             .sidebar {
                 width: 100%;
                 height: auto;
                 position: relative;
                 padding: 1rem;
             }
-            
+
             .nav-items {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 0.5rem;
             }
-            
+
             .nav-item {
                 margin: 0;
                 padding: 0.5rem;
                 font-size: 0.9rem;
             }
-            
+
             #chat-messages {
                 height: 300px;
             }
-            
+
             .quick-questions .question-categories {
                 flex-direction: column;
                 gap: 10px;
             }
-            
+
             .quick-questions .category {
                 min-width: 100%;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="dashboard">
         <!-- Sidebar -->
@@ -380,12 +412,13 @@
 
             <div id="faq-container">
                 <div id="chat-messages"></div>
-                
+
                 <div id="user-input-container">
-                    <input type="text" id="user-input" placeholder="Ask about products, AR, customization, or issues...">
+                    <input type="text" id="user-input"
+                        placeholder="Ask about products, AR, customization, or issues...">
                     <button id="send-button">Send</button>
                 </div>
-                
+
                 <div class="quick-questions">
                     <h3>Quick Questions:</h3>
                     <div class="question-categories">
@@ -412,7 +445,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- <script>
         // Enhanced FAQ database for SmartFix with direct button responses
         const faqResponses = {
@@ -602,4 +635,5 @@
     </script> -->
     <script src="/chatbot/html/chatbot.js" type="module"></script>
 </body>
+
 </html>
