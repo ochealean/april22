@@ -243,29 +243,10 @@ function getCustomernameUsingID(userID) {
 
 // Display reviews on the page
 async function displayReviews(feedbacks) {
-    if (reviewsList) reviewsList.innerHTML = '';
+    if (reviewsList) reviewsList.innerHTML = '<div class="loading">Loading reviews...</div>';
 
-    // Calculate and display average rating
-    const averageRating = calculateAverageRating(feedbacks);
-    const averageRatingElement = document.getElementById('averageRating');
-
-    if (averageRatingElement) {
-        if (averageRating > 0) {
-            averageRatingElement.innerHTML =
-                `<span class="average-rating" style="font-size: 0.8em; color: var(--warning);">
-                    (Average: ${averageRating} <i class="fas fa-star"></i>)
-                </span>`
-                ;
-        } else {
-            averageRatingElement.innerHTML =
-                `<span class="average-rating" style="font-size: 0.8em; color: var(--gray-dark);">
-                    (No ratings yet)
-                </span>`
-                ;
-        }
-    }
-
-    // First collect all reviews we need to display
+    // Calculate review counts per rating
+    const ratingCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
     const reviewsToDisplay = [];
 
     for (const userId in feedbacks) {
@@ -276,7 +257,34 @@ async function displayReviews(feedbacks) {
                     userId,
                     feedback
                 });
+                // Count ratings (1-5 stars only)
+                if (feedback.rating >= 1 && feedback.rating <= 5) {
+                    ratingCounts[feedback.rating]++;
+                }
             }
+        }
+    }
+
+    // Update the filter buttons with counts
+    updateRatingFilters(ratingCounts);
+
+    // Calculate and display average rating
+    const averageRating = calculateAverageRating(feedbacks);
+    const averageRatingElement = document.getElementById('averageRating');
+    
+    if (averageRatingElement) {
+        if (averageRating > 0) {
+            averageRatingElement.innerHTML = `
+                <span class="average-rating" style="font-size: 0.8em; color: var(--warning);">
+                    ${averageRating} <i class="fas fa-star"></i> (${Object.values(ratingCounts).reduce((a, b) => a + b, 0)})
+                </span>
+            `;
+        } else {
+            averageRatingElement.innerHTML = `
+                <span class="average-rating" style="font-size: 0.8em; color: var(--gray-dark);">
+                    (No ratings yet)
+                </span>
+            `;
         }
     }
 
@@ -286,12 +294,14 @@ async function displayReviews(feedbacks) {
         return;
     }
 
+    reviewsList.innerHTML = '';
+
     // Process each review asynchronously
     for (const review of reviewsToDisplay) {
         try {
             // Await the username lookup
             const username = await getCustomernameUsingID(review.userId);
-
+            
             // Create review element
             const reviewDiv = document.createElement("div");
             reviewDiv.classList.add("review-item");
@@ -300,44 +310,104 @@ async function displayReviews(feedbacks) {
             // Create review header
             const headerDiv = document.createElement("div");
             headerDiv.classList.add("review-header");
-
+            
             const authorSpan = document.createElement("span");
             authorSpan.classList.add("review-author");
             authorSpan.textContent = username;
-
+            
             const dateSpan = document.createElement("span");
             dateSpan.classList.add("review-date");
             dateSpan.textContent = formatTimestamp(review.feedback.timestamp);
-
+            
             headerDiv.appendChild(authorSpan);
             headerDiv.appendChild(dateSpan);
-
+            
             // Create stars
             const starsDiv = document.createElement("div");
             starsDiv.classList.add("review-stars");
-
+            
             for (let i = 1; i <= 5; i++) {
                 const starIcon = document.createElement("i");
                 starIcon.classList.add(i <= review.feedback.rating ? "fas" : "far");
                 starIcon.classList.add("fa-star");
                 starsDiv.appendChild(starIcon);
             }
-
+            
             // Create comment
             const commentP = document.createElement("p");
             commentP.textContent = review.feedback.comment || "No comment provided.";
-
+            
             // Append all elements
             reviewDiv.appendChild(headerDiv);
             reviewDiv.appendChild(starsDiv);
             reviewDiv.appendChild(commentP);
-
+            
             reviewsList.appendChild(reviewDiv);
 
         } catch (error) {
             console.error("Error processing review:", error);
         }
     }
+}
+
+function updateRatingFilters(ratingCounts) {
+    const filtersContainer = document.querySelector('.review-filters');
+    if (!filtersContainer) return;
+    
+    // Clear existing filters
+    filtersContainer.innerHTML = '';
+    
+    // Total count for "All" filter
+    const totalReviews = Object.values(ratingCounts).reduce((a, b) => a + b, 0);
+    
+    // Create filter buttons from 5 stars to 1 star
+    for (let rating = 5; rating >= 1; rating--) {
+        const filter = document.createElement('div');
+        filter.className = 'stars-filter';
+        filter.dataset.rating = rating;
+        filter.onclick = () => filterReviews(rating);
+        
+        filter.innerHTML = `
+            <div class="stars">
+                ${'<i class="fas fa-star"></i>'.repeat(rating)}
+                ${'<i class="far fa-star"></i>'.repeat(5 - rating)}
+            </div>
+            <div class="text">${rating} Star${rating !== 1 ? 's' : ''} (${ratingCounts[rating]})</div>
+        `;
+        
+        filtersContainer.appendChild(filter);
+    }
+    
+    // Add "All" filter at the end
+    const allFilter = document.createElement('div');
+    allFilter.className = 'stars-filter active';
+    allFilter.dataset.rating = '0';
+    allFilter.onclick = () => filterReviews(0);
+    allFilter.innerHTML = `
+        <div class="text">All Reviews (${totalReviews})</div>
+    `;
+    filtersContainer.appendChild(allFilter);
+}
+
+// Filter reviews by star rating
+window.filterReviews = function(rating) {
+    const reviewItems = document.querySelectorAll('.review-item');
+    const filters = document.querySelectorAll('.stars-filter');
+    
+    // Update active filter button
+    filters.forEach(filter => {
+        filter.classList.remove('active');
+        if (parseInt(filter.dataset.rating) === rating) {
+            filter.classList.add('active');
+        }
+    });
+    
+    // Show/hide reviews based on filter
+    reviewItems.forEach(item => {
+        item.style.display = (rating === 0 || parseInt(item.dataset.rating) === rating) 
+            ? 'block' 
+            : 'none';
+    });
 }
 
 // Wishlist toggle
