@@ -231,16 +231,20 @@ function saveLastQuestion(id) {
 // Render chatbot table with responses
 function renderChatbotTable(responses) {
     const tbody = document.getElementById('chatbotTableBody');
+    
+    // ✅ Clear existing rows to prevent duplication
+    tbody.innerHTML = '';
 
     if (!responses || Object.keys(responses).length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--gray-dark)">No responses added yet</td></tr>`;
         return;
     }
 
+    // ✅ Render fresh rows
     tbody.innerHTML = Object.entries(responses).map(([id, response]) => `
         <tr>
             <td>${id}</td>
-            <td>${response.category || 'feature'}</td> <!-- Add category column -->
+            <td>${response.category || 'feature'}</td>
             <td>${response.keyword}</td>
             <td class="responseTD">${Array.isArray(response.responses) ? response.responses.join('<br>') : response.responses}</td>
             <td>${response.popularity || 0}</td>
@@ -265,6 +269,7 @@ function renderChatbotTable(responses) {
         </tr>
     `).join('');
 }
+
 
 // Open modal for editing a response
 function openEditResponse(id) {
