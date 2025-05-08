@@ -23,7 +23,7 @@ const chatMessages = document.getElementById('chat-messages');
 const quickQuestionsContainer = document.querySelector('.quick-questions .question-categories');
 
 let faqResponses = {};
-let responseKeys = {}; // Store both the response data and their Firebase keys
+let responseKeys = {};
 
 function createDefaultResponse() {
     return `<div class="troubleshooting-section">
@@ -39,7 +39,6 @@ function loadResponsesFromFirebase() {
     onValue(chatbotResponsesRef, (snapshot) => {
         const responses = snapshot.val() || {};
         
-        // Store both the data and keys
         responseKeys = responses;
         faqResponses = Object.entries(responses).reduce((acc, [key, response]) => {
             if (response.keyword && response.responses) {
@@ -50,69 +49,109 @@ function loadResponsesFromFirebase() {
                         : response.responses,
                     firebaseKey: key,
                     popularity: response.popularity || 0,
-                    lastQuestionSentence: response.lastQuestionSentence || response.keyword
+                    lastQuestionSentence: response.lastQuestionSentence || response.keyword,
+                    category: response.category || 'general' // Default to general if no category specified
                 };
             }
             return acc;
         }, {});
         
-        // Ensure we always have a default response
         faqResponses.default = {
             response: createDefaultResponse(),
             firebaseKey: null,
             popularity: 0,
-            lastQuestionSentence: "Help topics"
+            lastQuestionSentence: "Help topics",
+            category: 'general'
         };
         
-        // Update popular questions display
-        updatePopularQuestions();
+        updateQuickQuestions();
         
     }, (error) => {
         console.error("Error loading responses:", error);
     });
 }
 
-function updatePopularQuestions() {
+function updateQuickQuestions() {
     // Clear existing questions
     quickQuestionsContainer.innerHTML = '';
     
-    // Create a container for popular questions
-    const popularQuestionsDiv = document.createElement('div');
-    popularQuestionsDiv.className = 'popular-questions';
+    // Get all responses as array
+    const allResponses = Object.values(faqResponses)
+        .filter(response => response.lastQuestionSentence && response.popularity > 0);
     
-    // Create header
-    const header = document.createElement('h4');
-    header.textContent = 'Popular Questions';
-    popularQuestionsDiv.appendChild(header);
-    
-    // Get all responses as array and sort by popularity (descending)
-    const responsesArray = Object.values(faqResponses)
-        .filter(response => response.lastQuestionSentence && response.popularity > 0)
+    // 1. Popular Questions (top 3 by popularity)
+    const popularQuestions = [...allResponses]
         .sort((a, b) => b.popularity - a.popularity)
-        .slice(0, 10); // Limit to top 10
+        .slice(0, 3);
     
-    if (responsesArray.length === 0) {
-        // If no popular questions yet, show some default suggestions
-        const defaultQuestions = [
-            "How does the AR try-on work?",
-            "What are my shipping options?",
-            "How do returns work?",
-            "Can I customize my shoes?"
-        ];
-        
-        defaultQuestions.forEach(question => {
-            const button = createQuestionButton(question);
-            popularQuestionsDiv.appendChild(button);
-        });
-    } else {
-        // Add the popular questions
-        responsesArray.forEach(response => {
-            const button = createQuestionButton(response.lastQuestionSentence);
-            popularQuestionsDiv.appendChild(button);
-        });
+    // 2. Categorized Questions (top 3 from each category by popularity)
+    const featuresQuestions = allResponses
+        .filter(response => response.category === 'feature')
+        .sort((a, b) => b.popularity - a.popularity)
+        .slice(0, 3);
+    
+    const ordersQuestions = allResponses
+        .filter(response => response.category === 'orders')
+        .sort((a, b) => b.popularity - a.popularity)
+        .slice(0, 3);
+    
+    const helpQuestions = allResponses
+        .filter(response => response.category === 'help')
+        .sort((a, b) => b.popularity - a.popularity)
+        .slice(0, 3);
+    
+    // Create containers for each section
+    const popularDiv = createQuestionCategory('Popular Questions', popularQuestions);
+    const featuresDiv = createQuestionCategory('Features', featuresQuestions);
+    const ordersDiv = createQuestionCategory('Orders', ordersQuestions);
+    const helpDiv = createQuestionCategory('Help', helpQuestions);
+    
+    // Add default questions if any category is empty
+    if (popularQuestions.length === 0) {
+        popularDiv.appendChild(createQuestionButton("How does the AR try-on work?"));
+        popularDiv.appendChild(createQuestionButton("What are my shipping options?"));
+        popularDiv.appendChild(createQuestionButton("How do returns work?"));
     }
     
-    quickQuestionsContainer.appendChild(popularQuestionsDiv);
+    if (featuresQuestions.length === 0) {
+        featuresDiv.appendChild(createQuestionButton("How does the AR try-on work?"));
+        featuresDiv.appendChild(createQuestionButton("Can I customize my shoes?"));
+        featuresDiv.appendChild(createQuestionButton("What products do you offer?"));
+    }
+    
+    if (ordersQuestions.length === 0) {
+        ordersDiv.appendChild(createQuestionButton("What are my shipping options?"));
+        ordersDiv.appendChild(createQuestionButton("How do returns work?"));
+        ordersDiv.appendChild(createQuestionButton("What payment methods do you accept?"));
+    }
+    
+    if (helpQuestions.length === 0) {
+        helpDiv.appendChild(createQuestionButton("I have an issue with my order"));
+        helpDiv.appendChild(createQuestionButton("My product has a problem"));
+        helpDiv.appendChild(createQuestionButton("I need sizing help"));
+    }
+    
+    // Append all sections to the container
+    quickQuestionsContainer.appendChild(popularDiv);
+    quickQuestionsContainer.appendChild(featuresDiv);
+    quickQuestionsContainer.appendChild(ordersDiv);
+    quickQuestionsContainer.appendChild(helpDiv);
+}
+
+function createQuestionCategory(title, questions) {
+    const categoryDiv = document.createElement('div');
+    categoryDiv.className = 'category';
+    
+    const header = document.createElement('h4');
+    header.textContent = title;
+    categoryDiv.appendChild(header);
+    
+    questions.forEach(response => {
+        const button = createQuestionButton(response.lastQuestionSentence);
+        categoryDiv.appendChild(button);
+    });
+    
+    return categoryDiv;
 }
 
 function createQuestionButton(question) {
@@ -127,13 +166,11 @@ function createQuestionButton(question) {
 function getBestResponse(input) {
     const lowerInput = input.toLowerCase().trim();
     
-    // 1. Check for exact keyword match
     if (faqResponses[lowerInput]) {
         updateResponseUsage(faqResponses[lowerInput].firebaseKey, input);
         return faqResponses[lowerInput].response;
     }
     
-    // 2. Check for partial matches
     const matchingKey = Object.keys(faqResponses).find(key => 
         key !== 'default' && lowerInput.includes(key)
     );
@@ -147,7 +184,7 @@ function getBestResponse(input) {
 }
 
 function updateResponseUsage(responseKey, question) {
-    if (!responseKey) return; // Skip if no valid key (like for default response)
+    if (!responseKey) return;
     
     const responseRef = ref(db, `AR_shoe_users/chatbot/responses/${responseKey}`);
     get(responseRef).then((snapshot) => {
@@ -156,9 +193,8 @@ function updateResponseUsage(responseKey, question) {
             const currentPopularity = response.popularity || 0;
             update(responseRef, {
                 popularity: currentPopularity + 1,
-                lastQuestionSentence: question // Store the last question asked
+                lastQuestionSentence: question
             }).then(() => {
-                // Refresh popular questions after update
                 loadResponsesFromFirebase();
             }).catch(error => {
                 console.error("Error updating response usage:", error);
@@ -209,7 +245,6 @@ function initChatbot() {
     loadResponsesFromFirebase();
     setupEventListeners();
     
-    // Initial greeting after short delay
     setTimeout(() => {
         displayMessage('bot', `Welcome to SmartFit's Help Center! 👟<br><br>
             How can I assist you today? Try asking about:<br>
@@ -220,8 +255,5 @@ function initChatbot() {
     }, 1000);
 }
 
-// Make functions available globally if needed
 window.askQuestion = askQuestion;
-
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', initChatbot);
