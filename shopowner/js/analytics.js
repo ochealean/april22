@@ -99,60 +99,78 @@ function loadShopProfile(shopId) {
 
 function loadShopTransactions(shopId) {
     const transactionsRef = ref(db, 'AR_shoe_users/transactions');
-
     onValue(transactionsRef, (snapshot) => {
         if (snapshot.exists()) {
             const allTransactions = snapshot.val();
             const shopTransactions = [];
+            let filteredOutCount = 0;
 
-            // Filter transactions for this shop
             Object.keys(allTransactions).forEach(userId => {
                 const userTransactions = allTransactions[userId];
 
                 Object.keys(userTransactions).forEach(orderId => {
                     const transaction = userTransactions[orderId];
 
+                    // Debug logging for each transaction
+                    console.log(`Processing order ${orderId}:`, transaction);
+
                     if (transaction.item && transaction.item.shopId === shopId) {
-                        shopTransactions.push({
-                            ...transaction,
-                            orderId,
-                            userId
-                        });
+                        try {
+                            const transactionDate = new Date(transaction.date);
+                            if (isNaN(transactionDate.getTime())) {
+                                console.error(`Invalid date for order ${orderId}: ${transaction.date}`);
+                                return;
+                            }
+                            shopTransactions.push({
+                                ...transaction,
+                                orderId,
+                                userId
+                            });
+                        } catch (e) {
+                            console.error(`Error processing order ${orderId}:`, e);
+                        }
+                    } else {
+                        filteredOutCount++;
+                        console.log(`Filtered out order ${orderId} - shopId mismatch or missing item`);
                     }
                 });
             });
 
+            console.log(`Total transactions: ${Object.keys(allTransactions).length}`);
+            console.log(`Filtered transactions for shop ${shopId}: ${shopTransactions.length}`);
+            console.log(`Transactions filtered out: ${filteredOutCount}`);
+
             // Sort by date (newest first)
             shopTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            // Display in table
             displayTransactions(shopTransactions);
-
-            // Prepare data for charts
             prepareChartData(shopTransactions);
         }
     });
 }
 
 function displayTransactions(transactions) {
-    // Clear existing rows
     elements.recentSalesTable.innerHTML = '';
 
-    // Add new rows
-    transactions.forEach(transaction => {
-        const row = document.createElement('tr');
+    // Filter out future dates if needed
+    const now = new Date();
+    const validTransactions = transactions.filter(t => new Date(t.date) <= now);
 
-        // Format date
-        const date = new Date(transaction.date);
-        const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    validTransactions.forEach(transaction => {
+        // Add new rows
+        transactions.forEach(transaction => {
+            const row = document.createElement('tr');
 
-        // Determine status class
-        let statusClass = 'badge-primary';
-        if (transaction.status === 'Delivered') statusClass = 'badge-success';
-        if (transaction.status === 'rejected') statusClass = 'badge-danger';
-        if (transaction.status === 'cancelled') statusClass = 'badge-warning';
+            // Format date
+            const date = new Date(transaction.date);
+            const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
 
-        row.innerHTML = `
+            // Determine status class
+            let statusClass = 'badge-primary';
+            if (transaction.status === 'Delivered') statusClass = 'badge-success';
+            if (transaction.status === 'rejected') statusClass = 'badge-danger';
+            if (transaction.status === 'cancelled') statusClass = 'badge-warning';
+
+            row.innerHTML = `
             <td>${formattedDate}</td>
             <td>${transaction.orderId}</td>
             <td>${transaction.shippingInfo?.firstName || 'N/A'} ${transaction.shippingInfo?.lastName || ''}</td>
@@ -162,7 +180,8 @@ function displayTransactions(transactions) {
             <td>₱${transaction.totalAmount?.toLocaleString() || '0'}</td>
             <td><span class="badge ${statusClass}">${transaction.status}</span></td>
         `;
-        elements.recentSalesTable.appendChild(row);
+            elements.recentSalesTable.appendChild(row);
+        });
     });
 }
 
