@@ -89,6 +89,7 @@ function saveResponseToFirebase() {
     const responseData = {
         keyword,
         responses: responsesArray,
+        popularity: 0, // Initialize popularity counter
         timestamp: serverTimestamp()
     };
 
@@ -130,7 +131,7 @@ function renderChatbotTable(responses) {
     const tbody = document.getElementById('chatbotTableBody');
 
     if (!responses || Object.keys(responses).length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--gray-dark)">No responses added yet</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--gray-dark)">No responses added yet</td></tr>`;
         return;
     }
 
@@ -139,6 +140,7 @@ function renderChatbotTable(responses) {
             <td>${id}</td>
             <td>${response.keyword}</td>
             <td class="responseTD">${response.responses.join('<br>')}</td>
+            <td>${response.popularity || 0}</td>
             <td>
                 <div class="response-actions">
                     <button class="edit-btn" onclick="openEditResponse('${id}')">

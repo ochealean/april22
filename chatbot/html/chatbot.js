@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAuPALylh11cTArigeGJZmLwrFwoAsNPSI",
@@ -21,9 +21,8 @@ const inputField = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
 const chatMessages = document.getElementById('chat-messages');
 
-let faqResponses = {
-    default: createDefaultResponse()
-};
+let faqResponses = {};
+let responseKeys = {}; // Store both the response data and their Firebase keys
 
 function createDefaultResponse() {
     return `<div class="troubleshooting-section">
@@ -39,21 +38,27 @@ function loadResponsesFromFirebase() {
     onValue(chatbotResponsesRef, (snapshot) => {
         const responses = snapshot.val() || {};
         
-        // Transform the Firebase data into our FAQ format
-        faqResponses = Object.values(responses).reduce((acc, response) => {
+        // Store both the data and keys
+        responseKeys = responses;
+        faqResponses = Object.entries(responses).reduce((acc, [key, response]) => {
             if (response.keyword && response.responses) {
                 const keyword = response.keyword.toLowerCase();
-                acc[keyword] = Array.isArray(response.responses) 
-                    ? response.responses.join('<br>')
-                    : response.responses;
+                acc[keyword] = {
+                    response: Array.isArray(response.responses) 
+                        ? response.responses.join('<br>')
+                        : response.responses,
+                    firebaseKey: key
+                };
             }
             return acc;
         }, {});
         
         // Ensure we always have a default response
-        faqResponses.default = faqResponses.default || createDefaultResponse();
+        faqResponses.default = {
+            response: createDefaultResponse(),
+            firebaseKey: null
+        };
         
-        console.log("Loaded responses:", faqResponses); // Debug logging
     }, (error) => {
         console.error("Error loading responses:", error);
     });
@@ -64,7 +69,8 @@ function getBestResponse(input) {
     
     // 1. Check for exact keyword match
     if (faqResponses[lowerInput]) {
-        return faqResponses[lowerInput];
+        incrementPopularity(faqResponses[lowerInput].firebaseKey);
+        return faqResponses[lowerInput].response;
     }
     
     // 2. Check for partial matches
@@ -72,8 +78,31 @@ function getBestResponse(input) {
         key !== 'default' && lowerInput.includes(key)
     );
     
-    return matchingKey ? faqResponses[matchingKey] : faqResponses.default;
+    if (matchingKey) {
+        incrementPopularity(faqResponses[matchingKey].firebaseKey);
+        return faqResponses[matchingKey].response;
+    }
+    
+    return faqResponses.default.response;
 }
+
+function incrementPopularity(responseKey) {
+    if (!responseKey) return; // Skip if no valid key (like for default response)
+    
+    const responseRef = ref(db, `AR_shoe_users/chatbot/responses/${responseKey}`);
+    get(responseRef).then((snapshot) => {
+        const response = snapshot.val();
+        if (response) {
+            const currentPopularity = response.popularity || 0;
+            update(responseRef, {
+                popularity: currentPopularity + 1
+            }).catch(error => {
+                console.error("Error updating popularity:", error);
+            });
+        }
+    });
+}
+
 
 function displayMessage(sender, message) {
     const msgDiv = document.createElement('div');
