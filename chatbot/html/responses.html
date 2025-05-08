@@ -834,6 +834,23 @@
         .troubleshooting-item strong {
             color: var(--secondary);
         }
+
+        .response-form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: white;
+            transition: var(--transition);
+        }
+
+        .response-form-group select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
     </style>
 </head>
 
@@ -877,6 +894,11 @@
         </div>
         <div class="modal-body">
             <div class="response-form-group">
+                <select id="modalCategory" class="response-input">
+                    <option value="feature">Feature</option>
+                    <option value="orders">Orders</option>
+                    <option value="help">Help</option>
+                </select>
                 <input type="text" id="modalKeyword" class="response-input" placeholder="Enter keyword (single word)">
                 <div class="response-list" id="responseList">
                     <textarea id="responseTextarea" class="response-input"
@@ -908,6 +930,7 @@
                     <thead>
                         <tr>
                             <th><i class="fas fa-id-badge"></i> ID</th>
+                            <th><i class="fas fa-tag"></i> Category</th> <!-- New column -->
                             <th><i class="fas fa-key"></i> Keyword</th>
                             <th><i class="fas fa-comment-dots"></i> Responses</th>
                             <th><i class="fas fa-chart-line"></i> Popularity</th>
