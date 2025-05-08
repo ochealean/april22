@@ -124,7 +124,7 @@ function displayRecentOrders(orders) {
             });
 
             const amount = order.totalAmount ?
-                `$${order.totalAmount.toFixed(2)}` : '$0.00';
+                `₱${order.totalAmount.toFixed(2)}` : '₱ 0.00';
 
             const status = order.status || 'pending';
             const statusClass = status === 'completed' ? 'shipped' :
@@ -316,7 +316,7 @@ function displayOrderModal(order) {
                 <div class="order-item-title">${item.name}</div>
                 <div class="order-item-variant">${item.variantName} (${item.color}) - Size: ${item.size}</div>
                 <div>Quantity: ${item.quantity}</div>
-                <div class="order-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+                <div class="order-item-price">₱${(item.price * item.quantity).toFixed(2)}</div>
             </div>
         </div>
     `).join('');
@@ -329,7 +329,7 @@ function displayOrderModal(order) {
                     <p><strong>Order ID:</strong> ${order.orderId}</p>
                     <p><strong>Date:</strong> ${orderDate}</p>
                     <p><strong>Status:</strong> <span class="status ${order.status}">${order.status}</span></p>
-                    <p><strong>Total:</strong> $${order.totalAmount?.toFixed(2) || '0.00'}</p>
+                    <p><strong>Total:</strong> ₱${order.totalAmount?.toFixed(2) || '0.00'}</p>
                 </div>
                 
                 <div class="order-details-section">

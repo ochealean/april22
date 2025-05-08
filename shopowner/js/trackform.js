@@ -208,7 +208,7 @@ function updateOrderInfo(data) {
     }
 
     if (domElements.orderTotal && data.totalAmount) {
-        domElements.orderTotal.textContent = `$${data.totalAmount.toFixed(2)}`;
+        domElements.orderTotal.textContent = `₱${data.totalAmount.toFixed(2)}`;
     }
 }
 

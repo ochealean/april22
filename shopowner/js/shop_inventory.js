@@ -184,7 +184,7 @@ function showShoeDetails(shoeId) {
                 variantsHtml += `
                     <div class="variant-detail">
                         <h4>${variant.variantName || 'Variant'} (${variant.color || 'No color'})</h4>
-                        <p><strong>Price:</strong> $${variant.price || '0.00'}</p>
+                        <p><strong>Price:</strong> ₱${variant.price || '0.00'}</p>
                         ${variant.imageUrl ?
                         `<img src="${variant.imageUrl}" alt="${variant.variantName}" class="variant-image">` :
                         '<p>No variant image</p>'}
