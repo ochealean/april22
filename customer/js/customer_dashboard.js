@@ -132,7 +132,7 @@ function displayShoe(shoe) {
             <h3>${shoe.shoeName}</h3>
             <p class="shoe-code">Code: ${shoe.shoeCode}</p>
             <p class="shoe-description">${fixedDescription(shoe.generalDescription) || 'No description available'}</p>
-            <p class="shoe-price">From $${lowestPrice.toFixed(2)}</p>
+            <p class="shoe-price">From ₱${lowestPrice.toFixed(2)}</p>
             <div class="shoe-variants">
                 <p>Available in ${Object.keys(shoe.variants).length} color${Object.keys(shoe.variants).length > 1 ? 's' : ''}</p>
             </div>
@@ -187,7 +187,7 @@ function updateProductModalContent() {
              onclick="selectVariant('${key}')">
             <div class="variant-header">
                 <span class="variant-name">${variant.variantName}</span>
-                <span class="variant-price">$${variant.price}</span>
+                <span class="variant-price">₱${variant.price}</span>
             </div>
             <div>
                 ${variant.imageUrl ? `<img src="${variant.imageUrl}" class="variant-image">` : ''}
@@ -229,7 +229,7 @@ function updateProductModalContent() {
             <div class="product-info">
                 <h2 class="product-name">Shop Name: ${shoe.shopName}</h2>
                 <div class="product-code">Product Code: ${shoe.shoeCode}</div>
-                <div class="product-price">$${variant.price}</div>
+                <div class="product-price">₱${variant.price}</div>
                 
                 <!-- Add quantity selector -->
                 <div class="quantity-selector" ${!selectedSizeKey ? 'style="display:none;"' : ''}>

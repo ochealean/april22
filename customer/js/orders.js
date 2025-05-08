@@ -144,7 +144,7 @@ function createOrderCard(order) {
             <div class="item-details">
                 <div class="item-name">${order.item.name || 'Unknown Product'}</div>
                 <div class="item-variant">Color: ${order.item.color || 'N/A'}, Size: ${order.item.size || 'N/A'}</div>
-                <div class="item-price">$${(order.item.price || 0).toFixed(2)}</div>
+                <div class="item-price">₱${(order.item.price || 0).toFixed(2)}</div>
             </div>
             <div class="item-quantity">Qty: ${order.item.quantity || 1}</div>
         </div>
@@ -178,7 +178,7 @@ function createOrderCard(order) {
             </div>
         </div>
         <div class="order-footer">
-            <div class="order-total">Total: $${(order.totalAmount || 0).toFixed(2)}</div>
+            <div class="order-total">Total: ₱${(order.totalAmount || 0).toFixed(2)}</div>
             <div class="order-actions">
                 ${actionButtons}
             </div>

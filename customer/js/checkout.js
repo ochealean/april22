@@ -451,19 +451,19 @@ function showOrderConfirmationModal(order) {
     modalOrderSummary.innerHTML = `
         <div class="order-summary-item">
             <span>Subtotal</span>
-            <span>$${subtotal.toFixed(2)}</span>
+            <span>₱${subtotal.toFixed(2)}</span>
         </div>
         <div class="order-summary-item">
             <span>Tax (10%)</span>
-            <span>$${tax.toFixed(2)}</span>
+            <span>₱${tax.toFixed(2)}</span>
         </div>
         <div class="order-summary-item">
             <span>Shipping</span>
-            <span>$${shipping.toFixed(2)}</span>
+            <span>₱${shipping.toFixed(2)}</span>
         </div>
         <div class="order-summary-item order-total">
             <span>Total</span>
-            <span>$${order.totalAmount.toFixed(2)}</span>
+            <span>₱${order.totalAmount.toFixed(2)}</span>
         </div>
     `;
 
@@ -546,7 +546,7 @@ function displaySingleItemOrder(item) {
             <p>${item.variantName} (${item.color})</p>
             <p>Size: ${item.size}</p>
             <p>Quantity: ${item.quantity}</p>
-            <p class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</p>
+            <p class="cart-item-price">₱${(item.price * item.quantity).toFixed(2)}</p>
         </div>
     `;
     orderItemsContainer.appendChild(itemElement);
@@ -560,19 +560,19 @@ function displaySingleItemOrder(item) {
     document.getElementById('orderSummary').innerHTML = `
         <div class="order-summary-item">
             <span>Subtotal</span>
-            <span>$${subtotal.toFixed(2)}</span>
+            <span>₱${subtotal.toFixed(2)}</span>
         </div>
         <div class="order-summary-item">
             <span>Tax (10%)</span>
-            <span>$${tax.toFixed(2)}</span>
+            <span>₱${tax.toFixed(2)}</span>
         </div>
         <div class="order-summary-item">
             <span>Shipping</span>
-            <span>$${shipping.toFixed(2)}</span>
+            <span>₱${shipping.toFixed(2)}</span>
         </div>
         <div class="order-summary-item order-total">
             <span>Total</span>
-            <span>$${total.toFixed(2)}</span>
+            <span>₱${total.toFixed(2)}</span>
         </div>
     `;
 }
@@ -685,7 +685,7 @@ async function displayMultipleItemOrder(cartIDs) {
                 <p>${item.variantName} (${item.color})</p>
                 <p>Size: ${item.size}</p>
                 <p>Quantity: ${item.quantity}</p>
-                <p class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</p>
+                <p class="cart-item-price">₱${(item.price * item.quantity).toFixed(2)}</p>
                 ${item.availableStock < item.quantity ? 
                     `<p class="stock-warning">Only ${item.availableStock} left in stock!</p>` : ''}
             </div>
@@ -705,19 +705,19 @@ function updateOrderSummary(items) {
     document.getElementById('orderSummary').innerHTML = `
         <div class="order-summary-item">
             <span>Subtotal</span>
-            <span>$${subtotal.toFixed(2)}</span>
+            <span>₱${subtotal.toFixed(2)}</span>
         </div>
         <div class="order-summary-item">
             <span>Tax (10%)</span>
-            <span>$${tax.toFixed(2)}</span>
+            <span>₱${tax.toFixed(2)}</span>
         </div>
         <div class="order-summary-item">
             <span>Shipping</span>
-            <span>$${shipping.toFixed(2)}</span>
+            <span>₱${shipping.toFixed(2)}</span>
         </div>
         <div class="order-summary-item order-total">
             <span>Total</span>
-            <span>$${total.toFixed(2)}</span>
+            <span>₱${total.toFixed(2)}</span>
         </div>
     `;
 }

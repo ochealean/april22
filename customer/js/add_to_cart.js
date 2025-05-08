@@ -121,7 +121,7 @@ function renderCart() {
             <div class="cart-item-details">
                 <h3 class="cart-item-name">${item.shoeName}</h3>
                 <p class="cart-item-variant">${item.variantName} (${item.color}) - Size: ${item.size}</p>
-                <p class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</p>
+                <p class="cart-item-price">₱${(item.price * item.quantity).toFixed(2)}</p>
 
                 <div class="quantity-controls">
                     <button class="quantity-btn" data-cartid="${item.cartId}" data-change="-1">-</button>
@@ -300,10 +300,10 @@ function updateTotals() {
     const shippingEl = document.getElementById('shipping');
     const totalEl = document.getElementById('total');
 
-    if (subtotalEl) subtotalEl.innerText = `$${subtotal.toFixed(2)}`;
-    if (taxEl) taxEl.innerText = `$${tax.toFixed(2)}`;
-    if (shippingEl) shippingEl.innerText = `$${shipping.toFixed(2)}`;
-    if (totalEl) totalEl.innerText = `$${total.toFixed(2)}`;
+    if (subtotalEl) subtotalEl.innerText = `₱${subtotal.toFixed(2)}`;
+    if (taxEl) taxEl.innerText = `₱${tax.toFixed(2)}`;
+    if (shippingEl) shippingEl.innerText = `₱${shipping.toFixed(2)}`;
+    if (totalEl) totalEl.innerText = `₱${total.toFixed(2)}`;
 }
 
 // Show empty cart message

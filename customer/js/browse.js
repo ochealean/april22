@@ -52,7 +52,7 @@ function createProductCard(shoeData) {
       <div class="product-info">
         <div class="product-shop">${shoeData.shopName}</div>
         <h3 class="product-name">${shoeData.name}</h3>
-        <div class="product-price">$${shoeData.price.toFixed(2)}</div>
+        <div class="product-price">₱${shoeData.price.toFixed(2)}</div>
         <div class="product-actions">
             <button class="add-to-cart" onclick="viewDetails('${shoeData.shoeID}', '${shoeData.shopID}')">View Details</button>
             <button class="wishlist-btn" onclick="toggleWishlist('${shoeData.shoeID}', '${shoeData.shopID}', this)">

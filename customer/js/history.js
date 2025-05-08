@@ -168,7 +168,7 @@ function displayOrderCard(order, userId) {
             <div class="item-details">
                 <div class="item-name">${item.name || 'Unknown Product'}</div>
                 <div class="item-variant">Color: ${item.color || 'N/A'}, Size: ${item.size || 'N/A'}</div>
-                <div class="item-price">$${(item.price || 0).toFixed(2)}</div>
+                <div class="item-price">₱${(item.price || 0).toFixed(2)}</div>
             </div>
             <div class="item-quantity">Qty: ${item.quantity || 1}</div>
         </div>
@@ -235,7 +235,7 @@ function displayOrderCard(order, userId) {
                 ${rejectionHTML}
             </div>
             <div class="order-footer">
-                <div class="order-total">Total: $${(order.totalAmount || 0).toFixed(2)}</div>
+                <div class="order-total">Total: ₱${(order.totalAmount || 0).toFixed(2)}</div>
                 <div class="order-actions">
                     ${actionButtons}
                 </div>
