@@ -453,6 +453,15 @@
             margin-bottom: 0.5rem;
         }
 
+        .average-rating {
+            font-weight: normal;
+            margin-left: 10px;
+        }
+
+        .average-rating i {
+            color: var(--warning);
+        }
+
         /* Responsive Styles */
         @media (max-width: 1200px) {
             .product-details-container {
@@ -753,7 +762,7 @@
             <!-- Reviews Section -->
             <div class="reviews-section">
                 <div class="reviews-header">
-                    <h2 class="reviews-title">Customer Reviews</h2>
+                    <h2 class="reviews-title">Customer Reviews <span id="averageRating"></span></h2>
                     <div class="review-filters">
                         <div class="stars-filter" data-rating="5" onclick="filterReviews(5)">
                             <div class="stars">
@@ -785,12 +794,32 @@
                             </div>
                             <div class="text">3 Stars</div>
                         </div>
-                        <div class="stars-filter" data-rating="0" onclick="filterReviews(0)">
+                        <div class="stars-filter" data-rating="2" onclick="filterReviews(2)">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <div class="text">2 Stars</div>
+                        </div>
+                        <div class="stars-filter" data-rating="1" onclick="filterReviews(1)">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <div class="text">1 Star</div>
+                        </div>
+                        <div class="stars-filter active" data-rating="0" onclick="filterReviews(0)">
                             <div class="text">All Reviews</div>
                         </div>
                     </div>
                 </div>
-
+            
                 <div id="reviewsContainer">
                     <div class="review-item" data-rating="5">
                         <div class="review-header">

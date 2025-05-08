@@ -196,7 +196,7 @@ function updatePriceAndSizes(variantKey) {
 
                 // Optional: Show available stock
                 const stockText = document.getElementById("availableStock");
-                if (stockText) stockText.textContent = `Available: ${stock}`;
+                if (stockText) stockText.textContent = `Available: ${ stock }`;
             };
 
 
@@ -231,7 +231,7 @@ function getCustomernameUsingID(userID) {
     return get(userRef).then(snapshot => {
         if (snapshot.exists()) {
             const userData = snapshot.val();
-            return `${userData.firstName} ${userData.lastName}` || "Anonymous User";  // Return display name or default to "Anonymous User"
+            return `${ userData.firstName} ${userData.lastName}` || "Anonymous User" ;  // Return display name or default to "Anonymous User"
         } else {
             return "Anonymous User";  // Default if user not found
         }
@@ -244,6 +244,26 @@ function getCustomernameUsingID(userID) {
 // Display reviews on the page
 async function displayReviews(feedbacks) {
     if (reviewsList) reviewsList.innerHTML = '';
+
+    // Calculate and display average rating
+    const averageRating = calculateAverageRating(feedbacks);
+    const averageRatingElement = document.getElementById('averageRating');
+
+    if (averageRatingElement) {
+        if (averageRating > 0) {
+            averageRatingElement.innerHTML =
+                `<span class="average-rating" style="font-size: 0.8em; color: var(--warning);">
+                    (Average: ${averageRating} <i class="fas fa-star"></i>)
+                </span>`
+                ;
+        } else {
+            averageRatingElement.innerHTML =
+                `<span class="average-rating" style="font-size: 0.8em; color: var(--gray-dark);">
+                    (No ratings yet)
+                </span>`
+                ;
+        }
+    }
 
     // First collect all reviews we need to display
     const reviewsToDisplay = [];
@@ -271,36 +291,51 @@ async function displayReviews(feedbacks) {
         try {
             // Await the username lookup
             const username = await getCustomernameUsingID(review.userId);
+
             // Create review element
             const reviewDiv = document.createElement("div");
-            reviewDiv.classList.add("review");
+            reviewDiv.classList.add("review-item");
+            reviewDiv.dataset.rating = review.feedback.rating;
 
-            // Create rating stars
-            const starDiv = document.createElement("div");
+            // Create review header
+            const headerDiv = document.createElement("div");
+            headerDiv.classList.add("review-header");
+
+            const authorSpan = document.createElement("span");
+            authorSpan.classList.add("review-author");
+            authorSpan.textContent = username;
+
+            const dateSpan = document.createElement("span");
+            dateSpan.classList.add("review-date");
+            dateSpan.textContent = formatTimestamp(review.feedback.timestamp);
+
+            headerDiv.appendChild(authorSpan);
+            headerDiv.appendChild(dateSpan);
+
+            // Create stars
+            const starsDiv = document.createElement("div");
+            starsDiv.classList.add("review-stars");
+
             for (let i = 1; i <= 5; i++) {
-                const star = document.createElement("span");
-                star.classList.add("star");
-                star.textContent = i <= review.feedback.rating ? "★" : "☆";
-                starDiv.appendChild(star);
+                const starIcon = document.createElement("i");
+                starIcon.classList.add(i <= review.feedback.rating ? "fas" : "far");
+                starIcon.classList.add("fa-star");
+                starsDiv.appendChild(starIcon);
             }
 
-            // Review content
-            const commentDiv = document.createElement("p");
-            commentDiv.textContent = review.feedback.comment || "No comment provided.";
+            // Create comment
+            const commentP = document.createElement("p");
+            commentP.textContent = review.feedback.comment || "No comment provided.";
 
-            const reviewerDiv = document.createElement("p");
-            reviewerDiv.textContent = `Reviewed by: ${username}`;
-
-            // Append elements
-            reviewDiv.appendChild(starDiv);
-            reviewDiv.appendChild(commentDiv);
-            reviewDiv.appendChild(reviewerDiv);
+            // Append all elements
+            reviewDiv.appendChild(headerDiv);
+            reviewDiv.appendChild(starsDiv);
+            reviewDiv.appendChild(commentP);
 
             reviewsList.appendChild(reviewDiv);
 
         } catch (error) {
             console.error("Error processing review:", error);
-            // Optionally show an error message for this review
         }
     }
 }
@@ -387,7 +422,7 @@ buyNowBtn.addEventListener("click", async () => {
         });
 
         console.log("Redirecting to checkout with params:", params.toString());
-        window.location.href = `/customer/html/checkout.html?${params.toString()}`;
+        window.location.href = `/customer/html/checkout.html?${ params.toString() }`;
 
     } catch (error) {
         console.error("Error in Buy Now process:", error);
@@ -433,7 +468,7 @@ addToCartBtn.addEventListener("click", async () => {
     };
 
     const cartItemId = generate18CharID();
-    const cartRef = ref(db, `AR_shoe_users/carts/${user.uid}/${cartItemId}`);
+    const cartRef = ref(db, `AR_shoe_users/carts/${ user.uid }/${ cartItemId }`);
 
     try {
         await set(cartRef, cartItem);
@@ -459,4 +494,64 @@ function generate18CharID() {
         result += characters.charAt(Math.floor(Math.random() * characters.length));
     }
     return result;
+}
+
+function formatTimestamp(timestamp) {
+    let date = new Date(timestamp);
+
+    let month = String(date.getMonth() + 1).padStart(2, '0');
+    let day = String(date.getDate()).padStart(2, '0');
+    let year = date.getFullYear();
+    let hours = String(date.getHours()).padStart(2, '0');
+    let minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${ month }/${day}/${ year } ${ hours }:${ minutes }`;
+}
+
+// Filter reviews by star rating
+window.filterReviews = function (rating) {
+    const reviewItems = document.querySelectorAll('.review-item');
+    const filters = document.querySelectorAll('.stars-filter');
+
+    // Update active filter button
+    filters.forEach(filter => {
+        filter.classList.remove('active');
+        if (parseInt(filter.dataset.rating) === rating) {
+            filter.classList.add('active');
+        }
+    });
+
+    // Show/hide reviews based on filter
+    reviewItems.forEach(item => {
+        if (rating === 0) {
+            item.style.display = 'block'; // Show all reviews
+        } else {
+            const itemRating = parseInt(item.dataset.rating);
+            item.style.display = itemRating === rating ? 'block' : 'none';
+        }
+    });
+}
+
+
+
+// Calculate and display average rating
+function calculateAverageRating(feedbacks) {
+    let totalRating = 0;
+    let reviewCount = 0;
+
+    for (const userId in feedbacks) {
+        for (const orderID in feedbacks[userId]) {
+            const feedback = feedbacks[userId][orderID];
+            if (feedback.shoeID === shoeID) {
+                totalRating += feedback.rating;
+                reviewCount++;
+            }
+        }
+    }
+
+    if (reviewCount === 0) {
+        return 0;
+    }
+
+    return (totalRating / reviewCount).toFixed(1);
 }
