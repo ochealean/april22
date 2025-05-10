@@ -536,79 +536,133 @@ function renderInventoryStatusChart(inventoryChanges) {
 }
 
 // ----------------- FOR PRINT FUNCTION ----------------------------
-document.getElementById('printInventoryBtn').addEventListener('click', () => {
-    // Create a container for all the content we want to print
-    const printContainer = document.createElement('div');
-    printContainer.style.padding = '20px';
-    
-    // Add shop name and title
-    const title = document.createElement('h1');
-    title.textContent = `${sname || 'Shop'} Analytics Report`;
-    title.style.textAlign = 'center';
-    title.style.marginBottom = '20px';
-    printContainer.appendChild(title);
-    
-    // Add date of report
-    const reportDate = document.createElement('p');
-    reportDate.textContent = `Report generated: ${new Date().toLocaleString()}`;
-    reportDate.style.textAlign = 'center';
-    reportDate.style.marginBottom = '30px';
-    printContainer.appendChild(reportDate);
-    
-    // Clone all the sections we want to include
-    const sectionsToPrint = [
-        { title: 'Daily Sales', element: document.querySelector('.analytics-container .analytics-card:first-child') },
-        { title: 'Inventory Status', element: document.querySelector('.analytics-container .analytics-card:nth-child(2)') },
-        { title: 'Recent Inventory Changes', element: document.querySelector('.analytics-card:nth-of-type(3)') },
-        { title: 'Recent Sales', element: document.querySelector('.analytics-card:nth-of-type(4)') }
-    ];
-    
-    sectionsToPrint.forEach((section, index) => {
-        // Add section title
-        const sectionTitle = document.createElement('h2');
-        sectionTitle.textContent = section.title;
-        sectionTitle.style.marginTop = index > 0 ? '30px' : '0';
-        sectionTitle.style.marginBottom = '15px';
-        sectionTitle.style.borderBottom = '1px solid #ddd';
-        sectionTitle.style.paddingBottom = '5px';
-        printContainer.appendChild(sectionTitle);
+document.getElementById('printInventoryBtn').addEventListener('click', async () => {
+    // Show loading indicator
+    const originalText = document.getElementById('printInventoryBtn').textContent;
+    document.getElementById('printInventoryBtn').textContent = 'Generating PDF...';
+    document.getElementById('printInventoryBtn').disabled = true;
+
+    try {
+        // Create a container for all the content
+        const printContainer = document.createElement('div');
+        printContainer.style.padding = '20px';
+        printContainer.style.fontFamily = 'Arial, sans-serif';
         
-        // Clone the section content
-        const clone = section.element.cloneNode(true);
+        // Add title and date
+        const title = document.createElement('h1');
+        title.textContent = `${sname || 'Shop'} Analytics Report`;
+        title.style.textAlign = 'center';
+        title.style.marginBottom = '10px';
+        printContainer.appendChild(title);
         
-        // Adjust styles for printing
-        clone.style.boxShadow = 'none';
-        clone.style.padding = '10px';
-        clone.style.margin = '0';
-        clone.style.width = '100%';
+        const date = document.createElement('p');
+        date.textContent = `Generated: ${new Date().toLocaleString()}`;
+        date.style.textAlign = 'center';
+        date.style.marginBottom = '30px';
+        date.style.color = '#666';
+        printContainer.appendChild(date);
+
+        // Convert charts to images first
+        const charts = [
+            document.getElementById('salesChart'),
+            document.getElementById('inventoryStatusChart')
+        ];
+
+        // Replace each chart with its image representation
+        for (const chart of charts) {
+            if (chart) {
+                const img = document.createElement('img');
+                img.src = chart.toDataURL('image/png');
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                img.style.display = 'block';
+                img.style.margin = '0 auto';
+                
+                // Create a container for the chart
+                const chartContainer = document.createElement('div');
+                chartContainer.style.marginBottom = '30px';
+                chartContainer.appendChild(img);
+                
+                // Add the chart title
+                const chartTitle = chart.closest('.analytics-card')?.querySelector('.card-title');
+                if (chartTitle) {
+                    const titleClone = chartTitle.cloneNode(true);
+                    titleClone.style.marginBottom = '15px';
+                    titleClone.style.textAlign = 'center';
+                    chartContainer.insertBefore(titleClone, img);
+                }
+                
+                printContainer.appendChild(chartContainer);
+            }
+        }
+
+        // Clone all analytics cards
+        const analyticsCards = document.querySelectorAll('.analytics-card');
         
-        // For charts, we need to ensure they're rendered properly
-        const charts = clone.querySelectorAll('canvas');
-        charts.forEach(chart => {
-            // Set a fixed size for the chart in the PDF
-            chart.style.width = '100%';
-            chart.style.height = '300px';
-        });
+        for (const card of analyticsCards) {
+            // Skip if this is one of the chart cards (we already processed them)
+            if (card.querySelector('canvas')) continue;
+            
+            const clone = card.cloneNode(true);
+            
+            // Style adjustments for PDF
+            clone.style.boxShadow = 'none';
+            clone.style.border = '1px solid #ddd';
+            clone.style.borderRadius = '5px';
+            clone.style.padding = '15px';
+            clone.style.marginBottom = '20px';
+            clone.style.pageBreakInside = 'avoid'; // Prevent splitting across pages
+            
+            // Ensure tables are properly scaled
+            const tables = clone.querySelectorAll('table');
+            tables.forEach(table => {
+                table.style.width = '100%';
+                table.style.fontSize = '10pt';
+            });
+            
+            printContainer.appendChild(clone);
+        }
+
+        // PDF options
+        const opt = {
+            margin: [10, 10, 10, 10], // top, left, bottom, right
+            filename: `${sname || 'Shop'}_Analytics_${new Date().toISOString().slice(0,10)}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { 
+                scale: 2,
+                logging: true,
+                useCORS: true,
+                scrollX: 0,
+                scrollY: 0,
+                allowTaint: true,
+                letterRendering: true,
+                // This helps with table rendering
+                onclone: (clonedDoc) => {
+                    // Ensure all tables are visible
+                    clonedDoc.querySelectorAll('table').forEach(table => {
+                        table.style.visibility = 'visible';
+                    });
+                }
+            },
+            jsPDF: { 
+                unit: 'mm', 
+                format: 'a4',
+                orientation: 'portrait' 
+            }
+        };
+
+        // Add a small delay to ensure everything is ready
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        printContainer.appendChild(clone);
-    });
-    
-    // PDF options
-    const opt = {
-        margin: 0.5,
-        filename: `${sname || 'Shop'}_Analytics_Report_${new Date().toISOString().slice(0,10)}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-            scale: 2,
-            logging: true,
-            useCORS: true,
-            allowTaint: true,
-            scrollX: 0,
-            scrollY: 0
-        },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
-    
-    // Generate the PDF
-    html2pdf().from(printContainer).set(opt).save();
+        // Generate PDF
+        await html2pdf().set(opt).from(printContainer).save();
+        
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        alert('Failed to generate PDF. Please try again.');
+    } finally {
+        // Restore button state
+        document.getElementById('printInventoryBtn').textContent = originalText;
+        document.getElementById('printInventoryBtn').disabled = false;
+    }
 });
