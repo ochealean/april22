@@ -24,6 +24,7 @@ let shopLoggedin; // shop ID of the logged-in user
 let roleLoggedin; // role of the logged-in user
 let sname; //shop name
 let employeeEmail; // email of the employee to be added
+let RecentSalesFilter = 'day';
 
 // DOM Elements
 const elements = {
@@ -91,100 +92,16 @@ function loadShopProfile(shopId) {
             elements.userNameDisplay.textContent = shopData.shopName || "Shop Manager";
 
             // Now load transactions for this shop
-            loadShopTransactions(shopId);
+            console.log(shopData);
             loadInventoryChanges(shopId);
+            loadShopTransactions(shopId, RecentSalesFilter);
         }
     });
 }
 
-function loadShopTransactions(shopId) {
-    const transactionsRef = ref(db, 'AR_shoe_users/transactions');
-    onValue(transactionsRef, (snapshot) => {
-        if (snapshot.exists()) {
-            const allTransactions = snapshot.val();
-            const shopTransactions = [];
-            let filteredOutCount = 0;
 
-            Object.keys(allTransactions).forEach(userId => {
-                const userTransactions = allTransactions[userId];
 
-                Object.keys(userTransactions).forEach(orderId => {
-                    const transaction = userTransactions[orderId];
-
-                    // Debug logging for each transaction
-                    console.log(`Processing order ${orderId}:`, transaction);
-
-                    if (transaction.item && transaction.item.shopId === shopId) {
-                        try {
-                            const transactionDate = new Date(transaction.date);
-                            if (isNaN(transactionDate.getTime())) {
-                                console.error(`Invalid date for order ${orderId}: ${transaction.date}`);
-                                return;
-                            }
-                            shopTransactions.push({
-                                ...transaction,
-                                orderId,
-                                userId
-                            });
-                        } catch (e) {
-                            console.error(`Error processing order ${orderId}:`, e);
-                        }
-                    } else {
-                        filteredOutCount++;
-                        console.log(`Filtered out order ${orderId} - shopId mismatch or missing item`);
-                    }
-                });
-            });
-
-            console.log(`Total transactions: ${Object.keys(allTransactions).length}`);
-            console.log(`Filtered transactions for shop ${shopId}: ${shopTransactions.length}`);
-            console.log(`Transactions filtered out: ${filteredOutCount}`);
-
-            // Sort by date (newest first)
-            shopTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-            displayTransactions(shopTransactions);
-            prepareChartData(shopTransactions);
-        }
-    });
-}
-
-function displayTransactions(transactions) {
-    elements.recentSalesTable.innerHTML = '';
-
-    // Filter out future dates if needed
-    const now = new Date();
-    const validTransactions = transactions.filter(t => new Date(t.date) <= now);
-
-    validTransactions.forEach(transaction => {
-        // Add new rows
-        transactions.forEach(transaction => {
-            const row = document.createElement('tr');
-
-            // Format date
-            const date = new Date(transaction.date);
-            const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-
-            // Determine status class
-            let statusClass = 'badge-primary';
-            if (transaction.status === 'Delivered') statusClass = 'badge-success';
-            if (transaction.status === 'rejected') statusClass = 'badge-danger';
-            if (transaction.status === 'cancelled') statusClass = 'badge-warning';
-
-            row.innerHTML = `
-            <td>${formattedDate}</td>
-            <td>${transaction.orderId}</td>
-            <td>${transaction.shippingInfo?.firstName || 'N/A'} ${transaction.shippingInfo?.lastName || ''}</td>
-            <td>${transaction.item.name} (${transaction.item.variantName})</td>
-            <td>${transaction.item.size}</td>
-            <td>${transaction.item.quantity}</td>
-            <td>₱${transaction.totalAmount?.toLocaleString() || '0'}</td>
-            <td><span class="badge ${statusClass}">${transaction.status}</span></td>
-        `;
-            elements.recentSalesTable.appendChild(row);
-        });
-    });
-}
-
+// ito nagdidisplay ng Inventory Changes
 function loadInventoryChanges(shopId) {
     const shoesRef = ref(db, `AR_shoe_users/shoe/${shopId}`);
 
@@ -209,7 +126,7 @@ function loadInventoryChanges(shopId) {
                                 const sizeValue = Object.keys(size)[0]; // Get the size value (e.g., "8")
                                 const stock = size[sizeValue].stock;
 
-                                console.log("variant: ", shoes);
+                                // console.log("variant: ", shoes);
 
                                 // Add to inventory changes
                                 inventoryChanges.push({
@@ -228,9 +145,140 @@ function loadInventoryChanges(shopId) {
 
             // Display in table
             displayInventoryChanges(inventoryChanges);
+            renderInventoryStatusChart(inventoryChanges);
         }
     });
 }
+
+// ito nagdidisplay ng Recent Sales
+function loadShopTransactions(shopId, filterDate) {
+    const transactionsRef = ref(db, 'AR_shoe_users/transactions');
+    onValue(transactionsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const allTransactions = snapshot.val();
+            const shopTransactions = [];
+            let filteredOutCount = 0;
+
+            Object.keys(allTransactions).forEach(userId => {
+                const userTransactions = allTransactions[userId];
+
+                Object.keys(userTransactions).forEach(orderId => {
+                    const transaction = userTransactions[orderId];
+
+                    // Debug logging for each transaction
+                    // console.log(`Processing order ${orderId}:`, transaction);
+
+                    // Check if transaction has item and if shopId matches
+                    if (transaction.item && transaction.item.shopId === shopId) {
+                        try {
+                            const transactionDate = new Date(transaction.date);
+                            if (isNaN(transactionDate.getTime())) {
+                                console.error(`Invalid date for order ${orderId}: ${transaction.date}`);
+                                return;
+                            }
+                            shopTransactions.push({
+                                ...transaction,
+                                orderId,
+                                userId
+                            });
+                        } catch (e) {
+                            console.error(`Error processing order ${orderId}:`, e);
+                        }
+                    } else {
+                        filteredOutCount++;
+                        console.log(`Filtered out order ${orderId} - shopId mismatch or missing item`);
+                    }
+                });
+            });
+
+            console.log(`Total transactions processed: ${Object.keys(allTransactions).length}`);
+            console.log(`Filtered transactions for shop ${shopId}: ${shopTransactions.length}`);
+            console.log(shopTransactions);
+            console.log(`Transactions filtered out: ${filteredOutCount}`);
+
+            // Sort by date (newest first)
+            shopTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            displayTransactions(shopTransactions, filterDate);
+            prepareChartData(shopTransactions);
+        }
+    });
+}
+
+function displayTransactions(transactions, filterDate) {
+    elements.recentSalesTable.innerHTML = '';
+
+    const now = new Date();
+    let validTransactions = [];
+
+    if (filterDate.toLowerCase() === 'day') {
+        validTransactions = transactions.filter(t => {
+            const transactionDate = new Date(t.date);
+            const today = new Date();
+
+            today.setDate(now.getDate() - 1);
+            return (
+                transactionDate >= today
+            );
+        });
+    } else if (filterDate.toLowerCase() === 'week') {
+        validTransactions = transactions.filter(t => {
+            const transactionDate = new Date(t.date);
+            const today = new Date();
+            const monthAgo = new Date();
+
+            today.setDate(now.getDate() - 1);
+            monthAgo.setMonth(now.getMonth() - 1);
+
+            return transactionDate > monthAgo && today > transactionDate;
+        });
+    } else if (filterDate.toLowerCase() === 'month') {
+        validTransactions = transactions.filter(t => {
+            const transactionDate = new Date(t.date);
+            const monthAgo = new Date();
+            monthAgo.setMonth(now.getMonth() - 1);
+            return transactionDate <= monthAgo;
+        });
+    } else {
+        // Fallback if filter is not recognized
+        validTransactions = transactions.filter(t => {
+            const transactionDate = new Date(t.date);
+            return transactionDate <= now;
+        });
+    }
+
+    console.log(validTransactions);
+    console.log(now);
+    console.log(filterDate);
+
+    // Limit to 9 most recent transactions
+    validTransactions.slice(0, 9).forEach(transaction => {
+        const row = document.createElement('tr');
+
+        // yung normal na new Date(transaction.date) is naka based lang sa local browser
+        const date = new Date(new Date(transaction.date).toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+        const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+
+        let statusClass = 'badge-primary';
+        if (transaction.status === 'Delivered') statusClass = 'badge-success';
+        if (transaction.status === 'rejected') statusClass = 'badge-danger';
+        if (transaction.status === 'cancelled') statusClass = 'badge-warning';
+
+        row.innerHTML = `
+            <td>${formattedDate}</td>
+            <td>${transaction.orderId}</td>
+            <td>${transaction.shippingInfo?.firstName || 'N/A'} ${transaction.shippingInfo?.lastName || ''}</td>
+            <td>${transaction.item.name} (${transaction.item.variantName})</td>
+            <td>${transaction.item.size}</td>
+            <td>${transaction.item.quantity}</td>
+            <td>₱${transaction.totalAmount?.toLocaleString() || '0'}</td>
+            <td><span class="badge ${statusClass}">${transaction.status}</span></td>
+        `;
+        elements.recentSalesTable.appendChild(row);
+    });
+}
+
+
+
 
 function displayInventoryChanges(changes) {
     // Clear existing rows
@@ -264,35 +312,24 @@ function displayInventoryChanges(changes) {
 }
 
 function prepareChartData(transactions) {
-    // Group transactions by date for sales chart
     const dailySales = {};
     const weeklySales = {};
     const monthlySales = {};
 
     transactions.forEach(transaction => {
-        const date = new Date(transaction.date);
+        const date = new Date(new Date(transaction.date).toLocaleString("en-US", { timeZone: "Asia/Manila" }));
         const day = date.toLocaleDateString();
         const week = getWeekNumber(date);
         const month = date.getMonth() + 1 + '/' + date.getFullYear();
 
-        // Daily sales
-        if (!dailySales[day]) dailySales[day] = 0;
-        dailySales[day] += transaction.totalAmount || 0;
-
-        // Weekly sales
-        if (!weeklySales[week]) weeklySales[week] = 0;
-        weeklySales[week] += transaction.totalAmount || 0;
-
-        // Monthly sales
-        if (!monthlySales[month]) monthlySales[month] = 0;
-        monthlySales[month] += transaction.totalAmount || 0;
+        dailySales[day] = (dailySales[day] || 0) + (transaction.totalAmount || 0);
+        weeklySales[week] = (weeklySales[week] || 0) + (transaction.totalAmount || 0);
+        monthlySales[month] = (monthlySales[month] || 0) + (transaction.totalAmount || 0);
     });
 
-    // Here you would update your charts with this data
-    // For example:
-    // updateSalesChart(Object.keys(dailySales), Object.values(dailySales));
-    // You'll need to implement the chart updating logic based on your chart library
+    renderChart(dailySales, weeklySales, monthlySales); // Add this line
 }
+
 
 function getWeekNumber(date) {
     const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
@@ -317,22 +354,184 @@ function setupEventListeners() {
             parent.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
 
-            // Here you would implement filtering logic based on the selected period
-            // For now, we'll just log it
-            console.log(`Filter recent sales by: ${this.dataset.recentFilter}`);
+            RecentSalesFilter = this.dataset.recentFilter;
+            loadShopTransactions(shopLoggedin, RecentSalesFilter); // <-- Reload with new filter
         });
     });
 
-    // Filter buttons for inventory
-    document.querySelectorAll('[data-filter]').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const parent = this.parentElement;
-            parent.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
 
-            // Here you would implement filtering logic based on the selected filter
-            // For now, we'll just log it
-            console.log(`Filter inventory by: ${this.dataset.filter}`);
+    // Filter buttons for inventory
+    // document.querySelectorAll('[data-filter]').forEach(btn => {
+    //     btn.addEventListener('click', function () {
+    //         const parent = this.parentElement;
+    //         parent.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    //         this.classList.add('active');
+
+    //         // Here you would implement filtering logic based on the selected filter
+    //         // For now, we'll just log it
+    //         console.log(`Filter inventory by: ${this.dataset.filter}`);
+    //     });
+    // });
+}
+
+
+//  ---------------------------------------------- FOR CHART ------------------------------------------------
+let salesChartInstance; // store the Chart instance
+
+function renderChart(dailySales, weeklySales, monthlySales) {
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const filter = RecentSalesFilter.toLowerCase();
+
+    let labels = [];
+    let data = [];
+
+    if (filter === 'day') {
+        labels = Object.keys(dailySales).sort((a, b) => new Date(a) - new Date(b));
+        data = labels.map(label => dailySales[label]);
+    } else if (filter === 'week') {
+        labels = Object.keys(weeklySales).sort((a, b) => parseInt(a) - parseInt(b));
+        data = labels.map(label => weeklySales[label]);
+    } else if (filter === 'month') {
+        labels = Object.keys(monthlySales).sort((a, b) => {
+            const [monthA, yearA] = a.split('/').map(Number);
+            const [monthB, yearB] = b.split('/').map(Number);
+            return new Date(yearA, monthA - 1) - new Date(yearB, monthB - 1);
         });
+        data = labels.map(label => monthlySales[label]);
+    }
+
+    if (salesChartInstance) {
+        salesChartInstance.destroy();
+    }
+
+    salesChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Sales (₱)',
+                data,
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '₱' + context.raw.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        drawBorder: false
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return '₱' + value.toLocaleString();
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            layout: {
+                padding: {
+                    top: 10,
+                    right: 15,
+                    bottom: 10,
+                    left: 15
+                }
+            }
+        }
+    });
+}
+
+
+// ----------------------------------- FOR INVENTORY STATUS --------------------------------
+
+function renderInventoryStatusChart(inventoryChanges) {
+    const statusCounts = {
+        normal: 0,
+        warning: 0,
+        outOfStock: 0
+    };
+
+    inventoryChanges.forEach(item => {
+        if (item.status === 'normal') statusCounts.normal++;
+        else if (item.status === 'warning') statusCounts.warning++;
+        else if (item.status === 'out of stock' || item.status === 'danger') statusCounts.outOfStock++;
+    });
+
+    const ctx = document.getElementById('inventoryStatusChart').getContext('2d');
+    if (window.inventoryChart) {
+        window.inventoryChart.destroy();
+    }
+
+    window.inventoryChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Normal', 'Warning', 'Out of Stock'],
+            datasets: [{
+                label: 'Inventory Status',
+                data: [statusCounts.normal, statusCounts.warning, statusCounts.outOfStock],
+                backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                borderWidth: 1,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 20,
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '65%',
+            spacing: 5
+        }
     });
 }
