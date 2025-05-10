@@ -434,7 +434,7 @@ function renderChart(dailySales, weeklySales, monthlySales) {
                 },
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
+                        label: function (context) {
                             return '₱' + context.raw.toLocaleString();
                         }
                     }
@@ -447,7 +447,7 @@ function renderChart(dailySales, weeklySales, monthlySales) {
                         drawBorder: false
                     },
                     ticks: {
-                        callback: function(value) {
+                        callback: function (value) {
                             return '₱' + value.toLocaleString();
                         }
                     }
@@ -519,7 +519,7 @@ function renderInventoryStatusChart(inventoryChanges) {
                 },
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
+                        label: function (context) {
                             const label = context.label || '';
                             const value = context.raw || 0;
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
@@ -538,23 +538,27 @@ function renderInventoryStatusChart(inventoryChanges) {
 // ----------------- FOR PRINT FUNCTION ----------------------------
 document.getElementById('printInventoryBtn').addEventListener('click', async () => {
     // Show loading indicator
-    const originalText = document.getElementById('printInventoryBtn').textContent;
-    document.getElementById('printInventoryBtn').textContent = 'Generating PDF...';
-    document.getElementById('printInventoryBtn').disabled = true;
+    const btn = document.getElementById('printInventoryBtn');
+    const originalText = btn.textContent;
+    const originalHTML = btn.innerHTML; // Store original HTML including icon
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+    btn.disabled = true;
+    btn.classList.add('loading');
 
     try {
         // Create a container for all the content
         const printContainer = document.createElement('div');
         printContainer.style.padding = '20px';
         printContainer.style.fontFamily = 'Arial, sans-serif';
-        
+
         // Add title and date
         const title = document.createElement('h1');
         title.textContent = `${sname || 'Shop'} Analytics Report`;
         title.style.textAlign = 'center';
         title.style.marginBottom = '10px';
         printContainer.appendChild(title);
-        
+
         const date = document.createElement('p');
         date.textContent = `Generated: ${new Date().toLocaleString()}`;
         date.style.textAlign = 'center';
@@ -577,12 +581,12 @@ document.getElementById('printInventoryBtn').addEventListener('click', async () 
                 img.style.height = 'auto';
                 img.style.display = 'block';
                 img.style.margin = '0 auto';
-                
+
                 // Create a container for the chart
                 const chartContainer = document.createElement('div');
                 chartContainer.style.marginBottom = '30px';
                 chartContainer.appendChild(img);
-                
+
                 // Add the chart title
                 const chartTitle = chart.closest('.analytics-card')?.querySelector('.card-title');
                 if (chartTitle) {
@@ -591,20 +595,20 @@ document.getElementById('printInventoryBtn').addEventListener('click', async () 
                     titleClone.style.textAlign = 'center';
                     chartContainer.insertBefore(titleClone, img);
                 }
-                
+
                 printContainer.appendChild(chartContainer);
             }
         }
 
         // Clone all analytics cards
         const analyticsCards = document.querySelectorAll('.analytics-card');
-        
+
         for (const card of analyticsCards) {
             // Skip if this is one of the chart cards (we already processed them)
             if (card.querySelector('canvas')) continue;
-            
+
             const clone = card.cloneNode(true);
-            
+
             // Style adjustments for PDF
             clone.style.boxShadow = 'none';
             clone.style.border = '1px solid #ddd';
@@ -612,57 +616,63 @@ document.getElementById('printInventoryBtn').addEventListener('click', async () 
             clone.style.padding = '15px';
             clone.style.marginBottom = '20px';
             clone.style.pageBreakInside = 'avoid'; // Prevent splitting across pages
-            
+
             // Ensure tables are properly scaled
             const tables = clone.querySelectorAll('table');
             tables.forEach(table => {
                 table.style.width = '100%';
                 table.style.fontSize = '10pt';
+                table.style.borderCollapse = 'collapse';
             });
-            
+
             printContainer.appendChild(clone);
         }
 
         // PDF options
         const opt = {
-            margin: [10, 10, 10, 10], // top, left, bottom, right
-            filename: `${sname || 'Shop'}_Analytics_${new Date().toISOString().slice(0,10)}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { 
+            margin: [15, 15, 15, 15], // Slightly larger margins
+            filename: `${sname || 'Shop'}_Analytics_${new Date().toISOString().slice(0, 10)}.pdf`,
+            image: { 
+                type: 'jpeg', 
+                quality: 1.0 // Higher quality
+            },
+            html2canvas: {
                 scale: 2,
-                logging: true,
+                logging: false, // Disable logging for production
                 useCORS: true,
                 scrollX: 0,
                 scrollY: 0,
                 allowTaint: true,
                 letterRendering: true,
-                // This helps with table rendering
                 onclone: (clonedDoc) => {
-                    // Ensure all tables are visible
-                    clonedDoc.querySelectorAll('table').forEach(table => {
-                        table.style.visibility = 'visible';
+                    // Ensure all content is visible
+                    clonedDoc.querySelectorAll('table, img, div').forEach(el => {
+                        el.style.visibility = 'visible';
+                        el.style.opacity = '1';
                     });
                 }
             },
-            jsPDF: { 
-                unit: 'mm', 
+            jsPDF: {
+                unit: 'mm',
                 format: 'a4',
-                orientation: 'portrait' 
+                orientation: 'portrait',
+                hotfixes: ['px_scaling'] // Fix for pixel scaling issues
             }
         };
 
         // Add a small delay to ensure everything is ready
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+        await new Promise(resolve => setTimeout(resolve, 300));
+
         // Generate PDF
         await html2pdf().set(opt).from(printContainer).save();
-        
+
     } catch (error) {
         console.error('Error generating PDF:', error);
         alert('Failed to generate PDF. Please try again.');
     } finally {
         // Restore button state
-        document.getElementById('printInventoryBtn').textContent = originalText;
-        document.getElementById('printInventoryBtn').disabled = false;
+        btn.innerHTML = originalHTML; // Restore original HTML including icon
+        btn.disabled = false;
+        btn.classList.remove('loading');
     }
 });

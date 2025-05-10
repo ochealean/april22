@@ -243,6 +243,74 @@
             color: var(--error);
         }
 
+        /* ------------ for print button ----------------- */
+        #printInventoryBtn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-sm);
+            margin-left: auto;
+            /* Pushes to the right in flex container */
+        }
+
+        #printInventoryBtn:hover {
+            background-color: var(--primary-dark);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        #printInventoryBtn:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-sm);
+        }
+
+        #printInventoryBtn:disabled {
+            background-color: var(--gray);
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none !important;
+        }
+
+        /* Icon style */
+        #printInventoryBtn i {
+            font-size: 0.9em;
+        }
+
+        /* Loading state */
+        #printInventoryBtn.loading {
+            position: relative;
+            padding-right: 40px;
+        }
+
+        #printInventoryBtn.loading:after {
+            content: "";
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 15px;
+            height: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: translateY(-50%) rotate(360deg);
+            }
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .analytics-container {
@@ -292,7 +360,9 @@
                 <div class="user-profile">
                     <span id="userName_display2">Shop Manager</span>
                 </div>
-                <button id="printInventoryBtn" class="btn btn-primary">Print Inventory Status (PDF)</button>
+                <button id="printInventoryBtn" class="btn btn-primary">
+                    <i class="fas fa-file-pdf"></i> Print Inventory Status (PDF)
+                </button>
             </div>
 
             <div class="analytics-container">
@@ -381,9 +451,9 @@
     </div>
 
     <!-- this includes the html2pdf.js library in your webpage. -->
-     <!-- may html2pdf library kasi to -->
+    <!-- may html2pdf library kasi to -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
+
     <!-- ito naman is for chart ito ay version of Chart.js hosted on jsDelivr -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
     <!-- <script>
