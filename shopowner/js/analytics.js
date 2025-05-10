@@ -29,7 +29,6 @@ let RecentSalesFilter = 'day';
 // DOM Elements
 const elements = {
     userNameDisplay: document.getElementById('userName_display2'),
-    userProfileImage: document.getElementById('imageProfile'),
     recentSalesTable: document.getElementById('recentSales'),
     inventoryChangesTable: document.getElementById('inventoryChanges'),
     logoutBtn: document.getElementById('logout_btn')
@@ -535,3 +534,81 @@ function renderInventoryStatusChart(inventoryChanges) {
         }
     });
 }
+
+// ----------------- FOR PRINT FUNCTION ----------------------------
+document.getElementById('printInventoryBtn').addEventListener('click', () => {
+    // Create a container for all the content we want to print
+    const printContainer = document.createElement('div');
+    printContainer.style.padding = '20px';
+    
+    // Add shop name and title
+    const title = document.createElement('h1');
+    title.textContent = `${sname || 'Shop'} Analytics Report`;
+    title.style.textAlign = 'center';
+    title.style.marginBottom = '20px';
+    printContainer.appendChild(title);
+    
+    // Add date of report
+    const reportDate = document.createElement('p');
+    reportDate.textContent = `Report generated: ${new Date().toLocaleString()}`;
+    reportDate.style.textAlign = 'center';
+    reportDate.style.marginBottom = '30px';
+    printContainer.appendChild(reportDate);
+    
+    // Clone all the sections we want to include
+    const sectionsToPrint = [
+        { title: 'Daily Sales', element: document.querySelector('.analytics-container .analytics-card:first-child') },
+        { title: 'Inventory Status', element: document.querySelector('.analytics-container .analytics-card:nth-child(2)') },
+        { title: 'Recent Inventory Changes', element: document.querySelector('.analytics-card:nth-of-type(3)') },
+        { title: 'Recent Sales', element: document.querySelector('.analytics-card:nth-of-type(4)') }
+    ];
+    
+    sectionsToPrint.forEach((section, index) => {
+        // Add section title
+        const sectionTitle = document.createElement('h2');
+        sectionTitle.textContent = section.title;
+        sectionTitle.style.marginTop = index > 0 ? '30px' : '0';
+        sectionTitle.style.marginBottom = '15px';
+        sectionTitle.style.borderBottom = '1px solid #ddd';
+        sectionTitle.style.paddingBottom = '5px';
+        printContainer.appendChild(sectionTitle);
+        
+        // Clone the section content
+        const clone = section.element.cloneNode(true);
+        
+        // Adjust styles for printing
+        clone.style.boxShadow = 'none';
+        clone.style.padding = '10px';
+        clone.style.margin = '0';
+        clone.style.width = '100%';
+        
+        // For charts, we need to ensure they're rendered properly
+        const charts = clone.querySelectorAll('canvas');
+        charts.forEach(chart => {
+            // Set a fixed size for the chart in the PDF
+            chart.style.width = '100%';
+            chart.style.height = '300px';
+        });
+        
+        printContainer.appendChild(clone);
+    });
+    
+    // PDF options
+    const opt = {
+        margin: 0.5,
+        filename: `${sname || 'Shop'}_Analytics_Report_${new Date().toISOString().slice(0,10)}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2,
+            logging: true,
+            useCORS: true,
+            allowTaint: true,
+            scrollX: 0,
+            scrollY: 0
+        },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    
+    // Generate the PDF
+    html2pdf().from(printContainer).set(opt).save();
+});

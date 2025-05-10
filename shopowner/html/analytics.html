@@ -290,9 +290,9 @@
             <div class="header">
                 <h1>Shop Analytics</h1>
                 <div class="user-profile">
-                    <img id="imageProfile" src="#" alt="Profile" class="user-avatar">
                     <span id="userName_display2">Shop Manager</span>
                 </div>
+                <button id="printInventoryBtn" class="btn btn-primary">Print Inventory Status (PDF)</button>
             </div>
 
             <div class="analytics-container">
@@ -380,6 +380,11 @@
         </div>
     </div>
 
+    <!-- this includes the html2pdf.js library in your webpage. -->
+     <!-- may html2pdf library kasi to -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- ito naman is for chart ito ay version of Chart.js hosted on jsDelivr -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
     <!-- <script>
         document.addEventListener('DOMContentLoaded', function() {
