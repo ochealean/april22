@@ -156,49 +156,32 @@ function loadShopTransactions(shopId, filterDate) {
         if (snapshot.exists()) {
             const allTransactions = snapshot.val();
             const shopTransactions = [];
-            let filteredOutCount = 0;
 
             Object.keys(allTransactions).forEach(userId => {
                 const userTransactions = allTransactions[userId];
-
                 Object.keys(userTransactions).forEach(orderId => {
                     const transaction = userTransactions[orderId];
-
-                    // Debug logging for each transaction
-                    // console.log(`Processing order ${orderId}:`, transaction);
-
-                    // Check if transaction has item and if shopId matches
                     if (transaction.item && transaction.item.shopId === shopId) {
                         try {
                             const transactionDate = new Date(transaction.date);
-                            if (isNaN(transactionDate.getTime())) {
-                                console.error(`Invalid date for order ${orderId}: ${transaction.date}`);
-                                return;
+                            if (!isNaN(transactionDate.getTime())) {
+                                shopTransactions.push({
+                                    ...transaction,
+                                    orderId,
+                                    userId
+                                });
                             }
-                            shopTransactions.push({
-                                ...transaction,
-                                orderId,
-                                userId
-                            });
                         } catch (e) {
                             console.error(`Error processing order ${orderId}:`, e);
                         }
-                    } else {
-                        filteredOutCount++;
-                        console.log(`Filtered out order ${orderId} - shopId mismatch or missing item`);
                     }
                 });
             });
 
-            console.log(`Total transactions processed: ${Object.keys(allTransactions).length}`);
-            console.log(`Filtered transactions for shop ${shopId}: ${shopTransactions.length}`);
-            console.log(shopTransactions);
-            console.log(`Transactions filtered out: ${filteredOutCount}`);
-
             // Sort by date (newest first)
             shopTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
             displayTransactions(shopTransactions, filterDate);
-            prepareChartData(shopTransactions);
+            prepareChartData(shopTransactions, filterDate); // Pass the filterDate here
         }
     });
 }
@@ -310,23 +293,66 @@ function displayInventoryChanges(changes) {
     });
 }
 
-function prepareChartData(transactions) {
-    const dailySales = {};
-    const weeklySales = {};
-    const monthlySales = {};
+function prepareChartData(transactions, filterDate) {
+    const now = new Date();
+    let validTransactions = [];
 
-    transactions.forEach(transaction => {
+    // Apply the same filtering logic as in displayTransactions()
+    if (filterDate.toLowerCase() === 'day') {
+        validTransactions = transactions.filter(t => {
+            const transactionDate = new Date(t.date);
+            const today = new Date();
+            today.setDate(now.getDate() - 1);
+            return transactionDate >= today;
+        });
+    } else if (filterDate.toLowerCase() === 'week') {
+        validTransactions = transactions.filter(t => {
+            const transactionDate = new Date(t.date);
+            const today = new Date();
+            const monthAgo = new Date();
+            today.setDate(now.getDate() - 1);
+            monthAgo.setMonth(now.getMonth() - 1);
+            return transactionDate > monthAgo && today > transactionDate;
+        });
+    } else if (filterDate.toLowerCase() === 'month') {
+        validTransactions = transactions.filter(t => {
+            const transactionDate = new Date(t.date);
+            const monthAgo = new Date();
+            monthAgo.setMonth(now.getMonth() - 1);
+            return transactionDate <= monthAgo;
+        });
+    } else {
+        validTransactions = transactions.filter(t => {
+            const transactionDate = new Date(t.date);
+            return transactionDate <= now;
+        });
+    }
+
+    // Limit to 9 most recent transactions (same as the table)
+    validTransactions = validTransactions.slice(0, 9);
+
+    // Now prepare the chart data based on these filtered transactions
+    const chartData = {};
+    
+    validTransactions.forEach(transaction => {
         const date = new Date(new Date(transaction.date).toLocaleString("en-US", { timeZone: "Asia/Manila" }));
-        const day = date.toLocaleDateString();
-        const week = getWeekNumber(date);
-        const month = date.getMonth() + 1 + '/' + date.getFullYear();
-
-        dailySales[day] = (dailySales[day] || 0) + (transaction.totalAmount || 0);
-        weeklySales[week] = (weeklySales[week] || 0) + (transaction.totalAmount || 0);
-        monthlySales[month] = (monthlySales[month] || 0) + (transaction.totalAmount || 0);
+        let key;
+        
+        if (filterDate.toLowerCase() === 'day') {
+            // For day view, show exact time
+            key = date.toLocaleTimeString();
+        } else if (filterDate.toLowerCase() === 'week') {
+            // For week view, show day names
+            key = date.toLocaleDateString('en-US', { weekday: 'short' });
+        } else {
+            // For month view, show month/day
+            key = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+        
+        chartData[key] = (chartData[key] || 0) + (transaction.totalAmount || 0);
     });
 
-    renderChart(dailySales, weeklySales, monthlySales); // Add this line
+    renderChart(chartData, filterDate);
 }
 
 
@@ -377,97 +403,91 @@ function setupEventListeners() {
 //  ---------------------------------------------- FOR CHART ------------------------------------------------
 let salesChartInstance; // store the Chart instance
 
-function renderChart(dailySales, weeklySales, monthlySales) {
+function renderChart(chartData, filterDate) {
     const ctx = document.getElementById('salesChart').getContext('2d');
-    const filter = RecentSalesFilter.toLowerCase();
-
-    let labels = [];
-    let data = [];
-
-    if (filter === 'day') {
-        labels = Object.keys(dailySales).sort((a, b) => new Date(a) - new Date(b));
-        data = labels.map(label => dailySales[label]);
-    } else if (filter === 'week') {
-        labels = Object.keys(weeklySales).sort((a, b) => parseInt(a) - parseInt(b));
-        data = labels.map(label => weeklySales[label]);
-    } else if (filter === 'month') {
-        labels = Object.keys(monthlySales).sort((a, b) => {
-            const [monthA, yearA] = a.split('/').map(Number);
-            const [monthB, yearB] = b.split('/').map(Number);
-            return new Date(yearA, monthA - 1) - new Date(yearB, monthB - 1);
-        });
-        data = labels.map(label => monthlySales[label]);
-    }
-
+    
+    // Destroy previous chart if it exists
     if (salesChartInstance) {
         salesChartInstance.destroy();
     }
 
-    salesChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Sales (₱)',
-                data,
-                backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 2,
-                pointBackgroundColor: 'rgba(54, 162, 235, 1)',
-                pointRadius: 3,
-                pointHoverRadius: 5,
-                fill: true,
-                tension: 0.3
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        boxWidth: 12,
-                        padding: 20
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            return '₱' + context.raw.toLocaleString();
-                        }
-                    }
-                }
+    // Prepare labels and data
+    const labels = Object.keys(chartData);
+    const data = Object.values(chartData);
+
+    if (labels.length > 0 && data.length > 0) {
+        salesChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Sales (₱)',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    fill: true,
+                    tension: 0.1
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        drawBorder: false
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 20
+                        }
                     },
-                    ticks: {
-                        callback: function (value) {
-                            return '₱' + value.toLocaleString();
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return '₱' + context.raw.toLocaleString();
+                            }
                         }
                     }
                 },
-                x: {
-                    grid: {
-                        display: false
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false
+                        },
+                        ticks: {
+                            callback: function (value) {
+                                return '₱' + value.toLocaleString();
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
                     }
-                }
-            },
-            layout: {
-                padding: {
-                    top: 10,
-                    right: 15,
-                    bottom: 10,
-                    left: 15
+                },
+                layout: {
+                    padding: {
+                        top: 10,
+                        right: 15,
+                        bottom: 10,
+                        left: 15
+                    }
                 }
             }
-        }
-    });
+        });
+    } else {
+        // Display a message when no data is available
+        ctx.font = '16px Arial';
+        ctx.fillStyle = '#666';
+        ctx.textAlign = 'center';
+        ctx.fillText('No sales data available for this period', ctx.canvas.width / 2, ctx.canvas.height / 2);
+    }
 }
 
 
