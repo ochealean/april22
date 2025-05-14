@@ -673,6 +673,78 @@
             cursor: not-allowed;
             pointer-events: none;
         }
+
+        /* Variant Buttons */
+        .variant-btn {
+            padding: 0.8rem 1rem;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            border: 1px solid var(--gray);
+            border-radius: var(--radius-sm);
+            background-color: white;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .variant-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .variant-btn.selected {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .variant-btn.out-of-stock {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+            position: relative;
+        }
+
+        .variant-btn.out-of-stock::after {
+            content: "Out of stock";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--error);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.7rem;
+            width: 100%;
+        }
+
+        .variant-buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .stock-label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--error);
+            margin-top: 0.2rem;
+        }
+
+        /* Disabled state for buttons */
+        .disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .disabled:hover {
+            background-color: var(--primary) !important;
+        }
     </style>
 </head>
 
@@ -726,14 +798,8 @@
                     </div>
                     <div class="product-variants">
                         <h3>Available Variants</h3>
-                        <div class="variant-options" id="variantOptions"></div>
-                        <div class="variant-section">
-                            <div class="variant-title">Select Color</div>
-                            <div class="color-options" id="colorOptions"></div>
-                        </div>
-                        <div class="variant-section">
-                            <div class="variant-title">Select Size</div>
-                            <div class="size-options" id="sizeOptions"></div>
+                        <div id="variantDisplay" class="variant-buttons-container">
+                            <!-- Variant buttons will be displayed here -->
                         </div>
                     </div>
                 </div>
