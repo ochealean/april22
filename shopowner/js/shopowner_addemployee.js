@@ -170,7 +170,7 @@ document.getElementById('addEmployeeForm').addEventListener('submit', async (e) 
 
         // Create employee account
         const result = await createEmployeeAccount(employeeData);
-        
+
         // Initialize EmailJS - make sure to use your actual public key
         emailjs.init('gBZ5mCvVmgjo7wn0W'); // Your public key here
 
@@ -193,7 +193,7 @@ document.getElementById('addEmployeeForm').addEventListener('submit', async (e) 
 
         console.log('Email sent!', emailResponse.status, emailResponse.text);
         alert(`Employee created successfully! Email sent to ${employeeData.email}`);
-        
+
         // Reset form
         e.target.reset();
 
@@ -203,7 +203,7 @@ document.getElementById('addEmployeeForm').addEventListener('submit', async (e) 
         });
     } catch (err) {
         console.error("Error:", err);
-        
+
         // More specific error messages
         if (err.code === 'auth/email-already-in-use') {
             alert('This email is already registered');
@@ -236,8 +236,22 @@ document.getElementById('employeePhone').addEventListener('input', function (e) 
 });
 
 // Logout functionality
-document.getElementById('logout_btn')?.addEventListener('click', () => {
-    auth.signOut().then(() => {
-        window.location.href = '/user_login.html';
+const logoutBtn = document.getElementById('logout_btn');
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+        // Show loading state if you have a loader
+        logoutBtn.disabled = true;
+        logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+
+        auth.signOut().then(() => {
+            // Redirect to login page after successful signout
+            window.location.href = "/user_login.html";
+        }).catch((error) => {
+            console.error("Logout error:", error);
+            alert("Failed to logout. Please try again.");
+            // Reset button state
+            logoutBtn.disabled = false;
+            logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+        });
     });
-});
+}

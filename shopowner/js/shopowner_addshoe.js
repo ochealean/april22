@@ -3,7 +3,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref as dbRef, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-storage.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import { onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 // Firebase configuration
@@ -35,13 +35,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // Generate and set random 6-digit code for shoe
     const random6DigitCode = generate6DigitCode();
     document.getElementById('shoeCode').value = "" + random6DigitCode;
-    
+
     // Role-based access control
     const userRole = localStorage.getItem('userRole');
     if (userRole === "employee") {
         document.querySelectorAll(".manager, .shopowner").forEach(el => el.style.display = "none");
     } else if (userRole === "manager") {
         document.querySelectorAll(".shopowner").forEach(el => el.style.display = "none");
+    }
+
+    const logoutBtn = document.getElementById('logout_btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            // Show loading state if you have a loader
+            logoutBtn.disabled = true;
+            logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+
+            auth.signOut().then(() => {
+                // Redirect to login page after successful signout
+                window.location.href = "/user_login.html";
+            }).catch((error) => {
+                console.error("Logout error:", error);
+                alert("Failed to logout. Please try again.");
+                // Reset button state
+                logoutBtn.disabled = false;
+                logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+            });
+        });
     }
 
     // Add first color variant by default
@@ -57,13 +77,13 @@ onAuthStateChanged(auth, (user) => {
         onValue(shopRef, (snapshot) => {
             const shopData = snapshot.val();
             console.log("shopData: ", shopData);
-            
+
             // this will run if the user a Employee NOT a shop owner
             if (shopData) {
                 roleLoggedin = shopData.role;
                 shopLoggedin = shopData.shopId;
                 sname = shopData.shopName || ''; // Initialize with empty string if not available
-                
+
                 // Set role-based UI elements
                 if (shopData.role.toLowerCase() === "manager") {
                     document.getElementById("addemployeebtn").style.display = "none";
@@ -248,7 +268,7 @@ function addColorVariant() {
         </div>
         
         <div class="form-group">
-            <label for="variantPrice_${variantCount}">Price ($)</label>
+            <label for="variantPrice_${variantCount}">Price (₱)</label>
             <input type="number" id="variantPrice_${variantCount}" step="0.01" required>
         </div>
         

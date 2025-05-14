@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAuPALylh11cTArigeGJZmLwrFwoAsNPSI",
@@ -446,7 +446,7 @@ onAuthStateChanged(auth, async (user) => {
 
                 await loadShopDashboard();
             } else {
-                
+
                 // this will be called if the user is a shop owner
                 shopLoggedin = user.uid;
                 try {
@@ -482,9 +482,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logout_btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
+            // Show loading state if you have a loader
+            logoutBtn.disabled = true;
+            logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+
             auth.signOut().then(() => {
-                window.location.href = '/user_login.html';
-            }).catch(console.error);
+                // Redirect to login page after successful signout
+                window.location.href = "/user_login.html";
+            }).catch((error) => {
+                console.error("Logout error:", error);
+                alert("Failed to logout. Please try again.");
+                // Reset button state
+                logoutBtn.disabled = false;
+                logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+            });
         });
     }
 

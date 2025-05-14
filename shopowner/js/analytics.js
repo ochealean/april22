@@ -79,6 +79,26 @@ document.addEventListener('DOMContentLoaded', function () {
             window.location.href = "/user_login.html";
         }
     });
+
+    const logoutBtn = document.getElementById('logout_btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            // Show loading state if you have a loader
+            logoutBtn.disabled = true;
+            logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+
+            auth.signOut().then(() => {
+                // Redirect to login page after successful signout
+                window.location.href = "/user_login.html";
+            }).catch((error) => {
+                console.error("Logout error:", error);
+                alert("Failed to logout. Please try again.");
+                // Reset button state
+                logoutBtn.disabled = false;
+                logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+            });
+        });
+    }
 });
 
 
@@ -333,11 +353,11 @@ function prepareChartData(transactions, filterDate) {
 
     // Now prepare the chart data based on these filtered transactions
     const chartData = {};
-    
+
     validTransactions.forEach(transaction => {
         const date = new Date(new Date(transaction.date).toLocaleString("en-US", { timeZone: "Asia/Manila" }));
         let key;
-        
+
         if (filterDate.toLowerCase() === 'day') {
             // For day view, show exact time
             key = date.toLocaleTimeString();
@@ -348,7 +368,7 @@ function prepareChartData(transactions, filterDate) {
             // For month view, show month/day
             key = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         }
-        
+
         chartData[key] = (chartData[key] || 0) + (transaction.totalAmount || 0);
     });
 
@@ -363,14 +383,6 @@ function getWeekNumber(date) {
 }
 
 function setupEventListeners() {
-    // Logout button
-    elements.logoutBtn.addEventListener('click', function () {
-        auth.signOut().then(() => {
-            window.location.href = '/shopowner/html/shopowner_login.html';
-        }).catch(error => {
-            console.error('Logout error:', error);
-        });
-    });
 
     // Filter buttons for recent sales
     document.querySelectorAll('[data-recent-filter]').forEach(btn => {
@@ -405,7 +417,7 @@ let salesChartInstance; // store the Chart instance
 
 function renderChart(chartData, filterDate) {
     const ctx = document.getElementById('salesChart').getContext('2d');
-    
+
     // Destroy previous chart if it exists
     if (salesChartInstance) {
         salesChartInstance.destroy();
@@ -561,7 +573,7 @@ document.getElementById('printInventoryBtn').addEventListener('click', async () 
     const btn = document.getElementById('printInventoryBtn');
     const originalText = btn.textContent;
     const originalHTML = btn.innerHTML; // Store original HTML including icon
-    
+
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
     btn.disabled = true;
     btn.classList.add('loading');
@@ -652,8 +664,8 @@ document.getElementById('printInventoryBtn').addEventListener('click', async () 
         const opt = {
             margin: [15, 15, 15, 15], // Slightly larger margins
             filename: `${sname || 'Shop'}_Analytics_${new Date().toISOString().slice(0, 10)}.pdf`,
-            image: { 
-                type: 'jpeg', 
+            image: {
+                type: 'jpeg',
                 quality: 1.0 // Higher quality
             },
             html2canvas: {

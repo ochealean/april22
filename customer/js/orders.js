@@ -17,7 +17,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase(app);
 
-document.body.style.display = 'none';
+// ito ay kapag may nagtype ng url papuntang dashboard kahit di naka login
+// document.body.style.display = 'none';
 
 // Initialize the page when auth state changes
 onAuthStateChanged(auth, (user) => {

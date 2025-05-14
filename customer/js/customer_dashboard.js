@@ -18,6 +18,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase(app);
 
+// ito ay kapag may nagtype ng url papuntang dashboard kahit di naka login
 document.body.style.display = 'none';
 
 onAuthStateChanged(auth, (user) => {
@@ -257,6 +258,88 @@ function updateProductModalContent() {
     updateButtonStates();
 }
 
+
+function updateButtonStates() {
+    const addToCartBtn = document.getElementById('addToCartBtn');
+    const buyNowBtn = document.getElementById('buyNowBtn');
+
+    if (selectedSizeKey === null) {
+        addToCartBtn.disabled = true;
+        buyNowBtn.disabled = true;
+        addToCartBtn.title = "Please select a size first";
+        buyNowBtn.title = "Please select a size first";
+    } else {
+        addToCartBtn.disabled = false;
+        buyNowBtn.disabled = false;
+        addToCartBtn.title = "";
+        buyNowBtn.title = "";
+    }
+}
+
+async function searchShoes(searchTerm) {
+    searchTerm = searchTerm.toLowerCase().trim();
+    
+    if (!searchTerm) {
+        loadAllShoes(); // Show all shoes if search is empty
+        return;
+    }
+
+    const shoesRef = ref(db, 'AR_shoe_users/shoe/');
+    const snapshot = await get(shoesRef);
+    const shoesContainer = document.getElementById('shoesContainer');
+    
+    if (!shoesContainer) return;
+    shoesContainer.innerHTML = '';
+
+    if (snapshot.exists()) {
+        const allShoes = [];
+
+        snapshot.forEach((shopSnapshot) => {
+            const shopId = shopSnapshot.key;
+
+            shopSnapshot.forEach((shoeSnapshot) => {
+                const shoeData = shoeSnapshot.val();
+                shoeData.shopId = shopId;
+                shoeData.shoeId = shoeSnapshot.key;
+                allShoes.push(shoeData);
+            });
+        });
+
+        const filteredShoes = allShoes.filter(shoe => {
+            return (
+                shoe.shoeName.toLowerCase().includes(searchTerm) ||
+                shoe.shoeCode.toLowerCase().includes(searchTerm) ||
+                (shoe.generalDescription && shoe.generalDescription.toLowerCase().includes(searchTerm))
+        )});
+
+        if (filteredShoes.length > 0) {
+            filteredShoes.forEach(shoe => {
+                displayShoe(shoe);
+            });
+        } else {
+            shoesContainer.innerHTML = '<p class="no-shoes">No shoes found matching your search.</p>';
+        }
+    } else {
+        shoesContainer.innerHTML = '<p class="no-shoes">No shoes available at the moment.</p>';
+    }
+}
+
+function generate18CharID() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 18; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+}
+
+
+
+//  event listeners
+
+const unique18CharID = generate18CharID();
+console.log(unique18CharID); // Outputs something like 'Ab3XyZ89QlMnO1pRsT'
+
 window.selectVariant = function (variantKey) {
     selectedVariantKey = variantKey;
     selectedSizeKey = null;
@@ -284,43 +367,12 @@ window.selectSize = function (variantKey, sizeKey) {
     }
 };
 
-function updateButtonStates() {
-    const addToCartBtn = document.getElementById('addToCartBtn');
-    const buyNowBtn = document.getElementById('buyNowBtn');
-
-    if (selectedSizeKey === null) {
-        addToCartBtn.disabled = true;
-        buyNowBtn.disabled = true;
-        addToCartBtn.title = "Please select a size first";
-        buyNowBtn.title = "Please select a size first";
-    } else {
-        addToCartBtn.disabled = false;
-        buyNowBtn.disabled = false;
-        addToCartBtn.title = "";
-        buyNowBtn.title = "";
-    }
-}
-
 window.closeProductModal = function () {
     document.getElementById('productDetailsModal').classList.remove('show');
     document.body.classList.remove('modal-open');
 };
 
-function generate18CharID() {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < 18; i++) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
-}
-
-// Example usage:
-const unique18CharID = generate18CharID();
-console.log(unique18CharID); // Outputs something like 'Ab3XyZ89QlMnO1pRsT'
-
-
-// Replace the existing addToCart function with this:
+// addToCart function 
 window.addToCart = async function (cartItem) {
     const user = auth.currentUser;
     if (!user) {
@@ -362,7 +414,6 @@ window.addToCart = async function (cartItem) {
     }
 };
 
-// Update the addToCartBtn event listener:
 document.getElementById('addToCartBtn').addEventListener('click', async function () {
     if (!currentShoeData || !selectedVariantKey || !selectedSizeKey) return;
 
@@ -435,6 +486,12 @@ document.addEventListener('keydown', function (e) {
     }
 });
 
+// for search bar
+document.querySelector('.search-bar').addEventListener('input', function(e) {
+    searchShoes(e.target.value);
+});
+
+// for logout
 document.getElementById('logout_btn').addEventListener('click', () => {
     auth.signOut().then(() => {
         console.log("User signed out");
@@ -443,6 +500,7 @@ document.getElementById('logout_btn').addEventListener('click', () => {
     });
 });
 
+// for quantity
 window.adjustQuantity = function (change) {
     const quantityInput = document.getElementById('quantity');
     let newValue = parseInt(quantityInput.value) + change;

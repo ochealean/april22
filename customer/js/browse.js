@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getDatabase, ref, onValue, set, get, child } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAuPALylh11cTArigeGJZmLwrFwoAsNPSI",
@@ -22,21 +22,111 @@ let USER;
 let wishlistData = {}; 
 
 
+// Add this to your browse.js file
+
+// Search functionality
+function setupSearch() {
+  const searchInput = document.querySelector('.search-input');
+  const searchBtn = document.querySelector('.search-btn');
+  const productsGrid = document.getElementById('productsGrid');
+  
+  // Function to perform search
+  function performSearch(searchTerm) {
+      const dbRef = ref(db, "AR_shoe_users/shoe");
+      
+      get(dbRef).then((snapshot) => {
+          productsGrid.innerHTML = ''; // Clear current results
+          
+          if (snapshot.exists()) {
+              let foundResults = false;
+              
+              snapshot.forEach(shopSnap => {
+                  const shopID = shopSnap.key;
+                  shopSnap.forEach(shoeSnap => {
+                      const shoeID = shoeSnap.key;
+                      const shoeData = shoeSnap.val();
+                      
+                      const shoeName = shoeData.shoeName.toLowerCase();
+                      const shopName = shoeData.shopName ? shoeData.shopName.toLowerCase() : '';
+                      
+                      // Check if search term matches shoe name or shop name
+                      if (shoeName.includes(searchTerm.toLowerCase()) || 
+                          shopName.includes(searchTerm.toLowerCase())) {
+                          
+                          foundResults = true;
+                          const firstVariant = Object.values(shoeData.variants)[0];
+                          const price = firstVariant.price;
+                          const defaultImage = shoeData.defaultImage;
+                          
+                          const isWishlisted = wishlistData?.[shopID]?.[shoeID] === true;
+                          
+                          const productCardHTML = createProductCard({
+                              shoeID: shoeID,
+                              name: shoeData.shoeName,
+                              price: price,
+                              imageUrl: defaultImage,
+                              shopName: shoeData.shopName || shopID,
+                              shopID: shopID,
+                              isWishlisted: isWishlisted
+                          });
+                          
+                          productsGrid.innerHTML += productCardHTML;
+                      }
+                  });
+              });
+              
+              if (!foundResults) {
+                  productsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No matching shoes found</p>';
+              }
+          } else {
+              productsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No shoes available</p>';
+          }
+      }).catch((error) => {
+          console.error("Error searching shoes: ", error);
+      });
+  }
+  
+  // Search button click handler
+  searchBtn.addEventListener('click', () => {
+      const searchTerm = searchInput.value.trim();
+      if (searchTerm) {
+          performSearch(searchTerm);
+      } else {
+          // If search is empty, reload all shoes
+          loadShoes();
+      }
+  });
+  
+  // Enter key handler
+  searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+          const searchTerm = searchInput.value.trim();
+          if (searchTerm) {
+              performSearch(searchTerm);
+          } else {
+              loadShoes();
+          }
+      }
+  });
+}
+
+// Call this function after onAuthStateChanged
 onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        USER = user.uid;
-        const userRef = ref(db, `AR_shoe_users/customer/${user.uid}`);
-        onValue(userRef, async (snapshot) => {
-            if (snapshot.exists()) {
-                const userData = snapshot.val();
-                console.log(userData);
-                // Now it's safe to load shoes
-                loadShoes();  // ✅ Call here
-            }
-        }, { onlyOnce: true });
-    } else {
-        window.location.href = "/user_login.html";
-    }
+  if (user) {
+      USER = user.uid;
+      const userRef = ref(db, `AR_shoe_users/customer/${user.uid}`);
+      onValue(userRef, async (snapshot) => {
+          if (snapshot.exists()) {
+              const userData = snapshot.val();
+              console.log(userData);
+              // Now it's safe to load shoes and setup search
+              loadShoes();
+              setupSearch(); // Add this line
+          }
+      }, { onlyOnce: true });
+  } else {
+      window.location.href = "/user_login.html";
+  }
 });
 
 
@@ -207,4 +297,15 @@ window.addToWishlist = addToWishlist;
 // };
 
 // Call the function to load products
+
+document.getElementById('logout_btn').addEventListener('click', () => {
+    auth.signOut().then(() => {
+        console.log("User signed out");
+    }).catch((error) => {
+        console.error("Error signing out: ", error);
+    });
+});
+
+
+
 loadShoes();

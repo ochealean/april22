@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAuPALylh11cTArigeGJZmLwrFwoAsNPSI",
@@ -13,6 +14,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth();
 const db = getDatabase(app);
 const chatbotResponsesRef = ref(db, 'AR_shoe_users/chatbot/responses');
 
@@ -70,6 +72,20 @@ function loadResponsesFromFirebase() {
         console.error("Error loading responses:", error);
     });
 }
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        get(ref(db, `AR_shoe_users/customer/${user.uid}`))
+            .then((snapshot) => {
+                if (!snapshot.exists()) {
+                    alert("Account does not exist");
+                    auth.signOut();
+                }
+            });
+    } else {
+        window.location.href = "/user_login.html";
+    }
+});
 
 function updateQuickQuestions() {
     // Clear existing questions
@@ -254,6 +270,14 @@ function initChatbot() {
             - Product customization`);
     }, 1000);
 }
+
+document.getElementById('logout_btn').addEventListener('click', () => {
+    auth.signOut().then(() => {
+        console.log("User signed out");
+    }).catch((error) => {
+        console.error("Error signing out: ", error);
+    });
+});
 
 window.askQuestion = askQuestion;
 document.addEventListener('DOMContentLoaded', initChatbot);

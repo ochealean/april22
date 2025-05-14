@@ -336,9 +336,11 @@ function loadUserProfile(userId) {
 
 // Display user profile
 function displayUserProfile(userData) {
-    const userNameDisplay = document.getElementById("userName_display1");
+    const userNameDisplay = document.getElementById("userName_display");
     const imageProfile = document.getElementById("imageProfile");
     
+    console.log(userData);
+
     if (userNameDisplay) {
         userNameDisplay.textContent = `${userData.firstName || ''} ${userData.lastName || ''}`;
     }
@@ -350,3 +352,11 @@ function displayUserProfile(userData) {
         };
     }
 }
+
+document.getElementById('logout_btn').addEventListener('click', () => {
+    auth.signOut().then(() => {
+        console.log("User signed out");
+    }).catch((error) => {
+        console.error("Error signing out: ", error);
+    });
+});

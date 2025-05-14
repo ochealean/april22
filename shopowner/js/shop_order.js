@@ -145,9 +145,9 @@ function createOrderRow(order) {
                 <i class="fas fa-times"></i> Reject
             </button>
         `;
-    }else if (status === 'rejected' || status === 'cancelled'){
+    } else if (status === 'rejected' || status === 'cancelled') {
         actionButtons = `<span class="no-actions">No actions available</span>`;
-    }else{ // line 123 redirect to track.html
+    } else { // line 123 redirect to track.html
         actionButtons = `
             <button class="btn btn-track" onclick="trackbtn('${order.orderId}', '${order.userId}')">
                 <i class="fas fa-plus"></i> Add Track Status
@@ -230,10 +230,10 @@ window.rejectOrder = async function () {
             if (stockSnap.exists()) {
                 const sizeData = stockSnap.val();
                 const currentStock = sizeData[item.size]?.stock || 0;
-                
+
                 if (typeof currentStock === 'number') {
                     const updatedStock = currentStock + (item.quantity || 1);
-                    
+
                     // Update using the correct path structure
                     await update(stockRef, {
                         [item.size]: {
@@ -242,7 +242,7 @@ window.rejectOrder = async function () {
                             LastUpdatedAt: new Date().toISOString()
                         }
                     });
-                    
+
                     console.log(`Updated stock for ${item.shoeId} size ${item.size}: ${currentStock} -> ${updatedStock}`);
                 } else {
                     console.error(`Invalid stock value for ${item.shoeId}:`, currentStock);
@@ -304,4 +304,24 @@ document.addEventListener('DOMContentLoaded', () => {
             rejectModal.style.display = 'none';
         }
     });
+
+    const logoutBtn = document.getElementById('logout_btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            // Show loading state if you have a loader
+            logoutBtn.disabled = true;
+            logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+
+            auth.signOut().then(() => {
+                // Redirect to login page after successful signout
+                window.location.href = "/user_login.html";
+            }).catch((error) => {
+                console.error("Logout error:", error);
+                alert("Failed to logout. Please try again.");
+                // Reset button state
+                logoutBtn.disabled = false;
+                logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+            });
+        });
+    }
 });
