@@ -21,35 +21,8 @@ const auth = getAuth(app);
 let selectedColor = null;
 let selectedSize = null;
 let maxAvailableQty = 1; // Default
-
-
-function updateQuantityLimit() {
-    if (selectedColor && selectedSize) {
-        const available = variants[selectedColor]?.sizes[selectedSize];
-        if (available) {
-            maxAvailableQty = available;
-            document.getElementById("quantity").max = maxAvailableQty;
-            document.getElementById("availableStock").textContent = `Available: ${maxAvailableQty}`;
-        }
-    }
-}
-
-function adjustQuantity(change) {
-    const quantityInput = document.getElementById("quantity");
-    let qty = parseInt(quantityInput.value) + change;
-    if (qty < 1) qty = 1;
-    if (qty > maxAvailableQty) qty = maxAvailableQty;
-    quantityInput.value = qty;
-}
-
-function validateQuantity() {
-    const quantityInput = document.getElementById("quantity");
-    let qty = parseInt(quantityInput.value);
-    if (qty < 1) qty = 1;
-    if (qty > maxAvailableQty) qty = maxAvailableQty;
-    quantityInput.value = qty;
-}
-
+let productData = {};
+let selectedVariantKey = null;
 
 // HTML Elements
 const productName = document.getElementById("productName");
@@ -70,10 +43,62 @@ const urlParams = new URLSearchParams(window.location.search);
 const shoeID = urlParams.get('shoeID');
 const shopID = urlParams.get('shopID');
 
-let productData = {};
-let selectedVariantKey = null;
+// Utility Functions
+function updateQuantityLimit() {
+    if (selectedColor && selectedSize) {
+        const variant = productData.variants[selectedVariantKey];
+        if (variant) {
+            for (const sizeKey in variant.sizes) {
+                const sizeGroup = variant.sizes[sizeKey];
+                for (const actualSize in sizeGroup) {
+                    if (actualSize === selectedSize) {
+                        maxAvailableQty = sizeGroup[actualSize].stock;
+                        document.getElementById("quantity").max = maxAvailableQty;
+                        document.getElementById("availableStock").textContent = `Available: ${maxAvailableQty}`;
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
 
-// Load product data
+function adjustQuantity(change) {
+    const quantityInput = document.getElementById("quantity");
+    let qty = parseInt(quantityInput.value) + change;
+    if (qty < 1) qty = 1;
+    if (qty > maxAvailableQty) qty = maxAvailableQty;
+    quantityInput.value = qty;
+}
+
+function validateQuantity() {
+    const quantityInput = document.getElementById("quantity");
+    let qty = parseInt(quantityInput.value);
+    if (qty < 1) qty = 1;
+    if (qty > maxAvailableQty) qty = maxAvailableQty;
+    quantityInput.value = qty;
+}
+
+function generate18CharID() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 18; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+}
+
+function formatTimestamp(timestamp) {
+    let date = new Date(timestamp);
+    let month = String(date.getMonth() + 1).padStart(2, '0');
+    let day = String(date.getDate()).padStart(2, '0');
+    let year = date.getFullYear();
+    let hours = String(date.getHours()).padStart(2, '0');
+    let minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${month}/${day}/${year} ${hours}:${minutes}`;
+}
+
+// Product Functions
 function loadProductDetails() {
     const shoeRef = ref(db, `AR_shoe_users/shoe/${shopID}/${shoeID}`);
 
@@ -82,16 +107,16 @@ function loadProductDetails() {
             productData = snapshot.val();
             updateProductInfo();
             loadVariants();
-            loadCustomerReviews();  // Load reviews after product details are fetched
+            loadCustomerReviews();
         } else {
             console.log("Product not found.");
         }
     }).catch(error => {
         console.error("Error loading product details:", error);
     });
+    updateButtonStates(0);
 }
 
-// Update general info
 function updateProductInfo() {
     productName.textContent = productData.shoeName;
     productShop.textContent = `Shop Name: ${productData.shopName}`;
@@ -99,7 +124,6 @@ function updateProductInfo() {
     productDescription.textContent = productData.generalDescription || "No description available.";
     mainProductImage.src = productData.defaultImage || "";
 
-    // Set initial variant if exists
     const variantKeys = Object.keys(productData.variants || {});
     if (variantKeys.length > 0) {
         selectedVariantKey = variantKeys[0];
@@ -107,7 +131,6 @@ function updateProductInfo() {
     }
 }
 
-// Load color variants
 function loadVariants() {
     colorOptions.innerHTML = '';
     sizeOptions.innerHTML = '';
@@ -126,90 +149,109 @@ function loadVariants() {
             selectedVariantKey = variantKey;
             mainProductImage.src = variant.imageUrl || productData.defaultImage || "";
             updatePriceAndSizes(variantKey);
-            selectColor(variantKey); // optional: for managing selection highlight
+            selectColor(variantKey);
         };
 
         colorOptions.appendChild(colorDiv);
     }
 }
 
-function selectSize(variantKey, sizeKey) {
-    const allSizeDivs = sizeOptions.querySelectorAll(".size-option");
-    allSizeDivs.forEach(div => div.classList.remove("selected"));
-
-    const selectedDiv = Array.from(allSizeDivs).find(div =>
-        div.textContent.trim().startsWith(sizeKey)
-    );
-    if (selectedDiv) {
-        selectedDiv.classList.add("selected");
-    }
-
-    console.log(`Selected size: ${sizeKey} from ${variantKey}`);
-    // You can store the selected sizeKey in a global variable if needed
-}
-
-
 function selectColor(selectedKey) {
     const allColorDivs = colorOptions.querySelectorAll(".color-option");
     allColorDivs.forEach(div => div.classList.remove("selected"));
 
-    const selectedDiv = Array.from(allColorDivs).find(div => div.textContent.trim() === productData.variants[selectedKey].color);
+    const selectedDiv = Array.from(allColorDivs).find(div => 
+        div.textContent.trim() === productData.variants[selectedKey].color
+    );
     if (selectedDiv) selectedDiv.classList.add("selected");
 }
 
-
-
-// Update price and sizes when variant is selected
 function updatePriceAndSizes(variantKey) {
     const variant = productData.variants[variantKey];
     productPrice.textContent = `₱${variant.price}`;
     sizeOptions.innerHTML = '';
 
-    console.log("variant.sizes:", variant.sizes);
-
     for (const sizeKey in variant.sizes) {
-        const sizeGroup = variant.sizes[sizeKey]; // e.g., { 8: { stock: 88 } }
-
+        const sizeGroup = variant.sizes[sizeKey];
+        
         for (const actualSize in sizeGroup) {
-            const stockInfo = sizeGroup[actualSize]; // e.g., { stock: 88 }
+            const stockInfo = sizeGroup[actualSize];
             const stock = stockInfo.stock;
 
             const sizeDiv = document.createElement("div");
             sizeDiv.className = "size-option";
             sizeDiv.textContent = `${actualSize} (${stock})`;
+            
+            if (stock <= 0) {
+                sizeDiv.classList.add("out-of-stock");
+            }
+            
             sizeDiv.onclick = (event) => {
                 event.stopPropagation();
+                
+                if (stock <= 0) return;
 
-                // Remove .selected from all size options
                 const allSizeDivs = sizeOptions.querySelectorAll(".size-option");
                 allSizeDivs.forEach(div => div.classList.remove("selected"));
 
-                // Add .selected to the clicked size
                 sizeDiv.classList.add("selected");
 
-                selectedColor = productData.variants[variantKey].color;  // update color context
-                selectedSize = actualSize;  // track selected size
+                selectedColor = productData.variants[variantKey].color;
+                selectedSize = actualSize;
                 maxAvailableQty = stock;
 
-                quantitySelector.max = stock;
-                quantitySelector.value = 1;
+                const quantityInput = document.getElementById("quantity");
+                quantityInput.max = stock;
+                quantityInput.value = 1;
 
-                // Optional: Show available stock
                 const stockText = document.getElementById("availableStock");
-                if (stockText) stockText.textContent = `Available: ${ stock }`;
+                if (stockText) stockText.textContent = `Available: ${stock}`;
+                
+                updateButtonStates(stock);
             };
-
-
-
 
             sizeOptions.appendChild(sizeDiv);
         }
     }
 }
 
+function updateButtonStates(stock) {
+    const buyNowBtn = document.getElementById("buyNowBtn");
+    const addToCartBtn = document.getElementById("addToCartBtn");
+    
+    if (stock <= 0) {
+        buyNowBtn.disabled = true;
+        addToCartBtn.disabled = true;
+        buyNowBtn.title = "This item is out of stock";
+        addToCartBtn.title = "This item is out of stock";
+        buyNowBtn.classList.add("disabled");
+        addToCartBtn.classList.add("disabled");
+    } else {
+        buyNowBtn.disabled = false;
+        addToCartBtn.disabled = false;
+        buyNowBtn.title = "";
+        addToCartBtn.title = "";
+        buyNowBtn.classList.remove("disabled");
+        addToCartBtn.classList.remove("disabled");
+    }
+}
 
+// Review Functions
+async function getCustomernameUsingID(userID) {
+    const userRef = ref(db, `AR_shoe_users/customer/${userID}`);
+    return get(userRef).then(snapshot => {
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            return `${userData.firstName} ${userData.lastName}` || "Anonymous User";
+        } else {
+            return "Anonymous User";
+        }
+    }).catch(error => {
+        console.error("Error fetching user data:", error);
+        return "Anonymous User";
+    });
+}
 
-// Load customer reviews from Firebase
 function loadCustomerReviews() {
     const feedbackRef = ref(db, `AR_shoe_users/feedbacks`);
 
@@ -226,26 +268,9 @@ function loadCustomerReviews() {
     });
 }
 
-function getCustomernameUsingID(userID) {
-    const userRef = ref(db, `AR_shoe_users/customer/${userID}`);
-    return get(userRef).then(snapshot => {
-        if (snapshot.exists()) {
-            const userData = snapshot.val();
-            return `${ userData.firstName} ${userData.lastName}` || "Anonymous User" ;  // Return display name or default to "Anonymous User"
-        } else {
-            return "Anonymous User";  // Default if user not found
-        }
-    }).catch(error => {
-        console.error("Error fetching user data:", error);
-        return "Anonymous User";  // Default if error occurs
-    });
-}
-
-// Display reviews on the page
 async function displayReviews(feedbacks) {
     if (reviewsList) reviewsList.innerHTML = '<div class="loading">Loading reviews...</div>';
 
-    // Calculate review counts per rating
     const ratingCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
     const reviewsToDisplay = [];
 
@@ -253,11 +278,7 @@ async function displayReviews(feedbacks) {
         for (const orderID in feedbacks[userId]) {
             const feedback = feedbacks[userId][orderID];
             if (feedback.shoeID === shoeID) {
-                reviewsToDisplay.push({
-                    userId,
-                    feedback
-                });
-                // Count ratings (1-5 stars only)
+                reviewsToDisplay.push({ userId, feedback });
                 if (feedback.rating >= 1 && feedback.rating <= 5) {
                     ratingCounts[feedback.rating]++;
                 }
@@ -265,10 +286,8 @@ async function displayReviews(feedbacks) {
         }
     }
 
-    // Update the filter buttons with counts
     updateRatingFilters(ratingCounts);
 
-    // Calculate and display average rating
     const averageRating = calculateAverageRating(feedbacks);
     const averageRatingElement = document.getElementById('averageRating');
     
@@ -288,7 +307,6 @@ async function displayReviews(feedbacks) {
         }
     }
 
-    // If no reviews, show message
     if (reviewsToDisplay.length === 0) {
         reviewsList.innerHTML = "<p>No reviews yet.</p>";
         return;
@@ -296,18 +314,14 @@ async function displayReviews(feedbacks) {
 
     reviewsList.innerHTML = '';
 
-    // Process each review asynchronously
     for (const review of reviewsToDisplay) {
         try {
-            // Await the username lookup
             const username = await getCustomernameUsingID(review.userId);
             
-            // Create review element
             const reviewDiv = document.createElement("div");
             reviewDiv.classList.add("review-item");
             reviewDiv.dataset.rating = review.feedback.rating;
 
-            // Create review header
             const headerDiv = document.createElement("div");
             headerDiv.classList.add("review-header");
             
@@ -322,7 +336,6 @@ async function displayReviews(feedbacks) {
             headerDiv.appendChild(authorSpan);
             headerDiv.appendChild(dateSpan);
             
-            // Create stars
             const starsDiv = document.createElement("div");
             starsDiv.classList.add("review-stars");
             
@@ -333,17 +346,14 @@ async function displayReviews(feedbacks) {
                 starsDiv.appendChild(starIcon);
             }
             
-            // Create comment
             const commentP = document.createElement("p");
             commentP.textContent = review.feedback.comment || "No comment provided.";
             
-            // Append all elements
             reviewDiv.appendChild(headerDiv);
             reviewDiv.appendChild(starsDiv);
             reviewDiv.appendChild(commentP);
             
             reviewsList.appendChild(reviewDiv);
-
         } catch (error) {
             console.error("Error processing review:", error);
         }
@@ -354,13 +364,9 @@ function updateRatingFilters(ratingCounts) {
     const filtersContainer = document.querySelector('.review-filters');
     if (!filtersContainer) return;
     
-    // Clear existing filters
     filtersContainer.innerHTML = '';
-    
-    // Total count for "All" filter
     const totalReviews = Object.values(ratingCounts).reduce((a, b) => a + b, 0);
     
-    // Create filter buttons from 5 stars to 1 star
     for (let rating = 5; rating >= 1; rating--) {
         const filter = document.createElement('div');
         filter.className = 'stars-filter';
@@ -378,44 +384,48 @@ function updateRatingFilters(ratingCounts) {
         filtersContainer.appendChild(filter);
     }
     
-    // Add "All" filter at the end
     const allFilter = document.createElement('div');
     allFilter.className = 'stars-filter active';
     allFilter.dataset.rating = '0';
     allFilter.onclick = () => filterReviews(0);
-    allFilter.innerHTML = `
-        <div class="text">All Reviews (${totalReviews})</div>
-    `;
+    allFilter.innerHTML = `<div class="text">All Reviews (${totalReviews})</div>`;
     filtersContainer.appendChild(allFilter);
 }
 
-// Filter reviews by star rating
-window.filterReviews = function(rating) {
+function calculateAverageRating(feedbacks) {
+    let totalRating = 0;
+    let reviewCount = 0;
+
+    for (const userId in feedbacks) {
+        for (const orderID in feedbacks[userId]) {
+            const feedback = feedbacks[userId][orderID];
+            if (feedback.shoeID === shoeID) {
+                totalRating += feedback.rating;
+                reviewCount++;
+            }
+        }
+    }
+
+    return reviewCount === 0 ? 0 : (totalRating / reviewCount).toFixed(1);
+}
+
+window.filterReviews = function (rating) {
     const reviewItems = document.querySelectorAll('.review-item');
     const filters = document.querySelectorAll('.stars-filter');
-    
-    // Update active filter button
+
     filters.forEach(filter => {
         filter.classList.remove('active');
         if (parseInt(filter.dataset.rating) === rating) {
             filter.classList.add('active');
         }
     });
-    
-    // Show/hide reviews based on filter
+
     reviewItems.forEach(item => {
-        item.style.display = (rating === 0 || parseInt(item.dataset.rating) === rating) 
-            ? 'block' 
-            : 'none';
+        item.style.display = (rating === 0 || parseInt(item.dataset.rating) === rating) ? 'block' : 'none';
     });
-}
+};
 
-// Wishlist toggle
-wishlistBtn.addEventListener("click", () => {
-    console.log("Wishlist clicked");
-});
-
-// Logout
+// Event Listeners
 document.getElementById("logout_btn").addEventListener("click", function () {
     auth.signOut().then(() => {
         window.location.href = "/customer/html/user_login.html";
@@ -424,25 +434,19 @@ document.getElementById("logout_btn").addEventListener("click", function () {
     });
 });
 
-// Start
-loadProductDetails();
+document.getElementById("quantity").addEventListener("change", validateQuantity);
 
-// Identify HTML buttons
-const buyNowBtn = document.getElementById("buyNowBtn");
-const addToCartBtn = document.getElementById("addToCartBtn");
+wishlistBtn.addEventListener("click", () => {
+    console.log("Wishlist clicked");
+});
 
-// Helper to get selected size
-function getSelectedSize() {
-    return selectedSize;
-}
-
-
-// BUY NOW
-buyNowBtn.addEventListener("click", async () => {
+document.getElementById("buyNowBtn").addEventListener("click", async () => {
     try {
-        console.log("[Buy Now] Button clicked - Starting process");
+        if (maxAvailableQty <= 0) {
+            alert("This item is out of stock");
+            return;
+        }
 
-        // Verify selections
         if (!selectedVariantKey) {
             alert("Please select a color first.");
             return;
@@ -454,11 +458,9 @@ buyNowBtn.addEventListener("click", async () => {
             return;
         }
 
-        // Get product data
         const variant = productData.variants[selectedVariantKey];
         const quantity = parseInt(document.getElementById("quantity").value) || 1;
 
-        // Find the sizeKey
         let sizeKey = null;
         for (const [key, sizeObj] of Object.entries(variant.sizes)) {
             const sizeValue = Object.keys(sizeObj)[0];
@@ -474,13 +476,12 @@ buyNowBtn.addEventListener("click", async () => {
             return;
         }
 
-        // Prepare URL parameters (matching your current URL structure)
         const params = new URLSearchParams({
             method: "buyNow",
             shopId: shopID,
             shoeId: shoeID,
             variantKey: selectedVariantKey,
-            sizeKey: sizeKey,  // This is crucial for checkout.js
+            sizeKey: sizeKey,
             size: selectedSize,
             quantity: quantity,
             price: variant.price,
@@ -491,17 +492,18 @@ buyNowBtn.addEventListener("click", async () => {
             shopName: productData.shopName || "Unknown Shop"
         });
 
-        console.log("Redirecting to checkout with params:", params.toString());
-        window.location.href = `/customer/html/checkout.html?${ params.toString() }`;
-
+        window.location.href = `/customer/html/checkout.html?${params.toString()}`;
     } catch (error) {
         console.error("Error in Buy Now process:", error);
         alert("An error occurred. Please try again.");
     }
 });
 
-// ADD TO CART
-addToCartBtn.addEventListener("click", async () => {
+document.getElementById("addToCartBtn").addEventListener("click", async () => {
+    if (maxAvailableQty <= 0) {
+        alert("This item is out of stock");
+        return;
+    }
     const user = auth.currentUser;
     if (!user) return alert("Please log in first.");
 
@@ -511,7 +513,6 @@ addToCartBtn.addEventListener("click", async () => {
 
     const variant = productData.variants[selectedVariantKey];
 
-    // Find the sizeKey that corresponds to the selected size
     let sizeKey = null;
     for (const [key, sizeObj] of Object.entries(variant.sizes)) {
         if (Object.keys(sizeObj)[0] === selectedSize) {
@@ -526,11 +527,11 @@ addToCartBtn.addEventListener("click", async () => {
         shopId: shopID,
         shoeId: shoeID,
         variantKey: selectedVariantKey,
-        sizeKey: sizeKey, // Use the sizeKey instead of the size value
+        sizeKey: sizeKey,
         shoeName: productData.shoeName,
         variantName: variant.variantName || "",
         color: variant.color || "",
-        size: selectedSize, // Keep the actual size value as well if needed
+        size: selectedSize,
         price: variant.price,
         image: variant.imageUrl || productData.defaultImage || "",
         quantity: parseInt(document.getElementById("quantity").value || 1),
@@ -538,7 +539,7 @@ addToCartBtn.addEventListener("click", async () => {
     };
 
     const cartItemId = generate18CharID();
-    const cartRef = ref(db, `AR_shoe_users/carts/${ user.uid }/${ cartItemId }`);
+    const cartRef = ref(db, `AR_shoe_users/carts/${user.uid}/${cartItemId}`);
 
     try {
         await set(cartRef, cartItem);
@@ -549,79 +550,8 @@ addToCartBtn.addEventListener("click", async () => {
     }
 });
 
-window.adjustQuantity = function (change) {
-    const quantityInput = document.getElementById("quantity");
-    let currentValue = parseInt(quantityInput.value) || 1;
-    currentValue += change;
-    if (currentValue < 1) currentValue = 1;
-    quantityInput.value = currentValue;
-};
+// Initialize
+loadProductDetails();
 
-function generate18CharID() {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < 18; i++) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
-}
-
-function formatTimestamp(timestamp) {
-    let date = new Date(timestamp);
-
-    let month = String(date.getMonth() + 1).padStart(2, '0');
-    let day = String(date.getDate()).padStart(2, '0');
-    let year = date.getFullYear();
-    let hours = String(date.getHours()).padStart(2, '0');
-    let minutes = String(date.getMinutes()).padStart(2, '0');
-
-    return `${ month }/${day}/${ year } ${ hours }:${ minutes }`;
-}
-
-// Filter reviews by star rating
-window.filterReviews = function (rating) {
-    const reviewItems = document.querySelectorAll('.review-item');
-    const filters = document.querySelectorAll('.stars-filter');
-
-    // Update active filter button
-    filters.forEach(filter => {
-        filter.classList.remove('active');
-        if (parseInt(filter.dataset.rating) === rating) {
-            filter.classList.add('active');
-        }
-    });
-
-    // Show/hide reviews based on filter
-    reviewItems.forEach(item => {
-        if (rating === 0) {
-            item.style.display = 'block'; // Show all reviews
-        } else {
-            const itemRating = parseInt(item.dataset.rating);
-            item.style.display = itemRating === rating ? 'block' : 'none';
-        }
-    });
-}
-
-
-
-// Calculate and display average rating
-function calculateAverageRating(feedbacks) {
-    let totalRating = 0;
-    let reviewCount = 0;
-
-    for (const userId in feedbacks) {
-        for (const orderID in feedbacks[userId]) {
-            const feedback = feedbacks[userId][orderID];
-            if (feedback.shoeID === shoeID) {
-                totalRating += feedback.rating;
-                reviewCount++;
-            }
-        }
-    }
-
-    if (reviewCount === 0) {
-        return 0;
-    }
-
-    return (totalRating / reviewCount).toFixed(1);
-}
+// Global functions
+window.adjustQuantity = adjustQuantity;

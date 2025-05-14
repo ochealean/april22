@@ -657,6 +657,22 @@
                 width: 40px;
             }
         }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn:disabled:hover {
+            background-color: inherit !important;
+        }
+
+        .size-option.out-of-stock {
+            opacity: 0.6;
+            text-decoration: line-through;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
     </style>
 </head>
 
@@ -819,7 +835,7 @@
                         </div>
                     </div>
                 </div>
-            
+
                 <div id="reviewsContainer">
                     <div class="review-item" data-rating="5">
                         <div class="review-header">
