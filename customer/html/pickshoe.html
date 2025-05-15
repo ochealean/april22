@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Shoe Model</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2c3e50;
+            --accent: #e74c3c;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --error: #c0392b;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray: #bdc3c7;
+            --gray-light: #ecf0f1;
+            --gray-dark: #7f8c8d;
+            --text-primary: #2c3e50;
+            --text-secondary: #34495e;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--gray-light);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--secondary);
+            color: var(--light);
+            padding: 2rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .logo {
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .nav-item {
+            padding: 0.8rem 1rem;
+            margin: 0.5rem 0;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: block;
+            color: var(--light);
+            text-decoration: none;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--primary-dark);
+            color: var(--light);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            overflow-x: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* Model Selection Styles */
+        .model-selection-container {
+            margin-top: 2rem;
+        }
+
+        .section-title {
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+            font-size: 1.5rem;
+        }
+
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .model-card {
+            background: white;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .model-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .model-card.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+        }
+
+        .model-image {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            background-color: #f9f9f9;
+            padding: 1rem;
+        }
+
+        .model-details {
+            padding: 1.5rem;
+        }
+
+        .model-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+        }
+
+        .model-price {
+            color: var(--primary);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .model-description {
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            margin-top: 2rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:disabled {
+            background-color: var(--gray);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard {
+                grid-template-columns: 200px 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                height: auto;
+                position: relative;
+                padding: 1rem;
+            }
+            
+            .nav-items {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .nav-item {
+                margin: 0;
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .model-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .model-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">SHOE PORTAL</div>
+            <div class="nav-items">
+                <a href="/customer/html/customer_dashboard.html" class="nav-item">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item active">
+                    <i class="fas fa-shoe-prints"></i> Customize Shoes
+                </a>
+                <a href="/customer/html/orders.html" class="nav-item">
+                    <i class="fas fa-receipt"></i> My Orders
+                </a>
+                <a href="/customer/html/add_to_cart.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i> My Cart
+                </a>
+                <a href="/customer/html/history.html" class="nav-item">
+                    <i class="fas fa-history"></i> Order History
+                </a>
+                <a href="/customer/html/wishlist.html" class="nav-item">
+                    <i class="fas fa-heart"></i> Wishlist
+                </a>
+                <a href="/chatbot/html/chatbot.html" class="nav-item">
+                    <i class="fas fa-comment"></i> Chatbot
+                </a>
+                <a href="/extras/devonprocess.html" class="nav-item">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a id="logout_btn" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>Select Your Shoe Model</h1>
+                <div class="user-profile">
+                    <img id="imageProfile" src="#" alt="Profile" class="user-avatar">
+                    <span id="userName_display2">Customer name</span>
+                </div>
+            </div>
+
+            <div class="model-selection-container">
+                <h2 class="section-title">Available Models</h2>
+                <div class="model-grid" id="modelGrid">
+                    <!-- Model 1 -->
+                    <div class="model-card" data-model="classic" data-base-price="2499" data-base-days="7" data-base-image="https://via.placeholder.com/400x300?text=Classic+Sneaker">
+                        <img src="https://via.placeholder.com/400x300?text=Classic+Sneaker" alt="Classic Sneaker" class="model-image">
+                        <div class="model-details">
+                            <h3 class="model-name">Classic Sneaker</h3>
+                            <div class="model-price">₱2,499.00</div>
+                            <p class="model-description">Our timeless classic sneaker with customizable options for sole, upper, laces, and more.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Model 2 -->
+                    <div class="model-card" data-model="runner" data-base-price="2999" data-base-days="5" data-base-image="https://via.placeholder.com/400x300?text=Performance+Runner">
+                        <img src="https://via.placeholder.com/400x300?text=Performance+Runner" alt="Performance Runner" class="model-image">
+                        <div class="model-details">
+                            <h3 class="model-name">Performance Runner</h3>
+                            <div class="model-price">₱2,999.00</div>
+                            <p class="model-description">High-performance running shoe with advanced cushioning technology and breathable materials.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Model 3 -->
+                    <div class="model-card" data-model="high-top" data-base-price="2799" data-base-days="10" data-base-image="https://via.placeholder.com/400x300?text=High-Top+Basketball">
+                        <img src="https://via.placeholder.com/400x300?text=High-Top+Basketball" alt="High-Top Basketball" class="model-image">
+                        <div class="model-details">
+                            <h3 class="model-name">High-Top Basketball</h3>
+                            <div class="model-price">₱2,799.00</div>
+                            <p class="model-description">Ankle-supporting basketball shoes with customizable colors and premium materials.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Model 4 -->
+                    <div class="model-card" data-model="slip-on" data-base-price="2299" data-base-days="5" data-base-image="https://via.placeholder.com/400x300?text=Slip-On+Comfort">
+                        <img src="https://via.placeholder.com/400x300?text=Slip-On+Comfort" alt="Slip-On Comfort" class="model-image">
+                        <div class="model-details">
+                            <h3 class="model-name">Slip-On Comfort</h3>
+                            <div class="model-price">₱2,299.00</div>
+                            <p class="model-description">Easy-wearing slip-on shoes with memory foam insoles and stylish design options.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="customizeBtn" class="btn btn-primary" disabled>
+                    <i class="fas fa-magic"></i> Customize Selected Model
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let selectedModel = null;
+            const modelCards = document.querySelectorAll('.model-card');
+            const customizeBtn = document.getElementById('customizeBtn');
+            
+            // Handle model selection
+            modelCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Remove selected class from all cards
+                    modelCards.forEach(c => c.classList.remove('selected'));
+                    
+                    // Add selected class to clicked card
+                    this.classList.add('selected');
+                    
+                    // Store selected model data
+                    selectedModel = {
+                        id: this.dataset.model,
+                        basePrice: parseFloat(this.dataset.basePrice),
+                        baseDays: parseInt(this.dataset.baseDays),
+                        baseImage: this.dataset.baseImage,
+                        name: this.querySelector('.model-name').textContent
+                    };
+                    
+                    // Enable customize button
+                    customizeBtn.disabled = false;
+                });
+            });
+            
+            // Handle customize button click
+            customizeBtn.addEventListener('click', function() {
+                if (selectedModel) {
+                    // Store the selected model in sessionStorage to pass to the next page
+                    sessionStorage.setItem('selectedShoeModel', JSON.stringify(selectedModel));
+                    
+                    // Redirect to customization page
+                    window.location.href = 'customizeshoe.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
