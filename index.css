@@ -23,6 +23,17 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* for targeting */
+ html {
+    scroll-behavior: smooth;
+ }
+
+ @keyframes highlight {
+    0% { background-color: transparent; }
+    20% { background-color: rgba(255, 255, 255, 0.1); }
+    100% { background-color: transparent; }
+ }
+
 body {
     background-color: var(--soft-gray);
     color: var(--primary-black);
