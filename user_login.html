@@ -15,7 +15,7 @@
         </div>
 
         <div class="login-type-selector">
-            <button class="login-type-btn active" data-type="customer">
+            <button class="login-type-btn" data-type="customer">
                 <i class="fas fa-user"></i> Customer Login
             </button>
             <button class="login-type-btn" data-type="shop">
@@ -23,7 +23,7 @@
             </button>
         </div>
 
-        <div class="login-form active" id="customer-login">
+        <div class="login-form" id="customer-login">
             <form id="customerLoginForm">
                 <div class="form-group">
                     <label for="customer-email">Email</label>
@@ -85,46 +85,56 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Switch between customer and shop login
+            // Get all elements
             const loginTypeBtns = document.querySelectorAll('.login-type-btn');
             const loginForms = document.querySelectorAll('.login-form');
             
+            // Function to activate a specific login type
+            function activateLoginType(type) {
+                // Update active button
+                loginTypeBtns.forEach(b => b.classList.remove('active'));
+                document.querySelector(`.login-type-btn[data-type="${type}"]`).classList.add('active');
+                
+                // Show corresponding form with animation
+                loginForms.forEach(form => {
+                    if (form.classList.contains('active')) {
+                        form.style.animation = 'fadeIn 0.4s ease-out reverse';
+                        setTimeout(() => {
+                            form.classList.remove('active');
+                        }, 300);
+                    }
+                    if (form.id === `${type}-login`) {
+                        setTimeout(() => {
+                            form.classList.add('active');
+                            form.style.animation = 'fadeIn 0.6s ease-out';
+                        }, 300);
+                    }
+                });
+            }
+            
+            // Check URL hash on page load
+            const hash = window.location.hash.substring(1); // Remove the #
+            const defaultType = 'customer'; // Default to customer login
+            const activeType = (hash === 'customer' || hash === 'shop') ? hash : defaultType;
+            activateLoginType(activeType);
+            
+            // Button click handlers
             loginTypeBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
                     const loginType = this.dataset.type;
-                    
-                    // Update active button
-                    loginTypeBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Show corresponding form with animation
-                    loginForms.forEach(form => {
-                        if (form.classList.contains('active')) {
-                            form.style.animation = 'fadeIn 0.4s ease-out reverse';
-                            setTimeout(() => {
-                                form.classList.remove('active');
-                            }, 300);
-                        }
-                        if (form.id === `${loginType}-login`) {
-                            setTimeout(() => {
-                                form.classList.add('active');
-                                form.style.animation = 'fadeIn 0.6s ease-out';
-                            }, 300);
-                        }
-                    });
+                    window.location.hash = loginType; // Update URL hash
+                    activateLoginType(loginType);
                 });
             });
             
             // Form submission
             document.getElementById('customerLoginForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                // Add your customer login logic here
                 console.log('Customer login submitted');
             });
             
             document.getElementById('shopLoginForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                // Add your shop login logic here
                 console.log('Shop login submitted');
             });
         });
