@@ -70,37 +70,67 @@ function Recent_OrdersFunc(uid) {
 
 function loadAllShoes() {
     const shoesRef = ref(db, 'AR_shoe_users/shoe/');
+    const shopsRef = ref(db, 'AR_shoe_users/shop/');
 
-    onValue(shoesRef, (snapshot) => {
-        const shoesContainer = document.getElementById('shoesContainer');
-        if (!shoesContainer) return;
-
-        shoesContainer.innerHTML = '';
-
-        if (snapshot.exists()) {
-            const allShoes = [];
-
-            snapshot.forEach((shopSnapshot) => {
-                const shopId = shopSnapshot.key;
-
-                shopSnapshot.forEach((shoeSnapshot) => {
-                    const shoeData = shoeSnapshot.val();
-                    shoeData.shopId = shopId;
-                    shoeData.shoeId = shoeSnapshot.key;
-                    allShoes.push(shoeData);
-                });
+    // Fetch all shops first to map shopId -> shopName
+    get(shopsRef).then(shopsSnapshot => {
+        const shopNames = {};
+        if (shopsSnapshot.exists()) {
+            shopsSnapshot.forEach(shopSnap => {
+                const shopData = shopSnap.val();
+                // Use both possible ID formats for backward compatibility
+                shopNames[shopSnap.key] = shopData.shopName || 'Unknown Shop';
             });
+        }
 
-            if (allShoes.length > 0) {
-                allShoes.forEach(shoe => {
-                    displayShoe(shoe);
+        onValue(shoesRef, (snapshot) => {
+            const shoesContainer = document.getElementById('shoesContainer');
+            if (!shoesContainer) return;
+
+            shoesContainer.innerHTML = '';
+
+            if (snapshot.exists()) {
+                const allShoes = [];
+
+                snapshot.forEach((shopSnapshot) => {
+                    const shopId = shopSnapshot.key;
+
+                    shopSnapshot.forEach((shoeSnapshot) => {
+                        const shoeData = shoeSnapshot.val();
+                        // Handle both shopID and shopId cases
+                        const actualShopId = shoeData.shopID || shoeData.shopId || shopId;
+                        const shopName = shopNames[actualShopId] || 
+                                         shoeData.shopName || 
+                                         'Unknown Shop';
+                        
+                        // Create a clean shoe object with guaranteed fields
+                        const shoe = {
+                            ...shoeData,
+                            shopId: actualShopId,
+                            shopName: shopName,
+                            shoeId: shoeSnapshot.key
+                        };
+                        
+                        allShoes.push(shoe);
+                    });
                 });
+
+                if (allShoes.length > 0) {
+                    allShoes.forEach(shoe => {
+                        displayShoe(shoe);
+                    });
+                } else {
+                    shoesContainer.innerHTML = '<p class="no-shoes">No shoes available at the moment.</p>';
+                }
             } else {
                 shoesContainer.innerHTML = '<p class="no-shoes">No shoes available at the moment.</p>';
             }
-        } else {
-            shoesContainer.innerHTML = '<p class="no-shoes">No shoes available at the moment.</p>';
-        }
+        });
+    }).catch(error => {
+        console.error("Error loading shops:", error);
+        // Fallback - load shoes even if shops fail to load
+        onValue(shoesRef, (snapshot) => {
+        });
     });
 }
 
@@ -132,6 +162,7 @@ function displayShoe(shoe) {
         <div class="shoe-details">
             <h3>${shoe.shoeName}</h3>
             <p class="shoe-code">Code: ${shoe.shoeCode}</p>
+            <h4>Shop Name: ${shoe.shopName}</h4>
             <p class="shoe-description">${fixedDescription(shoe.generalDescription) || 'No description available'}</p>
             <p class="shoe-price">From ₱${lowestPrice.toFixed(2)}</p>
             <div class="shoe-variants">

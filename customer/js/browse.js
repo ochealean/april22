@@ -32,59 +32,74 @@ function setupSearch() {
   
   // Function to perform search
   function performSearch(searchTerm) {
-      const dbRef = ref(db, "AR_shoe_users/shoe");
-      
-      get(dbRef).then((snapshot) => {
-          productsGrid.innerHTML = ''; // Clear current results
-          
-          if (snapshot.exists()) {
-              let foundResults = false;
-              
-              snapshot.forEach(shopSnap => {
-                  const shopID = shopSnap.key;
-                  shopSnap.forEach(shoeSnap => {
-                      const shoeID = shoeSnap.key;
-                      const shoeData = shoeSnap.val();
-                      
-                      const shoeName = shoeData.shoeName.toLowerCase();
-                      const shopName = shoeData.shopName ? shoeData.shopName.toLowerCase() : '';
-                      
-                      // Check if search term matches shoe name or shop name
-                      if (shoeName.includes(searchTerm.toLowerCase()) || 
-                          shopName.includes(searchTerm.toLowerCase())) {
-                          
-                          foundResults = true;
-                          const firstVariant = Object.values(shoeData.variants)[0];
-                          const price = firstVariant.price;
-                          const defaultImage = shoeData.defaultImage;
-                          
-                          const isWishlisted = wishlistData?.[shopID]?.[shoeID] === true;
-                          
-                          const productCardHTML = createProductCard({
-                              shoeID: shoeID,
-                              name: shoeData.shoeName,
-                              price: price,
-                              imageUrl: defaultImage,
-                              shopName: shoeData.shopName || shopID,
-                              shopID: shopID,
-                              isWishlisted: isWishlisted
-                          });
-                          
-                          productsGrid.innerHTML += productCardHTML;
-                      }
-                  });
-              });
-              
-              if (!foundResults) {
-                  productsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No matching shoes found</p>';
-              }
-          } else {
-              productsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No shoes available</p>';
-          }
-      }).catch((error) => {
-          console.error("Error searching shoes: ", error);
-      });
-  }
+    const dbRef = ref(db, "AR_shoe_users/shoe");
+    
+    // First get all shop names
+    const shopsRef = ref(db, "AR_shoe_users/shop");
+    get(shopsRef).then((shopsSnapshot) => {
+        const shopNames = {};
+        if (shopsSnapshot.exists()) {
+            shopsSnapshot.forEach((shopSnap) => {
+                shopNames[shopSnap.key] = shopSnap.val().shopName || shopSnap.key;
+            });
+        }
+
+        // Then search through shoes
+        get(dbRef).then((snapshot) => {
+            productsGrid.innerHTML = ''; // Clear current results
+            
+            if (snapshot.exists()) {
+                let foundResults = false;
+                
+                snapshot.forEach(shopSnap => {
+                    const shopID = shopSnap.key;
+                    const shopName = shopNames[shopID] || shopID;
+                    
+                    shopSnap.forEach(shoeSnap => {
+                        const shoeID = shoeSnap.key;
+                        const shoeData = shoeSnap.val();
+                        
+                        const shoeName = shoeData.shoeName.toLowerCase();
+                        const shopNameLower = shopName.toLowerCase();
+                        
+                        if (shoeName.includes(searchTerm.toLowerCase()) || 
+                            shopNameLower.includes(searchTerm.toLowerCase())) {
+                            
+                            foundResults = true;
+                            const firstVariant = Object.values(shoeData.variants)[0];
+                            const price = firstVariant.price;
+                            const defaultImage = shoeData.defaultImage;
+                            
+                            const isWishlisted = wishlistData?.[shopID]?.[shoeID] === true;
+                            
+                            const productCardHTML = createProductCard({
+                                shoeID: shoeID,
+                                name: shoeData.shoeName,
+                                price: price,
+                                imageUrl: defaultImage,
+                                shopName: shopName,
+                                shopID: shopID,
+                                isWishlisted: isWishlisted
+                            });
+                            
+                            productsGrid.innerHTML += productCardHTML;
+                        }
+                    });
+                });
+                
+                if (!foundResults) {
+                    productsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No matching shoes found</p>';
+                }
+            } else {
+                productsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No shoes available</p>';
+            }
+        }).catch((error) => {
+            console.error("Error searching shoes: ", error);
+        });
+    }).catch((error) => {
+        console.error("Error loading shop names for search: ", error);
+    });
+}
   
   // Search button click handler
   searchBtn.addEventListener('click', () => {
@@ -135,7 +150,6 @@ function createProductCard(shoeData) {
     const heartClass = shoeData.isWishlisted ? "fas" : "far";
     const heartColor = shoeData.isWishlisted ? "red" : "";
 
-    console.log(shoeData.shopID); // Ensure you are logging shopID
     return `
     <div class="product-card">
       <img src="${shoeData.imageUrl}" alt="${shoeData.name}" class="product-image">
@@ -174,43 +188,58 @@ function loadShoes() {
 
     get(wishlistRef).then((wishlistSnap) => {
         if (wishlistSnap.exists()) {
-            wishlistData = wishlistSnap.val(); // All shopIDs and their shoeIDs
+            wishlistData = wishlistSnap.val();
         }
 
-        // Then load shoes
         const dbRef = ref(db, "AR_shoe_users/shoe");
-
         get(dbRef).then((snapshot) => {
             if (snapshot.exists()) {
-                snapshot.forEach(shopSnap => {
-                    const shopID = shopSnap.key;
-                    shopSnap.forEach(shoeSnap => {
-                        const shoeID = shoeSnap.key;
-                        const shoeData = shoeSnap.val();
-
-                        const shoeName = shoeData.shoeName;
-                        const defaultImage = shoeData.defaultImage;
-                        const firstVariant = Object.values(shoeData.variants)[0];
-                        const price = firstVariant.price;
-
-                        const isWishlisted = wishlistData?.[shopID]?.[shoeID] === true;
-
-                        const productCardHTML = createProductCard({
-                            shoeID: shoeID,
-                            name: shoeName,
-                            price: price,
-                            imageUrl: defaultImage,
-                            shopName: shopID,  // Passing shopID
-                            shopID: shopID,    // Pass the shopID as well
-                            isWishlisted: isWishlisted
+                // First get all shop names
+                const shopsRef = ref(db, "AR_shoe_users/shop");
+                get(shopsRef).then((shopsSnapshot) => {
+                    const shopNames = {};
+                    if (shopsSnapshot.exists()) {
+                        shopsSnapshot.forEach((shopSnap) => {
+                            shopNames[shopSnap.key] = shopSnap.val().shopName || shopSnap.key;
                         });
-                        
+                    }
 
-                        productsGrid.innerHTML += productCardHTML;
+                    // Now load shoes with proper shop names
+                    productsGrid.innerHTML = ''; // Clear existing content
+                    snapshot.forEach(shopSnap => {
+                        const shopID = shopSnap.key;
+                        const shopName = shopNames[shopID] || shopID; // Fallback to shopID if name not found
+                        
+                        shopSnap.forEach(shoeSnap => {
+                            const shoeID = shoeSnap.key;
+                            const shoeData = shoeSnap.val();
+
+                            const shoeName = shoeData.shoeName;
+                            const defaultImage = shoeData.defaultImage;
+                            const firstVariant = Object.values(shoeData.variants)[0];
+                            const price = firstVariant.price;
+
+                            const isWishlisted = wishlistData?.[shopID]?.[shoeID] === true;
+
+                            const productCardHTML = createProductCard({
+                                shoeID: shoeID,
+                                name: shoeName,
+                                price: price,
+                                imageUrl: defaultImage,
+                                shopName: shopName,  // Use the actual shop name
+                                shopID: shopID,
+                                isWishlisted: isWishlisted
+                            });
+
+                            productsGrid.innerHTML += productCardHTML;
+                        });
                     });
+                }).catch((error) => {
+                    console.error("Error loading shop names: ", error);
                 });
             } else {
                 console.log("No shoe data available");
+                productsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No shoes available</p>';
             }
         }).catch((error) => {
             console.error("Error loading shoes: ", error);
