@@ -202,8 +202,16 @@ async function updateDeliveryInfo(data) {
 // Helper function to format phone numbers
 function formatPhoneNumber(phone) {
     if (!phone) return '';
-    // Simple formatting - adjust as needed
-    return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+
+    const digits = phone.replace(/\D/g, '');
+
+    if (digits.length === 10) {
+        // Format: 0XXX XXX XXXX
+        return `0${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6, 10)}`;
+    }
+
+    // Return unformatted if it doesn't match expected pattern
+    return phone;
 }
 
 // Update status updates and timeline

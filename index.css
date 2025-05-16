@@ -581,7 +581,7 @@ img {
 }
 
 .ar-image {
-    padding: 5rem;
+    padding: 2.5rem;
     flex: 1;
 }
 
@@ -593,10 +593,11 @@ img {
 .ar-try-on ul {
     list-style: none;
     padding: 0 7rem;
+
 }
 
 .ar-try-on li {
-    margin-bottom: 0.8rem;
+    margin-bottom: 1.25rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -617,19 +618,42 @@ img {
     color: #666;
 }
 
+.ar-buttons {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 2.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
 .ar-try-button {
-    display: inline-block;
-    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5rem;
     color: white;
-    padding: 1rem 2rem;
+    padding: 1rem 1.5rem;
     border-radius: 30px;
     font-weight: 600;
     transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.ar-try-button.android {
+    background: #3DDC84; /* Android green */
+}
+
+.ar-try-button.ios {
+    background: #000000; /* iOS black */
 }
 
 .ar-try-button:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    opacity: 0.9;
+}
+
+.ar-try-button i {
+    font-size: 1.2rem;
 }
 
 /* Newsletter */
