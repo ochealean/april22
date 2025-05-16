@@ -80,6 +80,16 @@ function loadOrderData() {
     });
 }
 
+function getShopDetailsByID(shopID) {
+    return new Promise((resolve) => {
+        const ShoporderRef = ref(db, `AR_shoe_users/shop/${shopID}`);
+        onValue(ShoporderRef, (snapshot) => {
+            const data = snapshot.val();
+            resolve(data || null);
+        }, { onlyOnce: true });
+    });
+}
+
 // Update order information display
 function updateOrderInfo(data) {
     console.log(data);
@@ -132,7 +142,8 @@ function updateShippingInfo(data) {
 }
 
 // Update delivery information
-function updateDeliveryInfo(data) {
+async function updateDeliveryInfo(data) {
+    console.log(data);
     if (!data.shippingInfo) return;
 
     // Recipient info
@@ -160,25 +171,29 @@ function updateDeliveryInfo(data) {
         domElements.recipientContact.innerHTML = contact || "N/A";
     }
 
+
+    // Get seller info asynchronously
+    const sellerInfo = await getShopDetailsByID(data.item?.shopId);
+    console.log(data.item?.shopId);
+    console.log(sellerInfo);
+
     // Seller info
-    if (domElements.shopName && data.seller) {
+    if (domElements.shopName) {
         domElements.shopName.textContent = data.item?.shopName || "N/A";
     }
 
-    if (domElements.shopAddress && data.seller) {
+    if (domElements.shopAddress && sellerInfo) {
         const shopAddress = [
-            data.seller.address || '',
-            data.seller.city || '',
-            data.seller.state || '',
-            data.seller.zipCode || ''
-        ].filter(Boolean).join("<br>");
+            sellerInfo.shopCity || '',
+            ` ${sellerInfo.shopState}` || ''
+        ];
         domElements.shopAddress.innerHTML = shopAddress || "N/A";
     }
 
-    if (domElements.shopContact && data.seller) {
+    if (domElements.shopContact && sellerInfo) {
         const shopContact = [
-            data.seller.phone ? formatPhoneNumber(data.seller.phone) : '',
-            data.seller.email || ''
+            sellerInfo.ownerPhone ? formatPhoneNumber(sellerInfo.ownerPhone) : '',
+            sellerInfo.email || ''
         ].filter(Boolean).join("<br>");
         domElements.shopContact.innerHTML = shopContact || "N/A";
     }
@@ -329,10 +344,10 @@ function formatDateForDisplay(dateString) {
 //                 };
 //             }
 
-//             if (data.seller?.latitude && data.seller?.longitude) {
+//             if (sellerInfo?.latitude && sellerInfo?.longitude) {
 //                 sellerLocation = {
-//                     lat: parseFloat(data.seller.latitude),
-//                     lng: parseFloat(data.seller.longitude)
+//                     lat: parseFloat(sellerInfo.latitude),
+//                     lng: parseFloat(sellerInfo.longitude)
 //                 };
 //             }
 
