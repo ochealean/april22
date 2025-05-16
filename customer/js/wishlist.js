@@ -201,6 +201,9 @@ onAuthStateChanged(auth, user => {
                   defaultImage: data.defaultImage || 'path/to/placeholder.jpg'
                 };
 
+                // para lang mawala yung inline css sa html
+                document.querySelector('.products-grid').removeAttribute('style');
+
                 const card = createProductCard(cardData, shoeId);
                 productsGrid.appendChild(card);
               } else {
