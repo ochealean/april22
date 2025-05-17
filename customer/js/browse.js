@@ -31,74 +31,65 @@ function setupSearch() {
   const productsGrid = document.getElementById('productsGrid');
   
   // Function to perform search
-  function performSearch(searchTerm) {
+  async function performSearch(searchTerm) {
     const dbRef = ref(db, "AR_shoe_users/shoe");
     
-    // First get all shop names
-    const shopsRef = ref(db, "AR_shoe_users/shop");
-    get(shopsRef).then((shopsSnapshot) => {
-        const shopNames = {};
-        if (shopsSnapshot.exists()) {
-            shopsSnapshot.forEach((shopSnap) => {
-                shopNames[shopSnap.key] = shopSnap.val().shopName || shopSnap.key;
-            });
-        }
+    try {
+        // Get all shop names first
+        const shopNames = await getShopNames();
 
         // Then search through shoes
-        get(dbRef).then((snapshot) => {
-            productsGrid.innerHTML = ''; // Clear current results
+        const snapshot = await get(dbRef);
+        productsGrid.innerHTML = ''; // Clear current results
+        
+        if (snapshot.exists()) {
+            let foundResults = false;
             
-            if (snapshot.exists()) {
-                let foundResults = false;
+            snapshot.forEach(shopSnap => {
+                const shopID = shopSnap.key;
+                const shopName = shopNames[shopID] || shopID;
                 
-                snapshot.forEach(shopSnap => {
-                    const shopID = shopSnap.key;
-                    const shopName = shopNames[shopID] || shopID;
+                shopSnap.forEach(shoeSnap => {
+                    const shoeID = shoeSnap.key;
+                    const shoeData = shoeSnap.val();
                     
-                    shopSnap.forEach(shoeSnap => {
-                        const shoeID = shoeSnap.key;
-                        const shoeData = shoeSnap.val();
+                    const shoeName = shoeData.shoeName.toLowerCase();
+                    const shopNameLower = shopName.toLowerCase();
+                    
+                    if (shoeName.includes(searchTerm.toLowerCase()) || 
+                        shopNameLower.includes(searchTerm.toLowerCase())) {
                         
-                        const shoeName = shoeData.shoeName.toLowerCase();
-                        const shopNameLower = shopName.toLowerCase();
+                        foundResults = true;
+                        const firstVariant = Object.values(shoeData.variants)[0];
+                        const price = firstVariant.price;
+                        const defaultImage = shoeData.defaultImage;
                         
-                        if (shoeName.includes(searchTerm.toLowerCase()) || 
-                            shopNameLower.includes(searchTerm.toLowerCase())) {
-                            
-                            foundResults = true;
-                            const firstVariant = Object.values(shoeData.variants)[0];
-                            const price = firstVariant.price;
-                            const defaultImage = shoeData.defaultImage;
-                            
-                            const isWishlisted = wishlistData?.[shopID]?.[shoeID] === true;
-                            
-                            const productCardHTML = createProductCard({
-                                shoeID: shoeID,
-                                name: shoeData.shoeName,
-                                price: price,
-                                imageUrl: defaultImage,
-                                shopName: shopName,
-                                shopID: shopID,
-                                isWishlisted: isWishlisted
-                            });
-                            
-                            productsGrid.innerHTML += productCardHTML;
-                        }
-                    });
+                        const isWishlisted = wishlistData?.[shopID]?.[shoeID] === true;
+                        
+                        const productCardHTML = createProductCard({
+                            shoeID: shoeID,
+                            name: shoeData.shoeName,
+                            price: price,
+                            imageUrl: defaultImage,
+                            shopName: shopName,  // This now uses the actual shop name
+                            shopID: shopID,
+                            isWishlisted: isWishlisted
+                        });
+                        
+                        productsGrid.innerHTML += productCardHTML;
+                    }
                 });
-                
-                if (!foundResults) {
-                    productsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No matching shoes found</p>';
-                }
-            } else {
-                productsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No shoes available</p>';
+            });
+            
+            if (!foundResults) {
+                productsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No matching shoes found</p>';
             }
-        }).catch((error) => {
-            console.error("Error searching shoes: ", error);
-        });
-    }).catch((error) => {
-        console.error("Error loading shop names for search: ", error);
-    });
+        } else {
+            productsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No shoes available</p>';
+        }
+    } catch (error) {
+        console.error("Error searching shoes: ", error);
+    }
 }
   
   // Search button click handler
@@ -150,11 +141,13 @@ function createProductCard(shoeData) {
     const heartClass = shoeData.isWishlisted ? "fas" : "far";
     const heartColor = shoeData.isWishlisted ? "red" : "";
 
+    // console.log(shoeData);
+    
     return `
     <div class="product-card">
       <img src="${shoeData.imageUrl}" alt="${shoeData.name}" class="product-image">
       <div class="product-info">
-        <div class="product-shop">${shoeData.shopName}</div>
+        <div class="product-shop"><h4>Shop Name: ${shoeData.shopName}</h4></div>
         <h3 class="product-name">${shoeData.name}</h3>
         <div class="product-price">₱${shoeData.price.toFixed(2)}</div>
         <div class="product-actions">
@@ -179,72 +172,83 @@ window.viewDetails = function (shoeID, shopID) {
 
 
 
-function loadShoes() {
+async function getShopNames() {
+    const shopsRef = ref(db, "AR_shoe_users/shop");
+    try {
+        const snapshot = await get(shopsRef);
+        const shopNames = {};
+        if (snapshot.exists()) {
+            snapshot.forEach((shopSnap) => {
+                shopNames[shopSnap.key] = shopSnap.val().shopName || shopSnap.key;
+            });
+        }
+        return shopNames;
+    } catch (error) {
+        console.error("Error loading shop names: ", error);
+        return {};
+    }
+}
+
+// Then modify the loadShoes function to use this
+async function loadShoes() {
     const user = auth.currentUser;
     if (!user) return;
 
     const userID = user.uid;
     const wishlistRef = ref(db, `AR_shoe_users/wishlist/${userID}`);
 
-    get(wishlistRef).then((wishlistSnap) => {
+    try {
+        // Get wishlist data
+        const wishlistSnap = await get(wishlistRef);
         if (wishlistSnap.exists()) {
             wishlistData = wishlistSnap.val();
         }
 
+        // Get all shop names first
+        const shopNames = await getShopNames();
+
+        // Now get all shoes
         const dbRef = ref(db, "AR_shoe_users/shoe");
-        get(dbRef).then((snapshot) => {
-            if (snapshot.exists()) {
-                // First get all shop names
-                const shopsRef = ref(db, "AR_shoe_users/shop");
-                get(shopsRef).then((shopsSnapshot) => {
-                    const shopNames = {};
-                    if (shopsSnapshot.exists()) {
-                        shopsSnapshot.forEach((shopSnap) => {
-                            shopNames[shopSnap.key] = shopSnap.val().shopName || shopSnap.key;
-                        });
-                    }
+        const snapshot = await get(dbRef);
+        
+        if (snapshot.exists()) {
+            productsGrid.innerHTML = ''; // Clear existing content
+            
+            snapshot.forEach(shopSnap => {
+                const shopID = shopSnap.key;
+                
+                shopSnap.forEach(shoeSnap => {
+                    const shoeID = shoeSnap.key;
+                    const shoeData = shoeSnap.val();
+                    const shopName = shoeData.shopName;
 
-                    // Now load shoes with proper shop names
-                    productsGrid.innerHTML = ''; // Clear existing content
-                    snapshot.forEach(shopSnap => {
-                        const shopID = shopSnap.key;
-                        const shopName = shopNames[shopID] || shopID; // Fallback to shopID if name not found
-                        
-                        shopSnap.forEach(shoeSnap => {
-                            const shoeID = shoeSnap.key;
-                            const shoeData = shoeSnap.val();
+                    const shoeName = shoeData.shoeName;
+                    const defaultImage = shoeData.defaultImage;
+                    const firstVariant = Object.values(shoeData.variants)[0];
+                    const price = firstVariant.price;
 
-                            const shoeName = shoeData.shoeName;
-                            const defaultImage = shoeData.defaultImage;
-                            const firstVariant = Object.values(shoeData.variants)[0];
-                            const price = firstVariant.price;
+                    const isWishlisted = wishlistData?.[shopID]?.[shoeID] === true;
 
-                            const isWishlisted = wishlistData?.[shopID]?.[shoeID] === true;
-
-                            const productCardHTML = createProductCard({
-                                shoeID: shoeID,
-                                name: shoeName,
-                                price: price,
-                                imageUrl: defaultImage,
-                                shopName: shopName,  // Use the actual shop name
-                                shopID: shopID,
-                                isWishlisted: isWishlisted
-                            });
-
-                            productsGrid.innerHTML += productCardHTML;
-                        });
+                    const productCardHTML = createProductCard({
+                        shoeID: shoeID,
+                        name: shoeName,
+                        price: price,
+                        imageUrl: defaultImage,
+                        shopName: shopName,  // This now uses the actual shop name
+                        shopID: shopID,
+                        isWishlisted: isWishlisted
                     });
-                }).catch((error) => {
-                    console.error("Error loading shop names: ", error);
+
+                    productsGrid.innerHTML += productCardHTML;
                 });
-            } else {
-                console.log("No shoe data available");
-                productsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No shoes available</p>';
-            }
-        }).catch((error) => {
-            console.error("Error loading shoes: ", error);
-        });
-    });
+            });
+        } else {
+            console.log("No shoe data available");
+            productsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No shoes available</p>';
+        }
+    } catch (error) {
+        console.error("Error loading shoes: ", error);
+    }
 }
 
 
