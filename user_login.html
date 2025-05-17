@@ -78,9 +78,10 @@
         <div class="footer-content">
             <p>&copy; 2025 Shoe Shop Portal. All rights reserved.</p>
             <nav>
-                <a href="/extras/devonprocess.html">Privacy Policy</a>
-                <a href="/extras/devonprocess.html">Terms of Service</a>
-                <a href="/extras/devonprocess.html">Contact Us</a>
+                <a href="/">Home</a>
+                <a href="/extras/privacypolicy.html">Privacy Policy</a>
+                <a href="/extras/termsofservice.html">Terms of Service</a>
+                <a href="/extras/contactus.html">Contact Us</a>
             </nav>
         </div>
     </footer>
@@ -140,6 +141,25 @@
                 console.log('Shop login submitted');
             });
         });
+
+        // Toggle password visibility
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.parentElement.querySelector('input');
+                const icon = this.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                    this.setAttribute('aria-label', 'Hide password');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                    this.setAttribute('aria-label', 'Show password');
+                }
+            });
+        });
+
     </script>
     <script src="user_login.js" type="module"></script>
 </body>

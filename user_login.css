@@ -217,6 +217,38 @@ body {
     color: var(--primary);
 }
 
+.password-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-container input {
+    width: 100%;
+    padding-right: 3rem !important; /* Space for the eye icon on the right */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 0.8rem; /* Position on the right instead of left */
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    z-index: 2;
+    padding: 0.5rem;
+    transition: var(--transition);
+}
+
+.toggle-password:hover {
+    color: var(--primary);
+}
+
+.toggle-password:focus {
+    outline: none;
+    color: var(--primary);
+}
+
 .forgot-password {
     text-align: right;
     margin-top: 0.5rem;

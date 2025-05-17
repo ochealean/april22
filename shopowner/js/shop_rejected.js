@@ -42,13 +42,13 @@ document.addEventListener('DOMContentLoaded', () => {
     onValue(shopRef, (snapshot) => {
         if (snapshot.exists()) {
             const shop = snapshot.val();
-            const rejectionReason = shop.rejectionReason || "No specific reason provided";
+            const rejectionReason = shop.rejectionReason || "Your shop application did not meet our requirements";
 
             // Split reasons by newlines or bullet points
             const reasons = rejectionReason.split('\n').filter(r => r.trim() !== '');
 
             if (reasons.length === 0) {
-                reasons.push("No specific reason provided");
+                reasons.push("Your shop application did not meet our requirements");
             }
 
             reasonsList.innerHTML = reasons.map(reason =>
