@@ -97,8 +97,9 @@ function createOrderCard(order) {
 
     const status = order.status.toLowerCase();
 
-    // Skip rendering if status is rejected, delivered, or cancelled
-    if (['rejected', 'delivered', 'cancelled'].includes(status)) return null;
+    // Only show these statuses (now including delivered, removed shipped)
+    const allowedStatuses = ['pending', 'accepted', 'processed', 'delivered'];
+    if (!allowedStatuses.includes(status)) return null;
 
     const orderCard = document.createElement('div');
     orderCard.className = 'order-card';
@@ -122,16 +123,19 @@ function createOrderCard(order) {
             statusText = 'Processing';
             break;
         case 'accepted':
-            statusClass = 'status-shipped';
-            statusText = 'Accepted';
+            statusClass = 'status-accepted';
+            statusText = 'Order Accepted';
             break;
-        case 'shipped':
-            statusClass = 'status-shipped';
-            statusText = 'Shipped';
+        case 'processed':
+            statusClass = 'status-processed';
+            statusText = 'Order Processed';
+            break;
+        case 'delivered':
+            statusClass = 'status-delivered';
+            statusText = 'Delivered';
             break;
         default:
-            statusClass = 'status-approved';
-            statusText = 'Approved';
+            return null;
     }
 
     let orderItemHTML = '';
@@ -156,7 +160,14 @@ function createOrderCard(order) {
 
     if (status === 'pending') {
         actionButtons = `
+            <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
             <button class="btn btn-cancel" onclick="cancelOrder('${order.id}')">Cancel Order</button>
+        `;
+    } else if (status === 'delivered') {
+        actionButtons = `
+            <button class="btn btn-received" onclick="markAsReceived('${order.id}')">Order Received</button>
+            <button class="btn btn-issue" onclick="reportIssue('${order.id}')">Report Issue</button>
+            <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
         `;
     } else if (status !== 'pending') {
         actionButtons = `
@@ -313,3 +324,31 @@ document.getElementById('logout_btn')?.addEventListener('click', () => {
         console.error("Error signing out: ", error);
     });
 });
+
+// Mark order as received (completed)
+window.markAsReceived = async function(orderId) {
+    if (!confirm('Confirm you have received this order in good condition?')) return;
+    
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        await set(ref(db, `AR_shoe_users/transactions/${user.uid}/${orderId}/status`), 'completed');
+        alert('Order marked as received successfully!');
+        // Refresh the orders list
+        loadOrders(user.uid);
+    } catch (error) {
+        console.error('Error marking order as received:', error);
+        alert('Failed to update order status. Please try again.');
+    }
+};
+
+// Report issue with order
+window.reportIssue = function(orderId) {
+    const user = auth.currentUser;
+    if (!user) {
+        window.location.href = "/user_login.html";
+        return;
+    }
+    window.location.href = `/customer/html/reportIssue.html?orderID=${orderId}&userID=${user.uid}`;
+};

@@ -92,7 +92,19 @@ function loadOrderHistory(userId, statusFilter = 'all') {
         snapshot.forEach((orderSnapshot) => {
             const order = orderSnapshot.val();
             order.orderId = orderSnapshot.key;
-            orders.push(order);
+            
+            // Statuses to show in history (excluding 'delivered' and 'processed')
+            const status = order.status.toLowerCase();
+            const historyStatuses = [
+                'rejected', 'cancelled', 'completed',  // Added 'completed'
+                'shipped', 'in transit',
+                'arrived at facility',  
+                'out for delivery'       
+            ];
+            
+            if (historyStatuses.includes(status)) {
+                orders.push(order);
+            }
         });
 
         orders.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -100,7 +112,7 @@ function loadOrderHistory(userId, statusFilter = 'all') {
         // Filter orders based on status
         const filteredOrders = statusFilter === 'all'
             ? orders
-            : orders.filter(order => order.status === statusFilter);
+            : orders.filter(order => order.status.toLowerCase() === statusFilter);
 
         if (filteredOrders.length === 0) {
             purchaseHistoryContainer.innerHTML = `
@@ -123,9 +135,7 @@ function loadOrderHistory(userId, statusFilter = 'all') {
 // Display a single order card
 function displayOrderCard(order, userId) {
     const purchaseHistoryContainer = document.querySelector('.purchase-history');
-
-    // Skip rendering if status is rejected, delivered, or cancelled
-    if (['rejected', 'delivered', 'cancelled'].includes(status)) return null;
+    const status = order.status.toLowerCase();
 
     // Format date
     const orderDate = new Date(order.date).toLocaleDateString('en-US', {
@@ -136,7 +146,7 @@ function displayOrderCard(order, userId) {
 
     // Determine status class and text
     let statusClass, statusText;
-    switch (order.status.toLowerCase()) {
+    switch (status) {
         case 'rejected':
             statusClass = 'status-rejected';
             statusText = 'Rejected by Shop';
@@ -145,16 +155,33 @@ function displayOrderCard(order, userId) {
             statusClass = 'status-delivered';
             statusText = 'Delivered';
             break;
-        case 'completed':
-            statusClass = 'status-delivered';
-            statusText = 'Delivered';
-            break;
         case 'cancelled':
             statusClass = 'status-cancelled';
             statusText = 'Cancelled';
             break;
+        case 'completed': 
+            statusClass = 'status-completed';
+            statusText = 'Completed';
+            break;
+        case 'shipped':
+            statusClass = 'status-shipped';
+            statusText = 'Shipped';
+            break;
+        case 'in transit':
+            statusClass = 'status-transit';
+            statusText = 'In Transit';
+            break;
+        case 'arrived at facility':
+            statusClass = 'status-facility';
+            statusText = 'At Facility';
+            break;
+        case 'out for delivery':
+            statusClass = 'status-delivery';
+            statusText = 'Out for Delivery';
+            break;
         default:
-            return null; // Skip rendering for other statuses
+            statusClass = 'status-default';
+            statusText = order.status; // Show raw status if not recognized
     }
 
     // Get the item(s)
@@ -207,12 +234,17 @@ function displayOrderCard(order, userId) {
 
     // Determine which buttons to show based on order status
     let actionButtons = '';
-    if (order.status.toLowerCase() === 'delivered') {
+    if (status === 'delivered') {
         actionButtons = `
             <button class="btn btn-reorder">Reorder</button>
             <button class="btn btn-review">Leave Review</button>
         `;
-    } else if (order.status.toLowerCase() === 'rejected' || order.status.toLowerCase() === 'cancelled') {
+    } else if (status === 'completed') {  // Added for completed orders
+        actionButtons = `
+            <button class="btn btn-reorder">Reorder</button>
+            <button class="btn btn-review">Leave Review</button>
+        `;
+    } else if (status === 'rejected' || status === 'cancelled') {
         actionButtons = `
             <button class="btn btn-reorder">Find Similar</button>
         `;

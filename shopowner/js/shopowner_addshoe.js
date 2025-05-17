@@ -22,7 +22,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
-const storage = getStorage(app);
+const storage = getStorage(app); 
 
 // Global variables
 let shopLoggedin; // shop ID of the logged-in user
@@ -130,60 +130,59 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
         return;
     }
 
-    // Get main shoe data
-    const shoeCode = document.getElementById('shoeCode').value;
-    const shoeName = document.getElementById('shoeName').value;
-    const shoeDescription = document.getElementById('shoeDescription').value;
-    const shoeImageFile = document.getElementById('shoeImage').files[0];
-    const random18CharID = generate18CharID();
+    // Show loading modal
+    document.getElementById('loadingModal').style.display = 'block';
 
-    // Get all variant data
-    const variantGroups = document.querySelectorAll('.variant-group');
-    const variants = {}; // Create ONE object to hold all variants
+    try {
+        // Get main shoe data
+        const shoeCode = document.getElementById('shoeCode').value;
+        const shoeName = document.getElementById('shoeName').value;
+        const shoeDescription = document.getElementById('shoeDescription').value;
+        const shoeImageFile = document.getElementById('shoeImage').files[0];
+        const random18CharID = generate18CharID();
 
-    // Process each variant
-    variantGroups.forEach((group, index) => {
-        const variantId = group.dataset.variantId;
-        const variantName = document.getElementById(`variantName_${variantId}`).value;
-        const color = document.getElementById(`color_${variantId}`).value;
-        const price = document.getElementById(`variantPrice_${variantId}`).value;
-        const variantImageFile = document.getElementById(`variantImage_${variantId}`).files[0];
+        // Get all variant data
+        const variantGroups = document.querySelectorAll('.variant-group');
+        const variants = {}; // Object to hold all variants
 
-        // Get sizes and stock for this variant
-        const sizeContainer = document.getElementById(`sizeStockContainer_${variantId}`);
-        const sizeItems = sizeContainer.querySelectorAll('.size-stock-item');
-        const sizes = {};
+        variantGroups.forEach((group, index) => {
+            const variantId = group.dataset.variantId;
+            const variantName = document.getElementById(`variantName_${variantId}`).value;
+            const color = document.getElementById(`color_${variantId}`).value;
+            const price = document.getElementById(`variantPrice_${variantId}`).value;
+            const variantImageFile = document.getElementById(`variantImage_${variantId}`).files[0];
 
-        sizeItems.forEach((item, sizeIndex) => {
-            const sizeValue = item.querySelector('.size-input').value;
-            const stock = item.querySelector('.stock-input').value;
+            const sizeContainer = document.getElementById(`sizeStockContainer_${variantId}`);
+            const sizeItems = sizeContainer.querySelectorAll('.size-stock-item');
+            const sizes = {};
 
-            // Create the nested structure
-            sizes[`size_${sizeIndex}`] = {
-                [sizeValue]: {
-                    stock: parseInt(stock)
-                }
+            sizeItems.forEach((item, sizeIndex) => {
+                const sizeValue = item.querySelector('.size-input').value;
+                const stock = item.querySelector('.stock-input').value;
+
+                sizes[`size_${sizeIndex}`] = {
+                    [sizeValue]: {
+                        stock: parseInt(stock)
+                    }
+                };
+            });
+
+            variants[`variant_${index}`] = {
+                variantName,
+                color,
+                price: parseFloat(price),
+                sizes,
+                variantImageFile
             };
         });
 
-        // Add to variants object with variant_X key
-        variants[`variant_${index}`] = {
-            variantName,
-            color,
-            price: parseFloat(price),
-            sizes,
-            variantImageFile
-        };
-    });
-
-    try {
         // Upload main shoe image if exists
         let shoeImageUrl = '';
         if (shoeImageFile) {
             shoeImageUrl = await uploadFile(shoeImageFile, `shoes/${shopLoggedin}/${random18CharID}_${shoeCode}/main_image`);
         }
 
-        // Process each variant and upload its image
+        // Upload each variant image and format data
         const variantEntries = Object.entries(variants);
         const variantPromises = variantEntries.map(async ([key, variant]) => {
             let variantImageUrl = '';
@@ -207,7 +206,7 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
 
         const processedVariants = Object.assign({}, ...await Promise.all(variantPromises));
 
-        // Save all data to database
+        // Save all data to Firebase Database
         await set(dbRef(db, `AR_shoe_users/shoe/${shopLoggedin}/${random18CharID}_${shoeCode}`), {
             shoeName: shoeName,
             shoeCode: shoeCode,
@@ -220,6 +219,7 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
             dateAdded: new Date().toISOString()
         });
 
+        // Reset form
         document.getElementById('addShoeForm').reset();
         document.getElementById('colorVariants').innerHTML = '';
         addColorVariant();
@@ -227,8 +227,12 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
     } catch (error) {
         console.error("Error adding shoe: ", error);
         alert("Error adding shoe: " + error.message);
+    } finally {
+        // Hide loading modal
+        document.getElementById('loadingModal').style.display = 'none';
     }
 });
+
 
 // File upload function
 async function uploadFile(file, path) {

@@ -278,3 +278,35 @@ body {
         text-align: center;
     }
 }
+
+/* pang loading modal */
+.loading-modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.5); /* Black with transparency */
+}
+
+.loading-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 2rem 3rem;
+  border-radius: 8px;
+  text-align: center;
+  font-family: sans-serif;
+  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+
+.loading-content i {
+  font-size: 2rem;
+  color: #007BFF;
+  margin-bottom: 10px;
+}

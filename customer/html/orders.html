@@ -7,6 +7,42 @@
     <link rel="stylesheet" href="/customer/css/customer_dashboard.css">
     <link rel="stylesheet" href="/customer/css/orders.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .status-processing {
+            color: #FFA500;
+            background-color: #FFF4E5;
+        }
+
+        .status-accepted {
+            color: #4CAF50;
+            background-color: #E8F5E9;
+        }
+
+        .status-processed {
+            color: #2196F3;
+            background-color: #E3F2FD;
+        }
+
+        .status-shipped {
+            color: #9C27B0;
+            background-color: #F3E5F5;
+        }
+
+        .btn-received {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-issue {
+            background-color: #f44336;
+            color: white;
+        }
+        .btn-received:hover {
+            background-color: #45a049;
+        }
+        .btn-issue:hover {
+            background-color: #d32f2f;
+        }
+    </style>
 </head>
 
 <body>
@@ -59,11 +95,16 @@
             <div class="history-filters">
                 <div class="filter-group">
                     <span class="filter-label">Show:</span>
-                    <select class="filter-select" id="activeFilter">
-                        <option value="all">All Active</option>
-                        <option value="pending">Pending</option>
-                        <option value="shipped">Shipped</option>
-                    </select>
+                    <select id="statusFilter" class="form-select">
+                    <option value="all">All Orders</option>
+                    <option value="completed">Completed</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="in transit">In Transit</option>
+                    <option value="arrived at facility">At Facility</option>
+                    <option value="out for delivery">Out for Delivery</option>
+                </select>
                 </div>
                 <input type="text" class="search-orders" placeholder="Search active orders...">
             </div>

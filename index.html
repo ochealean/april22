@@ -4,64 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shoe Shop Portal</title>
-    <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <header id="home" class="header">
-        <div class="header-content">
-            <div class="header-top animate-fade">
+    <header id="home">
+        <div class="container header-content">
+            <div class="header-top">
                 <div class="logo">
                     <i class="fas fa-shoe-prints"></i>
                     <span>Shoe Shop Portal</span>
                 </div>
-                <a href="user_login.html" class="login-btn">Login</a>
+                <a href="user_login.html" class="btn btn-primary">Login</a>
             </div>
-            <h1 class="animate-fade delay-1">Find Your Perfect Pair</h1>
-            <p class="animate-fade delay-2">Explore a wide range of shoes from local shops and top brands.</p>
-            <!-- <div class="search-bar animate-fade">
-                <input type="text" placeholder="Search for shoes, brands, or shops...">
-                <button><i class="fas fa-search"></i></button>
-            </div> -->
+            
+            <div class="hero animate-fade">
+                <h1>Find Your Perfect Pair</h1>
+                <p>Explore a wide range of shoes from local shops and top brands.</p>
+            </div>
         </div>
     </header>
 
-    <div class="maincontainer">
-
-        <!-- User Options Section -->
-        <section  class="user-options">
-            <div class="backgroundimg animate-left">
-                <div class="option-card">
+    <!-- User Options Section -->
+    <section class="user-options">
+        <div class="container">
+            <div class="option-card animate-left">
+                <div class="option-content">
                     <h2>For Shop Owners</h2>
                     <ul>
                         <li>Register your shop and showcase your products</li>
                         <li>Gain visibility and attract more customers</li>
                         <li>Manage your shop profile and update offerings</li>
                     </ul>
-                    <a href="shopowner/html/shop_register.html" class="useroptionbtn">Register Your Shop</a>
+                    <div class="auth-buttons">
+                        <a href="shopowner/html/shop_register.html" class="btn btn-primary">Register Your Shop</a>
+                        <a href="user_login.html#shop" class="btn btn-outline">Shop Owner Login</a>
+                    </div>
                 </div>
-                <div class="option-image">
+                <div class="option-image" style="background-color: #6e8efb;">
                     <img src="images/shopowner.jpg" alt="Shop Owner">
                 </div>
             </div>
-            <div class="backgroundimg animate-right">
-                <div class="option-card">
+            
+            <div class="option-card animate-right">
+                <div class="option-content">
                     <h2>For Customers</h2>
                     <ul>
                         <li>Browse multiple shops in one place</li>
                         <li>Discover trending and featured shoes</li>
                         <li>Connect with shop owners easily</li>
                     </ul>
-                    <a href="customer/html/customer_register.html" class="useroptionbtn">Register as a Customer</a>
+                    <div class="auth-buttons">
+                        <a href="customer/html/customer_register.html" class="btn btn-primary">Register as Customer</a>
+                        <a href="user_login.html#customer" class="btn btn-outline">Customer Login</a>
+                    </div>
                 </div>
-                <div class="option-image">
-                    <img src="images/customers.jpg" alt="Shop Owner">
+                <div class="option-image" style="background-color: #a777e3;">
+                    <img src="images/customers.jpg" alt="Customers">
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Stats Banner -->
-        <section class="stats-banner">
+    <!-- Stats Banner -->
+    <section class="stats">
+        <div class="container stats-container">
             <div class="stat-item animate-fade delay-1">
                 <h3>10,000+</h3>
                 <p>Shoes Available</p>
@@ -78,14 +85,16 @@
                 <h3>24/7</h3>
                 <p>Customer Support</p>
             </div>
-        </section>
-        
-        <!-- Featured Shoes Carousel -->
-        <section class="featured-shoes">
-            <div class="section-header">
+        </div>
+    </section>
+    
+    <!-- Featured Shoes Carousel -->
+    <section class="featured-shoes">
+        <div class="container">
+            <div class="section-title">
                 <h2>New Arrivals</h2>
-                <!-- <a href="/extras/devonprocess.html" class="view-all">View All <i class="fas fa-arrow-right"></i></a> -->
             </div>
+            
             <div class="carousel">
                 <div class="carousel-container">
                     <!-- Original Items -->
@@ -274,7 +283,7 @@
                         <p>Nike Victori One Slide</p>
                     </div>
                     <!-- Duplicate Items for Seamless Looping -->
-                                        <div class="carousel-item animate-fade">
+                    <div class="carousel-item animate-fade">
                         <img 
                             src="https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/354e209b-f9f2-42c4-9130-d57f49bd77c0/AIR+FORCE+1+%2707.png" 
                             alt="Nike Air Force 1 '07" 
@@ -314,344 +323,261 @@
                         >
                         <p>Park Avenue Cap-toe Oxford</p>
                     </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://m.media-amazon.com/images/I/71owZh2w5WL._AC_SX395_.jpg" 
-                            alt="Johnston & Murphy Upton Plain Toe" 
-                            onclick="openModal('https://m.media-amazon.com/images/I/71owZh2w5WL._AC_SX395_.jpg')"
-                        >
-                        <p>Johnston & Murphy Upton Plain Toe</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://cdn.media.amplience.net/i/clarks/26110309_GW_1?fmt=auto&img404=imageNotFound&w=2088&qlt=default" 
-                            alt="Tilden Cap" 
-                            onclick="openModal('https://cdn.media.amplience.net/i/clarks/26110309_GW_1?fmt=auto&img404=imageNotFound&w=2088&qlt=default')"
-                        >
-                        <p>Tilden Cap</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://m.media-amazon.com/images/I/71TO8jfCEaL._AC_SY395_.jpg" 
-                            alt="Grand Shortwing Oxford" 
-                            onclick="openModal('https://m.media-amazon.com/images/I/71TO8jfCEaL._AC_SY395_.jpg')"
-                        >
-                        <p>Grand Shortwing Oxford</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://magnanni.com/media/catalog/product/cache/8119ba437eced1f9032fc83ae9c2ade8/2/1/21207_men_marco-ii_cuero_p45.jpg" 
-                            alt="Marco II"
-                            onclick="openModal('https://magnanni.com/media/catalog/product/cache/8119ba437eced1f9032fc83ae9c2ade8/2/1/21207_men_marco-ii_cuero_p45.jpg')"
-                        >
-                        <p>Marco II</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://www.timberland.com.my/wp-content/uploads/product/f23/10061713-HERO-768x768.jpg" 
-                            alt="Timberland 6-Inch Premium"
-                            onclick="openModal('https://www.timberland.com.my/wp-content/uploads/product/f23/10061713-HERO-768x768.jpg')"
-                        >
-                        <p>Timberland 6-Inch Premium</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://cdn.media.amplience.net/i/drmartens/11822006.80?$smart320$&fmt=auto" 
-                            alt="1460 Lace-Up Boots"
-                            onclick="openModal('https://cdn.media.amplience.net/i/drmartens/11822006.80?$smart320$&fmt=auto')"
-                        >
-                        <p>1460 Lace-Up Boots</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://embed.widencdn.net/img/redwing/vhngyoup5h/645x645px/RW08111C_MUL_N1_0418?position=S&crop=no&color=F2F2F2" 
-                            alt="Iron Ranger"
-                            onclick="openModal('https://embed.widencdn.net/img/redwing/vhngyoup5h/645x645px/RW08111C_MUL_N1_0418?position=S&crop=no&color=F2F2F2')"
-                        >
-                        <p>Iron Ranger</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://m.media-amazon.com/images/I/71d3wU+ZHGL._AC_SX395_.jpg" 
-                            alt="Clarks Women's Desert"
-                            onclick="openModal('https://m.media-amazon.com/images/I/71d3wU+ZHGL._AC_SX395_.jpg')"
-                        >
-                        <p>Clarks Women's Desert</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://static.nike.com/a/images/t_PDP_936_v1/f_auto,q_auto:eco/1abaae51-d7c4-4ca6-8e2b-8133b90d168b/AIR+ZOOM+PEGASUS+40.png" 
-                            alt="Nike Pegasus 40"
-                            onclick="openModal('https://static.nike.com/a/images/t_PDP_936_v1/f_auto,q_auto:eco/1abaae51-d7c4-4ca6-8e2b-8133b90d168b/AIR+ZOOM+PEGASUS+40.png')"
-                        >
-                        <p>Nike Pegasus 40</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/dfeaac2e2d8f46558e76af7f010bafe5_9366/Ultraboost_Light_Shoes_Black_HQ6339_01_standard.jpg" 
-                            alt="Ultraboost Light Shoes"
-                            onclick="openModal('https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/dfeaac2e2d8f46558e76af7f010bafe5_9366/Ultraboost_Light_Shoes_Black_HQ6339_01_standard.jpg')"
-                        >
-                        <p>Ultraboost Light Shoes</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://images.asics.com/is/image/asics/1011C052_003_SB_FR_GLB?%24eaproduct%24" 
-                            alt="ASICS Gel-Kayano 30"
-                            onclick="openModal('https://images.asics.com/is/image/asics/1011C052_003_SB_FR_GLB?%24eaproduct%24')"
-                        >
-                        <p>ASICS Gel-Kayano 30</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/e37310aa-479e-4e21-a34c-368911ad14ab/NIKE+METCON+9.png" 
-                            alt="Nike Metcon 9"
-                            onclick="openModal('https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/e37310aa-479e-4e21-a34c-368911ad14ab/NIKE+METCON+9.png')"
-                        >
-                        <p>Nike Metcon 9</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://underarmour.scene7.com/is/image/Underarmour/3025516-002_PAIR?rp=standard-30pad|pdpMainDesktop&scl=1&fmt=jpg&qlt=85&resMode=sharp2&cache=on,on&bgc=f0f0f0&wid=566&hei=708&size=536,688" 
-                            alt="UA HOVR™ Phantom 3"
-                            onclick="openModal('https://underarmour.scene7.com/is/image/Underarmour/3025516-002_PAIR?rp=standard-30pad|pdpMainDesktop&scl=1&fmt=jpg&qlt=85&resMode=sharp2&cache=on,on&bgc=f0f0f0&wid=566&hei=708&size=536,688')"
-                        >
-                        <p>UA HOVR™ Phantom 3</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://www.birkenstock.com/dw/image/v2/BBBF_PRD/on/demandware.static/-/Sites-master-catalog/default/dw68fb8421/1017046/1017046.jpg?sw=848&sh=848&strip=false" 
-                            alt="Birkenstock Arizona"
-                            onclick="openModal('https://www.birkenstock.com/dw/image/v2/BBBF_PRD/on/demandware.static/-/Sites-master-catalog/default/dw68fb8421/1017046/1017046.jpg?sw=848&sh=848&strip=false')"
-                        >
-                        <p>Birkenstock Arizona</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://m.media-amazon.com/images/I/711-2R0DJLL._AC_SX500_.jpg" 
-                            alt="Teva Women's Hurricane Xlt2"
-                            onclick="openModal('https://m.media-amazon.com/images/I/711-2R0DJLL._AC_SX500_.jpg')"
-                        >
-                        <p>Teva Women's Hurricane Xlt2</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="//crocs.com.ph/cdn/shop/files/209403-410_2_e1a31aef-eec5-40f6-8694-41ceb69af38e_800x.jpg?v=1746681117" 
-                            alt="Crocs Classic Sandal"
-                            onclick="openModal('//crocs.com.ph/cdn/shop/files/209403-410_2_e1a31aef-eec5-40f6-8694-41ceb69af38e_800x.jpg?v=1746681117')"
-                        >
-                        <p>Crocs Classic Sandal</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://s7d4.scene7.com/is/image/WolverineWorldWide/CHAM-JCH109901Z-030424-S25-000?wid=300&hei=250&op_usm=0.8,1&qlt=80&fmt=jpg" 
-                            alt="Chaco Z/1 Classic"
-                            onclick="openModal('https://s7d4.scene7.com/is/image/WolverineWorldWide/CHAM-JCH109901Z-030424-S25-000?wid=300&hei=250&op_usm=0.8,1&qlt=80&fmt=jpg')"
-                        >
-                        <p>Chaco Z/1 Classic</p>
-                    </div>
-                    <div class="carousel-item animate-fade">
-                        <img 
-                            src="https://static.nike.com/a/images/t_default/b73a210f-133b-4661-bcce-2d30604ba045/NIKE+VICTORI+ONE+SLIDE.png" 
-                            alt="Nike Victori One Slide"
-                            onclick="openModal('https://static.nike.com/a/images/t_default/b73a210f-133b-4661-bcce-2d30604ba045/NIKE+VICTORI+ONE+SLIDE.png')"
-                        >
-                        <p>Nike Victori One Slide</p>
-                    </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-         <!-- Categories Section -->
-         <div class="smallcontainer">
-            <section id="categories" class="shop-categories">
-                <div class="section-header">
-                    <h2>Shop by Category</h2>
-                    <!-- <a href="/extras/devonprocess.html" class="view-all">All Categories <i class="fas fa-arrow-right"></i></a> -->
-                </div>
-                <div class="grid">
-                    <div class="category-card animate-fade delay-1">
-                        <img src="images/shoe1.png" alt="Sneakers">
+    <!-- Categories Section -->
+    <section id="categories" class="categories">
+        <div class="container">
+            <div class="section-title">
+                <h2>Shop by Category</h2>
+            </div>
+            
+            <div class="categories-grid">
+                <div class="category-card animate-fade delay-1">
+                    <div class="category-img">
+                        <img src="https://cdn-images.farfetch-contents.com/12/43/12/89/12431289_23446496_480.jpg" alt="Sneakers">
+                    </div>
+                    <div class="category-info">
                         <h3>Sneakers</h3>
                         <p>Find the latest styles and comfort.</p>
                     </div>
-                    <div class="category-card animate-fade delay-2">
-                        <img src="images/shoe2.png" alt="Formal Shoes">
+                </div>
+                
+                <div class="category-card animate-fade delay-2">
+                    <div class="category-img">
+                        <img src="https://cdn.media.amplience.net/i/clarks/26110309_GW_1?fmt=auto&img404=imageNotFound&w=2088&qlt=default" alt="Formal Shoes">
+                    </div>
+                    <div class="category-info">
                         <h3>Formal Shoes</h3>
                         <p>Elegant footwear for any occasion.</p>
                     </div>
-                    <div class="category-card animate-fade delay-3">
-                        <img src="images/shoe3.png" alt="Boots">
+                </div>
+                
+                <div class="category-card animate-fade delay-3">
+                    <div class="category-img">
+                        <img src="https://cdn.media.amplience.net/i/drmartens/11822006.84?$smart576$&fmt=auto" alt="Boots">
+                    </div>
+                    <div class="category-info">
                         <h3>Boots</h3>
                         <p>Durable and stylish boots for all seasons.</p>
                     </div>
-                    <div class="category-card animate-fade delay-4">
-                        <img src="images/shoe1.png" alt="Sandals">
+                </div>
+                
+                <div class="category-card animate-fade delay-4">
+                    <div class="category-img">
+                        <img src="https://static.nike.com/a/images/t_PDP_936_v1/f_auto,q_auto:eco/40542cd0-e9c3-4b30-a75b-dded53570db3/NK+VICTORI+ONE+SLIDE+PRINT.png" alt="Sandals">
+                    </div>
+                    <div class="category-info">
                         <h3>Sandals</h3>
                         <p>Comfortable and trendy sandals for summer.</p>
                     </div>
-                    <div class="category-card animate-fade delay-5">
-                        <img src="images/shoe1.png" alt="Sneakers">
-                        <h3>Sneakers</h3>
-                        <p>Find the latest styles and comfort.</p>
+                </div>
+                
+                <div class="category-card animate-fade delay-5">
+                    <div class="category-img">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYMIordut2n1_dFXCkyDuNlHgsvgzomqfXNg&s" alt="Athletic">
+                    </div>
+                    <div class="category-info">
+                        <h3>Athletic Shoes</h3>
+                        <p>Performance footwear for sports and training.</p>
                     </div>
                 </div>
-            </section>
-        </div>
-
-        <!-- Testimonials -->
-        <section class="testimonials">
-            <h2>What Our Customers Say</h2>
-            <div class="testimonial-container">
-                <div class="testimonial-card">
-                    <div class="rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <p>"Found the perfect running shoes through this portal. The AR try-on feature helped me make the right choice!"</p>
-                    <div class="customer">
-                        <img src="images/shoe2.png" alt="Customer">
-                        <h4>Sarah Johnson</h4>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <p>"Found the perfect running shoes through this portal. The AR try-on feature helped me make the right choice!"</p>
-                    <div class="customer">
-                        <img src="images/shoe2.png" alt="Customer">
-                        <h4>Sarah Johnson</h4>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <p>"Found the perfect running shoes through this portal. The AR try-on feature helped me make the right choice!"</p>
-                    <div class="customer">
-                        <img src="images/shoe2.png" alt="Customer">
-                        <h4>Sarah Johnson</h4>
-                    </div>
-                </div>
-                <!-- Add 2 more testimonial cards -->
             </div>
-        </section>
+        </div>
+    </section>
 
-       <!-- AR Try-On Section -->
-        <section id="ar-try-on" class="ar-try-on">
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-title">
+                <h2>What Our Customers Say</h2>
+            </div>
+            
+            <div class="testimonial-grid">
+                <div class="testimonial-card animate-fade delay-1">
+                    <div class="rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"Found the perfect running shoes through this portal. The AR try-on feature helped me make the right choice!"</p>
+                    <div class="customer">
+                        <div class="customer-img">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzzIJDNaWFPDga2VWx9G4rM2IST-kPixumaw&s" alt="Customer">
+                        </div>
+                        <h4>Sarah Johnson</h4>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card animate-fade delay-2">
+                    <div class="rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"As a shop owner, this platform has helped me reach so many new customers. Highly recommended!"</p>
+                    <div class="customer">
+                        <div class="customer-img">
+                            <img src="https://ysm-res.cloudinary.com/image/upload/c_limit,f_auto,h_2400,q_auto,w_1600/v1/yms/prod/332e5c7d-9008-4f8e-bf5d-65898c39b60f" alt="Customer">
+                        </div>
+                        <h4>Michael Chen</h4>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card animate-fade delay-3">
+                    <div class="rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <p class="testimonial-text">"The variety of shoes available is amazing. I found exactly what I was looking for at a great price."</p>
+                    <div class="customer">
+                        <div class="customer-img">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnfQ5jb72syGgoNbg3QjCUuUrS5lJJciztuQ&s" alt="Customer">
+                        </div>
+                        <h4>Emma Rodriguez</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AR Try-On Section -->
+    <section id="ar-try-on" class="ar-section">
+        <div class="container">
             <div class="ar-content">
                 <div class="ar-text animate-left">
                     <h2>Try Before You Buy</h2>
                     <p>Experience our revolutionary AR try-on feature! See how shoes look on your feet before purchasing.</p>
-                    <ul>
+                    <ul class="ar-features">
                         <li><i class="fas fa-check-circle"></i> Realistic 3D visualization</li>
                         <li><i class="fas fa-check-circle"></i> Works on any smartphone</li>
-                        <li><i class="fas fa-check-circle"></i> Save your favorite looks</li>
+                        <li><i class="fas fa-check-circle"></i> Offline Try-On Mode</li>
+                        <li><i class="fas fa-check-circle"></i> Zoom & Rotate</li>
                     </ul>
                     <div class="ar-buttons">
-                        <a href="#" class="ar-try-button android">
+                        <a href="#" class="btn btn-accent">
                             <i class="fab fa-android"></i> Android Version
                         </a>
-                        <a href="#" class="ar-try-button ios">
+                        <a href="#" class="btn btn-accent">
                             <i class="fab fa-apple"></i> iOS Version
                         </a>
                     </div>
                 </div>
                 <div class="ar-image animate-right animate-float">
-                    <!-- <img src="images/shoe2.png" alt="AR Demo"> -->
                     <video preload="auto" muted="" loop="" playsinline="" src="https://assets.adidas.com/videos/ar_1,w_720,c_fill,q_auto,f_auto/6fd2f4b4d42345049f24c0921a698322_d98c/Superstar_II_Shoes_White_JP9677_video.mp4" autoplay=""></video>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Newsletter -->
-        <!-- <section class="newsletter">
-            <div class="newsletter-content">
-                <h2>Stay Updated</h2>
-                <p>Subscribe to get exclusive offers and new arrivals</p>
-                <form>
-                    <input type="email" placeholder="Your email address">
-                    <button type="submit">Subscribe</button>
-                </form>
-            </div>
-        </section> -->
-
-       <!-- Featured Shops -->
-       <div class="smallcontainer">
-        <section id="shops" class="featured-shops">
-            <div class="section-header">
+    <!-- Featured Shops -->
+    <section id="shops" class="featured-shops">
+        <div class="container">
+            <div class="section-title">
                 <h2>Featured Shops</h2>
-                <!-- <a href="#" class="view-all">View All Shops <i class="fas fa-arrow-right"></i></a> -->
             </div>
-            <div class="grid">
-                    <div class="card">
-                        <img src="images/shoe1.png" alt="Shop 1">
-                        <h3>Urban Sneakers</h3>
+            
+            <div class="shops-grid">
+                <div class="shop-card animate-fade delay-1">
+                    <div class="shop-img">
+                        <img src="https://img.freepik.com/free-vector/urban-shoes-logo_1051-1632.jpg?semt=ais_hybrid&w=740" alt="Shop 1">
+                    </div>
+                    <div class="shop-info">
+                        <h3>Urban Shoes</h3>
                         <p>Premium sneakers from top brands.</p>
                     </div>
-                    <div class="card">
-                        <img src="images/shoe2.png" alt="Shop 2">
-                        <h3>Classic Footwear</h3>
+                </div>
+                
+                <div class="shop-card animate-fade delay-2">
+                    <div class="shop-img">
+                        <img src="https://i.pinimg.com/736x/ff/14/19/ff141956107ab14af35181fbf26baf8c.jpg" alt="Shop 2">
+                    </div>
+                    <div class="shop-info">
+                        <h3>Ultra Sneaker</h3>
                         <p>Timeless styles for every occasion.</p>
                     </div>
                 </div>
-            </section>
+                
+                <div class="shop-card animate-fade delay-3">
+                    <div class="shop-img">
+                        <img src="https://i.pinimg.com/736x/66/fe/42/66fe425f8cf65deb715e789fcc62b21a.jpg" alt="Shop 3">
+                    </div>
+                    <div class="shop-info">
+                        <h3>Patty's Shoes</h3>
+                        <p>Durable boots for outdoor enthusiasts.</p>
+                    </div>
+                </div>
+                
+                <div class="shop-card animate-fade delay-4">
+                    <div class="shop-img">
+                        <img src="https://img.freepik.com/premium-vector/luxury-elegant-logo-design-golden-shoes-black-background_568822-20.jpg" alt="Shop 4">
+                    </div>
+                    <div class="shop-info">
+                        <h3>Luxurious Heels</h3>
+                        <p>High-end designer footwear.</p>
+                    </div>
+                </div>
+            </div>
         </div>
-
-    </div>
+    </section>
 
     <!-- CTA Section -->
-    <div class="cta">
-        <div class="cta-content">
+    <section class="cta">
+        <div class="container">
             <h3>Ready to showcase your products?</h3>
-            <a href="shopowner/html/shop_register.html" class="cta-button">Register Your Shop Now</a>
+            <a href="shopowner/html/shop_register.html" class="btn btn-primary">Register Your Shop Now</a>
         </div>
-    </div>
+    </section>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>About Us</h3>
-                <p>Connecting customers with local shoe shops since 2025.</p>
-            </div>
-            <div class="footer-section">
-                <h3>Quick Links</h3>
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>About Us</h3>
+                    <p>Connecting customers with local shoe shops since 2025. Our mission is to make shoe shopping easier and more accessible for everyone.</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
                     <ul>
                         <li><a href="#home">Home</a></li>
                         <li><a href="#shops">Shops</a></li>
                         <li><a href="#categories">Categories</a></li>
                         <li><a href="#ar-try-on">AR Try-On</a></li>
                     </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Contact</h3>
-                <p><i class="fas fa-envelope"></i> info@shoeshopportal.com</p>
-                <p><i class="fas fa-phone"></i> 0922 333 4444</p>
-            </div>
-            <div class="footer-section">
-                <h3>Follow Us</h3>
-                <div class="social-icons">
-                    <a href="/extras/devonprocess.html"><i class="fab fa-facebook"></i></a>
-                    <a href="/extras/devonprocess.html"><i class="fab fa-instagram"></i></a>
-                    <a href="/extras/devonprocess.html"><i class="fab fa-x"></i></a>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Contact</h3>
+                    <p><i class="fas fa-envelope"></i> info@shoeshopportal.com</p>
+                    <p><i class="fas fa-phone"></i> 0922 333 4444</p>
+                    <p><i class="fas fa-map-marker-alt"></i> 123 Shoe Street, Manila</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="extras/devonprocess.html" class="facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="extras/devonprocess.html" class="instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="extras/devonprocess.html" class="twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="extras/devonprocess.html" class="youtube"><i class="fab fa-youtube"></i></a>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 Shoe Shop Portal. All rights reserved.</p>
-            <a href="admin/html/admin_login.html">Are you an admin? Login here</a>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 Shoe Shop Portal. All rights reserved. <a href="admin/html/admin_login.html">Admin Login</a></p>
+            </div>
         </div>
     </footer>
 
@@ -662,36 +588,41 @@
     </div>
 
     <script>
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const carouselContainer = document.querySelector(".carousel-container");
-            
-            // Clone the items for a smooth loop
-            const items = carouselContainer.innerHTML;
-            carouselContainer.innerHTML += items; // Duplicate items
-
-            // Set up animation reset when halfway through
-            let scrollSpeed = 0.85; // Adjust for smooth speed
-            function moveCarousel() {
-                carouselContainer.style.transform = `translateX(-${scrollSpeed}px)`;
-                scrollSpeed += 1;
-                if (scrollSpeed >= carouselContainer.scrollWidth / 2) {
-                    scrollSpeed = 0; // Reset to create an infinite loop effect
-                }
-                requestAnimationFrame(moveCarousel);
-            }
-            moveCarousel();
-        });
-
+        // Open modal function
         function openModal(imageSrc) {
             document.getElementById('modalImage').src = imageSrc;
-            document.getElementById('imageModal').classList.add('active'); // Add 'active' class
+            document.getElementById('imageModal').classList.add('active');
         }
-    
+        
+        // Close modal function
         function closeModal() {
-            document.getElementById('imageModal').classList.remove('active'); // Remove 'active' class
+            document.getElementById('imageModal').classList.remove('active');
         }
+        
+        // Close modal when clicking outside the image
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        // Auto-scrolling carousel
+        document.addEventListener("DOMContentLoaded", function() {
+            const carousel = document.querySelector(".carousel-container");
+            let scrollAmount = 0;
+            const scrollSpeed = 1; // Adjust speed as needed
+            
+            function scrollCarousel() {
+                scrollAmount += scrollSpeed;
+                if (scrollAmount >= carousel.scrollWidth / 2) {
+                    scrollAmount = 0;
+                }
+                carousel.style.transform = `translateX(-${scrollAmount}px)`;
+                requestAnimationFrame(scrollCarousel);
+            }
+            
+            scrollCarousel();
+        });
     </script>
-    
 </body>
 </html>
