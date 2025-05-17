@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, remove, set, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, remove, set, onValue, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
+// Firebase config
 const firebaseConfig = {
     apiKey: "AIzaSyAuPALylh11cTArigeGJZmLwrFwoAsNPSI",
     authDomain: "opportunity-9d3bf.firebaseapp.com",
@@ -13,57 +14,56 @@ const firebaseConfig = {
     measurementId: "G-QC2JSR1FJW"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// Global variables
-let shopLoggedin; // shop ID of the logged-in user
-let roleLoggedin; // role of the logged-in user
-let sname; //shop name
+// Global session object
+const userSession = {
+    shopId: null,
+    role: null,
+    shopName: ''
+};
 
-// Expose functions to global scope
+// Expose functions globally
 window.showShoeDetails = showShoeDetails;
 window.editShoe = editShoe;
 window.promptDelete = promptDelete;
 window.closeModal = closeModal;
 window.addNewShoe = addNewShoe;
+window.showReviews = showReviews;
+window.testFeedback = testFeedback;
+// window.filterReviewsModal = filterReviewsModal;
 
+// Auth state handling
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // Fetch shop name from database
         const shopRef = ref(db, `AR_shoe_users/employees/${user.uid}`);
         onValue(shopRef, (snapshot) => {
             const shopData = snapshot.val();
-            console.log("shopData: ", shopData);
-
-            // this will run if the user a Employee NOT a shop owner
             if (shopData) {
-                roleLoggedin = shopData.role;
-                shopLoggedin = shopData.shopId;
-                console.log("shopLoggedin: ", shopLoggedin);
-                sname = shopData.shopName || ''; // Initialize with empty string if not available
+                userSession.role = shopData.role;
+                userSession.shopId = shopData.shopId;
+                userSession.shopName = shopData.shopName || '';
 
-                // Set role-based UI elements
                 if (shopData.role.toLowerCase() === "manager") {
                     document.getElementById("addemployeebtn").style.display = "none";
                 } else if (shopData.role.toLowerCase() === "salesperson") {
                     document.getElementById("addemployeebtn").style.display = "none";
                     document.getElementById("analyticsbtn").style.display = "none";
                 }
-                
-                loadInventory('inventoryTableBody');
             } else {
-                // this will run if the user is a shop owner
-                shopLoggedin = user.uid;
-                loadInventory('inventoryTableBody');
-                roleLoggedin = "Shop Owner"; // Default role
-                sname = 'Shop Owner'; // Default shop name
+                userSession.shopId = user.uid;
+                userSession.role = "Shop Owner";
+                userSession.shopName = 'Shop Owner';
             }
+            loadInventory('inventoryTableBody');
         }, (error) => {
             console.error("Error fetching shop data:", error);
-            shopLoggedin = user.uid; // Fallback to user UID
-            sname = 'Unknown Shop';
+            userSession.shopId = user.uid;
+            userSession.shopName = 'Unknown Shop';
+            loadInventory('inventoryTableBody');
         });
     } else {
         window.location.href = "/user_login.html";
@@ -75,15 +75,12 @@ function addNewShoe() {
 }
 
 function loadInventory(tableBodyId) {
-    const inventoryRef = ref(db, `AR_shoe_users/shoe/${shopLoggedin}`);
+    const inventoryRef = ref(db, `AR_shoe_users/shoe/${userSession.shopId}`);
     const tbody = document.getElementById(tableBodyId);
-
     if (!tbody) return;
 
     onValue(inventoryRef, (snapshot) => {
-        console.log("Inventory snapshot:", snapshot.val());
         tbody.innerHTML = '';
-
         if (!snapshot.exists()) {
             tbody.innerHTML = `<tr><td colspan="7">No shoes found in inventory</td></tr>`;
             return;
@@ -102,22 +99,18 @@ function createInventoryRow(shoeId, shoe) {
     row.className = 'animate-fade';
     row.setAttribute('data-id', shoeId);
 
-    // Calculate total stock from all variants
     let totalStock = 0;
     let firstPrice = 'N/A';
 
     if (shoe.variants) {
-        // Get the first variant key
         const variantKeys = Object.keys(shoe.variants);
         if (variantKeys.length > 0) {
             const firstVariant = shoe.variants[variantKeys[0]];
             firstPrice = firstVariant.price ? `₱${firstVariant.price}` : 'N/A';
-
-            // Calculate total stock
             Object.values(shoe.variants).forEach(variant => {
                 if (variant.sizes) {
                     Object.values(variant.sizes).forEach(sizeObj => {
-                        const sizeKey = Object.keys(sizeObj)[0]; // Get the size key (e.g., "9")
+                        const sizeKey = Object.keys(sizeObj)[0];
                         totalStock += sizeObj[sizeKey].stock || 0;
                     });
                 }
@@ -125,37 +118,27 @@ function createInventoryRow(shoeId, shoe) {
         }
     }
 
-    // Format date
     const addedDate = shoe.dateAdded ? new Date(shoe.dateAdded).toLocaleDateString() : 'N/A';
 
     row.innerHTML = `
-        <td>
-            ${shoe.defaultImage ?
-            `<img src="${shoe.defaultImage}" alt="${shoe.shoeName}" class="shoe-thumbnail">` :
-            '<div class="no-image">No Image</div>'}
-        </td>
+        <td>${shoe.defaultImage ? `<img src="${shoe.defaultImage}" alt="${shoe.shoeName}" class="shoe-thumbnail">` : '<div class="no-image">No Image</div>'}</td>
         <td>${shoe.shoeName || 'N/A'}</td>
         <td>${shoe.shoeCode || 'N/A'}</td>
         <td>${firstPrice}</td>
         <td>${totalStock}</td>
         <td>${addedDate}</td>
         <td class="action-buttons">
-            <button class="btn btn-view" onclick="showShoeDetails('${shoeId}')">
-                <i class="fas fa-eye"></i> View
-            </button>
-            <button class="btn btn-edit" onclick="editShoe('${shoeId}')">
-                <i class="fas fa-edit"></i> Edit
-            </button>
-            <button class="btn btn-danger" onclick="promptDelete('${shoeId}')">
-                <i class="fas fa-trash"></i> Delete
-            </button>
+            <button class="btn btn-view" onclick="showShoeDetails('${shoeId}')"><i class="fas fa-eye"></i> View</button>
+            <button class="btn btn-edit" onclick="editShoe('${shoeId}')"><i class="fas fa-edit"></i> Edit</button>
+            <button class="btn btn-reviews" onclick="showReviews('${shoeId}')"><i class="fas fa-star"></i> Reviews</button>
+            <button class="btn btn-danger" onclick="promptDelete('${shoeId}')"><i class="fas fa-trash"></i> Delete</button>
         </td>
     `;
     return row;
 }
 
 function showShoeDetails(shoeId) {
-    const shoeRef = ref(db, `AR_shoe_users/shoe/${shopLoggedin}/${shoeId}`);
+    const shoeRef = ref(db, `AR_shoe_users/shoe/${userSession.shopId}/${shoeId}`);
     const modalContent = document.getElementById('shoeDetailsContent');
     const modalElement = document.getElementById('shoeDetailsModal');
 
@@ -176,7 +159,7 @@ function showShoeDetails(shoeId) {
                 let sizesHtml = '';
                 if (variant.sizes) {
                     sizesHtml = Object.values(variant.sizes).map(sizeObj => {
-                        const sizeKey = Object.keys(sizeObj)[0]; // Get the size key (e.g., "9")
+                        const sizeKey = Object.keys(sizeObj)[0];
                         return `<div class="size-item">Size ${sizeKey}: ${sizeObj[sizeKey].stock} in stock</div>`;
                     }).join('');
                 }
@@ -243,7 +226,7 @@ function promptDelete(shoeId) {
 }
 
 function deleteShoe(shoeId) {
-    const shoeRef = ref(db, `AR_shoe_users/shoe/${shopLoggedin}/${shoeId}`);
+    const shoeRef = ref(db, `AR_shoe_users/shoe/${userSession.shopId}/${shoeId}`);
     remove(shoeRef)
         .then(() => {
             alert("Shoe deleted successfully!");
@@ -279,22 +262,342 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const logoutBtn = document.getElementById('logout_btn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                // Show loading state if you have a loader
-                logoutBtn.disabled = true;
-                logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
-    
-                auth.signOut().then(() => {
-                    // Redirect to login page after successful signout
-                    window.location.href = "/user_login.html";
-                }).catch((error) => {
-                    console.error("Logout error:", error);
-                    alert("Failed to logout. Please try again.");
-                    // Reset button state
-                    logoutBtn.disabled = false;
-                    logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
-                });
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            logoutBtn.disabled = true;
+            logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+            auth.signOut().then(() => {
+                window.location.href = "/user_login.html";
+            }).catch((error) => {
+                console.error("Logout error:", error);
+                alert("Failed to logout. Please try again.");
+                logoutBtn.disabled = false;
+                logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
             });
-        }
+        });
+    }
 });
+
+async function showReviews(shoeId) {
+    const feedbacksRef = ref(db, `AR_shoe_users/feedbacks`);
+    const modalContent = document.getElementById('shoeDetailsContent');
+    const modalElement = document.getElementById('shoeDetailsModal');
+
+    // Show loading state
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2>Loading Reviews...</h2>
+            <button onclick="closeModal()" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="loading">Please wait while we load the reviews...</div>
+        </div>
+    `;
+    modalElement.classList.add('show');
+    document.body.classList.add('modal-open');
+
+    try {
+        const snapshot = await get(feedbacksRef);
+        if (!snapshot.exists()) {
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <h2>No Reviews Yet</h2>
+                    <button onclick="closeModal()" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>This shoe hasn't received any reviews yet.</p>
+                </div>
+            `;
+            return;
+        }
+
+        const feedbacks = snapshot.val();
+        const reviewsToDisplay = [];
+
+        // Filter reviews for this specific shoe
+        for (const userId in feedbacks) {
+            for (const orderID in feedbacks[userId]) {
+                const feedback = feedbacks[userId][orderID];
+                if (feedback.shoeID === shoeId) {
+                    reviewsToDisplay.push({
+                        userId,
+                        feedback
+                    });
+                }
+            }
+        }
+
+        if (reviewsToDisplay.length === 0) {
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <h2>No Reviews Yet</h2>
+                    <button onclick="closeModal()" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>This shoe hasn't received any reviews yet.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Calculate average rating
+        const averageRating = calculateAverageRating(feedbacks, shoeId);
+        const ratingCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+        
+        // Count ratings
+        reviewsToDisplay.forEach(review => {
+            const rating = review.feedback.rating;
+            if (rating >= 1 && rating <= 5) {
+                ratingCounts[rating]++;
+            }
+        });
+
+        // Create filter buttons
+        const filtersHtml = `
+            <div class="review-filters">
+                ${[5, 4, 3, 2, 1].map(rating => `
+                    <div class="stars-filter" data-rating="${rating}" onclick="filterReviewsModal(${rating})">
+                        <div class="stars">
+                            ${'<i class="fas fa-star"></i>'.repeat(rating)}
+                            ${'<i class="far fa-star"></i>'.repeat(5 - rating)}
+                        </div>
+                        <div class="text">${rating} Star${rating !== 1 ? 's' : ''} (${ratingCounts[rating]})</div>
+                    </div>
+                `).join('')}
+                <div class="stars-filter active" data-rating="0" onclick="filterReviewsModal(0)">
+                    <div class="text">All Reviews (${reviewsToDisplay.length})</div>
+                </div>
+            </div>
+        `;
+
+        // Process each review asynchronously
+        let reviewsHtml = '';
+        for (const review of reviewsToDisplay) {
+            try {
+                const username = await getCustomernameUsingID(review.userId);
+                
+                reviewsHtml += `
+                    <div class="review-item" data-rating="${review.feedback.rating}">
+                        <div class="review-header">
+                            <span class="review-author">${username}</span>
+                            <span class="review-date">${formatTimestamp(review.feedback.timestamp)}</span>
+                        </div>
+                        <div class="review-stars">
+                            ${generateStarRating(review.feedback.rating)}
+                        </div>
+                        <p class="review-comment">${review.feedback.comment || "No comment provided."}</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error("Error processing review:", error);
+            }
+        }
+
+        modalContent.innerHTML = `
+            <div class="modal-header">
+                <h2>Customer Reviews</h2>
+                <button onclick="closeModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="average-rating-container">
+                    Average Rating: 
+                    <span class="average-rating-value">
+                        ${averageRating > 0 ? `${averageRating} <i class="fas fa-star"></i>` : 'No ratings yet'}
+                    </span>
+                </div>
+                ${filtersHtml}
+                <div class="reviews-container">
+                    ${reviewsHtml}
+                </div>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error("Error fetching reviews:", error);
+        modalContent.innerHTML = `
+            <div class="modal-header">
+                <h2>Error Loading Reviews</h2>
+                <button onclick="closeModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Failed to load reviews. Please try again later.</p>
+            </div>
+        `;
+    }
+}
+
+function generateStarRating(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    let starsHtml = '';
+    
+    for (let i = 0; i < fullStars; i++) {
+        starsHtml += '<i class="fas fa-star"></i>';
+    }
+    
+    if (hasHalfStar) {
+        starsHtml += '<i class="fas fa-star-half-alt"></i>';
+    }
+    
+    for (let i = 0; i < emptyStars; i++) {
+        starsHtml += '<i class="far fa-star"></i>';
+    }
+    
+    return starsHtml;
+}
+
+function calculateAverageRating(feedbacks, shoeId) {
+    let totalRating = 0;
+    let reviewCount = 0;
+
+    for (const userId in feedbacks) {
+        for (const orderID in feedbacks[userId]) {
+            const feedback = feedbacks[userId][orderID];
+            if (feedback.shoeID === shoeId) {
+                totalRating += feedback.rating;
+                reviewCount++;
+            }
+        }
+    }
+
+    return reviewCount > 0 ? (totalRating / reviewCount).toFixed(1) : 0;
+}
+
+async function getCustomernameUsingID(userID) {
+    const userRef = ref(db, `AR_shoe_users/customer/${userID}`);
+    try {
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            return `${userData.firstName} ${userData.lastName}` || "Anonymous User";
+        }
+        return "Anonymous User";
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+        return "Anonymous User";
+    }
+}
+
+function formatTimestamp(timestamp) {
+    let date = new Date(timestamp);
+    let month = String(date.getMonth() + 1).padStart(2, '0');
+    let day = String(date.getDate()).padStart(2, '0');
+    let year = date.getFullYear();
+    let hours = String(date.getHours()).padStart(2, '0');
+    let minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${month}/${day}/${year} ${hours}:${minutes}`;
+}
+
+window.filterReviewsModal = function(rating) {
+    const reviewItems = document.querySelectorAll('#shoeDetailsContent .review-item');
+    const filters = document.querySelectorAll('#shoeDetailsContent .stars-filter');
+    
+    filters.forEach(filter => {
+        filter.classList.remove('active');
+        if (parseInt(filter.dataset.rating) === rating) {
+            filter.classList.add('active');
+        }
+    });
+    
+    reviewItems.forEach(item => {
+        item.style.display = (rating === 0 || parseInt(item.dataset.rating) === rating) 
+            ? 'block' 
+            : 'none';
+    });
+}
+
+function testFeedback(shoeId) {
+    const modalContent = document.getElementById('shoeDetailsContent');
+    const modalElement = document.getElementById('shoeDetailsModal');
+    
+    const sampleFeedbacks = [
+        {
+            rating: 5,
+            comment: "Absolutely love these shoes! They're comfortable and stylish. Perfect fit!",
+            timestamp: Date.now() - 86400000 * 2
+        },
+        {
+            rating: 4,
+            comment: "Great shoes overall. The color is a bit different than expected but still nice.",
+            timestamp: Date.now() - 86400000 * 5
+        },
+        {
+            rating: 3,
+            comment: "Average quality. They look good but the sole isn't as durable as I hoped.",
+            timestamp: Date.now() - 86400000 * 10
+        },
+        {
+            rating: 2,
+            comment: "Disappointed with the quality. The stitching is coming apart after just a week.",
+            timestamp: Date.now() - 86400000 * 15
+        },
+        {
+            rating: 1,
+            comment: "Poor quality. The shoes fell apart after 3 days of normal use. Would not recommend.",
+            timestamp: Date.now() - 86400000 * 20
+        }
+    ];
+
+    const averageRating = sampleFeedbacks.reduce((sum, feedback) => sum + feedback.rating, 0) / sampleFeedbacks.length;
+    const ratingCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+    sampleFeedbacks.forEach(feedback => {
+        ratingCounts[feedback.rating]++;
+    });
+
+    const filtersHtml = `
+        <div class="review-filters">
+            ${[5, 4, 3, 2, 1].map(rating => `
+                <div class="stars-filter" data-rating="${rating}" onclick="filterReviewsModal(${rating})">
+                    <div class="stars">
+                        ${'<i class="fas fa-star"></i>'.repeat(rating)}
+                        ${'<i class="far fa-star"></i>'.repeat(5 - rating)}
+                    </div>
+                    <div class="text">${rating} Star${rating !== 1 ? 's' : ''} (${ratingCounts[rating]})</div>
+                </div>
+            `).join('')}
+            <div class="stars-filter active" data-rating="0" onclick="filterReviewsModal(0)">
+                <div class="text">All Reviews (${sampleFeedbacks.length})</div>
+            </div>
+        </div>
+    `;
+
+    const reviewsHtml = sampleFeedbacks.map(feedback => `
+        <div class="review-item" data-rating="${feedback.rating}">
+            <div class="review-header">
+                <span class="review-author">Sample Customer</span>
+                <span class="review-date">${formatTimestamp(feedback.timestamp)}</span>
+            </div>
+            <div class="review-stars">
+                ${generateStarRating(feedback.rating)}
+            </div>
+            <p class="review-comment">${feedback.comment}</p>
+        </div>
+    `).join('');
+
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h2>Feedback Test Preview</h2>
+            <button onclick="closeModal()" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="test-feedback-notice">
+                <i class="fas fa-info-circle"></i> This is a preview of how customer feedback will appear on your shoe.
+            </div>
+            <div class="average-rating-container">
+                Average Rating: 
+                <span class="average-rating-value">
+                    ${averageRating.toFixed(1)} <i class="fas fa-star"></i>
+                </span>
+            </div>
+            ${filtersHtml}
+            <div class="reviews-container">
+                ${reviewsHtml}
+            </div>
+        </div>
+    `;
+
+    modalElement.classList.add('show');
+    document.body.classList.add('modal-open');
+}

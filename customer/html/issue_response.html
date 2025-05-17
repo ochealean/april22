@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Responses - Shop Owner</title>
+    <link rel="stylesheet" href="/shopowner/css/shop_dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .container {
+            padding: 2rem;
+            transition: margin-left 0.3s;
+        }
+
+        .responsive-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .responsive-table th,
+        .responsive-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .responsive-table th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+        }
+
+        .responsive-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .status-pending {
+            color: #FFA500;
+            font-weight: 600;
+        }
+
+        .status-resolved {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .status-processing {
+            color: #2196F3;
+            font-weight: 600;
+        }
+
+        .issue-details-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            margin-bottom: 10px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .issue-description-full {
+            white-space: pre-wrap;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .document-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .document-item img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .document-item img:hover {
+            transform: scale(1.05);
+        }
+
+        .response-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .response-date {
+            color: #666;
+        }
+
+        .response-message {
+            white-space: pre-wrap;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .pagination-btn {
+            padding: 8px 15px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .pagination-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .pagination-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .search-btn, .clear-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .search-btn {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .clear-btn {
+            background: #f0f0f0;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 4px;
+            color: white;
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s, fadeOut 0.5s 2.5s forwards;
+        }
+
+        .notification.success {
+            background: #4CAF50;
+        }
+
+        .notification.error {
+            background: #F44336;
+        }
+
+        .notification.info {
+            background: #2196F3;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">SHOP DASHBOARD</div>
+            <div class="nav-items">
+                <a href="/customer/html/customer_dashboard.html" class="nav-item">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="/customer/html/browse.html" class="nav-item">
+                    <i class="fas fa-shopping-bag"></i> Browse Shoes
+                </a>
+                <a href="/customer/html/orders.html" class="nav-item">
+                    <i class="fas fa-receipt"></i> My Orders
+                </a>
+                <a href="/customer/html/add_to_cart.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i> My Cart
+                </a>
+                <a href="/customer/html/history.html" class="nav-item">
+                    <i class="fas fa-history"></i> Order History
+                </a>
+                <a href="/customer/html/issue_response.html" class="nav-item active">
+                    <i class="fas fa-reply"></i> Issue Response
+                <a href="/customer/html/wishlist.html" class="nav-item">
+                    <i class="fas fa-heart"></i> Wishlist
+                </a>
+                <a href="/chatbot/html/chatbot.html" class="nav-item">
+                    <i class="fas fa-comment"></i> Chatbot
+                </a>
+                <a href="/extras/devonprocess.html" class="nav-item">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a id="logout_btn" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="container">
+            <h1><i class="fas fa-exclamation-circle"></i> Issue Responses</h1>
+            
+            <div class="search-container">
+                <input type="text" id="issueSearch" placeholder="Search by order ID or issue type..." class="search-input">
+                <button id="searchBtn" class="search-btn">Search</button>
+                <button id="clearSearch" class="clear-btn">Clear</button>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="responsive-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Issue Type</th>
+                            <th>Status</th>
+                            <th>Date Reported</th>
+                            <th>Last Response</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="issueResponsesTable">
+                        <!-- Data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination">
+                <button id="prevBtn" class="pagination-btn" disabled>Previous</button>
+                <!-- Page numbers will be inserted here -->
+                <button id="nextBtn" class="pagination-btn">Next</button>
+            </div>
+        </div>
+        
+        <!-- Issue Details Modal -->
+        <div id="issueDetailsModal" class="issue-details-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalIssueTitle">Issue Report Details</h2>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div id="modalIssueContent" class="modal-body">
+                    <!-- Dynamic content will load here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notification -->
+        <div id="notification" class="notification"></div>
+        
+        <!-- Overlay -->
+        <div id="overlay" class="overlay"></div>
+    </div>
+    <script src="/customer/js/issue_response.js" type="module"></script>
+</body>
+</html>
