@@ -191,7 +191,12 @@ function createOrderCard(order) {
             <button class="btn btn-issue" onclick="reportIssue('${order.id}')">Report Issue</button>
             <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
         `;
-    } else {
+    } else if (status === 'pending') {
+        actionButtons = `
+            <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
+            <button class="btn btn-cancel" onclick="cancelOrder('${order.id}')">Cancel Order</button>
+        `;
+    }else {
         actionButtons = `
             <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
         `;
