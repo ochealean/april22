@@ -276,7 +276,7 @@ function displayRecentProducts(shoes, container) {
         <div class="product-card">
             <div class="product-image">
                 ${imageUrl
-                ? `<img src="${imageUrl}" alt="${shoe.shoeName}" data-fallback="/images/unloadshoepic.png" class="shoe-thumbnail">`
+                ? `<img src="${imageUrl}" alt="${shoe.shoeName}" class="shoe-thumbnail">`
                 : '<div class="no-image">No Image</div>'
             }
             </div>
