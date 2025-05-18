@@ -72,20 +72,13 @@
             text-align: center;
         }
 
-        .nav-items {
-            display: flex;
-            flex-direction: column;
-        }
-
         .nav-item {
             padding: 0.8rem 1rem;
             margin: 0.5rem 0;
             border-radius: var(--radius-sm);
             cursor: pointer;
             transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: block;
             color: var(--light);
             text-decoration: none;
         }
@@ -93,11 +86,6 @@
         .nav-item:hover, .nav-item.active {
             background-color: var(--primary-dark);
             color: var(--light);
-        }
-
-        .nav-item i {
-            width: 20px;
-            text-align: center;
         }
 
         /* Main Content Styles */
