@@ -1,4 +1,4 @@
-// shopowner_addshoe.js - Cleaned up version without local storage
+// shopowner_addshoe.js - With file type validation
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref as dbRef, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -29,6 +29,9 @@ let shopLoggedin; // shop ID of the logged-in user
 let roleLoggedin; // role of the logged-in user
 let sname; //shop name
 let variantCount = 0;
+
+// Allowed file types
+const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic'];
 
 // DOM Content Loaded event
 document.addEventListener('DOMContentLoaded', () => {
@@ -67,7 +70,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add first color variant by default
     addColorVariant();
 
+    // Add file type validation to all file inputs
+    setupFileInputValidation();
 });
+
+function setupFileInputValidation() {
+    // Main shoe image validation
+    document.getElementById('shoeImage').addEventListener('change', function(e) {
+        validateFileInput(this);
+    });
+
+    // Variant image validation will be added when variants are created
+}
+
+function validateFileInput(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const fileType = file.type.toLowerCase();
+    const fileName = file.name.toLowerCase();
+    const fileExt = fileName.split('.').pop();
+
+    // Check if file type is allowed
+    if (!ALLOWED_FILE_TYPES.includes(fileType) && fileExt !== 'heic') {
+        alert('Only JPG, JPEG, PNG, and HEIC files are allowed.');
+        input.value = ''; // Clear the file input
+        return false;
+    }
+
+    return true;
+}
 
 // Firebase authentication state change handler
 onAuthStateChanged(auth, (user) => {
@@ -130,6 +162,22 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
         return;
     }
 
+    // Validate main image file type
+    const shoeImageFile = document.getElementById('shoeImage').files[0];
+    if (shoeImageFile && !validateFileInput(document.getElementById('shoeImage'))) {
+        return;
+    }
+
+    // Validate all variant image file types
+    const variantGroups = document.querySelectorAll('.variant-group');
+    for (const group of variantGroups) {
+        const variantId = group.dataset.variantId;
+        const variantImageInput = document.getElementById(`variantImage_${variantId}`);
+        if (variantImageInput.files[0] && !validateFileInput(variantImageInput)) {
+            return;
+        }
+    }
+
     // Show loading modal
     document.getElementById('loadingModal').style.display = 'block';
 
@@ -138,11 +186,9 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
         const shoeCode = document.getElementById('shoeCode').value;
         const shoeName = document.getElementById('shoeName').value;
         const shoeDescription = document.getElementById('shoeDescription').value;
-        const shoeImageFile = document.getElementById('shoeImage').files[0];
         const random18CharID = generate18CharID();
 
         // Get all variant data
-        const variantGroups = document.querySelectorAll('.variant-group');
         const variants = {}; // Object to hold all variants
 
         variantGroups.forEach((group, index) => {
@@ -230,9 +276,9 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
     } finally {
         // Hide loading modal
         document.getElementById('loadingModal').style.display = 'none';
+        window.location.href = "/shopowner/html/shop_inventory.html"; // Redirect to dashboard
     }
 });
-
 
 // File upload function
 async function uploadFile(file, path) {
@@ -278,7 +324,7 @@ function addColorVariant() {
         
         <div class="form-group">
             <label for="variantImage_${variantCount}">Variant Image</label>
-            <input type="file" id="variantImage_${variantCount}" accept="image/*">
+            <input type="file" id="variantImage_${variantCount}" accept="image/jpeg, image/jpg, image/png, image/heic">
         </div>
         
         <div class="form-group">
@@ -297,6 +343,12 @@ function addColorVariant() {
     `;
 
     container.appendChild(variant);
+    
+    // Add validation for the new file input
+    document.getElementById(`variantImage_${variantCount}`).addEventListener('change', function(e) {
+        validateFileInput(this);
+    });
+    
     addSizeInput(variantCount);
 }
 

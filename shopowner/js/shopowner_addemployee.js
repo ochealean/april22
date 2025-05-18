@@ -162,11 +162,11 @@ document.getElementById('addEmployeeForm').addEventListener('submit', async (e) 
 
     try {
         // Get shop owner's password confirmation
-        shopOwnerPassword = prompt("Please confirm your password to continue:");
-        if (!shopOwnerPassword) {
-            alert("Password confirmation is required");
-            return;
-        }
+        // shopOwnerPassword = prompt("Please confirm your password to continue:");
+        // if (!shopOwnerPassword) {
+        //     alert("Password confirmation is required");
+        //     return;
+        // }
 
         // Create employee account
         const result = await createEmployeeAccount(employeeData);

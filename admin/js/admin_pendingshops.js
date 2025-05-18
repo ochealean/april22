@@ -707,6 +707,18 @@ document.getElementById('overlay')?.addEventListener('click', function() {
     this.classList.remove('show');
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    // Menu toggle functionality
+    const menuBtn = document.querySelector(".menu-btn");
+    const navLinks = document.querySelector(".nav-links");
+    
+    menuBtn?.addEventListener("click", function() {
+        navLinks.classList.toggle("active");
+        menuBtn.innerHTML = navLinks.classList.contains("active") ? 
+            '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+    });
+});
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     loadShops('pending', 'pendingShopsTableBody');
