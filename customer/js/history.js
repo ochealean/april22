@@ -93,14 +93,9 @@ function loadOrderHistory(userId, statusFilter = 'all') {
             const order = orderSnapshot.val();
             order.orderId = orderSnapshot.key;
             
-            // Statuses to show in history (excluding 'delivered' and 'processed')
+            // Only include these statuses in history
             const status = order.status.toLowerCase();
-            const historyStatuses = [
-                'rejected', 'cancelled', 'completed',  // Added 'completed'
-                'shipped', 'in transit',
-                'arrived at facility',  
-                'out for delivery'       
-            ];
+            const historyStatuses = ['cancelled', 'rejected', 'completed'];
             
             if (historyStatuses.includes(status)) {
                 orders.push(order);
@@ -144,50 +139,30 @@ function displayOrderCard(order, userId) {
         day: 'numeric'
     });
 
-    // Determine status class and text
+    // Determine status class and text - only for cancelled, rejected, and completed
     let statusClass, statusText;
     switch (status) {
         case 'rejected':
             statusClass = 'status-rejected';
             statusText = 'Rejected by Shop';
             break;
-        case 'delivered':
-            statusClass = 'status-delivered';
-            statusText = 'Delivered';
-            break;
         case 'cancelled':
             statusClass = 'status-cancelled';
             statusText = 'Cancelled';
             break;
-        case 'completed': 
+        case 'completed':
             statusClass = 'status-completed';
             statusText = 'Completed';
             break;
-        case 'shipped':
-            statusClass = 'status-shipped';
-            statusText = 'Shipped';
-            break;
-        case 'in transit':
-            statusClass = 'status-transit';
-            statusText = 'In Transit';
-            break;
-        case 'arrived at facility':
-            statusClass = 'status-facility';
-            statusText = 'At Facility';
-            break;
-        case 'out for delivery':
-            statusClass = 'status-delivery';
-            statusText = 'Out for Delivery';
-            break;
         default:
+            // This shouldn't happen since we filter before calling this function
             statusClass = 'status-default';
-            statusText = order.status; // Show raw status if not recognized
+            statusText = order.status;
     }
 
     // Get the item(s)
     const items = order.item ? [order.item] : (order.order_items ? Object.values(order.order_items) : []);
-
-    console.log('Items:', items);
+    
     // Generate HTML for each item
     const itemsHTML = items.map(item => `
         <div class="order-item">
@@ -203,7 +178,7 @@ function displayOrderCard(order, userId) {
 
     // Generate rejection info if order was rejected
     let rejectionHTML = '';
-    if (order.status === 'rejected') {
+    if (status === 'rejected') {
         rejectionHTML = `
             <div class="rejection-info">
                 <div class="rejection-title">
@@ -215,10 +190,7 @@ function displayOrderCard(order, userId) {
                 </div>
             </div>
         `;
-    }
-
-    // Generate cancellation info if order was cancelled
-    if (order.status === 'cancelled') {
+    } else if (status === 'cancelled') {
         rejectionHTML = `
             <div class="rejection-info">
                 <div class="rejection-title">
@@ -234,12 +206,7 @@ function displayOrderCard(order, userId) {
 
     // Determine which buttons to show based on order status
     let actionButtons = '';
-    if (status === 'delivered') {
-        actionButtons = `
-            <button class="btn btn-reorder">Reorder</button>
-            <button class="btn btn-review">Leave Review</button>
-        `;
-    } else if (status === 'completed') {  // Added for completed orders
+    if (status === 'completed') {
         actionButtons = `
             <button class="btn btn-reorder">Reorder</button>
             <button class="btn btn-review">Leave Review</button>

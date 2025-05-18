@@ -97,8 +97,18 @@ function createOrderCard(order) {
 
     const status = order.status.toLowerCase();
 
-    // Only show these statuses (now including delivered, removed shipped)
-    const allowedStatuses = ['pending', 'accepted', 'processed', 'delivered'];
+    // Only show these statuses
+    const allowedStatuses = [
+        'order processed', 
+        'shipped', 
+        'in transit', 
+        'arrived at facility', 
+        'out for delivery', 
+        'delivered',
+        'other'  // Added 'other' as per your requirement
+    ];
+    
+    // Skip if status is not in allowed list
     if (!allowedStatuses.includes(status)) return null;
 
     const orderCard = document.createElement('div');
@@ -118,25 +128,38 @@ function createOrderCard(order) {
     let statusClass = '';
     let statusText = '';
     switch (status) {
-        case 'pending':
-            statusClass = 'status-processing';
-            statusText = 'Processing';
-            break;
-        case 'accepted':
-            statusClass = 'status-accepted';
-            statusText = 'Order Accepted';
-            break;
-        case 'processed':
+        case 'order processed':
             statusClass = 'status-processed';
             statusText = 'Order Processed';
+            break;
+        case 'shipped':
+            statusClass = 'status-shipped';
+            statusText = 'Shipped';
+            break;
+        case 'in transit':
+            statusClass = 'status-transit';
+            statusText = 'In Transit';
+            break;
+        case 'arrived at facility':
+            statusClass = 'status-arrived';
+            statusText = 'Arrived at Facility';
+            break;
+        case 'out for delivery':
+            statusClass = 'status-out-for-delivery';
+            statusText = 'Out for Delivery';
             break;
         case 'delivered':
             statusClass = 'status-delivered';
             statusText = 'Delivered';
             break;
+        case 'other':
+            statusClass = 'status-other';
+            statusText = 'Other';
+            break;
         default:
             return null;
     }
+
 
     let orderItemHTML = '';
     if (order.item) {
@@ -158,23 +181,17 @@ function createOrderCard(order) {
 
     let actionButtons = '';
 
-    if (status === 'pending') {
-        actionButtons = `
-            <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
-            <button class="btn btn-cancel" onclick="cancelOrder('${order.id}')">Cancel Order</button>
-        `;
-    } else if (status === 'delivered') {
+    if (status === 'delivered') {
         actionButtons = `
             <button class="btn btn-received" onclick="markAsReceived('${order.id}')">Order Received</button>
             <button class="btn btn-issue" onclick="reportIssue('${order.id}')">Report Issue</button>
             <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
         `;
-    } else if (status !== 'pending') {
+    } else {
         actionButtons = `
             <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
-            <button class="btn btn-return" onclick="startReturn('${order.id}')">Start Return</button>
         `;
-    } 
+    }
 
     orderCard.innerHTML = `
         <div class="order-header">
