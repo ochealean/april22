@@ -311,30 +311,6 @@
             <!-- Top Products -->
             <h2 class="section-title">Top Products</h2>
             <div class="product-list">
-                <!-- <div class="product-card">
-                    <div class="product-image">
-                        [Product Image]
-                    </div>
-                    <div class="product-info">
-                        <div class="product-title">Running Sneakers</div>
-                        <div class="product-price">$89.99</div>
-                        <button class="btn btn-view" style="margin-top: 0.5rem;">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image">
-                        [Product Image]
-                    </div>
-                    <div class="product-info">
-                        <div class="product-title">Casual Loafers</div>
-                        <div class="product-price">$59.99</div>
-                        <button class="btn btn-view" style="margin-top: 0.5rem;">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                    </div>
-                </div> -->
                 <p>No shoes added yet</p>
             </div>
 
@@ -383,76 +359,7 @@
             </div>
         </div>
     </div>
-    <!-- 
-    <script>
-        // Example: get the user role from localStorage or backend
-        const userRole = localStorage.getItem('userRole'); // "employee", "manager", "owner"
-      
-        document.addEventListener("DOMContentLoaded", () => {
-          if (userRole === "employee") {
-            document.querySelectorAll(".manager, .shopowner").forEach(el => el.style.display = "none");
-          } else if (userRole === "manager") {
-            document.querySelectorAll(".shopowner").forEach(el => el.style.display = "none");
-          }
-          // owner sees everything, so no need to hide
-        });
-
-        // Add this to your shop_dashboard.js or in a script tag
-        document.addEventListener("DOMContentLoaded", () => {
-            // ... your existing code ...
-            
-            displayRecentAddedShoes();
-        });
-
-        function displayRecentAddedShoes() {
-            const recentAddedContainer = document.getElementById('recentAdded');
-            const shoes = JSON.parse(localStorage.getItem('shoes')) || [];
-            
-            // Filter shoes for this shop only
-            const shopId = localStorage.getItem('shopId');
-            const shopShoes = shoes.filter(shoe => shoe.shopId === shopId)
-                                .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
-                                .slice(0, 4); // Get 4 most recent
-            
-            if (shopShoes.length === 0) {
-                recentAddedContainer.innerHTML = '<p>No shoes added yet</p>';
-                return;
-            }
-            
-            let html = '<div class="product-list">';
-            shopShoes.forEach(shoe => {
-                // Get the first variant for display purposes
-                const firstVariant = shoe.variants && shoe.variants.length > 0 ? shoe.variants[0] : null;
-                
-                html += `
-                <div class="product-card">
-                    <div class="product-image">
-                        ${shoe.image ? `<img src="uploads/${shoe.image}" alt="${shoe.name}" style="max-width:100%; height:auto;">` : '[Product Image]'}
-                    </div>
-                    <div class="product-info">
-                        <div class="product-title">${shoe.name}</div>
-                        <div class="product-code">Code: ${shoe.code}</div>
-                        <div class="product-price">$${(firstVariant ? firstVariant.price : 0).toFixed(2)}</div>
-                        <div class="product-color">${firstVariant ? `Color: ${firstVariant.color}` : ''}</div>
-                        <button class="btn btn-view" onclick="viewShoeDetails('${shoe.id}')">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                    </div>
-                </div>
-                `;
-            });
-            html += '</div>';
-            
-            recentAddedContainer.innerHTML = html;
-        }
-
-        function viewShoeDetails(shoeId) {
-            // Store the shoe ID to view details on inventory page
-            localStorage.setItem('viewingShoeId', shoeId);
-            window.location.href = 'shop_inventory.html';
-        }
-    </script>
-       -->
+    
     <!-- nagadd ng script -->
     <script src="/shopowner/js/shop_dashboard.js" type="module"></script>
 </body>
