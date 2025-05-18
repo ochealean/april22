@@ -365,8 +365,15 @@ async function submitResponse() {
     const newStatus = responseStatus.value;
     
     if (!responseText) {
+        // Add visual feedback to the textarea
+                adminResponse.style.border = "2px solid red";
+                adminResponse.focus();
+
+                // Remove the red border after 2 seconds
+                setTimeout(() => {
+                    adminResponse.style.border = "";
+                }, 2000);
         showNotification("Please enter a response message", "error");
-        adminResponse.focus();
         return;
     }
     
