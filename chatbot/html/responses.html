@@ -254,6 +254,44 @@
             background-color: rgba(52, 152, 219, 0.05);
         }
 
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+            position: relative; /* Added this */
+        }
+
+        .modal-header h3 {
+            color: var(--secondary);
+            font-size: 1.5rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-grow: 1; /* Added this */
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.75rem;
+            color: var(--gray-dark);
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 0.25rem;
+            line-height: 1;
+            position: static; /* Changed from absolute to static */
+            margin-left: auto; /* Added this to push it to the right */
+        }
+
+        .close-modal:hover {
+            color: var(--accent);
+            transform: rotate(90deg);
+        }
+
         /* Buttons */
         button {
             padding: 10px 18px;
@@ -330,52 +368,135 @@
 
         /* Modal Styles */
         .response-modal {
-            display: none;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-            z-index: 10001;
-            max-width: 500px;
-            width: 90%;
+            z-index: 1001;
+            display: none;
         }
 
         .response-modal.active {
             display: block;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .response-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
         }
 
         .response-input {
             width: 100%;
-            padding: 0.8rem;
-            margin-bottom: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--gray);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: white;
+            color: var(--text-primary);
+        }
+
+        .response-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .response-input::placeholder {
+            color: var(--gray-dark);
+            opacity: 0.7;
+        }
+
+        select.response-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+            padding-right: 2.5rem;
+        }
+
+        textarea.response-input {
             min-height: 150px;
             resize: vertical;
+            line-height: 1.5;
+            font-family: inherit;
         }
 
-        .modal-header {
+        .response-list {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
+            flex-direction: column;
+            gap: 0.75rem;
         }
 
         .clear-container {
             display: flex;
             justify-content: flex-end;
-            margin-top: 0.5rem;
+        }
+
+        .clear-btn {
+            background-color: var(--gray-light);
+            color: var(--gray-dark);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .clear-btn:hover {
+            background-color: var(--gray);
+            color: var(--dark);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .modal-actions button {
+            min-width: 100px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Focus states for better accessibility */
+        button:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
         }
 
         /* Notification */
@@ -443,7 +564,7 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.7);
-            z-index: 10000;
+            z-index: 900;
             opacity: 0;
             visibility: hidden;
             transition: var(--transition);
@@ -578,6 +699,18 @@
         @media (max-width: 480px) {
             .container {
                 padding: 15px;
+            }
+            .response-modal {
+                padding: 1.5rem;
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .modal-actions button {
+                width: 100%;
             }
         }
 
@@ -892,6 +1025,7 @@
             <h3 id="modalTitle">Add New Response</h3>
             <button class="close-modal">&times;</button>
         </div>
+        
         <div class="modal-body">
             <div class="response-form-group">
                 <select id="modalCategory" class="response-input">
@@ -947,169 +1081,6 @@
         </section>
     </div>
 
-    <!-- <script>
-        let responses = JSON.parse(localStorage.getItem('chatbotResponses')) || [];
-        let currentEditId = null;
-        let deleteCallback = null;
-
-        const notification = document.getElementById('notification');
-        const confirmationDialog = document.getElementById('confirmationDialog');
-        const overlay = document.getElementById('overlay');
-        const responseModal = document.getElementById('responseModal');
-        const modalTitle = document.getElementById('modalTitle');
-
-        document.addEventListener('DOMContentLoaded', initChatbot);
-
-        function initChatbot() {
-            responses = responses.map(r => {
-                if (typeof r.response === 'string') {
-                    return { ...r, responses: [r.response] };
-                }
-                return r;
-            });
-            localStorage.setItem('chatbotResponses', JSON.stringify(responses));
-            renderChatbotTable();
-            setupEventListeners();
-        }
-
-        function setupEventListeners() {
-            document.querySelector('.menu-btn').addEventListener('click', () => {
-                document.querySelector('.nav-links').classList.toggle('active');
-            });
-            
-            document.getElementById('openResponseModal').addEventListener('click', () => {
-                currentEditId = null;
-                modalTitle.textContent = 'Add New Response';
-                resetModal();
-                openModal();
-            });
-            
-            document.querySelector('.close-modal').addEventListener('click', closeModal);
-            document.getElementById('cancelModal').addEventListener('click', closeModal);
-            overlay.addEventListener('click', closeModal);
-            document.getElementById('clearResponses').addEventListener('click', resetTextarea);
-            document.getElementById('saveModalResponse').addEventListener('click', saveResponse);
-            document.getElementById('confirmAction').addEventListener('click', handleConfirmDelete);
-            document.getElementById('cancelAction').addEventListener('click', closeConfirmationDialog);
-        }
-
-        function openModal() {
-            responseModal.classList.add('active');
-            overlay.classList.add('show');
-        }
-
-        function closeModal() {
-            responseModal.classList.remove('active');
-            overlay.classList.remove('show');
-        }
-
-        function resetTextarea() {
-            document.getElementById('responseTextarea').value = '';
-        }
-
-        function saveResponse() {
-            const keyword = document.getElementById('modalKeyword').value.trim();
-            const responsesText = document.getElementById('responseTextarea').value.trim();
-            const responsesArray = responsesText.split('\n').filter(Boolean);
-
-            if (!keyword || responsesArray.length === 0) {
-                showNotification('Please fill in the keyword and at least one response', 'error');
-                return;
-            }
-
-            const newResponse = {
-                id: currentEditId || Date.now(),
-                keyword,
-                responses: responsesArray
-            };
-
-            if (currentEditId) {
-                const index = responses.findIndex(r => r.id == currentEditId);
-                responses[index] = newResponse;
-            } else {
-                responses.push(newResponse);
-            }
-
-            localStorage.setItem('chatbotResponses', JSON.stringify(responses));
-            showNotification(`Response ${currentEditId ? 'updated' : 'added'} successfully`, 'success');
-            renderChatbotTable();
-            closeModal();
-        }
-
-        function openEditResponse(id) {
-            const response = responses.find(r => r.id == id);
-            if (!response) return;
-
-            currentEditId = id;
-            modalTitle.textContent = 'Edit Response';
-            document.getElementById('modalKeyword').value = response.keyword;
-            document.getElementById('responseTextarea').value = response.responses.join('\n');
-            openModal();
-        }
-
-        function resetModal() {
-            document.getElementById('modalKeyword').value = '';
-            document.getElementById('responseTextarea').value = '';
-        }
-
-        function renderChatbotTable() {
-            const tbody = document.getElementById('chatbotTableBody');
-            tbody.innerHTML = responses.length ? 
-                responses.map(response => `
-                    <tr>
-                        <td>${response.id}</td>
-                        <td>${response.keyword}</td>
-                        <td>${response.responses.join('<br>')}</td>
-                        <td>
-                            <div class="response-actions">
-                                <button class="edit-btn" onclick="openEditResponse('${response.id}')">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                                <button class="delete-btn" onclick="confirmDelete('${response.id}')">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('') : 
-                `<tr><td colspan="4" style="text-align:center;color:var(--gray-dark)">No responses added yet</td></tr>`;
-        }
-
-        function confirmDelete(id) {
-            showConfirmationDialog('Delete this response?', () => {
-                responses = responses.filter(r => r.id != id);
-                localStorage.setItem('chatbotResponses', JSON.stringify(responses));
-                renderChatbotTable();
-                showNotification('Response deleted', 'success');
-            });
-        }
-
-        function handleConfirmDelete() {
-            deleteCallback?.();
-            closeConfirmationDialog();
-        }
-
-        function showNotification(message, type = 'success') {
-            notification.textContent = message;
-            notification.className = `notification ${type} show`;
-            setTimeout(() => notification.classList.remove('show'), 3000);
-        }
-
-        function showConfirmationDialog(message, callback) {
-            document.getElementById('dialogMessage').textContent = message;
-            confirmationDialog.classList.add('show');
-            overlay.classList.add('show');
-            deleteCallback = callback;
-        }
-
-        function closeConfirmationDialog() {
-            confirmationDialog.classList.remove('show');
-            overlay.classList.remove('show');
-        }
-
-        window.openEditResponse = openEditResponse;
-        window.confirmDelete = confirmDelete;
-    </script> -->
     <script src="/chatbot/html/responses.js" type="module"></script>
 </body>
 
