@@ -101,6 +101,21 @@ function updateOrderInfo(data) {
         domElements.packageShop.textContent = `From: ${data.item?.shopName || "Unknown Seller"}`;
     }
 
+    // Add this section to update the package image
+    const packageImage = document.getElementById('packageImage');
+    if (packageImage && data.item?.imageUrl) {
+        packageImage.src = data.item.imageUrl;
+        packageImage.alt = data.item?.name || "Product Image";
+        
+        // Add error handling in case the image fails to load
+        packageImage.onerror = function() {
+            this.src = "https://cdn-icons-png.flaticon.com/512/11542/11542598.png"; // Fallback image
+        };
+    } else if (packageImage) {
+        // Set a default image if no image URL is provided
+        packageImage.src = "https://cdn-icons-png.flaticon.com/512/11542/11542598.png";
+    }
+
     if (domElements.orderNumber) {
         domElements.orderNumber.textContent = `#${data.orderId}`;
     }

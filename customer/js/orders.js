@@ -99,13 +99,14 @@ function createOrderCard(order) {
 
     // Only show these statuses
     const allowedStatuses = [
+        'pending',                 // ✅ Added pending here
         'order processed', 
         'shipped', 
         'in transit', 
         'arrived at facility', 
         'out for delivery', 
         'delivered',
-        'other'  // Added 'other' as per your requirement
+        'other'
     ];
     
     // Skip if status is not in allowed list
@@ -128,6 +129,10 @@ function createOrderCard(order) {
     let statusClass = '';
     let statusText = '';
     switch (status) {
+        case 'pending':
+            statusClass = 'status-pending';
+            statusText = 'Pending';
+            break;
         case 'order processed':
             statusClass = 'status-processed';
             statusText = 'Order Processed';
@@ -159,7 +164,6 @@ function createOrderCard(order) {
         default:
             return null;
     }
-
 
     let orderItemHTML = '';
     if (order.item) {
@@ -216,6 +220,7 @@ function createOrderCard(order) {
 
     return orderCard;
 }
+
 
 
 
