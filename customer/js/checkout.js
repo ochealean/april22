@@ -95,7 +95,9 @@ onAuthStateChanged(auth, (user) => {
                         document.getElementById('zip').value = userData.zip || '';
                     }
                     if (document.getElementById('country')) {
+                        userData.country ='Philippines';
                         document.getElementById('country').value = userData.country || '';
+                        console.log("Country value set to:", userData.country);
                     }
                     console.log("User data loaded successfully:", userData.country);
 
