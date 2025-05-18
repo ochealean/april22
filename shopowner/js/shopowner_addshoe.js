@@ -110,11 +110,13 @@ onAuthStateChanged(auth, (user) => {
             const shopData = snapshot.val();
             console.log("shopData: ", shopData);
 
-            // this will run if the user a Employee NOT a shop owner
             if (shopData) {
+                // This is an employee
                 roleLoggedin = shopData.role;
                 shopLoggedin = shopData.shopId;
-                sname = shopData.shopName || ''; // Initialize with empty string if not available
+                sname = shopData.shopName;
+                console.log(shopData);
+                console.log(sname);
 
                 // Set role-based UI elements
                 if (shopData.role.toLowerCase() === "manager") {
@@ -123,11 +125,34 @@ onAuthStateChanged(auth, (user) => {
                     document.getElementById("addemployeebtn").style.display = "none";
                     document.getElementById("analyticsbtn").style.display = "none";
                 }
+                
+                // If shopName isn't set in employee data, fetch it from shop data
+                if (!sname && shopLoggedin) {
+                    const shopInfoRef = dbRef(db, `AR_shoe_users/shop/${shopLoggedin}`);
+                    onValue(shopInfoRef, (shopSnapshot) => {
+                        const shopInfo = shopSnapshot.val();
+                        if (shopInfo) {
+                            sname = shopInfo.shopName;
+                            console.log("Fetched shop name from shop data:", sname);
+                        }
+                    });
+                }
             } else {
-                // this will run if the user is a shop owner
+                // This is a shop owner
                 shopLoggedin = user.uid;
-                roleLoggedin = "Shop Owner"; // Default role
-                sname = 'Shop Owner'; // Default shop name
+                roleLoggedin = "Shop Owner";
+                
+                // Fetch shop name from shop data
+                const shopInfoRef = dbRef(db, `AR_shoe_users/shop/${shopLoggedin}`);
+                onValue(shopInfoRef, (shopSnapshot) => {
+                    const shopInfo = shopSnapshot.val();
+                    if (shopInfo) {
+                        sname = shopInfo.shopName;
+                        console.log("Shop owner shop name:", sname);
+                    } else {
+                        sname = 'Shop Owner'; // Default if shop data not found
+                    }
+                });
             }
         }, (error) => {
             console.error("Error fetching shop data:", error);
