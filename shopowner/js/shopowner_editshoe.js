@@ -310,7 +310,7 @@ function addColorVariantWithData(variantData = {}, index = variantCount) {
         </div>
         
         <div class="form-group">
-            <label for="variantPrice_${variantCount}">Price ($)</label>
+            <label for="variantPrice_${variantCount}">Price (₱)</label>
             <input type="number" id="variantPrice_${variantCount}" step="0.01" required value="${variantData.price || ''}">
         </div>
         
