@@ -101,7 +101,7 @@
                     
                     <div class="form-group">
                         <label for="yearsInBusiness">Years in Business</label>
-                        <input type="number" id="yearsInBusiness" name="yearsInBusiness" min="0" placeholder="e.g. 5">
+                        <input type="text" id="yearsInBusiness" name="yearsInBusiness" min="0" placeholder="e.g. 5" maxlength="2" pattern="[0-9]*" inputmode="numeric" max="200">
                     </div>
                 </div>
 
@@ -178,7 +178,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="shopZip">ZIP/Postal Code*</label>
-                            <input type="text" id="shopZip" name="shopZip" required placeholder="ZIP code">
+                            <input type="text" id="shopZip" name="shopZip" required placeholder="ZIP code" maxlength="4" pattern="[0-9]*" inputmode="numeric" max="9999">
                         </div>
                         
                         <div class="form-group">
