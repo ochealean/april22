@@ -348,7 +348,7 @@ function displayUserProfile(userData) {
     if (imageProfile) {
         imageProfile.src = userData.profilePhoto?.profilePhoto?.url || 'https://via.placeholder.com/150';
         imageProfile.onerror = () => {
-            imageProfile.src = 'https://via.placeholder.com/150';
+            imageProfile.src = '';
         };
     }
 }

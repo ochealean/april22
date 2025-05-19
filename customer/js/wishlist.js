@@ -34,6 +34,8 @@ function createProductCard(data, shoeID) {
   // Safely handle missing image
   const imageUrl = data.defaultImage || 'path/to/placeholder-image.jpg';
 
+  console.log("data sa 37" + data);
+  console.log("shoe ID sa 38 "+shoeID);
   card.innerHTML = `
       <img src="${imageUrl}" alt="${data.shoeName || 'Shoe image'}" class="product-image">
       <div class="product-info">
@@ -49,6 +51,7 @@ function createProductCard(data, shoeID) {
 
   card.querySelector('.add-to-cart').addEventListener('click', () => {
     const user = auth.currentUser;
+    console.log(user);
     if (!user) {
       alert("You must be logged in to add items to your cart.");
       return;
@@ -74,6 +77,7 @@ function createProductCard(data, shoeID) {
     const [sizeKey, sizeObj] = sizes[0];
     const sizeValue = Object.keys(sizeObj)[0];
 
+    console.log(data.shopID);
     // Create complete cart item
     const cartItem = {
       shopId: data.shopID,
@@ -113,6 +117,7 @@ function createProductCard(data, shoeID) {
     }
 
     const shopID = data.shopID;
+    console.log(data);
     const wishlistRef = ref(db, `AR_shoe_users/wishlist/${user.uid}/${shopID}/${shoeID}`);
 
     // Check if already in wishlist
@@ -170,6 +175,7 @@ function showEmptyState() {
 // Auth listener
 onAuthStateChanged(auth, user => {
   if (user) {
+    console.log(user);
     const wishlistRef = ref(db, 'AR_shoe_users/wishlist/' + user.uid);
     get(wishlistRef).then(snapshot => {
       if (snapshot.exists()) {
@@ -179,9 +185,11 @@ onAuthStateChanged(auth, user => {
           const shopId = shopSnap.key;
           shopSnap.forEach(shoeSnap => {
             const shoeId = shoeSnap.key;
+            console.log(shoeId);
 
             // Verify the path exists before trying to fetch
             const shoeRef = ref(db, `AR_shoe_users/shoe/${shopId}/${shoeId}`);
+            console.log(shoeId);
 
             get(shoeRef).then(shoeSnap => {
               if (shoeSnap.exists()) {
@@ -189,17 +197,21 @@ onAuthStateChanged(auth, user => {
                 console.log('Shoe data:', data); // Debugging line
                 if (!data) {
                   console.error('Empty data for shoe:', shoeId);
+            console.log(shoeId);
                   return;
                 }
+            console.log(shoeId);
 
                 // Ensure required fields exist
                 const cardData = {
                   ...data,
+                  shopID:shopId,
                   shoeName: data.shoeName || 'Unknown Shoe',
                   price: data.price || 0,
                   shopName: data.shopName || 'Unknown Shop',
                   defaultImage: data.defaultImage || 'path/to/placeholder.jpg'
                 };
+            console.log(shoeId);
 
                 // para lang mawala yung inline css sa html
                 document.querySelector('.products-grid').removeAttribute('style');
