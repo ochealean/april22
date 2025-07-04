@@ -85,7 +85,14 @@ function loadProductDetails() {
             productData = snapshot.val();
             updateProductInfo();
             loadVariants();
-            loadCustomerReviews();  // Load reviews after product details are fetched
+            
+            // Check if user is logged in before checking wishlist status
+            const user = auth.currentUser;
+            if (user) {
+                isWishlisted();
+            }
+            
+            loadCustomerReviews();
         } else {
             console.log("Product not found.");
         }
@@ -94,8 +101,38 @@ function loadProductDetails() {
     });
 }
 
+function isWishlisted() {
+    const user = auth.currentUser;
+    if (!user) {
+        console.log("User not logged in");
+        return;
+    }
+
+    const wishlistRef = ref(db, `AR_shoe_users/wishlist/${user.uid}/${shopID}/${shoeID}`);
+    
+    get(wishlistRef).then((snapshot) => {
+        const icon = wishlistBtn.querySelector("i");
+        if (snapshot.exists()) {
+            // Item is in wishlist - set active state
+            wishlistBtn.classList.add("active");
+            icon.classList.remove("far");
+            icon.classList.add("fas");
+            icon.style.color = "red";
+        } else {
+            // Item not in wishlist - set inactive state
+            wishlistBtn.classList.remove("active");
+            icon.classList.remove("fas");
+            icon.classList.add("far");
+            icon.style.color = "";
+        }
+    }).catch((error) => {
+        console.error("Error checking wishlist status:", error);
+    });
+}
+
 // Update general info
 function updateProductInfo() {
+    console.log("Product Data:", productData);
     productName.textContent = productData.shoeName;
     productShop.textContent = `Shop Name: ${productData.shopName}`;
     productCode.textContent = `Product Code: ${shoeID}`;
@@ -430,10 +467,62 @@ window.filterReviews = function(rating) {
     });
 }
 
-// Wishlist toggle
-wishlistBtn.addEventListener("click", () => {
-    console.log("Wishlist clicked");
+wishlistBtn.addEventListener("click", function() {
+    toggleWishlist(this);
 });
+
+function toggleWishlist(btnElement) {
+    const user = auth.currentUser;
+    if (!user) {
+        alert("Please log in to use the wishlist");
+        window.location.href = "/customer/html/user_login.html";
+        return;
+    }
+
+    const userID = user.uid;
+    const wishlistRef = ref(db, `AR_shoe_users/wishlist/${userID}/${shopID}/${shoeID}`);
+    const icon = btnElement.querySelector("i");
+
+    get(wishlistRef).then((snapshot) => {
+        if (snapshot.exists()) {
+            // Item is in wishlist - remove it
+            set(wishlistRef, null)
+                .then(() => {
+                    console.log("Shoe removed from wishlist");
+                    btnElement.classList.remove("active");
+                    icon.classList.remove("fas");
+                    icon.classList.add("far");
+                    icon.style.color = "";
+                })
+                .catch((error) => {
+                    console.error("Error removing from wishlist:", error);
+                });
+        } else {
+            // Item not in wishlist - add it
+            set(wishlistRef, {
+                shoeId: shoeID,
+                shopId: shopID,
+                shoeName: productData.shoeName,
+                price: productData.variants[selectedVariantKey].price,
+                image: productData.variants[selectedVariantKey].imageUrl || productData.defaultImage,
+                addedAt: new Date().toISOString()
+            })
+                .then(() => {
+                    console.log("Shoe added to wishlist");
+                    btnElement.classList.add("active");
+                    icon.classList.remove("far");
+                    icon.classList.add("fas");
+                    icon.style.color = "red";
+                })
+                .catch((error) => {
+                    console.error("Error adding to wishlist:", error);
+                });
+        }
+    }).catch((error) => {
+        console.error("Error checking wishlist status:", error);
+        alert("Error accessing wishlist");
+    });
+}
 
 // Logout
 document.getElementById("logout_btn").addEventListener("click", function () {
@@ -457,7 +546,6 @@ function getSelectedSize() {
 }
 
 
-// BUY NOW
 // BUY NOW
 buyNowBtn.addEventListener("click", async () => {
     const check = canAddToCartOrBuy();
