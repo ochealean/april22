@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoe Shop Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            /* Color Scheme */
+            --primary: #5e72e4;
+            --secondary: #825ee4;
+            --accent: #ff9e3f;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --gray: #e9ecef;
+            --white: #ffffff;
+            --black: #121212;
+            --success: #2dce89;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            
+            /* Transitions */
+            --transition: all 0.3s ease;
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4 {
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--dark);
+            opacity: 0.9;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        section {
+            padding: 4rem 0;
+            position: relative;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .auth-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem 1.75rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+            border: 2px solid transparent;
+            min-width: 180px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: #4a5fd1;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(94, 114, 228, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-accent {
+            background-color: var(--accent);
+            color: var(--white);
+            gap: 0.5rem;
+        }
+
+        .btn-accent:hover {
+            background-color: #ff8c1a;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--dark), #16213e);
+            color: var(--white);
+            padding: 2rem 0 6rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 2rem 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--white);
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 2.5rem;
+        }
+
+        /* User Options Section */
+        .user-options {
+            background-color: var(--white);
+            position: relative;
+            z-index: 1;
+            margin-top: -4rem;
+        }
+
+        .option-card {
+            display: flex;
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .option-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        .option-content {
+            padding: 3rem;
+            flex: 1;
+        }
+
+        .option-content h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+
+        .option-content ul {
+            list-style-type: none;
+            margin-bottom: 2.5rem;
+        }
+
+        .option-content ul li {
+            position: relative;
+            padding-left: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .option-content ul li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .option-image {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .option-image img {
+            max-height: 300px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+        }
+
+        .option-image img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Stats Banner - Improved */
+        .stats {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            padding: 5rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--white);
+            opacity: 0.8;
+            transition: var(--transition);
+        }
+
+        .stat-item:hover .stat-icon {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+
+        .stat-content h3 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--white);
+            font-weight: 700;
+        }
+
+        .stat-content p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            color: var(--white);
+            margin-bottom: 0;
+        }
+
+        .stat-decoration {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            top: -30px;
+            right: -30px;
+            transition: var(--transition);
+        }
+
+        .stat-item:hover .stat-decoration {
+            transform: scale(1.2);
+        }
+
+        /* Background elements */
+        .stats-bg-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .circle-1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            left: -100px;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .circle-2 {
+            width: 200px;
+            height: 200px;
+            bottom: -50px;
+            right: -50px;
+            animation: float 10s ease-in-out infinite reverse;
+        }
+
+        .circle-3 {
+            width: 150px;
+            height: 150px;
+            top: 50%;
+            right: 10%;
+            animation: float 12s ease-in-out infinite;
+        }
+
+        /* Featured Shoes Carousel - Improved */
+        .featured-shoes {
+            background-color: var(--white);
+            padding: 5rem 0;
+            position: relative;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .section-title p {
+            color: var(--dark);
+            opacity: 0.7;
+            font-size: 1.1rem;
+        }
+
+        .carousel-nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .carousel-prev, 
+        .carousel-next {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--light);
+            color: var(--dark);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .carousel-prev:hover, 
+        .carousel-next:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .carousel-container {
+            overflow: hidden;
+            position: relative;
+            margin: 0 -15px;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease;
+            padding-bottom: 10px; /* For shadow visibility */
+        }
+
+        .carousel-item {
+            flex: 0 0 calc(25% - 30px);
+            padding: 0 15px;
+            transition: var(--transition);
+        }
+
+        .shoe-card {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: var(--transition);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .shoe-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        .shoe-img-container {
+            position: relative;
+            padding-top: 100%; /* 1:1 aspect ratio */
+            overflow: hidden;
+            background: var(--gray);
+        }
+
+        .shoe-img-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: var(--transition);
+        }
+
+        .shoe-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .shoe-card:hover .shoe-overlay {
+            opacity: 1;
+        }
+
+        .quick-view {
+            background: var(--white);
+            color: var(--dark);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .quick-view:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .shoe-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--accent);
+            color: var(--white);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .shoe-info {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .shoe-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .shoe-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .shoe-brand {
+            font-size: 0.9rem;
+            color: var(--dark);
+            opacity: 0.7;
+            font-weight: 600;
+        }
+
+        .shoe-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .shoe-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        .btn-wishlist {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--light);
+            color: var(--dark);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .btn-wishlist:hover {
+            color: #ff4757;
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        .btn-wishlist.active {
+            color: #ff4757;
+        }
+
+        .btn-cart {
+            flex-grow: 1;
+            background: var(--light);
+            color: var(--dark);
+            border: none;
+            border-radius: 50px;
+            padding: 0 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .btn-cart:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .carousel-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--gray);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .carousel-dot.active {
+            background: var(--primary);
+            transform: scale(1.2);
+        }
+
+        /* Keyframes for floating animation */
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .animate-fade {
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        .animate-left {
+            animation: slideInLeft 1s ease-out forwards;
+        }
+
+        .animate-right {
+            animation: slideInRight 1s ease-out forwards;
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .carousel-item {
+                flex: 0 0 calc(33.333% - 30px);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .option-card {
+                flex-direction: column;
+            }
+            
+            .option-image {
+                order: -1;
+            }
+            
+            .carousel-item {
+                flex: 0 0 calc(50% - 30px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .stat-item {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .section-title:after {
+                width: 60px;
+                height: 3px;
+                bottom: -10px;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .carousel-nav {
+                align-self: flex-end;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header-top {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .auth-buttons {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 0.75rem 1.5rem;
+            }
+            
+            .option-content {
+                padding: 2rem;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .carousel-item {
+                flex: 0 0 calc(100% - 30px);
+            }
+            
+            .shoe-actions {
+                flex-direction: column;
+            }
+            
+            .btn-cart {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header id="home">
+        <div class="container header-content">
+            <div class="header-top">
+                <div class="logo">
+                    <i class="fas fa-shoe-prints"></i>
+                    <span>Shoe Shop Portal</span>
+                </div>
+                <a href="user_login.html" class="btn btn-primary">Login</a>
+            </div>
+            
+            <div class="hero animate-fade">
+                <h1>Find Your Perfect Pair</h1>
+                <p>Explore a wide range of shoes from local shops and top brands.</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- User Options Section -->
+    <section class="user-options">
+        <div class="container">
+            <div class="option-card animate-left">
+                <div class="option-content">
+                    <h2>For Shop Owners</h2>
+                    <ul>
+                        <li>Register your shop and showcase your products</li>
+                        <li>Gain visibility and attract more customers</li>
+                        <li>Manage your shop profile and update offerings</li>
+                    </ul>
+                    <div class="auth-buttons">
+                        <a href="shopowner/html/shop_register.html" class="btn btn-primary">Register Your Shop</a>
+                        <a href="user_login.html#shop" class="btn btn-outline">Shop Owner Login</a>
+                    </div>
+                </div>
+                <div class="option-image" style="background-color: #6e8efb;">
+                    <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Shop Owner">
+                </div>
+            </div>
+            
+            <div class="option-card animate-right">
+                <div class="option-content">
+                    <h2>For Customers</h2>
+                    <ul>
+                        <li>Browse multiple shops in one place</li>
+                        <li>Discover trending and featured shoes</li>
+                        <li>Connect with shop owners easily</li>
+                    </ul>
+                    <div class="auth-buttons">
+                        <a href="customer/html/customer_register.html" class="btn btn-primary">Register as Customer</a>
+                        <a href="user_login.html#customer" class="btn btn-outline">Customer Login</a>
+                    </div>
+                </div>
+                <div class="option-image" style="background-color: #a777e3;">
+                    <img src="https://images.unsplash.com/photo-1460353581641-37baddab0fa2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Customers">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Banner -->
+    <section class="stats">
+        <div class="container stats-container">
+            <div class="stat-item animate-fade delay-1">
+                <div class="stat-icon">
+                    <i class="fas fa-shoe-prints"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>10,000+</h3>
+                    <p>Shoes Available</p>
+                </div>
+                <div class="stat-decoration"></div>
+            </div>
+            
+            <div class="stat-item animate-fade delay-2">
+                <div class="stat-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>200+</h3>
+                    <p>Local Shops</p>
+                </div>
+                <div class="stat-decoration"></div>
+            </div>
+            
+            <div class="stat-item animate-fade delay-3">
+                <div class="stat-icon">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>50+</h3>
+                    <p>Brands</p>
+                </div>
+                <div class="stat-decoration"></div>
+            </div>
+            
+            <div class="stat-item animate-fade delay-4">
+                <div class="stat-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>24/7</h3>
+                    <p>Customer Support</p>
+                </div>
+                <div class="stat-decoration"></div>
+            </div>
+        </div>
+        
+        <!-- Background elements -->
+        <div class="stats-bg-elements">
+            <div class="bg-circle circle-1"></div>
+            <div class="bg-circle circle-2"></div>
+            <div class="bg-circle circle-3"></div>
+        </div>
+    </section>
+    
+    <!-- Featured Shoes Carousel -->
+    <section class="featured-shoes">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-title">
+                    <h2>New Arrivals</h2>
+                    <p>Discover the latest additions to our collection</p>
+                </div>
+                <div class="carousel-nav">
+                    <button class="carousel-prev" aria-label="Previous shoes">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="carousel-next" aria-label="Next shoes">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="carousel-container">
+                <div class="carousel-track">
+                    <!-- Original Items -->
+                    <div class="carousel-item">
+                        <div class="shoe-card">
+                            <div class="shoe-img-container">
+                                <img src="https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/354e209b-f9f2-42c4-9130-d57f49bd77c0/AIR+FORCE+1+%2707.png" 
+                                    alt="Nike Air Force 1 '07">
+                                <div class="shoe-overlay">
+                                    <button class="quick-view" onclick="openModal('https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/354e209b-f9f2-42c4-9130-d57f49bd77c0/AIR+FORCE+1+%2707.png')">
+                                        <i class="fas fa-expand"></i> Quick View
+                                    </button>
+                                </div>
+                                <div class="shoe-badge">New</div>
+                            </div>
+                            <div class="shoe-info">
+                                <h3>Nike Air Force 1 '07</h3>
+                                <div class="shoe-meta">
+                                    <span class="shoe-brand">Nike</span>
+                                    <span class="shoe-price">$110</span>
+                                </div>
+                                <div class="shoe-actions">
+                                    <button class="btn-wishlist" aria-label="Add to wishlist">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                    <button class="btn-cart" aria-label="Add to cart">
+                                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="carousel-item">
+                        <div class="shoe-card">
+                            <div class="shoe-img-container">
+                                <img src="https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/7f07c3d80903407db38947e29450ec4b_9366/Superstar_II_Shoes_White_JP9677_01_00_standard.jpg" 
+                                    alt="Superstar II Shoes">
+                                <div class="shoe-overlay">
+                                    <button class="quick-view" onclick="openModal('https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/7f07c3d80903407db38947e29450ec4b_9366/Superstar_II_Shoes_White_JP9677_01_00_standard.jpg')">
+                                        <i class="fas fa-expand"></i> Quick View
+                                    </button>
+                                </div>
+                                <div class="shoe-badge">Popular</div>
+                            </div>
+                            <div class="shoe-info">
+                                <h3>Superstar II Shoes</h3>
+                                <div class="shoe-meta">
+                                    <span class="shoe-brand">Adidas</span>
+                                    <span class="shoe-price">$90</span>
+                                </div>
+                                <div class="shoe-actions">
+                                    <button class="btn-wishlist" aria-label="Add to wishlist">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                    <button class="btn-cart" aria-label="Add to cart">
+                                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="carousel-item">
+                        <div class="shoe-card">
+                            <div class="shoe-img-container">
+                                <img src="https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_2000,h_2000/global/308417/02/sv01/fnd/PHL/fmt/png/PUMA-x-PORSCHE-LEGACY-Suede-Classic-Tartan-Sneakers-Unisex" 
+                                    alt="PUMA x PORSCHE LEGACY Suede">
+                                <div class="shoe-overlay">
+                                    <button class="quick-view" onclick="openModal('https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_2000,h_2000/global/308417/02/sv01/fnd/PHL/fmt/png/PUMA-x-PORSCHE-LEGACY-Suede-Classic-Tartan-Sneakers-Unisex')">
+                                        <i class="fas fa-expand"></i> Quick View
+                                    </button>
+                                </div>
+                                <div class="shoe-badge">Limited</div>
+                            </div>
+                            <div class="shoe-info">
+                                <h3>PUMA x PORSCHE LEGACY Suede</h3>
+                                <div class="shoe-meta">
+                                    <span class="shoe-brand">Puma</span>
+                                    <span class="shoe-price">$120</span>
+                                </div>
+                                <div class="shoe-actions">
+                                    <button class="btn-wishlist" aria-label="Add to wishlist">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                    <button class="btn-cart" aria-label="Add to cart">
+                                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="carousel-item">
+                        <div class="shoe-card">
+                            <div class="shoe-img-container">
+                                <img src="https://www.converse.ph/media/catalog/product/cache/ae7cee22ac1ff58c2794c87414f27b45/0/8/0802-CON560845C005007-2.jpg" 
+                                    alt="Chuck Taylor All Star Lift">
+                                <div class="shoe-overlay">
+                                    <button class="quick-view" onclick="openModal('https://www.converse.ph/media/catalog/product/cache/ae7cee22ac1ff58c2794c87414f27b45/0/8/0802-CON560845C005007-2.jpg')">
+                                        <i class="fas fa-expand"></i> Quick View
+                                    </button>
+                                </div>
+                                <div class="shoe-badge">Classic</div>
+                            </div>
+                            <div class="shoe-info">
+                                <h3>Chuck Taylor All Star Lift</h3>
+                                <div class="shoe-meta">
+                                    <span class="shoe-brand">Converse</span>
+                                    <span class="shoe-price">$75</span>
+                                </div>
+                                <div class="shoe-actions">
+                                    <button class="btn-wishlist" aria-label="Add to wishlist">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                    <button class="btn-cart" aria-label="Add to cart">
+                                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="carousel-item">
+                        <div class="shoe-card">
+                            <div class="shoe-img-container">
+                                <img src="https://www.allenedmonds.com/blob/product-images/39099/ec/40/01389/ec4001389_bottom_feed1000.jpg" 
+                                    alt="Park Avenue Cap-toe Oxford">
+                                <div class="shoe-overlay">
+                                    <button class="quick-view" onclick="openModal('https://www.allenedmonds.com/blob/product-images/39099/ec/40/01389/ec4001389_bottom_feed1000.jpg')">
+                                        <i class="fas fa-expand"></i> Quick View
+                                    </button>
+                                </div>
+                                <div class="shoe-badge">Premium</div>
+                            </div>
+                            <div class="shoe-info">
+                                <h3>Park Avenue Cap-toe Oxford</h3>
+                                <div class="shoe-meta">
+                                    <span class="shoe-brand">Allen Edmonds</span>
+                                    <span class="shoe-price">$395</span>
+                                </div>
+                                <div class="shoe-actions">
+                                    <button class="btn-wishlist" aria-label="Add to wishlist">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                    <button class="btn-cart" aria-label="Add to cart">
+                                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="carousel-dots">
+                <!-- Dots will be added dynamically via JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        // Carousel functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const track = document.querySelector('.carousel-track');
+            const items = document.querySelectorAll('.carousel-item');
+            const prevBtn = document.querySelector('.carousel-prev');
+            const nextBtn = document.querySelector('.carousel-next');
+            const dotsContainer = document.querySelector('.carousel-dots');
+            
+            let currentIndex = 0;
+            const itemWidth = items[0].getBoundingClientRect().width;
+            const visibleItems = Math.min(4, items.length); // Show max 4 items
+            
+            // Create dots
+            items.forEach((_, index) => {
+                const dot = document.createElement('button');
+                dot.classList.add('carousel-dot');
+                dot.setAttribute('aria-label', `Go to slide ${index + 1}`);
+                if (index === 0) dot.classList.add('active');
+                
+                dot.addEventListener('click', () => {
+                    goToSlide(index);
+                });
+                
+                dotsContainer.appendChild(dot);
+            });
+            
+            const dots = document.querySelectorAll('.carousel-dot');
+            
+            // Update carousel position
+            function updateCarousel() {
+                track.style.transform = `translateX(-${currentIndex * itemWidth}px)`;
+                
+                // Update active dot
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentIndex);
+                });
+                
+                // Disable/enable buttons
+                prevBtn.disabled = currentIndex === 0;
+                nextBtn.disabled = currentIndex >= items.length - visibleItems;
+            }
+            
+            function goToSlide(index) {
+                currentIndex = index;
+                updateCarousel();
+            }
+            
+            function nextSlide() {
+                if (currentIndex < items.length - visibleItems) {
+                    currentIndex++;
+                    updateCarousel();
+                }
+            }
+            
+            function prevSlide() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateCarousel();
+                }
+            }
+            
+            // Event listeners
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') nextSlide();
+                if (e.key === 'ArrowLeft') prevSlide();
+            });
+            
+            // Initialize
+            updateCarousel();
+            
+            // Wishlist functionality
+            document.querySelectorAll('.btn-wishlist').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    this.innerHTML = this.classList.contains('active') ? 
+                        '<i class="fas fa-heart"></i>' : '<i class="far fa-heart"></i>';
+                });
+            });
+        });
+
+        // Modal functionality
+        function openModal(imageSrc) {
+            document.getElementById('modalImage').src = imageSrc;
+            document.getElementById('imageModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close modal when clicking outside the image
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
