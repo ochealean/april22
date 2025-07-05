@@ -8,19 +8,39 @@
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <header id="home">
+   <header id="home">
+        <div class="header-background">
+            <div class="header-overlay"></div>
+            <div class="floating-shoe">
+                <img src="images/shoetransparent.png" alt="Floating Shoe" class="shoe-main">
+                <div class="shoe-reflection"></div>
+            </div>
+        </div>
+
+        <!-- <video autoplay muted loop playsinline>
+                <source src="https://cdn.create.vista.com/api/media/medium/640820558/stock-video-hands-young-beautiful-woman-hold-white-sneaker-background-shoe-store?token=" type="video/mp4">
+        </video> -->
+        
         <div class="container header-content">
             <div class="header-top">
                 <div class="logo">
                     <i class="fas fa-shoe-prints"></i>
                     <span>Shoe Shop Portal</span>
                 </div>
-                <a href="user_login.html" class="btn btn-primary">Login</a>
+                <div class="header-actions">
+                    <a href="user_login.html" class="btn btn-primary">Login</a>
+                </div>
             </div>
             
             <div class="hero animate-fade">
-                <h1>Find Your Perfect Pair</h1>
-                <p>Explore a wide range of shoes from local shops and top brands.</p>
+                <h1>Step Into <span class="highlight">Style</span> & <span class="highlight">Comfort</span></h1>
+                <p>Discover the perfect pair from thousands of options across local shops and top brands worldwide.</p>
+                <div class="hero-buttons">
+                    <a href="#categories" class="btn btn-accent">Explore Collection</a>
+                    <a href="#ar-try-on" class="btn btn-outline hero-ar-button">
+                        <i class="fas fa-mobile-alt" style="margin-right: 0.5rem;"></i> Try AR Feature
+                    </a>
+                </div>
             </div>
         </div>
     </header>
@@ -70,21 +90,55 @@
     <section class="stats">
         <div class="container stats-container">
             <div class="stat-item animate-fade delay-1">
-                <h3>10,000+</h3>
-                <p>Shoes Available</p>
+                <div class="stat-icon">
+                    <i class="fas fa-shoe-prints"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>10,000+</h3>
+                    <p>Shoes Available</p>
+                </div>
+                <div class="stat-decoration"></div>
             </div>
+            
             <div class="stat-item animate-fade delay-2">
-                <h3>200+</h3>
-                <p>Local Shops</p>
+                <div class="stat-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>200+</h3>
+                    <p>Local Shops</p>
+                </div>
+                <div class="stat-decoration"></div>
             </div>
+            
             <div class="stat-item animate-fade delay-3">
-                <h3>50+</h3>
-                <p>Brands</p>
+                <div class="stat-icon">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>50+</h3>
+                    <p>Brands</p>
+                </div>
+                <div class="stat-decoration"></div>
             </div>
+            
             <div class="stat-item animate-fade delay-4">
-                <h3>24/7</h3>
-                <p>Customer Support</p>
+                <div class="stat-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>24/7</h3>
+                    <p>Customer Support</p>
+                </div>
+                <div class="stat-decoration"></div>
             </div>
+        </div>
+        
+        <!-- Background elements -->
+        <div class="stats-bg-elements">
+            <div class="bg-circle circle-1"></div>
+            <div class="bg-circle circle-2"></div>
+            <div class="bg-circle circle-3"></div>
         </div>
     </section>
     
@@ -333,119 +387,188 @@
         <div class="container">
             <div class="section-title">
                 <h2>Shop by Category</h2>
+                <p>Explore our diverse collection of footwear</p>
             </div>
             
             <div class="categories-grid">
                 <div class="category-card animate-fade delay-1">
                     <div class="category-img">
-                        <img src="https://cdn-images.farfetch-contents.com/12/43/12/89/12431289_23446496_480.jpg" alt="Sneakers">
+                        <img src="/images/shoetransparent.png" alt="Sneakers">
                     </div>
                     <div class="category-info">
                         <h3>Sneakers</h3>
                         <p>Find the latest styles and comfort.</p>
+                        <a href="#" class="btn btn-outline">Shop Now</a>
                     </div>
                 </div>
                 
                 <div class="category-card animate-fade delay-2">
                     <div class="category-img">
-                        <img src="https://cdn.media.amplience.net/i/clarks/26110309_GW_1?fmt=auto&img404=imageNotFound&w=2088&qlt=default" alt="Formal Shoes">
+                        <img src="/images/shoetransparent.png" alt="Formal Shoes">
                     </div>
                     <div class="category-info">
                         <h3>Formal Shoes</h3>
                         <p>Elegant footwear for any occasion.</p>
+                        <a href="#" class="btn btn-outline">Shop Now</a>
                     </div>
                 </div>
                 
                 <div class="category-card animate-fade delay-3">
                     <div class="category-img">
-                        <img src="https://cdn.media.amplience.net/i/drmartens/11822006.84?$smart576$&fmt=auto" alt="Boots">
+                        <img src="/images/shoetransparent.png" alt="Boots">
                     </div>
                     <div class="category-info">
                         <h3>Boots</h3>
                         <p>Durable and stylish boots for all seasons.</p>
+                        <a href="#" class="btn btn-outline">Shop Now</a>
                     </div>
                 </div>
                 
                 <div class="category-card animate-fade delay-4">
                     <div class="category-img">
-                        <img src="https://static.nike.com/a/images/t_PDP_936_v1/f_auto,q_auto:eco/40542cd0-e9c3-4b30-a75b-dded53570db3/NK+VICTORI+ONE+SLIDE+PRINT.png" alt="Sandals">
+                        <img src="/images/shoetransparent.png" alt="Sandals">
                     </div>
                     <div class="category-info">
                         <h3>Sandals</h3>
                         <p>Comfortable and trendy sandals for summer.</p>
+                        <a href="#" class="btn btn-outline">Shop Now</a>
                     </div>
                 </div>
                 
                 <div class="category-card animate-fade delay-5">
                     <div class="category-img">
-                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYMIordut2n1_dFXCkyDuNlHgsvgzomqfXNg&s" alt="Athletic">
+                        <img src="/images/shoetransparent.png" alt="Athletic">
                     </div>
                     <div class="category-info">
                         <h3>Athletic Shoes</h3>
                         <p>Performance footwear for sports and training.</p>
+                        <a href="#" class="btn btn-outline">Shop Now</a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Testimonials -->
+    <!-- Testimonials Section -->
     <section class="testimonials">
         <div class="container">
             <div class="section-title">
                 <h2>What Our Customers Say</h2>
             </div>
             
-            <div class="testimonial-grid">
-                <div class="testimonial-card animate-fade delay-1">
-                    <div class="rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">"Found the perfect running shoes through this portal. The AR try-on feature helped me make the right choice!"</p>
-                    <div class="customer">
-                        <div class="customer-img">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzzIJDNaWFPDga2VWx9G4rM2IST-kPixumaw&s" alt="Customer">
+            <div class="testimonial-carousel">
+                <!-- Testimonial Slides -->
+                <div class="testimonial-slides">
+                    <div class="testimonial-card active" data-index="0">
+                        <div class="customer-info">
+                            <div class="customer-img">
+                                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah Johnson">
+                            </div>
+                            <h4 class="customer-name">Sarah Johnson</h4>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
                         </div>
-                        <h4>Sarah Johnson</h4>
+                        <p class="testimonial-text">Found the perfect running shoes through this portal. The AR try-on feature helped me make the right choice!</p>
+                    </div>
+                    
+                    <div class="testimonial-card" data-index="1">
+                        <div class="customer-info">
+                            <div class="customer-img">
+                                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Michael Chen">
+                            </div>
+                            <h4 class="customer-name">Michael Chen</h4>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <p class="testimonial-text">As a shop owner, this platform has helped me reach so many new customers. Highly recommended!</p>
+                    </div>
+                    
+                    <div class="testimonial-card" data-index="2">
+                        <div class="customer-info">
+                            <div class="customer-img">
+                                <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Emma Rodriguez">
+                            </div>
+                            <h4 class="customer-name">Emma Rodriguez</h4>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                        <p class="testimonial-text">The variety of shoes available is amazing. I found exactly what I was looking for at a great price.</p>
+                    </div>
+                    <div class="testimonial-card active" data-index="3">
+                        <div class="customer-info">
+                            <div class="customer-img">
+                                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah Johnson">
+                            </div>
+                            <h4 class="customer-name">Sarah Johnson</h4>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <p class="testimonial-text">Found the perfect running shoes through this portal. The AR try-on feature helped me make the right choice!</p>
+                    </div>
+                    
+                    <div class="testimonial-card" data-index="4">
+                        <div class="customer-info">
+                            <div class="customer-img">
+                                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Michael Chen">
+                            </div>
+                            <h4 class="customer-name">Michael Chen</h4>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <p class="testimonial-text">As a shop owner, this platform has helped me reach so many new customers. Highly recommended!</p>
+                    </div>
+                    
+                    <div class="testimonial-card" data-index="5">
+                        <div class="customer-info">
+                            <div class="customer-img">
+                                <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Emma Rodriguez">
+                            </div>
+                            <h4 class="customer-name">Emma Rodriguez</h4>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                        <p class="testimonial-text">The variety of shoes available is amazing. I found exactly what I was looking for at a great price.</p>
                     </div>
                 </div>
                 
-                <div class="testimonial-card animate-fade delay-2">
-                    <div class="rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">"As a shop owner, this platform has helped me reach so many new customers. Highly recommended!"</p>
-                    <div class="customer">
-                        <div class="customer-img">
-                            <img src="https://ysm-res.cloudinary.com/image/upload/c_limit,f_auto,h_2400,q_auto,w_1600/v1/yms/prod/332e5c7d-9008-4f8e-bf5d-65898c39b60f" alt="Customer">
-                        </div>
-                        <h4>Michael Chen</h4>
-                    </div>
-                </div>
-                
-                <div class="testimonial-card animate-fade delay-3">
-                    <div class="rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
-                    </div>
-                    <p class="testimonial-text">"The variety of shoes available is amazing. I found exactly what I was looking for at a great price."</p>
-                    <div class="customer">
-                        <div class="customer-img">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnfQ5jb72syGgoNbg3QjCUuUrS5lJJciztuQ&s" alt="Customer">
-                        </div>
-                        <h4>Emma Rodriguez</h4>
-                    </div>
+                <!-- Navigation Dots -->
+                <div class="testimonial-nav">
+                    <button class="nav-dot active" data-index="0" aria-label="Show testimonial 1"></button>
+                    <button class="nav-dot" data-index="1" aria-label="Show testimonial 2"></button>
+                    <button class="nav-dot" data-index="2" aria-label="Show testimonial 3"></button>
+                    <button class="nav-dot" data-index="3" aria-label="Show testimonial 4"></button>
+                    <button class="nav-dot" data-index="4" aria-label="Show testimonial 5"></button>
+                    <button class="nav-dot" data-index="5" aria-label="Show testimonial 6"></button>
                 </div>
             </div>
         </div>
@@ -477,62 +600,332 @@
         </div>
     </section>
 
-    <!-- Featured Shops -->
-    <section id="shops" class="featured-shops">
+    <!-- Featured Shops Section (Simplified) -->
+    <section id="shops" class="featured-shops-section">
         <div class="container">
-            <div class="section-title">
-                <h2>Featured Shops</h2>
+            <!-- Centered Header -->
+            <div class="section-header">
+                <div class="shop-header-content">
+                    <span class="section-label">OUR PARTNERS</span>
+                    <h2 class="section-title">Featured Shops</h2>
+                    <p class="section-description">Discover exceptional footwear from our handpicked selection of premium retailers</p>
+                </div>
             </div>
-            
+
+            <!-- Flexbox Grid for Shops -->
             <div class="shops-grid">
-                <div class="shop-card animate-fade delay-1">
-                    <div class="shop-img">
-                        <img src="https://img.freepik.com/free-vector/urban-shoes-logo_1051-1632.jpg?semt=ais_hybrid&w=740" alt="Shop 1">
+                <!-- Shop 1 -->
+                <div class="shop-card">
+                    <div class="shop-media">
+                        <div class="logo-container">
+                            <img src="https://img.freepik.com/free-vector/urban-shoes-logo_1051-1632.jpg" alt="Urban Shoes" class="shop-logo">
+                        </div>
+                        <div class="shop-image" style="background-image: url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60')"></div>
                     </div>
-                    <div class="shop-info">
-                        <h3>Urban Shoes</h3>
-                        <p>Premium sneakers from top brands.</p>
+                    <div class="shop-details">
+                        <div class="shop-meta">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <span>4.8</span>
+                                <span class="review-count">(128)</span>
+                            </div>
+                            <span class="location">
+                                <i class="fas fa-map-marker-alt"></i> New York
+                            </span>
+                        </div>
+                        <h3 class="shop-name">Urban Shoes</h3>
+                        <p class="shop-description">Contemporary sneakers and streetwear from emerging designers</p>
+                        <div class="shop-footer">
+                            <span class="product-count">
+                                <i class="fas fa-shoe-prints"></i> 120+ styles
+                            </span>
+                            <a href="#" class="visit-btn">
+                                Explore <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
                     </div>
+                    <div class="shop-badge">Premium</div>
                 </div>
-                
-                <div class="shop-card animate-fade delay-2">
-                    <div class="shop-img">
-                        <img src="https://i.pinimg.com/736x/ff/14/19/ff141956107ab14af35181fbf26baf8c.jpg" alt="Shop 2">
+
+                <!-- Shop 2 -->
+                <div class="shop-card">
+                    <div class="shop-media">
+                        <div class="logo-container">
+                            <img src="https://i.pinimg.com/736x/ff/14/19/ff141956107ab14af35181fbf26baf8c.jpg" alt="Ultra Sneaker" class="shop-logo">
+                        </div>
+                        <div class="shop-image" style="background-image: url('https://images.unsplash.com/photo-1600269452121-4f2416e55c28?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60')"></div>
                     </div>
-                    <div class="shop-info">
-                        <h3>Ultra Sneaker</h3>
-                        <p>Timeless styles for every occasion.</p>
+                    <div class="shop-details">
+                        <div class="shop-meta">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <span>4.6</span>
+                                <span class="review-count">(94)</span>
+                            </div>
+                            <span class="location">
+                                <i class="fas fa-map-marker-alt"></i> Los Angeles
+                            </span>
+                        </div>
+                        <h3 class="shop-name">Ultra Sneaker</h3>
+                        <p class="shop-description">Limited edition collectibles and rare collaborations</p>
+                        <div class="shop-footer">
+                            <span class="product-count">
+                                <i class="fas fa-shoe-prints"></i> 85+ styles
+                            </span>
+                            <a href="#" class="visit-btn">
+                                Explore <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
                     </div>
+                    <div class="shop-badge">New</div>
                 </div>
-                
-                <div class="shop-card animate-fade delay-3">
-                    <div class="shop-img">
-                        <img src="https://i.pinimg.com/736x/66/fe/42/66fe425f8cf65deb715e789fcc62b21a.jpg" alt="Shop 3">
+
+                <!-- Shop 3 -->
+                <div class="shop-card">
+                    <div class="shop-media">
+                        <div class="logo-container">
+                            <img src="https://i.pinimg.com/736x/66/fe/42/66fe425f8cf65deb715e789fcc62b21a.jpg" alt="Patty's Shoes" class="shop-logo">
+                        </div>
+                        <div class="shop-image" style="background-image: url('https://images.unsplash.com/photo-1460353581641-37baddab0fa2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60')"></div>
                     </div>
-                    <div class="shop-info">
-                        <h3>Patty's Shoes</h3>
-                        <p>Durable boots for outdoor enthusiasts.</p>
+                    <div class="shop-details">
+                        <div class="shop-meta">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <span>4.9</span>
+                                <span class="review-count">(156)</span>
+                            </div>
+                            <span class="location">
+                                <i class="fas fa-map-marker-alt"></i> Chicago
+                            </span>
+                        </div>
+                        <h3 class="shop-name">Patty's Shoes</h3>
+                        <p class="shop-description">Artisan-crafted boots and outdoor footwear good for your feet</p>
+                        <div class="shop-footer">
+                            <span class="product-count">
+                                <i class="fas fa-shoe-prints"></i> 65+ styles
+                            </span>
+                            <a href="#" class="visit-btn">
+                                Explore <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
                     </div>
+                    <div class="shop-badge">Top Rated</div>
                 </div>
-                
-                <div class="shop-card animate-fade delay-4">
-                    <div class="shop-img">
-                        <img src="https://img.freepik.com/premium-vector/luxury-elegant-logo-design-golden-shoes-black-background_568822-20.jpg" alt="Shop 4">
+
+                <!-- Shop 4 -->
+                <div class="shop-card">
+                    <div class="shop-media">
+                        <div class="logo-container">
+                            <img src="https://img.freepik.com/premium-vector/luxury-elegant-logo-design-golden-shoes-black-background_568822-20.jpg" alt="Luxurious Heels" class="shop-logo">
+                        </div>
+                        <div class="shop-image" style="background-image: url('https://images.unsplash.com/photo-1543163521-1bf539c55dd2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60')"></div>
                     </div>
-                    <div class="shop-info">
-                        <h3>Luxurious Heels</h3>
-                        <p>High-end designer footwear.</p>
+                    <div class="shop-details">
+                        <div class="shop-meta">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <span>4.7</span>
+                                <span class="review-count">(112)</span>
+                            </div>
+                            <span class="location">
+                                <i class="fas fa-map-marker-alt"></i> Miami
+                            </span>
+                        </div>
+                        <h3 class="shop-name">Luxurious Heels</h3>
+                        <p class="shop-description">High-fashion footwear for the style-conscious worth the money</p>
+                        <div class="shop-footer">
+                            <span class="product-count">
+                                <i class="fas fa-shoe-prints"></i> 42+ styles
+                            </span>
+                            <a href="#" class="visit-btn">
+                                Explore <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
                     </div>
+                    <div class="shop-badge">Luxury</div>
                 </div>
+
+                <!-- Shop 5 -->
+                <div class="shop-card">
+                    <div class="shop-media">
+                        <div class="logo-container">
+                            <img src="https://img.freepik.com/free-vector/urban-shoes-logo_1051-1632.jpg" alt="Urban Shoes" class="shop-logo">
+                        </div>
+                        <div class="shop-image" style="background-image: url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60')"></div>
+                    </div>
+                    <div class="shop-details">
+                        <div class="shop-meta">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <span>4.8</span>
+                                <span class="review-count">(128)</span>
+                            </div>
+                            <span class="location">
+                                <i class="fas fa-map-marker-alt"></i> New York
+                            </span>
+                        </div>
+                        <h3 class="shop-name">Urban Shoes</h3>
+                        <p class="shop-description">Contemporary sneakers and streetwear from emerging designers</p>
+                        <div class="shop-footer">
+                            <span class="product-count">
+                                <i class="fas fa-shoe-prints"></i> 120+ styles
+                            </span>
+                            <a href="#" class="visit-btn">
+                                Explore <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="shop-badge">Premium</div>
+                </div>
+
+                <!-- Shop 6 -->
+                <div class="shop-card">
+                    <div class="shop-media">
+                        <div class="logo-container">
+                            <img src="https://i.pinimg.com/736x/ff/14/19/ff141956107ab14af35181fbf26baf8c.jpg" alt="Ultra Sneaker" class="shop-logo">
+                        </div>
+                        <div class="shop-image" style="background-image: url('https://images.unsplash.com/photo-1600269452121-4f2416e55c28?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60')"></div>
+                    </div>
+                    <div class="shop-details">
+                        <div class="shop-meta">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <span>4.6</span>
+                                <span class="review-count">(94)</span>
+                            </div>
+                            <span class="location">
+                                <i class="fas fa-map-marker-alt"></i> Los Angeles
+                            </span>
+                        </div>
+                        <h3 class="shop-name">Ultra Sneaker</h3>
+                        <p class="shop-description">Limited edition collectibles and rare collaborations</p>
+                        <div class="shop-footer">
+                            <span class="product-count">
+                                <i class="fas fa-shoe-prints"></i> 85+ styles
+                            </span>
+                            <a href="#" class="visit-btn">
+                                Explore <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="shop-badge">New</div>
+                </div>
+
+                <!-- Shop 7 -->
+                <div class="shop-card">
+                    <div class="shop-media">
+                        <div class="logo-container">
+                            <img src="https://i.pinimg.com/736x/66/fe/42/66fe425f8cf65deb715e789fcc62b21a.jpg" alt="Patty's Shoes" class="shop-logo">
+                        </div>
+                        <div class="shop-image" style="background-image: url('https://images.unsplash.com/photo-1460353581641-37baddab0fa2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60')"></div>
+                    </div>
+                    <div class="shop-details">
+                        <div class="shop-meta">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <span>4.9</span>
+                                <span class="review-count">(156)</span>
+                            </div>
+                            <span class="location">
+                                <i class="fas fa-map-marker-alt"></i> Chicago
+                            </span>
+                        </div>
+                        <h3 class="shop-name">Patty's Shoes</h3>
+                        <p class="shop-description">Artisan-crafted boots and outdoor footwear</p>
+                        <div class="shop-footer">
+                            <span class="product-count">
+                                <i class="fas fa-shoe-prints"></i> 65+ styles
+                            </span>
+                            <a href="#" class="visit-btn">
+                                Explore <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="shop-badge">Top Rated</div>
+                </div>
+
+                <!-- Shop 8 -->
+                <div class="shop-card">
+                    <div class="shop-media">
+                        <div class="logo-container">
+                            <img src="https://img.freepik.com/premium-vector/luxury-elegant-logo-design-golden-shoes-black-background_568822-20.jpg" alt="Luxurious Heels" class="shop-logo">
+                        </div>
+                        <div class="shop-image" style="background-image: url('https://images.unsplash.com/photo-1543163521-1bf539c55dd2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60')"></div>
+                    </div>
+                    <div class="shop-details">
+                        <div class="shop-meta">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <span>4.7</span>
+                                <span class="review-count">(112)</span>
+                            </div>
+                            <span class="location">
+                                <i class="fas fa-map-marker-alt"></i> Miami
+                            </span>
+                        </div>
+                        <h3 class="shop-name">Luxurious Heels</h3>
+                        <p class="shop-description">High-fashion footwear for the style-conscious</p>
+                        <div class="shop-footer">
+                            <span class="product-count">
+                                <i class="fas fa-shoe-prints"></i> 42+ styles
+                            </span>
+                            <a href="#" class="visit-btn">
+                                Explore <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="shop-badge">Luxury</div>
+                </div>
+            </div>
+
+            <!-- "View All" Button -->
+            <div class="view-all-container">
+                <a href="#" class="view-all-shops">
+                    View All Boutiques
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
             </div>
         </div>
     </section>
 
     <!-- CTA Section -->
     <section class="cta">
-        <div class="container">
-            <h3>Ready to showcase your products?</h3>
-            <a href="shopowner/html/shop_register.html" class="btn btn-primary">Register Your Shop Now</a>
+        <div class="cta-video-background">
+            <video autoplay muted loop playsinline>
+                <source src="https://cdn.create.vista.com/api/media/medium/640820558/stock-video-hands-young-beautiful-woman-hold-white-sneaker-background-shoe-store?token=" type="video/mp4">
+                <!-- Fallback image if video doesn't load -->
+            </video>
+            <div class="cta-video-overlay"></div>
+        </div>
+        
+        <div class="container cta-content">
+            <div class="cta-text animate-fade">
+                <h3>Ready to showcase your products?</h3>
+                <p>Join hundreds of shoe shops already growing their business with our platform</p>
+                <div class="cta-buttons">
+                    <a href="shopowner/html/shop_register.html" class="btn btn-accent cta-btn">
+                        <i class="fas fa-store"></i> Register Your Shop
+                    </a>
+                </div>
+            </div>
+            
+            <div class="cta-stats animate-fade delay-1">
+                <div class="stat-item">
+                    <div class="stat-number">200+</div>
+                    <div class="stat-label">Happy Shop Owners</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">10K+</div>
+                    <div class="stat-label">Shoes Displayed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Support Available</div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -588,29 +981,88 @@
     </div>
 
     <script>
-        // Open modal function
+        // Testimonials Carousel
+        document.addEventListener('DOMContentLoaded', function() {
+            // Testimonial carousel functionality
+            const testimonials = document.querySelector('.testimonial-carousel');
+            const cards = document.querySelectorAll('.testimonial-card');
+            const dots = document.querySelectorAll('.nav-dot');
+            let currentIndex = 0;
+
+            function showTestimonial(index) {
+                // Update active dot
+                dots.forEach(dot => dot.classList.remove('active'));
+                dots[index].classList.add('active');
+                
+                // Update active card
+                cards.forEach(card => {
+                    card.classList.remove('active', 'previous', 'next');
+                    
+                    if (parseInt(card.dataset.index) === index) {
+                        card.classList.add('active');
+                    } else if (parseInt(card.dataset.index) < index) {
+                        card.classList.add('previous');
+                    } else {
+                        card.classList.add('next');
+                    }
+                });
+                
+                currentIndex = index;
+            }
+
+            // Dot click event
+            dots.forEach(dot => {
+                dot.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    if (index !== currentIndex) {
+                        showTestimonial(index);
+                    }
+                });
+            });
+
+            // Auto-rotate testimonials
+            let interval = setInterval(() => {
+                let nextIndex = (currentIndex + 1) % cards.length;
+                showTestimonial(nextIndex);
+            }, 5000);
+
+            // Pause on hover
+            testimonials.addEventListener('mouseenter', () => {
+                clearInterval(interval);
+            });
+
+            testimonials.addEventListener('mouseleave', () => {
+                interval = setInterval(() => {
+                    let nextIndex = (currentIndex + 1) % cards.length;
+                    showTestimonial(nextIndex);
+                }, 5000);
+            });
+
+            // Initialize
+            showTestimonial(0);
+        });
+
+        // Image Modal Functionality
         function openModal(imageSrc) {
             document.getElementById('modalImage').src = imageSrc;
             document.getElementById('imageModal').classList.add('active');
         }
         
-        // Close modal function
         function closeModal() {
             document.getElementById('imageModal').classList.remove('active');
         }
         
-        // Close modal when clicking outside the image
         document.getElementById('imageModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
             }
         });
-        
-        // Auto-scrolling carousel
+
+        // Auto-scrolling Featured Shoes Carousel
         document.addEventListener("DOMContentLoaded", function() {
             const carousel = document.querySelector(".carousel-container");
             let scrollAmount = 0;
-            const scrollSpeed = 1; // Adjust speed as needed
+            const scrollSpeed = 1;
             
             function scrollCarousel() {
                 scrollAmount += scrollSpeed;
