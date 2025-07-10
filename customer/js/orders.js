@@ -91,7 +91,6 @@ function loadOrders(userId) {
         alert("Failed to load orders. Please try again.");
     });
 }
-
 function createOrderCard(order) {
     if (!order) return null;
 
@@ -102,6 +101,7 @@ function createOrderCard(order) {
         'pending',                 // ✅ Added pending here
         'order processed', 
         'shipped', 
+        'accepted',
         'in transit', 
         'arrived at facility', 
         'out for delivery', 
@@ -109,6 +109,7 @@ function createOrderCard(order) {
         'other'
     ];
     
+console.log("Orders.js loaded successfully");
     // Skip if status is not in allowed list
     if (!allowedStatuses.includes(status)) return null;
 
@@ -128,10 +129,16 @@ function createOrderCard(order) {
 
     let statusClass = '';
     let statusText = '';
+    console.log('asdasdasd');
+    console.log("Order Status:", status); // Debugging line to check status
     switch (status) {
         case 'pending':
             statusClass = 'status-pending';
             statusText = 'Pending';
+            break;
+        case 'accepted':
+            statusClass = 'status-processed';
+            statusText = 'Accepted';
             break;
         case 'order processed':
             statusClass = 'status-processed';
