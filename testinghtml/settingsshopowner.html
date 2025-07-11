@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Profile | Shop Owner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --error: #ef233c;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #adb5bd;
+            --gray-light: #e9ecef;
+            --gray-dark: #495057;
+            --text-primary: #212529;
+            --text-secondary: #343a40;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar - Matching inventory style */
+        .sidebar {
+            background: linear-gradient(180deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
+            transition: var(--transition);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo-icon {
+            background: rgba(255,255,255,0.2);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            overflow-x: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Profile Container */
+        .profile-container {
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .profile-container:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Profile Header */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .profile-avatar {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+            background-color: var(--gray-light);
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-upload {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            text-align: center;
+            padding: 0.5rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .avatar-upload:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .avatar-upload input {
+            display: none;
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .profile-email {
+            color: var(--gray-dark);
+            margin-bottom: 1rem;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.75rem 1rem;
+            background: var(--gray-light);
+            border-radius: var(--radius-sm);
+            min-width: 80px;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray-dark);
+        }
+
+        /* Form Styles */
+        .profile-form {
+            margin-top: 1rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--gray-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background-color: var(--gray-light);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            background-color: white;
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            background-color: var(--gray-light);
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            background-color: white;
+        }
+
+        /* Document Upload Styles */
+        .document-upload {
+            margin-top: 1rem;
+        }
+
+        .document-preview {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--gray-light);
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            overflow: auto;
+        }
+
+        .document-preview:hover {
+            background-color: #e2e6ea;
+        }
+
+        .document-icon {
+            font-size: 2rem;
+            color: var(--gray-dark);
+        }
+
+        .document-info {
+            flex: 1;
+        }
+
+        .document-name {
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+
+        .document-upload-date {
+            font-size: 0.8rem;
+            color: var(--gray-dark);
+        }
+
+        .document-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 0.65rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            border: none;
+        }
+
+        .btn-view {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-view:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-replace {
+            background-color: white;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-replace:hover {
+            background-color: var(--gray-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-save {
+            background-color: var(--success);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .btn-save:hover {
+            background-color: #1da1c1;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-cancel {
+            background-color: var(--gray-light);
+            color: var(--text-primary);
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .btn-cancel:hover {
+            background-color: var(--gray);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Password Toggle */
+        .password-toggle {
+            position: relative;
+        }
+
+        .password-toggle-icon {
+            position: absolute;
+            right: 1rem;
+            top: 70%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--gray-dark);
+            transition: var(--transition);
+        }
+
+        .password-toggle-icon:hover {
+            color: var(--dark);
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 240px 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard {
+                grid-template-columns: 220px 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: fixed;
+                left: -350px;
+                height: 100vh;
+                transition: var(--transition);
+                z-index: 100;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 0.5rem;
+            }
+            
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 99;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-stats {
+                justify-content: center;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn-save, .btn-cancel {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <span>Shop Dashboard</span>
+            </div>
+            <div class="nav-items">
+                <a href="/shopowner/html/shop_dashboard.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="/shopowner/html/shopowner_addshoe.html" class="nav-item">
+                    <i class="fas fa-shoe-prints"></i> Add Shoe
+                </a>
+                <a id="addemployeebtn" href="/shopowner/html/shopowner_addemployee.html" class="nav-item shopowner">
+                    <i class="fas fa-users"></i> Add Employee
+                </a>
+                <a href="/shopowner/html/shop_inventory.html" class="nav-item">
+                    <i class="fas fa-boxes"></i> Inventory
+                </a>
+                <a href="/shopowner/html/shop_order.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a>
+                <a id="issuereport" href="/shopowner/html/issue_report.html" class="nav-item manager">
+                    <i class="fas fa-exclamation-circle"></i> Issue Report
+                </a>
+                <a id="analyticsbtn" href="/shopowner/html/analytics.html" class="nav-item manager">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+                <a href="/shopowner/html/shopprofile.html" class="nav-item active">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a id="logout_btn" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <!-- Mobile Menu Toggle -->
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <h1><i class="fas fa-user-cog"></i> Shop Settings</h1>
+                <div class="user-profile">
+                    <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="Profile" class="user-avatar">
+                    <span>Shop Owner</span>
+                </div>
+            </div>
+
+            <!-- Profile Container -->
+            <div class="profile-container">
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <img src="https://via.placeholder.com/300?text=Shop+Logo" alt="Shop Logo" id="shopLogoImg">
+                        <label class="avatar-upload">
+                            <i class="fas fa-camera"></i> Change
+                            <input type="file" accept="image/*" id="avatarUpload">
+                        </label>
+                    </div>
+
+                    <div class="profile-info">
+                        <h2 class="profile-name">Elite Footwear</h2>
+                        <div class="profile-email">elitefootwear@example.com</div>
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">142</div>
+                                <div class="stat-label">Orders</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">56</div>
+                                <div class="stat-label">Products</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">4.8</div>
+                                <div class="stat-label">Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Form -->
+                <form class="profile-form" id="profileForm">
+                    <!-- Shop Information Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-store"></i> Shop Information</h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="shopName" class="form-label">Shop Name</label>
+                                <input type="text" id="shopName" class="form-control" value="Elite Footwear">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="shopCategory" class="form-label">Shop Category</label>
+                                <select id="shopCategory" class="form-select">
+                                    <option value="sneakers" selected>Sneakers</option>
+                                    <option value="formal">Formal Shoes</option>
+                                    <option value="boots">Boots</option>
+                                    <option value="sports">Sports Shoes</option>
+                                    <option value="sandals">Sandals</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="shopDescription" class="form-label">Shop Description</label>
+                            <textarea id="shopDescription" class="form-control" rows="4">Premium footwear store offering the latest trends in sneakers, sports shoes, and casual footwear. We provide high-quality products with excellent customer service.</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-address-card"></i> Contact Information</h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ownerName" class="form-label">Owner Name</label>
+                                <input type="text" id="ownerName" class="form-control" value="Juan Dela Cruz">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ownerEmail" class="form-label">Email</label>
+                                <input type="email" id="ownerEmail" class="form-control" value="elitefootwear@example.com">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ownerPhone" class="form-label">Phone Number</label>
+                                <div style="display: flex; align-items: center;">
+                                    <span style="padding: 0.8rem 0.5rem; background: var(--gray-light); border-radius: var(--radius-sm) 0 0 var(--radius-sm);">+63</span>
+                                    <input type="tel" id="ownerPhone" class="form-control" value="9123456789" maxlength="10" style="border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-left: -1px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location Information Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-map-marker-alt"></i> Location Information</h3>
+
+                        <div class="form-group">
+                            <label for="shopAddress" class="form-label">Shop Address</label>
+                            <input type="text" id="shopAddress" class="form-control" value="123 Main Street, Barangay 1">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="shopCity" class="form-label">City</label>
+                                <input type="text" id="shopCity" class="form-control" value="Manila">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="shopState" class="form-label">State/Province</label>
+                                <input type="text" id="shopState" class="form-control" value="Metro Manila">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="shopZip" class="form-label">ZIP/Postal Code</label>
+                                <input type="text" id="shopZip" class="form-control" value="1000">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="shopCountry" class="form-label">Country</label>
+                                <select id="shopCountry" class="form-select">
+                                    <option value="Philippines" selected>Philippines</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Business Documents Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-file-contract"></i> Business Documents</h3>
+
+                        <div class="document-upload">
+                            <label class="form-label">Mayor's Permit / Business License</label>
+                            <div class="document-preview">
+                                <i class="fas fa-file-pdf document-icon"></i>
+                                <div class="document-info">
+                                    <div class="document-name">business_permit_2023.pdf</div>
+                                    <div class="document-upload-date">Uploaded: June 15, 2023</div>
+                                </div>
+                                <div class="document-actions">
+                                    <button type="button" class="btn btn-view"><i class="fas fa-eye"></i> View</button>
+                                    <button type="button" class="btn btn-replace"><i class="fas fa-sync"></i> Replace</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="document-upload">
+                            <label class="form-label">Tax Identification Number</label>
+                            <input type="text" id="taxId" class="form-control" value="123-456-789-000">
+                        </div>
+
+                        <div class="document-upload">
+                            <label class="form-label">Business Permit</label>
+                            <div class="document-preview">
+                                <i class="fas fa-file-image document-icon"></i>
+                                <div class="document-info">
+                                    <div class="document-name">business_license_2023.jpg</div>
+                                    <div class="document-upload-date">Uploaded: June 15, 2023</div>
+                                </div>
+                                <div class="document-actions">
+                                    <button type="button" class="btn btn-view"><i class="fas fa-eye"></i> View</button>
+                                    <button type="button" class="btn btn-replace"><i class="fas fa-sync"></i> Replace</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password Change Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-lock"></i> Change Password</h3>
+
+                        <div class="form-row">
+                            <div class="form-group password-toggle">
+                                <label for="currentPassword" class="form-label">Current Password</label>
+                                <input type="password" id="currentPassword" class="form-control">
+                                <i class="fas fa-eye password-toggle-icon" id="toggleCurrentPassword"></i>
+                            </div>
+
+                            <div class="form-group password-toggle">
+                                <label for="newPassword" class="form-label">New Password</label>
+                                <input type="password" id="newPassword" class="form-control">
+                                <i class="fas fa-eye password-toggle-icon" id="toggleNewPassword"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group password-toggle">
+                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" class="form-control">
+                            <i class="fas fa-eye password-toggle-icon" id="toggleConfirmPassword"></i>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-cancel">Cancel</button>
+                        <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile sidebar toggle
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            mobileToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+
+            // Avatar upload preview
+            const avatarUpload = document.getElementById('avatarUpload');
+            const avatarPreview = document.getElementById('shopLogoImg');
+            
+            avatarUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        avatarPreview.src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Password toggle functionality
+            function setupPasswordToggle(inputId, toggleId) {
+                const passwordInput = document.getElementById(inputId);
+                const toggleIcon = document.getElementById(toggleId);
+
+                toggleIcon.addEventListener('click', function() {
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        toggleIcon.classList.remove('fa-eye');
+                        toggleIcon.classList.add('fa-eye-slash');
+                    } else {
+                        passwordInput.type = 'password';
+                        toggleIcon.classList.remove('fa-eye-slash');
+                        toggleIcon.classList.add('fa-eye');
+                    }
+                });
+            }
+
+            setupPasswordToggle('currentPassword', 'toggleCurrentPassword');
+            setupPasswordToggle('newPassword', 'toggleNewPassword');
+            setupPasswordToggle('confirmPassword', 'toggleConfirmPassword');
+
+            // Form submission
+            document.getElementById('profileForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Validate passwords if changed
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (newPassword && newPassword !== confirmPassword) {
+                    alert('New passwords do not match!');
+                    return;
+                }
+                
+                // Show success message (in real app, this would submit to server)
+                alert('Profile changes saved successfully!');
+            });
+
+            // Cancel button
+            document.querySelector('.btn-cancel').addEventListener('click', function() {
+                if (confirm('Are you sure you want to discard your changes?')) {
+                    window.location.reload();
+                }
+            });
+
+            // Document view buttons
+            document.querySelectorAll('.btn-view').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    alert('Document viewer would open here');
+                });
+            });
+
+            // Document replace buttons
+            document.querySelectorAll('.btn-replace').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    alert('File upload dialog would open here');
+                });
+            });
+
+            // Logout button
+            document.getElementById('logout_btn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to logout?')) {
+                    // In real app, this would call logout API
+                    window.location.href = '/login.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
