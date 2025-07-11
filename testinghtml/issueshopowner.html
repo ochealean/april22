@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Reports - Shop Owner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --error: #ef233c;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #adb5bd;
+            --gray-light: #e9ecef;
+            --gray-dark: #495057;
+            --text-primary: #212529;
+            --text-secondary: #343a40;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar - Matching inventory style */
+        .sidebar {
+            background: linear-gradient(180deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
+            transition: var(--transition);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo-icon {
+            background: rgba(255,255,255,0.2);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .container {
+            padding: 2rem;
+            overflow-x: auto;
+            background-color: var(--gray-light);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Search Container */
+        .search-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 0.8rem 1.5rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            max-width: 500px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-btn, .clear-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .search-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .clear-btn {
+            background-color: var(--gray-dark);
+            color: white;
+        }
+
+        .clear-btn:hover {
+            background-color: var(--gray);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Table Styles - Matching inventory */
+        .table-container {
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            overflow: auto;
+            margin-bottom: 2.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-light);
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: var(--gray-dark);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Status Classes */
+        .status-pending { 
+            color: var(--warning);
+            font-weight: 500;
+        }
+
+        .status-resolved { 
+            color: var(--success);
+            font-weight: 500;
+        }
+
+        .status-processing { 
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* Issue Description */
+        .issue-description {
+            white-space: pre-wrap;
+            max-height: 100px;
+            overflow-y: auto;
+            padding: 0.5rem 1.5rem 0.5rem 1.5rem;
+            background: var(--gray-light);
+            /* border-radius: var(--radius-sm); */
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Photo Thumbnail */
+        .photo-thumbnail {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-right: 5px;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-light);
+            transition: var(--transition);
+        }
+
+        .photo-thumbnail:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Buttons - Matching inventory style */
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .btn i {
+            font-size: 0.8rem;
+        }
+
+        .btn-view {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-edit {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-view:hover,
+        .btn-edit:hover,
+        .btn-danger:hover,
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-edit:hover {
+            background-color: #e07b16;
+        }
+
+        .btn-danger:hover {
+            background-color: #d71f32;
+        }
+
+        .btn-success:hover {
+            background-color: #1da1c1;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .empty-state-content {
+            max-width: 400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-state h3 {
+            color: var(--dark);
+            font-size: 1.3rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .empty-state p {
+            color: var(--gray-dark);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        /* Modals - Matching inventory style */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        .modal-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .modal-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .modal-section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            color: var(--primary);
+        }
+
+        .modal-section-header i {
+            font-size: 1.2rem;
+        }
+
+        .modal-section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--dark);
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-info-group {
+            margin-bottom: 1rem;
+        }
+
+        .modal-info-label {
+            font-size: 0.9rem;
+            color: var(--gray-dark);
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
+        .modal-info-value {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--dark);
+            padding: 0.5rem 0;
+        }
+
+        .modal-photos-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .modal-photo {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-light);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-photo:hover {
+            transform: scale(1.02);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .modal-response-container {
+            background-color: var(--gray-light);
+            padding: 1.25rem;
+            border-radius: var(--radius-md);
+            margin-top: 1rem;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-modal {
+            color: var(--gray);
+            float: right;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--dark);
+            transform: rotate(90deg);
+        }
+
+        /* Confirmation Modal */
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .confirmation-content {
+            background-color: white;
+            margin: 20vh auto;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        .confirmation-content h3 {
+            color: var(--dark);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .confirmation-content p {
+            color: var(--gray-dark);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid var(--gray-light);
+            background-color: white;
+            color: var(--text-primary);
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background-color: var(--gray-light);
+        }
+
+        .pagination-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            color: white;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background-color: var(--success);
+        }
+
+        .notification.error {
+            background-color: var(--error);
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 240px 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard {
+                grid-template-columns: 220px 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: fixed;
+                left: -350px;
+                height: 100vh;
+                transition: var(--transition);
+                z-index: 100;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 0.5rem;
+            }
+            
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 99;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .confirmation-buttons {
+                flex-direction: column;
+            }
+            
+            .confirmation-buttons .btn {
+                width: 100%;
+            }
+        }
+
+        /* Animation Classes */
+        .animate-fade {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <span>Shop Dashboard</span>
+            </div>
+            <div class="nav-items">
+                <a href="/shopowner/html/shop_dashboard.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="/shopowner/html/shopowner_addshoe.html" class="nav-item">
+                    <i class="fas fa-shoe-prints"></i> Add Shoe
+                </a>
+                <a id="addemployeebtn" href="/shopowner/html/shopowner_addemployee.html" class="nav-item shopowner">
+                    <i class="fas fa-users"></i> Add Employee
+                </a>
+                <a href="/shopowner/html/shop_inventory.html" class="nav-item">
+                    <i class="fas fa-boxes"></i> Inventory
+                </a>
+                <a href="/shopowner/html/shop_order.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a>
+                <a id="issuereport" href="/shopowner/html/issue_report.html" class="nav-item manager active">
+                    <i class="fas fa-exclamation-circle"></i> Issue Report
+                </a>
+                <a id="analyticsbtn" href="/shopowner/html/analytics.html" class="nav-item manager">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+                <a href="/shopowner/html/shopprofile.html" class="nav-item">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a id="logout_btn" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="container">
+            <div class="header">
+                <!-- Mobile Menu Toggle -->
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <h1 class="animate-fade">Customer Issue Reports</h1>
+                <div class="user-profile">
+                    <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="User" class="user-avatar">
+                    <span>Shop Owner</span>
+                </div>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="search-container animate-fade">
+                <input type="text" id="issueSearch" class="search-input" placeholder="Search issues by order ID, user ID, or type...">
+                <button id="searchBtn" class="search-btn">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                <button id="clearSearch" class="clear-btn">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
+
+            <!-- Issue Reports Table -->
+            <div class="table-container animate-fade">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-id-card-alt"></i> Report ID</th>
+                            <th><i class="fas fa-receipt"></i> Order ID</th>
+                            <th><i class="fas fa-user"></i> User ID</th>
+                            <th><i class="fas fa-tag"></i> Issue Type</th>
+                            <th><i class="fas fa-comment"></i> Description</th>
+                            <th><i class="fas fa-images"></i> Photos</th>
+                            <th><i class="fas fa-info-circle"></i> Status</th>
+                            <th><i class="fas fa-calendar-alt"></i> Date Reported</th>
+                            <th><i class="fas fa-cog"></i> Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="issueReportsTableBody">
+                        <!-- Sample Data Row (replace with dynamic content) -->
+                        <tr>
+                            <td>#IR-1001</td>
+                            <td>#ORD-2054</td>
+                            <td>#USR-4587</td>
+                            <td>Defective Product</td>
+                            <td class="issue-description">Received shoes with torn stitching on the left side...</td>
+                            <td>
+                                <img src="/images/businesspermitsample.png" class="photo-thumbnail" alt="Issue Photo 1">
+                                <img src="/images/businesspermitsample.png" class="photo-thumbnail" alt="Issue Photo 2">
+                            </td>
+                            <td class="status-pending">Pending</td>
+                            <td>2023-05-15</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-view" onclick="viewIssue('IR-1001')">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    <button class="btn btn-success" onclick="respondToIssue('IR-1001')">
+                                        <i class="fas fa-reply"></i> Respond
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Empty State (shown when no data) -->
+                        <tr id="emptyState" style="display: none;">
+                            <td colspan="9" class="empty-state">
+                                <div class="empty-state-content">
+                                    <i class="fas fa-inbox"></i>
+                                    <h3>No Issue Reports Found</h3>
+                                    <p>When customers report issues, they'll appear here.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="pagination-btn" id="prevBtn" disabled>
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <button class="pagination-btn active">1</button>
+                <button class="pagination-btn">2</button>
+                <button class="pagination-btn">3</button>
+                <button class="pagination-btn" id="nextBtn">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification element -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Issue Details Modal -->
+     <div id="issueDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div id="modalIssueContent">
+                <!-- Report Overview Section -->
+                <div class="modal-section">
+                    <h2 style="color: var(--primary); margin-bottom: 1.5rem;">Issue Report Details</h2>
+                    
+                    <div class="modal-grid">
+                        <div class="modal-info-group">
+                            <span class="modal-info-label">Report ID</span>
+                            <div class="modal-info-value" id="modalReportId">#IR-1001</div>
+                        </div>
+                        <div class="modal-info-group">
+                            <span class="modal-info-label">Order ID</span>
+                            <div class="modal-info-value" id="modalOrderId">#ORD-2054</div>
+                        </div>
+                        <div class="modal-info-group">
+                            <span class="modal-info-label">User ID</span>
+                            <div class="modal-info-value" id="modalUserId">#USR-4587</div>
+                        </div>
+                        <div class="modal-info-group">
+                            <span class="modal-info-label">Date Reported</span>
+                            <div class="modal-info-value" id="modalDate">2023-05-15</div>
+                        </div>
+                        <div class="modal-info-group">
+                            <span class="modal-info-label">Issue Type</span>
+                            <div class="modal-info-value" id="modalIssueType">Defective Product</div>
+                        </div>
+                        <div class="modal-info-group">
+                            <span class="modal-info-label">Status</span>
+                            <div class="modal-info-value" id="modalStatus" class="status-pending">Pending</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Description Section -->
+                <div class="modal-section">
+                    <div class="modal-section-header">
+                        <i class="fas fa-comment"></i>
+                        <h3 class="modal-section-title">Description</h3>
+                    </div>
+                    <div class="modal-info-value" id="modalDescription" style="white-space: pre-wrap; line-height: 1.6;">
+                        Received shoes with torn stitching on the left side. The damage appears to be from manufacturing as the box was undamaged. I've attached photos showing the issue.
+                    </div>
+                </div>
+                
+                <!-- Photos Section -->
+                <div class="modal-section">
+                    <div class="modal-section-header">
+                        <i class="fas fa-images"></i>
+                        <h3 class="modal-section-title">Attached Photos</h3>
+                    </div>
+                    <div class="modal-photos-container">
+                        <img src="/images/businesspermitsample.png" class="modal-photo" alt="Issue Photo" onclick="openImageInNewTab(this.src)">
+                        <img src="/images/businesspermitsample.png" class="modal-photo" alt="Issue Photo" onclick="openImageInNewTab(this.src)">
+                        <img src="/images/businesspermitsample.png" class="modal-photo" alt="Issue Photo" onclick="openImageInNewTab(this.src)">
+                    </div>
+                </div>
+                
+                <!-- Response Section -->
+                <div class="modal-section">
+                    <div class="modal-section-header">
+                        <i class="fas fa-reply"></i>
+                        <h3 class="modal-section-title">Admin Response</h3>
+                    </div>
+                    <div class="modal-response-container">
+                        <div id="modalResponse" style="white-space: pre-wrap; line-height: 1.6;">
+                            No response yet. Please use the "Respond" button to address this issue.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Response Dialog -->
+    <div id="responseDialog" class="modal confirmation-modal">
+        <div class="confirmation-content">
+            <h3>Respond to Issue</h3>
+            <div class="form-group">
+                <label for="responseStatus">Status:</label>
+                <select id="responseStatus" class="form-control">
+                    <option value="processing">Processing</option>
+                    <option value="resolved">Resolved</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="adminResponse">Your Response:</label>
+                <textarea id="adminResponse" class="form-control" placeholder="Enter your response to the customer..." rows="5"></textarea>
+            </div>
+            <div class="confirmation-buttons">
+                <button class="btn btn-danger" onclick="closeModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn btn-success" onclick="submitResponse()">
+                    <i class="fas fa-check"></i> Submit Response
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation -->
+    <div id="logoutDialog" class="modal confirmation-modal">
+        <div class="confirmation-content">
+            <h3>Confirm Logout</h3>
+            <p>Are you sure you want to logout?</p>
+            <div class="confirmation-buttons">
+                <button class="btn btn-danger" onclick="closeModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn btn-success" onclick="confirmLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay"></div>
+
+    <script>
+        // Mobile sidebar toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            mobileToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+
+            // Check if table is empty
+            const tableBody = document.getElementById('issueReportsTableBody');
+            if (tableBody.children.length <= 1) { // 1 for the empty state row
+                document.getElementById('emptyState').style.display = 'table-row';
+            }
+
+            // Logout button event
+            document.getElementById('logout_btn').addEventListener('click', function() {
+                document.getElementById('logoutDialog').style.display = 'block';
+            });
+        });
+
+        // open images in new tab
+        function openImageInNewTab(imageUrl) {
+            window.open(imageUrl, '_blank');
+        }
+
+        // Update the table image click handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Make all thumbnail images clickable
+            document.querySelectorAll('.photo-thumbnail').forEach(img => {
+                img.style.cursor = 'pointer';
+                img.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    openImageInNewTab(this.src);
+                });
+            });
+            
+            // [Rest of your existing DOMContentLoaded code]
+        });
+
+        // Modal functions
+        function viewIssue(issueId) {
+            // In a real app, you would fetch issue details from your backend
+            console.log('Viewing issue:', issueId);
+            document.getElementById('issueDetailsModal').style.display = 'block';
+        }
+
+        function respondToIssue(issueId) {
+            console.log('Responding to issue:', issueId);
+            document.getElementById('responseDialog').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+
+        function submitResponse() {
+            const status = document.getElementById('responseStatus').value;
+            const response = document.getElementById('adminResponse').value;
+            
+            // In a real app, you would send this to your backend
+            console.log('Submitting response:', { status, response });
+            
+            // Show success notification
+            showNotification('Response submitted successfully!', 'success');
+            closeModal();
+        }
+
+        function confirmLogout() {
+            // In a real app, you would handle the logout process
+            console.log('User logged out');
+            window.location.href = '/login.html'; // Redirect to login page
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

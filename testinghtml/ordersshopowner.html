@@ -166,6 +166,7 @@
             box-shadow: var(--shadow-sm);
             padding: 2rem;
             margin-bottom: 2rem;
+            overflow: auto;
         }
 
         /* Filter Section */
@@ -426,6 +427,13 @@
             gap: 1rem;
         }
 
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
         /* Mobile Responsiveness - Same as template */
         @media (max-width: 1200px) {
             .dashboard {
@@ -616,7 +624,7 @@
                         </tr>
 
                         <!-- Sample Order Row -->
-                        <!-- <tr>
+                        <tr>
                             <td>#ORD-7821</td>
                             <td>John Smith</td>
                             <td>Today, 10:45 AM</td>
@@ -658,7 +666,7 @@
                                     <span class="no-actions">No actions</span>
                                 </div>
                             </td>
-                        </tr> -->
+                        </tr>
                     </tbody>
                 </table>
             </div>
