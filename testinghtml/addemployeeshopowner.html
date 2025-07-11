@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Employee - Shop Owner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <style>
+        /* Reuse the exact same variables and base styles from dashboard */
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --error: #ef233c;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #adb5bd;
+            --gray-light: #e9ecef;
+            --gray-dark: #495057;
+            --text-primary: #212529;
+            --text-secondary: #343a40;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Dashboard Layout - Same as template */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar - Exact same styling as template */
+        .sidebar {
+            background: linear-gradient(180deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            background: rgba(255,255,255,0.2);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            padding: 2rem;
+            overflow-x: auto;
+        }
+
+        /* Header - Same as template */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Form Container - Adapted from original but matching new design */
+        .form-container {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+            border: 1px solid var(--gray-light);
+            max-width: 800px;
+        }
+
+        .form-container h1 {
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-container h1 i {
+            color: var(--primary);
+        }
+
+        /* Form Elements - Styled to match dashboard */
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background-color: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        /* Phone Input Styling */
+        .phone-input-container {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: white;
+        }
+
+        .country-code {
+            padding: 0 1rem;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            background: var(--light);
+            color: var(--gray-dark);
+            font-weight: 500;
+        }
+
+        .phone-input-container input {
+            border: none;
+            flex: 1;
+            padding: 0.8rem 1rem;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 0.5rem;
+            color: var(--gray-dark);
+            font-size: 0.8rem;
+        }
+
+        /* Password Toggle */
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 2.5rem;
+            cursor: pointer;
+            color: var(--gray-dark);
+            transition: var(--transition);
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        /* Password Requirements */
+        #passwordRequirements {
+            background-color: var(--light);
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            margin-top: 0.5rem;
+            border: 1px solid var(--gray-light);
+        }
+
+        #passwordRequirements p {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        #passwordRequirements ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        #passwordRequirements li {
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+            color: var(--gray-dark);
+        }
+
+        #passwordRequirements li::before {
+            content: "•";
+            color: var(--error);
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        /* Buttons - Matching dashboard style */
+        .btn {
+            padding: 0.65rem 1.25rem;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .btn i {
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary {
+            background-color: var(--gray-light);
+            color: var(--gray-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dfe3e8;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Navigation Links */
+        .navigation {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .navigation a{
+            text-decoration: none;
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* Mobile Responsiveness - Same as template */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 240px 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard {
+                grid-template-columns: 220px 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: fixed;
+                left: -350px;
+                height: 100vh;
+                transition: var(--transition);
+                z-index: 100;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 0.5rem;
+            }
+            
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 99;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
+            }
+            
+            .form-container {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .form-container {
+                padding: 1.25rem;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <!-- Sidebar - Same structure as template -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <span>Shop Dashboard</span>
+            </div>
+            <div class="nav-items">
+                <a href="/shopowner/html/shop_dashboard.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="/shopowner/html/shopowner_addshoe.html" class="nav-item">
+                    <i class="fas fa-shoe-prints"></i> Add Shoe
+                </a>
+                <a id="addemployeebtn" href="/shopowner/html/shopowner_addemployee.html" class="nav-item shopowner active">
+                    <i class="fas fa-users"></i> Add Employee
+                </a>
+                <a href="/shopowner/html/shop_inventory.html" class="nav-item">
+                    <i class="fas fa-boxes"></i> Inventory
+                </a>
+                <a href="/shopowner/html/shop_order.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a>
+                <a id="issuereport" href="/shopowner/html/issue_report.html" class="nav-item manager">
+                    <i class="fas fa-exclamation-circle"></i> Issue Report
+                </a>
+                <a id="analyticsbtn" href="/shopowner/html/analytics.html" class="nav-item manager">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+                <a href="/shopowner/html/shopprofile.html" class="nav-item">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a id="logout_btn" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <!-- Mobile Menu Toggle (same as template) -->
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <h1>Add New Employee</h1>
+                <div class="user-profile">
+                    <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="User" class="user-avatar">
+                    <span>Shop Owner</span>
+                </div>
+            </div>
+
+            <!-- Form Container -->
+            <div class="form-container">
+                <h1><i class="fas fa-users"></i> Add New Employee</h1>
+                <form id="addEmployeeForm">
+                    <div class="form-group">
+                        <label for="employeeName">Full Name</label>
+                        <input type="text" id="employeeName" required placeholder="e.g., Juan Dela Cruz">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="employeeEmail">Email</label>
+                        <input type="email" id="employeeEmail" required placeholder="e.g., employee@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="employeeRole">Role</label>
+                        <select id="employeeRole" required>
+                            <option value="">Select Role</option>
+                            <option value="Manager">Manager</option>
+                            <option value="SalesPerson">Sales Person</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="employeePhone">Phone Number</label>
+                        <div class="phone-input-container">
+                            <span class="country-code">+63</span>
+                            <input type="tel" id="employeePhone" placeholder="e.g., 9123456789" maxlength="10">
+                        </div>
+                        <small>Enter your 10-digit Philippine mobile number (without +63)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="employeePassword">Password</label>
+                        <input type="password" id="employeePassword" required placeholder="Enter password">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('employeePassword')"></i>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" required placeholder="Confirm password">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('confirmPassword')"></i>
+                    </div>
+
+                    <div class="form-group">
+                        <div id="passwordRequirements">
+                            <p>Password must contain:</p>
+                            <ul>
+                                <li id="reqLength">At least 8 characters</li>
+                                <li id="reqUppercase">At least one uppercase letter</li>
+                                <li id="reqLowercase">At least one lowercase letter</li>
+                                <li id="reqNumber">At least one number</li>
+                                <li id="reqSpecial">At least one special character</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Add Employee
+                    </button>
+                </form>
+                
+                <div class="navigation">
+                    <a href="/shopowner/html/shop_dashboard.html" class="btn btn-secondary">
+                        <i class="fas fa-tachometer-alt"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Overlay (dynamically added via JS) -->
+    <div class="sidebar-overlay"></div>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile sidebar toggle - same as template
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            mobileToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        });
+
+        // Password toggle functionality
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = field.nextElementSibling;
+            
+            if (field.type === "password") {
+                field.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                field.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+
+        // Password validation
+        document.getElementById('employeePassword').addEventListener('input', function() {
+            validatePassword();
+        });
+
+        function validatePassword() {
+            const password = document.getElementById('employeePassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Check password requirements
+            const hasLength = password.length >= 8;
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasLowercase = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSpecial = /[!@#$%^&*]/.test(password);
+            
+            // Update requirement indicators
+            document.getElementById('reqLength').style.color = hasLength ? 'green' : 'red';
+            document.getElementById('reqUppercase').style.color = hasUppercase ? 'green' : 'red';
+            document.getElementById('reqLowercase').style.color = hasLowercase ? 'green' : 'red';
+            document.getElementById('reqNumber').style.color = hasNumber ? 'green' : 'red';
+            document.getElementById('reqSpecial').style.color = hasSpecial ? 'green' : 'red';
+            
+            // Check if passwords match
+            if (password && confirmPassword) {
+                if (password !== confirmPassword) {
+                    document.getElementById('confirmPassword').setCustomValidity("Passwords don't match");
+                } else {
+                    document.getElementById('confirmPassword').setCustomValidity('');
+                }
+            }
+        }
+
+        // Confirm password validation
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            validatePassword();
+        });
+
+        // Role-based access control
+        document.addEventListener("DOMContentLoaded", () => {
+            const userRole = localStorage.getItem('userRole');
+            if (userRole === "employee") {
+                document.querySelectorAll(".manager, .shopowner").forEach(el => el.style.display = "none");
+            } else if (userRole === "manager") {
+                document.querySelectorAll(".shopowner").forEach(el => el.style.display = "none");
+            }
+
+            // Philippine phone number formatting
+            document.getElementById('employeePhone').addEventListener('input', function(e) {
+                // Remove all non-digit characters
+                let phoneNumber = e.target.value.replace(/\D/g, '');
+                
+                // Limit to 10 digits (Philippine mobile numbers are 10 digits without country code)
+                if (phoneNumber.length > 10) {
+                    phoneNumber = phoneNumber.substring(0, 10);
+                }
+                
+                // Update the input value with just the digits
+                e.target.value = phoneNumber;
+            });
+
+            // You can also add this to format it properly when submitting
+            document.getElementById('addEmployeeForm').addEventListener('submit', function(e) {
+                const phoneInput = document.getElementById('employeePhone');
+                if (phoneInput.value) {
+                    // Format as +639XXXXXXXXX before submitting
+                    phoneInput.value = '+63' + phoneInput.value;
+                }
+            });
+        });
+    </script>
+      
+    <!-- <script src="/shopowner/js/shopowner_addemployee.js" type="module"></script> -->
+</body>
+</html>
