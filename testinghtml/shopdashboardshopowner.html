@@ -22,9 +22,9 @@
             --gray-dark: #495057;
             --text-primary: #212529;
             --text-secondary: #343a40;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             --radius-sm: 6px;
             --radius-md: 10px;
@@ -103,6 +103,7 @@
             0% {
                 transform: translateY(0) rotate(0deg);
             }
+
             100% {
                 transform: translateY(-20px) rotate(5deg);
             }
@@ -113,6 +114,7 @@
                 transform: scale(1);
                 opacity: 0.7;
             }
+
             100% {
                 transform: scale(0.8);
                 opacity: 0.3;
@@ -148,7 +150,7 @@
         }
 
         .logo-icon {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             width: 36px;
             height: 36px;
             border-radius: 8px;
@@ -171,23 +173,23 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
             font-size: 0.95rem;
             font-weight: 500;
         }
 
         .nav-item:hover {
-            background: rgba(255,255,255,0.15);
+            background: rgba(255, 255, 255, 0.15);
             color: white;
             transform: translateX(4px);
         }
 
         .nav-item.active {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             color: white;
             font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .nav-item i {
@@ -324,7 +326,8 @@
             border-collapse: collapse;
         }
 
-        .order-table th, .order-table td {
+        .order-table th,
+        .order-table td {
             padding: 1rem 1.25rem;
             text-align: left;
             border-bottom: 1px solid var(--gray-light);
@@ -604,6 +607,7 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -822,11 +826,11 @@
             .dashboard {
                 grid-template-columns: 220px 1fr;
             }
-            
+
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
+
             .product-grid {
                 grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             }
@@ -836,29 +840,30 @@
             .dashboard {
                 grid-template-columns: 1fr;
             }
-            
+
             .sidebar {
                 height: auto;
                 position: relative;
                 padding: 1rem;
             }
-            
+
             .nav-items {
                 display: grid;
                 gap: 0.5rem;
             }
-            
+
             .nav-item {
                 margin: 0;
                 padding: 0.75rem;
                 font-size: 0.9rem;
             }
-            
+
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .order-table th, .order-table td {
+
+            .order-table th,
+            .order-table td {
                 padding: 0.75rem;
             }
         }
@@ -868,20 +873,20 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
-            
+
             .nav-items {
                 grid-template-columns: 1fr;
             }
-            
+
             .modal-content {
                 width: 95%;
                 padding: 1.5rem;
             }
-            
+
             .modal-actions {
                 flex-direction: column;
             }
-            
+
             .modal-actions .btn {
                 width: 100%;
                 justify-content: center;
@@ -900,7 +905,7 @@
             .mobile-menu-toggle {
                 display: block;
             }
-            
+
             .sidebar {
                 position: fixed;
                 left: -350px;
@@ -908,11 +913,11 @@
                 z-index: 100;
                 height: 100vh;
             }
-            
+
             .sidebar.active {
                 left: 0;
             }
-            
+
             /* Add overlay when sidebar is open */
             .sidebar-overlay {
                 display: none;
@@ -921,15 +926,14 @@
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: rgba(0,0,0,0.5);
+                background: rgba(0, 0, 0, 0.5);
                 z-index: 99;
             }
-            
+
             .sidebar-overlay.active {
                 display: block;
             }
         }
-
     </style>
 </head>
 
@@ -1008,30 +1012,30 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <h3>Total Sales</h3>
-                    <div class="value">₱ 24,580.00</div>
-                    <div class="change positive">
-                        <i class="fas fa-arrow-up"></i> 12% from last week
+                    <div class="value" id="totalSales">₱ 0.00</div>
+                    <div class="change" id="salesChange">
+                        <i class="fas fa-arrow-up"></i> <span id="salesChangeText">0% from last week</span>
                     </div>
                 </div>
                 <div class="stat-card">
                     <h3>Orders</h3>
-                    <div id="orderValuedisplay" class="value">42</div>
-                    <div class="change positive">
-                        <i class="fas fa-arrow-up"></i> 5 new today
+                    <div id="totalOrders" class="value">0</div>
+                    <div class="change" id="ordersChange">
+                        <i class="fas fa-arrow-up"></i> <span id="ordersChangeText">0 new today</span>
                     </div>
                 </div>
                 <div class="stat-card">
                     <h3>Products</h3>
-                    <div class="value">78</div>
-                    <div class="change negative">
-                        <i class="fas fa-arrow-down"></i> 2 out of stock
+                    <div id="totalProducts" class="value">0</div>
+                    <div class="change" id="productsChange">
+                        <i class="fas fa-arrow-up"></i> <span id="productsChangeText">0 out of stock</span>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <h3>Visitors</h3>
-                    <div class="value">1,245</div>
-                    <div class="change positive">
-                        <i class="fas fa-arrow-up"></i> 24% from last week
+                    <h3>Customers</h3>
+                    <div id="totalCustomers" class="value">0</div>
+                    <div class="change" id="customersChange">
+                        <i class="fas fa-arrow-up"></i> <span id="customersChangeText">0% from last week</span>
                     </div>
                 </div>
             </div>
@@ -1052,39 +1056,8 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>#ORD-7821</td>
-                            <td>John Smith</td>
-                            <td>Today, 10:45 AM</td>
-                            <td>₱ 2,450.00</td>
-                            <td><span class="status pending"><i class="fas fa-clock"></i> Pending</span></td>
-                            <td><button class="btn btn-view">View</button></td>
-                        </tr>
-                        <tr>
-                            <td>#ORD-7819</td>
-                            <td>Sarah Johnson</td>
-                            <td>Yesterday, 3:22 PM</td>
-                            <td>₱ 1,890.00</td>
-                            <td><span class="status shipped"><i class="fas fa-check-circle"></i> Shipped</span></td>
-                            <td><button class="btn btn-view">View</button></td>
-                        </tr>
-                        <tr>
-                            <td>#ORD-7815</td>
-                            <td>Michael Brown</td>
-                            <td>Jul 8, 2023</td>
-                            <td>₱ 3,250.00</td>
-                            <td><span class="status shipped"><i class="fas fa-check-circle"></i> Shipped</span></td>
-                            <td><button class="btn btn-view">View</button></td>
-                        </tr>
-                        <tr>
-                            <td>#ORD-7812</td>
-                            <td>Emily Davis</td>
-                            <td>Jul 7, 2023</td>
-                            <td>₱ 1,750.00</td>
-                            <td><span class="status cancelled"><i class="fas fa-times-circle"></i> Cancelled</span></td>
-                            <td><button class="btn btn-view">View</button></td>
-                        </tr>
+                    <tbody id="ordersTableBody">
+                        <!-- Orders will be populated here -->
                     </tbody>
                 </table>
             </div>
@@ -1094,72 +1067,8 @@
                 <h2 class="section-title">
                     <i class="fas fa-star"></i> Top Products
                 </h2>
-                <div class="product-grid">
-                    <div class="product-card">
-                        <div class="product-image">
-                            <span class="product-badge">Bestseller</span>
-                            <img src="https://via.placeholder.com/300x200?text=Running+Shoe" alt="Product" class="shoe-thumbnail">
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-title">Nike Air Max 270</h3>
-                            <div class="product-meta">
-                                <span>#SKU-7821</span>
-                                <span>Black/White</span>
-                            </div>
-                            <div class="product-price">₱ 5,495.00</div>
-                            <div class="product-stats">
-                                <div class="product-stat">
-                                    <i class="fas fa-shopping-cart"></i> 142 sold
-                                </div>
-                                <div class="product-stat">
-                                    <i class="fas fa-eye"></i> 1.2k views
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://via.placeholder.com/300x200?text=Casual+Shoe" alt="Product" class="shoe-thumbnail">
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-title">Adidas Superstar</h3>
-                            <div class="product-meta">
-                                <span>#SKU-6721</span>
-                                <span>White/Gum</span>
-                            </div>
-                            <div class="product-price">₱ 4,995.00</div>
-                            <div class="product-stats">
-                                <div class="product-stat">
-                                    <i class="fas fa-shopping-cart"></i> 98 sold
-                                </div>
-                                <div class="product-stat">
-                                    <i class="fas fa-eye"></i> 890 views
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <span class="product-badge">New</span>
-                            <img src="https://via.placeholder.com/300x200?text=Basketball+Shoe" alt="Product" class="shoe-thumbnail">
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-title">Jordan Retro 1</h3>
-                            <div class="product-meta">
-                                <span>#SKU-8921</span>
-                                <span>Bred/Black</span>
-                            </div>
-                            <div class="product-price">₱ 7,995.00</div>
-                            <div class="product-stats">
-                                <div class="product-stat">
-                                    <i class="fas fa-shopping-cart"></i> 64 sold
-                                </div>
-                                <div class="product-stat">
-                                    <i class="fas fa-eye"></i> 2.4k views
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="product-grid" id="topProductsGrid">
+                    <!-- Top products will be populated here -->
                 </div>
 
                 <h2 class="section-title">
@@ -1168,7 +1077,8 @@
                 <div class="product-grid">
                     <div class="product-card">
                         <div class="product-image">
-                            <img src="https://via.placeholder.com/300x200?text=New+Shoe" alt="Product" class="shoe-thumbnail">
+                            <img src="https://via.placeholder.com/300x200?text=New+Shoe" alt="Product"
+                                class="shoe-thumbnail">
                         </div>
                         <div class="product-info">
                             <h3 class="product-title">New Balance 574</h3>
@@ -1189,7 +1099,8 @@
                     </div>
                     <div class="product-card">
                         <div class="product-image">
-                            <img src="https://via.placeholder.com/300x200?text=New+Shoe" alt="Product" class="shoe-thumbnail">
+                            <img src="https://via.placeholder.com/300x200?text=New+Shoe" alt="Product"
+                                class="shoe-thumbnail">
                         </div>
                         <div class="product-info">
                             <h3 class="product-title">Puma RS-X</h3>
@@ -1234,7 +1145,7 @@
                             <p><strong>Email:</strong> john.smith@example.com</p>
                             <p><strong>Phone:</strong> +63 912 345 6789</p>
                         </div>
-                        
+
                         <div class="order-details-section">
                             <h3><i class="fas fa-truck"></i> Shipping Address</h3>
                             <p>123 Main Street</p>
@@ -1243,12 +1154,13 @@
                             <p>Philippines</p>
                         </div>
                     </div>
-                    
+
                     <div>
                         <div class="order-details-section">
                             <h3><i class="fas fa-receipt"></i> Order Summary</h3>
                             <div class="order-item">
-                                <img src="https://via.placeholder.com/150x150?text=Shoe" alt="Product" class="order-item-image">
+                                <img src="https://via.placeholder.com/150x150?text=Shoe" alt="Product"
+                                    class="order-item-image">
                                 <div class="order-item-details">
                                     <div class="order-item-title">Nike Air Max 270</div>
                                     <div class="order-item-variant">Color: Black/White | Size: 10</div>
@@ -1256,7 +1168,7 @@
                                     <div class="order-item-price">₱ 5,495.00</div>
                                 </div>
                             </div>
-                            
+
                             <div class="order-summary">
                                 <div class="summary-row">
                                     <span>Subtotal:</span>
@@ -1295,7 +1207,9 @@
             <span class="close-modal">&times;</span>
             <h2><i class="fas fa-exclamation-triangle"></i> Reason for Rejection</h2>
             <p>Please provide a clear reason for rejecting this order. The customer will receive this message.</p>
-            <textarea id="rejectionReason" placeholder="Example: The requested item is currently out of stock. We expect new inventory to arrive on July 25th. Please contact us if you'd like to be notified when it's available again." rows="4"></textarea>
+            <textarea id="rejectionReason"
+                placeholder="Example: The requested item is currently out of stock. We expect new inventory to arrive on July 25th. Please contact us if you'd like to be notified when it's available again."
+                rows="4"></textarea>
             <div class="modal-actions">
                 <button id="confirmRejectBtn" class="btn btn-danger">
                     <i class="fas fa-times"></i> Confirm Rejection
