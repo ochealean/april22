@@ -311,9 +311,22 @@ function viewOrderDetails(orderId, customerId) {
     // Show the modal
     document.getElementById('orderModal').style.display = 'block';
     
+    // Get reference to the action buttons
+    const acceptBtn = document.getElementById('acceptOrderBtn');
+    const rejectBtn = document.getElementById('rejectOrderBtn');
+    
+    // Show/hide buttons based on order status
+    if (order.status === 'completed' || order.status === 'cancelled') {
+        acceptBtn.style.display = 'none';
+        rejectBtn.style.display = 'none';
+    } else {
+        acceptBtn.style.display = 'inline-flex'; // or 'block' depending on your button styling
+        rejectBtn.style.display = 'inline-flex';
+    }
+    
     // Set up action buttons
-    document.getElementById('acceptOrderBtn').onclick = () => processOrder(orderId, customerId, 'completed');
-    document.getElementById('rejectOrderBtn').onclick = () => {
+    acceptBtn.onclick = () => processOrder(orderId, customerId, 'completed');
+    rejectBtn.onclick = () => {
         document.getElementById('orderModal').style.display = 'none';
         document.getElementById('rejectModal').style.display = 'block';
     };
