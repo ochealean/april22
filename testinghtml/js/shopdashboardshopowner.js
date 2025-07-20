@@ -39,8 +39,6 @@ function initDashboard() {
     // Set up real-time listeners
     setupRealtimeListeners();
     
-    // Update UI every 5 seconds (optional)
-    setInterval(updateDashboardUI, 5000);
 }
 
 // Load all dashboard data
@@ -84,13 +82,10 @@ function loadOrders() {
             for (const customerId in allTransactions) {
                 const customerOrders = allTransactions[customerId];
                 
-                // Iterate through each order for this customer
                 for (const orderId in customerOrders) {
                     const order = customerOrders[orderId];
                     
-                    // Check if this order belongs to our shop
                     if (order.item && order.item.shopId === shopLoggedin) {
-                        // Format the order data for our dashboard
                         const formattedOrder = {
                             id: orderId,
                             customerId: customerId,
@@ -126,7 +121,7 @@ function loadOrders() {
             // Sort by date (newest first)
             shopOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
             
-            // Get recent orders (last 5)
+            // Update dashboard data
             dashboardData.recentOrders = shopOrders.slice(0, 5);
             dashboardData.totalSales = totalSales;
             dashboardData.totalOrders = orderCount;
@@ -135,6 +130,7 @@ function loadOrders() {
         }
     }, (error) => {
         console.error("Error loading orders:", error);
+        showStatusMessage("Failed to load orders", 'error');
     });
 }
 
@@ -153,11 +149,16 @@ function loadCustomers() {
 
 // Update the dashboard UI with current data
 function updateDashboardUI() {
-    // Update stats cards
-    document.getElementById('totalSales').textContent = `₱ ${dashboardData.totalSales.toFixed(2)}`;
-    document.getElementById('totalOrders').textContent = dashboardData.totalOrders;
-    document.getElementById('totalProducts').textContent = dashboardData.totalProducts;
-    document.getElementById('totalCustomers').textContent = dashboardData.totalCustomers;
+    // Only update DOM elements if they exist
+    const totalSalesEl = document.getElementById('totalSales');
+    const totalOrdersEl = document.getElementById('totalOrders');
+    const totalProductsEl = document.getElementById('totalProducts');
+    const totalCustomersEl = document.getElementById('totalCustomers');
+    
+    if (totalSalesEl) totalSalesEl.textContent = `₱ ${dashboardData.totalSales.toFixed(2)}`;
+    if (totalOrdersEl) totalOrdersEl.textContent = dashboardData.totalOrders;
+    if (totalProductsEl) totalProductsEl.textContent = dashboardData.totalProducts;
+    if (totalCustomersEl) totalCustomersEl.textContent = dashboardData.totalCustomers;
     
     // Update orders table
     updateOrdersTable();
@@ -372,7 +373,7 @@ function setupRealtimeListeners() {
     // Listen for changes in orders
     const ordersRef = ref(db, 'AR_shoe_users/transactions');
     onValue(ordersRef, (snapshot) => {
-        loadOrders(); // Refresh orders data
+        loadOrders(); // This will call updateDashboardUI() when done
     });
     
     // Listen for changes in products
@@ -380,6 +381,15 @@ function setupRealtimeListeners() {
     onValue(productsRef, (snapshot) => {
         if (snapshot.exists()) {
             dashboardData.totalProducts = Object.keys(snapshot.val()).length;
+            updateDashboardUI();
+        }
+    });
+    
+    // Add listener for customers
+    const customersRef = ref(db, 'AR_shoe_users/customer');
+    onValue(customersRef, (snapshot) => {
+        if (snapshot.exists()) {
+            dashboardData.totalCustomers = Object.keys(snapshot.val()).length;
             updateDashboardUI();
         }
     });
