@@ -54,6 +54,19 @@ function loadDashboardData() {
         if (snapshot.exists()) {
             const shoes = snapshot.val();
             dashboardData.totalProducts = Object.keys(shoes).length;
+            
+            // Convert shoes object to array and sort by dateAdded
+            const shoesArray = Object.entries(shoes).map(([shoeId, shoeData]) => ({
+                id: shoeId,
+                ...shoeData
+            }));
+            
+            // Sort by dateAdded (newest first)
+            shoesArray.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+            
+            // Store in dashboard data
+            dashboardData.recentProducts = shoesArray.slice(0, 4); // Get 4 most recent
+            
             updateDashboardUI();
         }
     }).catch((error) => {
@@ -63,7 +76,7 @@ function loadDashboardData() {
     // Load orders
     loadOrders();
     
-    // Load customers (you'll need to implement this based on your DB structure)
+    // Load customers
     loadCustomers();
 }
 
@@ -165,6 +178,9 @@ function updateDashboardUI() {
     
     // Update top products
     updateTopProducts();
+    
+    // Update recently added products
+    updateRecentlyAddedProducts();
 }
 
 // Update orders table
@@ -237,17 +253,54 @@ function updateTopProducts() {
     productsGrid.innerHTML = '';
     
     // In a real app, you would query your database for top products
-    // For now, we'll just show an empty state
-    productsGrid.innerHTML = `
-        <div class="empty-state">
-            <i class="fas fa-shoe-prints"></i>
-            <h3>No Products Added</h3>
-            <p>Start by adding your first product to showcase in your store</p>
-            <button class="btn btn-primary" onclick="window.location.href='/shopowner/html/shopowner_addshoe.html'">
-                <i class="fas fa-plus"></i> Add First Product
-            </button>
-        </div>
-    `;
+    // For now, we'll just show the most recent products
+    if (dashboardData.recentProducts && dashboardData.recentProducts.length > 0) {
+        dashboardData.recentProducts.forEach(product => {
+            // Get the first variant for display
+            const firstVariant = product.variants ? Object.values(product.variants)[0] : null;
+            
+            const productCard = document.createElement('div');
+            productCard.className = 'product-card';
+            productCard.innerHTML = `
+                <div class="product-image">
+                    <img src="${firstVariant?.imageUrl || 'https://via.placeholder.com/300x200?text=No+Image'}" 
+                         alt="${product.shoeName}" class="shoe-thumbnail">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">${product.shoeName}</h3>
+                    <div class="product-meta">
+                        <span>#${product.shoeCode}</span>
+                        <span>${firstVariant?.variantName || ''}</span>
+                    </div>
+                    <div class="product-price">₱ ${firstVariant?.price?.toFixed(2) || '0.00'}</div>
+                    <div class="product-stats">
+                        <div class="product-stat">
+                            <i class="fas fa-eye"></i> 0 views
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add click event to view product details
+            productCard.addEventListener('click', () => {
+                // You can implement a function to view product details
+                console.log("View product:", product.id);
+            });
+            
+            productsGrid.appendChild(productCard);
+        });
+    } else {
+        productsGrid.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-shoe-prints"></i>
+                <h3>No Products Added</h3>
+                <p>Start by adding your first product to showcase in your store</p>
+                <button class="btn btn-primary" onclick="window.location.href='/shopowner/html/shopowner_addshoe.html'">
+                    <i class="fas fa-plus"></i> Add First Product
+                </button>
+            </div>
+        `;
+    }
 }
 
 // View order details in modal
@@ -514,3 +567,50 @@ document.getElementById('logout_btn')?.addEventListener('click', function() {
         console.error("Error signing out:", error);
     });
 });
+
+// Update recently added products
+function updateRecentlyAddedProducts() {
+    const recentlyAddedGrid = document.querySelector('.products-section .product-grid:last-child');
+    recentlyAddedGrid.innerHTML = '';
+    
+    if (dashboardData.recentProducts && dashboardData.recentProducts.length > 0) {
+        dashboardData.recentProducts.forEach(product => {
+            // Get the first variant for display
+            const firstVariant = product.variants ? Object.values(product.variants)[0] : null;
+            
+            const productCard = document.createElement('div');
+            productCard.className = 'product-card';
+            productCard.innerHTML = `
+                <div class="product-image">
+                    <img src="${firstVariant?.imageUrl || 'https://via.placeholder.com/300x200?text=No+Image'}" 
+                         alt="${product.shoeName}" class="shoe-thumbnail">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">${product.shoeName}</h3>
+                    <div class="product-meta">
+                        <span>#${product.shoeCode}</span>
+                        <span>${firstVariant?.variantName || ''}</span>
+                    </div>
+                    <div class="product-price">₱ ${firstVariant?.price?.toFixed(2) || '0.00'}</div>
+                    <div class="product-stats">
+                        <div class="product-stat">
+                            <i class="fas fa-eye"></i> 0 views
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            recentlyAddedGrid.appendChild(productCard);
+        });
+    } else {
+        recentlyAddedGrid.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-plus-circle"></i>
+                <p>Add more products to showcase here</p>
+                <button class="btn btn-primary" onclick="window.location.href='/shopowner/html/shopowner_addshoe.html'">
+                    <i class="fas fa-plus"></i> Add Product
+                </button>
+            </div>
+        `;
+    }
+}
