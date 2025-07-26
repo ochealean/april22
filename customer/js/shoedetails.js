@@ -306,9 +306,13 @@ async function displayReviews(feedbacks) {
     const ratingCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
     const reviewsToDisplay = [];
 
+    console.log("Feedbacks data:", feedbacks);
     for (const userId in feedbacks) {
+        console.log("Processing feedbacks for user:", userId);
         for (const orderID in feedbacks[userId]) {
+            console.log("Processing order ID:", orderID);
             const feedback = feedbacks[userId][orderID];
+            console.log("Feedback data:", feedback);
             if (feedback.shoeID === shoeID) {
                 reviewsToDisplay.push({
                     userId,

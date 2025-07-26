@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,9 +22,9 @@
             --gray-dark: #7f8c8d;
             --text-primary: #2c3e50;
             --text-secondary: #34495e;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             --radius-sm: 4px;
             --radius-md: 8px;
@@ -78,7 +79,8 @@
             text-decoration: none;
         }
 
-        .nav-item:hover, .nav-item.active {
+        .nav-item:hover,
+        .nav-item.active {
             background-color: var(--primary-dark);
             color: var(--light);
         }
@@ -126,7 +128,7 @@
             object-fit: cover;
             border: 2px solid var(--primary);
         }
-        
+
         .feedback-container {
             max-width: 800px;
             margin: 40px auto;
@@ -135,17 +137,17 @@
             border-radius: 10px;
             box-shadow: var(--shadow);
         }
-        
+
         .feedback-header {
             text-align: center;
             margin-bottom: 30px;
         }
-        
+
         .feedback-header h1 {
             color: var(--primary-color);
             margin-bottom: 10px;
         }
-        
+
         .shoe-details {
             display: flex;
             gap: 20px;
@@ -153,7 +155,7 @@
             padding-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
         }
-        
+
         .shoe-image {
             width: 150px;
             height: 150px;
@@ -161,32 +163,33 @@
             border-radius: 8px;
             border: 1px solid var(--border-color);
         }
-        
+
         .shoe-info {
             flex: 1;
         }
-        
+
         .shoe-name {
             font-size: 20px;
             font-weight: 600;
             margin-bottom: 8px;
         }
-        
-        .shoe-id, .shop-name {
+
+        .shoe-id,
+        .shop-name {
             color: var(--text-light);
             margin-bottom: 5px;
             font-size: 14px;
         }
-        
+
         .rating-section {
             margin-bottom: 25px;
         }
-        
+
         .rating-title {
             font-weight: 600;
             margin-bottom: 15px;
         }
-        
+
         .stars {
             display: flex;
             justify-content: space-between;
@@ -200,11 +203,12 @@
             transition: color 0.2s;
             justify-content: space-between;
         }
-        
-        .star:hover, .star.active {
+
+        .star:hover,
+        .star.active {
             color: var(--star-color);
         }
-        
+
         .rating-labels {
             display: flex;
             justify-content: space-between;
@@ -212,7 +216,7 @@
             color: var(--text-light);
             margin-top: 5px;
         }
-        
+
         textarea {
             width: 100%;
             min-height: 150px;
@@ -224,7 +228,7 @@
             margin-bottom: 20px;
             resize: vertical;
         }
-        
+
         .submit-btn {
             background-color: var(--primary-dark);
             color: white;
@@ -242,33 +246,34 @@
             width: 200px;
             margin: 0 auto;
         }
-        
+
         .submit-btn:hover {
             background-color: var(--primary);
             transform: translateY(-2px);
         }
-        
+
         .submit-btn:disabled {
             background-color: #ccc;
             cursor: not-allowed;
             transform: none;
         }
-        
+
         .loader {
             display: none;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
         }
-        
+
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
         
-        /* Success message */
         .success-message {
             display: none;
             text-align: center;
@@ -276,8 +281,30 @@
             margin-top: 20px;
             font-weight: 500;
         }
+
+        #existingFeedback {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        #existingFeedback .stars {
+            pointer-events: none;
+            /* Prevent interaction with the displayed stars */
+        }
+
+        #editReviewBtn {
+            background-color: var(--warning);
+            margin-bottom: 20px;
+        }
+
+        #editReviewBtn:hover {
+            background-color: #e67e22;
+        }
     </style>
 </head>
+
 <body>
     <div class="dashboard">
         <!-- Sidebar Navigation -->
@@ -332,19 +359,19 @@
 
             <div class="feedback-container">
                 <div class="feedback-header">
-                    
+
                     <p>Share your experience with this product</p>
                 </div>
-                
+
                 <div class="shoe-details">
-                    <img src="https://example.com/shoe-image.jpg" alt="Shoe Image" class="shoe-image" id="shoeImage">
+                    <img src="https://example.com/shoe-image.jpg " alt="Shoe Image" class="shoe-image" id="shoeImage">
                     <div class="shoe-info">
                         <h2 class="shoe-name" id="shoeName">Running Shoe Pro 2023</h2>
                         <div class="shoe-id" id="shoeId">Product ID: SH12345</div>
                         <div class="shop-name" id="shopName">From: Elite Footwear</div>
                     </div>
                 </div>
-                
+
                 <form id="feedbackForm">
                     <div class="rating-section">
                         <div class="rating-title">How would you rate this product?</div>
@@ -364,25 +391,47 @@
                         </div> -->
                         <input type="hidden" id="ratingValue" name="rating" value="0">
                     </div>
-                    
+
                     <div class="comment-section">
                         <label for="comment" class="rating-title">Share your thoughts (optional)</label>
-                        <textarea id="comment" name="comment" placeholder="What did you like or dislike about this product?"></textarea>
+                        <textarea id="comment" name="comment"
+                            placeholder="What did you like or dislike about this product?"></textarea>
                     </div>
-                    
+
                     <button type="submit" class="submit-btn" id="submitBtn">
                         <span>Submit Feedback</span>
                         <div class="loader" id="loader"></div>
                     </button>
-                    
+
                     <div class="success-message" id="successMessage">
                         <i class="fas fa-check-circle"></i> Thank you for your feedback!
                     </div>
                 </form>
+                <div id="existingFeedback" style="display: none;">
+                    <div class="rating-section">
+                        <div class="rating-title">Your Rating:</div>
+                        <div class="stars" id="existingStarRating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <div class="comment-section">
+                        <div class="rating-title">Your Review:</div>
+                        <div id="existingComment"
+                            style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 20px;"></div>
+                    </div>
+                    <button id="editReviewBtn" class="submit-btn"
+                        style="background-color: var(--warning); margin-bottom: 20px;">
+                        <span>Edit Review</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
- 
+
     <!-- <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Star rating functionality
@@ -493,4 +542,5 @@
     </script> -->
     <script src="/customer/js/feedback.js" type="module"></script>
 </body>
+
 </html>
