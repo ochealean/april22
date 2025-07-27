@@ -1,6 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getDatabase, ref, get, set, push } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+// Import the cursed words list
+import { cursedWords } from '../../cursedwords.js'; 
 
 // Firebase Config
 const firebaseConfig = {
@@ -362,7 +364,7 @@ async function displayReviews(feedbacks) {
         try {
             // Await the username lookup
             const username = await getCustomernameUsingID(review.userId);
-            
+
             // Create review element
             const reviewDiv = document.createElement("div");
             reviewDiv.classList.add("review-item");
@@ -396,7 +398,7 @@ async function displayReviews(feedbacks) {
             
             // Create comment
             const commentP = document.createElement("p");
-            commentP.textContent = review.feedback.comment || "No comment provided.";
+            commentP.textContent = censoredText(review.feedback.comment) || "No comment provided.";
             
             // Append all elements
             reviewDiv.appendChild(headerDiv);
@@ -828,3 +830,13 @@ function clearSizeSelection() {
 }
 buyNowBtn.disabled = true;
 addToCartBtn.disabled = true;
+
+function censoredText(text) {
+    if (!text) return text; // Return empty or null text as is
+    let censored = text;
+    cursedWords.forEach(word => {
+        const regex = new RegExp(`\\b${word}\\b`, 'gi'); // Match whole words, case insensitive
+        censored = censored.replace(regex, '****');
+    });
+    return censored;
+}

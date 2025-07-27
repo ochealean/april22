@@ -1,6 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+// Import the cursed words list
+import { cursedWords } from '../../cursedwords.js'; 
 
 // Firebase configuration
 const firebaseConfig = {
@@ -21,9 +23,11 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
+console.log(cursedWords);
+
 document.addEventListener("DOMContentLoaded", async () => {
     try {
-        const stars = document.querySelectorAll('.star');
+        const stars = document.querySelectorAll('#starRating .star');
         const ratingValue = document.getElementById('ratingValue');
         const feedbackForm = document.getElementById('feedbackForm');
         const submitBtn = document.getElementById('submitBtn');
@@ -31,6 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const successMessage = document.getElementById('successMessage');
         const existingFeedbackSection = document.getElementById('existingFeedback');
         const existingStarRating = document.getElementById('existingStarRating');
+        const existingStars = existingStarRating.querySelectorAll('.fa-star');
         const existingComment = document.getElementById('existingComment');
         const editReviewBtn = document.getElementById('editReviewBtn');
 
@@ -74,11 +79,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
 
-        // Check for existing feedback (both in transactions and feedbacks collections)
+        // Check for existing feedback
         const reviewRef = ref(db, `AR_shoe_users/feedbacks/${userID}/${orderID}`);
         const reviewSnapshot = await get(reviewRef);
 
-        // Use feedback from either transactions or feedbacks collection
         const existingFeedback = orderData.feedback || (reviewSnapshot.exists() ? reviewSnapshot.val() : null);
 
         // Function to update rating display
@@ -88,103 +92,30 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         };
 
-        if (existingFeedback) {
-            // Existing feedback handling
-            let currentRating = existingFeedback.rating;
-            let currentComment = existingFeedback.comment || 'No comment provided';
-
-            // Show existing feedback section
-            existingFeedbackSection.style.display = 'block';
-            feedbackForm.style.display = 'none';
-
-            // Get all star elements in both sections
-            const existingStars = existingStarRating.querySelectorAll('.fa-star');
-            
-            // Initialize rating display
-            updateRatingDisplay(existingStars, currentRating);
-            
-            // Display existing comment
-            existingComment.textContent = currentComment;
-
-            // Make existing stars interactive
-            existingStars.forEach((star, index) => {
+        // Function to make stars interactive
+        const makeStarsInteractive = (stars, ratingVar, isExisting = false) => {
+            stars.forEach((star, index) => {
                 star.style.cursor = 'pointer';
-                star.dataset.rating = index + 1; // Add rating data attribute
-                
-                star.addEventListener('click', () => {
-                    currentRating = index + 1;
-                    updateRatingDisplay(existingStars, currentRating);
-                    
-                    // Update the hidden form value
-                    ratingValue.value = currentRating;
-                    
-                    // Automatically save the new rating
-                    saveUpdatedFeedback(currentRating, currentComment);
+
+                star.addEventListener('click', (e) => {
+                    if (isExisting) e.stopPropagation();
+                    ratingVar = index + 1;
+                    updateRatingDisplay(stars, ratingVar);
+                    if (!isExisting) ratingValue.value = ratingVar;
+                    else saveUpdatedFeedback(ratingVar, existingComment.textContent);
                 });
 
                 star.addEventListener('mouseover', () => {
-                    if (existingFeedbackSection.style.display === 'block') {
-                        for (let i = 0; i <= index; i++) {
-                            existingStars[i].style.color = 'lightgray';
-                        }
-                    }
+                    stars.forEach((s, i) => {
+                        s.style.color = i <= index ? 'lightgray' : '#ccc';
+                    });
                 });
 
                 star.addEventListener('mouseout', () => {
-                    if (existingFeedbackSection.style.display === 'block') {
-                        updateRatingDisplay(existingStars, currentRating);
-                    }
+                    updateRatingDisplay(stars, ratingVar);
                 });
             });
-
-            // Set up edit button
-            editReviewBtn.onclick = () => {
-                existingFeedbackSection.style.display = 'none';
-                feedbackForm.style.display = 'block';
-
-                // Populate form with existing values
-                ratingValue.value = currentRating;
-                document.getElementById('comment').value = currentComment;
-
-                // Highlight stars to match existing rating
-                stars.forEach((star, index) => {
-                    star.classList.toggle('active', index < currentRating);
-                    star.style.color = index < currentRating ? 'gold' : '#ccc';
-                });
-            };
-        } else {
-            // New feedback handling
-            existingFeedbackSection.style.display = 'none';
-            feedbackForm.style.display = 'block';
-
-            // Rating stars behavior
-            stars.forEach(star => {
-                star.addEventListener('click', function () {
-                    const rating = parseInt(this.dataset.rating);
-                    ratingValue.value = rating;
-                    stars.forEach((s, i) => {
-                        s.classList.toggle('active', i < rating);
-                        s.style.color = i < rating ? 'gold' : '#ccc';
-                    });
-                });
-
-                star.addEventListener('mouseover', function () {
-                    if (ratingValue.value === '0') {
-                        const hoverRating = parseInt(this.dataset.rating);
-                        stars.forEach((s, i) => {
-                            s.style.color = i < hoverRating ? 'lightgray' : '#ccc';
-                        });
-                    }
-                });
-
-                star.addEventListener('mouseout', function () {
-                    const rating = parseInt(ratingValue.value);
-                    stars.forEach((s, i) => {
-                        s.style.color = i < rating ? 'gold' : '#ccc';
-                    });
-                });
-            });
-        }
+        };
 
         // Function to save updated feedback
         async function saveUpdatedFeedback(rating, comment) {
@@ -197,14 +128,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                     timestamp: Date.now()
                 };
 
-                // Update both collections separately
                 const feedbackRef = ref(db, `AR_shoe_users/feedbacks/${userID}/${orderID}`);
                 const transactionFeedbackRef = ref(db, `AR_shoe_users/transactions/${userID}/${orderID}/feedback`);
 
                 await set(feedbackRef, feedbackData);
                 await set(transactionFeedbackRef, feedbackData);
 
-                // Show success message briefly
                 successMessage.style.display = 'block';
                 successMessage.textContent = "Rating updated!";
                 setTimeout(() => {
@@ -217,64 +146,105 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         }
 
-        // Feedback submission (works for both new and edited reviews)
+        if (existingFeedback) {
+            // Existing feedback handling
+            let currentRating = existingFeedback.rating;
+            let currentComment = existingFeedback.comment || 'No comment provided';
+
+            existingFeedbackSection.style.display = 'block';
+            feedbackForm.style.display = 'none';
+
+            updateRatingDisplay(existingStars, currentRating);
+            existingComment.textContent = currentComment;
+
+            // Make existing stars interactive
+            makeStarsInteractive(existingStars, currentRating, true);
+
+            // Set up edit button
+            editReviewBtn.onclick = () => {
+                existingFeedbackSection.style.display = 'none';
+                feedbackForm.style.display = 'block';
+
+                ratingValue.value = currentRating;
+                document.getElementById('comment').value = currentComment;
+                updateRatingDisplay(stars, currentRating);
+
+                // Make form stars interactive
+                makeStarsInteractive(stars, currentRating);
+            };
+        } else {
+            // New feedback handling
+            existingFeedbackSection.style.display = 'none';
+            feedbackForm.style.display = 'block';
+
+            // Make form stars interactive
+            makeStarsInteractive(stars, 0);
+        }
+
+        // Feedback submission
         feedbackForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const rating = parseInt(ratingValue.value);
-            const comment = document.getElementById('comment').value;
-
-            if (rating === 0) {
-                alert("Please select a rating.");
+            if (checkForCursedWords(document.getElementById('comment').value)) {
+                alert("Your comment contains inappropriate language. Please revise it.");
                 return;
-            }
+            } else {
+                const rating = parseInt(ratingValue.value);
+                const comment = document.getElementById('comment').value;
 
-            submitBtn.disabled = true;
-            loader.style.display = 'block';
-            submitBtn.querySelector('span').textContent = 'Submitting...';
+                if (rating === 0) {
+                    alert("Please select a rating.");
+                    return;
+                }
 
-            try {
-                const feedbackData = {
-                    orderID,
-                    shoeID: orderData.item.shoeId,
-                    rating,
-                    comment,
-                    timestamp: Date.now()
-                };
+                submitBtn.disabled = true;
+                loader.style.display = 'block';
+                submitBtn.querySelector('span').textContent = 'Submitting...';
 
-                // Update both collections separately
-                const feedbackRef = ref(db, `AR_shoe_users/feedbacks/${userID}/${orderID}`);
-                const transactionFeedbackRef = ref(db, `AR_shoe_users/transactions/${userID}/${orderID}/feedback`);
+                try {
+                    const feedbackData = {
+                        orderID,
+                        shoeID: orderData.item.shoeId,
+                        rating,
+                        comment,
+                        timestamp: Date.now()
+                    };
 
-                await set(feedbackRef, feedbackData);
-                await set(transactionFeedbackRef, feedbackData);
+                    const feedbackRef = ref(db, `AR_shoe_users/feedbacks/${userID}/${orderID}`);
+                    const transactionFeedbackRef = ref(db, `AR_shoe_users/transactions/${userID}/${orderID}/feedback`);
 
-                loader.style.display = 'none';
-                successMessage.style.display = 'block';
-                successMessage.textContent = "Thank you for your feedback!";
+                    await set(feedbackRef, feedbackData);
+                    await set(transactionFeedbackRef, feedbackData);
 
-                // Update the displayed feedback
-                const existingStars = existingStarRating.querySelectorAll('.fa-star');
-                updateRatingDisplay(existingStars, rating);
-                existingComment.textContent = comment;
+                    loader.style.display = 'none';
+                    successMessage.style.display = 'block';
+                    successMessage.textContent = "Thank you for your feedback!";
 
-                // Switch to feedback display view
-                feedbackForm.style.display = 'none';
-                existingFeedbackSection.style.display = 'block';
+                    // Update the displayed feedback
+                    updateRatingDisplay(existingStars, rating);
+                    existingComment.textContent = comment;
 
-                // Reset form state
-                setTimeout(() => {
+                    // Switch to feedback display view
+                    feedbackForm.style.display = 'none';
+                    existingFeedbackSection.style.display = 'block';
+
+                    // Make existing stars interactive
+                    makeStarsInteractive(existingStars, rating, true);
+
+                    // Reset form state
+                    setTimeout(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.querySelector('span').textContent = 'Submit Feedback';
+                        successMessage.style.display = 'none';
+                    }, 3000);
+
+                } catch (error) {
+                    console.error("Error submitting feedback:", error);
+                    alert("Failed to submit feedback. Please try again.");
                     submitBtn.disabled = false;
+                    loader.style.display = 'none';
                     submitBtn.querySelector('span').textContent = 'Submit Feedback';
-                    successMessage.style.display = 'none';
-                }, 3000);
-
-            } catch (error) {
-                console.error("Error submitting feedback:", error);
-                alert("Failed to submit feedback. Please try again.");
-                submitBtn.disabled = false;
-                loader.style.display = 'none';
-                submitBtn.querySelector('span').textContent = 'Submit Feedback';
+                }
             }
         });
     } catch (error) {
@@ -282,3 +252,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         alert("An error occurred while loading the page.");
     }
 });
+
+function checkForCursedWords(comment) {
+    return cursedWords.some(word => comment.toLowerCase().includes(word.toLowerCase()));
+}
