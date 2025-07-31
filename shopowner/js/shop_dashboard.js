@@ -269,7 +269,13 @@ function displayRecentProducts(shoes, container) {
 
         const firstVariant = variants[0] || null;
         const price = firstVariant ? `₱${firstVariant.price}` : '₱0.00';
-        const color = firstVariant ? firstVariant.color : 'No color';
+        
+        // Get all unique colors from variants
+        const colors = [...new Set(variants.map(v => v.color))];
+        const colorText = colors.length > 0 
+            ? colors.join(', ') 
+            : 'No color';
+            
         const imageUrl = shoe.defaultImage || (firstVariant ? firstVariant.imageUrl : null);
 
         html += `
@@ -284,7 +290,7 @@ function displayRecentProducts(shoes, container) {
                 <div class="product-title">${shoe.shoeName || 'No Name'}</div>
                 <div class="product-code">Code: ${shoe.shoeCode || 'N/A'}</div>
                 <div class="product-price">${price}</div>
-                <div class="product-color">${color}</div>
+                <div class="product-color">Colors: ${colorText}</div>
                 <button class="btn btn-view" onclick="viewShoeDetails('${shoe.id}')">
                     <i class="fas fa-eye"></i> View
                 </button>
@@ -424,19 +430,15 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         const userRef = ref(db, `AR_shoe_users/employees/${user.uid}`);
         onValue(userRef, async (snapshot) => {
-            // this will be called if the user is NOT a shop owner but an employee
             if (snapshot.exists()) {
                 const userData = snapshot.val();
                 console.log(userData.role);
 
-                // setting the shopId of the logged in user
                 shopLoggedin = userData.shopId;
 
-                // Load Order Count in html dashboard
                 const orders = await getAllOrdersByShopId(shopLoggedin);
                 document.getElementById("orderValuedisplay").textContent = orders.length || 0;
 
-                // Hiding buttons based on role
                 if (userData.role.toLowerCase() === "manager") {
                     document.getElementById("addemployeebtn").style.display = "none";
                 } else if (userData.role.toLowerCase() === "salesperson") {
@@ -445,14 +447,14 @@ onAuthStateChanged(auth, async (user) => {
                 }
 
                 await loadShopDashboard();
+                await loadTopProducts(); // Add this line to load top products
             } else {
-
-                // this will be called if the user is a shop owner
                 shopLoggedin = user.uid;
                 try {
                     const orders = await getAllOrdersByShopId(shopLoggedin);
                     document.getElementById("orderValuedisplay").textContent = orders.length || 0;
                     await loadShopDashboard();
+                    await loadTopProducts(); // Add this line to load top products
                 } catch (error) {
                     console.error("Error loading dashboard:", error);
                 }
@@ -524,3 +526,150 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+async function loadTopProducts() {
+    try {
+        const feedbacksRef = ref(db, 'AR_shoe_users/feedbacks');
+        const shoesRef = ref(db, 'AR_shoe_users/shoe');
+        const [feedbacksSnapshot, shoesSnapshot] = await Promise.all([get(feedbacksRef), get(shoesRef)]);
+
+        if (!feedbacksSnapshot.exists() || !shoesSnapshot.exists()) {
+            displayTopProducts([]);
+            return;
+        }
+
+        // Collect all feedbacks and calculate average ratings
+        const productRatings = {};
+        feedbacksSnapshot.forEach((userSnapshot) => {
+            const userFeedbacks = userSnapshot.val();
+            for (const feedbackId in userFeedbacks) {
+                const feedback = userFeedbacks[feedbackId];
+                if (!productRatings[feedback.shoeID]) {
+                    productRatings[feedback.shoeID] = {
+                        totalRating: 0,
+                        count: 0
+                    };
+                }
+                productRatings[feedback.shoeID].totalRating += feedback.rating;
+                productRatings[feedback.shoeID].count++;
+            }
+        });
+
+        // Calculate average ratings and filter products with rating >= 3.0
+        const ratedProducts = [];
+        for (const shoeId in productRatings) {
+            const avgRating = productRatings[shoeId].totalRating / productRatings[shoeId].count;
+            if (avgRating >= 3.0) {
+                ratedProducts.push({
+                    shoeId,
+                    avgRating,
+                    feedbackCount: productRatings[shoeId].count
+                });
+            }
+        }
+
+        // Sort by rating (highest first)
+        ratedProducts.sort((a, b) => b.avgRating - a.avgRating);
+
+        // Get top 5 products
+        const topProducts = ratedProducts.slice(0, 5);
+
+        // Get shoe details for top products
+        const topProductsWithDetails = [];
+        for (const product of topProducts) {
+            let shoeFound = false;
+            shoesSnapshot.forEach((shopSnapshot) => {
+                const shopShoes = shopSnapshot.val();
+                for (const shoeId in shopShoes) {
+                    if (shoeId === product.shoeId) {
+                        const shoe = shopShoes[shoeId];
+                        topProductsWithDetails.push({
+                            ...shoe,
+                            id: shoeId,
+                            avgRating: product.avgRating,
+                            feedbackCount: product.feedbackCount,
+                            shopId: shopSnapshot.key
+                        });
+                        shoeFound = true;
+                        return;
+                    }
+                }
+            });
+            if (!shoeFound) {
+                console.warn(`Shoe not found: ${product.shoeId}`);
+            }
+        }
+
+        displayTopProducts(topProductsWithDetails);
+    } catch (error) {
+        console.error("Error loading top products:", error);
+        displayTopProducts([]);
+    }
+}
+
+function displayTopProducts(products) {
+    const topProductsGrid = document.getElementById('topProductsGrid');
+    if (!topProductsGrid) return;
+
+    if (products.length === 0) {
+        topProductsGrid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <i class="fas fa-star"></i>
+                <h3>No Top Rated Products Yet</h3>
+                <p>Products with ratings will appear here once customers leave feedback</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    products.forEach(product => {
+        // Get variants - handle both array and object formats
+        const variants = product.variants
+            ? (Array.isArray(product.variants)
+                ? product.variants
+                : Object.values(product.variants || {}))
+            : [];
+
+        const firstVariant = variants[0] || null;
+        const price = firstVariant ? `₱${firstVariant.price}` : '₱0.00';
+        
+        // Get all unique colors from variants
+        const colors = [...new Set(variants.map(v => v.color))];
+        const colorText = colors.length > 0 
+            ? colors.join(', ') 
+            : 'No color';
+            
+        const imageUrl = product.defaultImage || (firstVariant ? firstVariant.imageUrl : null);
+
+        html += `
+        <div class="product-card">
+            <div class="product-image">
+                ${imageUrl
+                ? `<img src="${imageUrl}" alt="${product.shoeName}" class="shoe-thumbnail">`
+                : '<div class="no-image">No Image</div>'
+            }
+                <div class="product-badge">
+                    ${product.avgRating.toFixed(1)} <i class="fas fa-star"></i>
+                </div>
+            </div>
+            <div class="product-info">
+                <div class="product-title">${product.shoeName || 'No Name'}</div>
+                <div class="product-code">Code: ${product.shoeCode || 'N/A'}</div>
+                <div class="product-price">${price}</div>
+                <div class="product-color">Colors: ${colorText}</div>
+                <div class="product-stats">
+                    <div class="product-stat">
+                        <i class="fas fa-star"></i> ${product.avgRating.toFixed(1)} (${product.feedbackCount} reviews)
+                    </div>
+                </div>
+                <button class="btn btn-view" onclick="viewShoeDetails('${product.id}')">
+                    <i class="fas fa-eye"></i> View
+                </button>
+            </div>
+        </div>
+        `;
+    });
+
+    topProductsGrid.innerHTML = html;
+}
