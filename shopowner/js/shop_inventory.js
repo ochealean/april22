@@ -181,7 +181,7 @@ function showShoeDetails(shoeId) {
         modalContent.innerHTML = `
             <div class="modal-header">
                 <h2>${shoe.shoeName || 'Shoe Details'}</h2>
-                <button onclick="closeModal()" class="close-btn">&times;</button>
+                
             </div>
             <div class="modal-body">
                 <div class="shoe-main-info">
@@ -287,7 +287,7 @@ async function showReviews(shoeId) {
     modalContent.innerHTML = `
         <div class="modal-header">
             <h2>Loading Reviews...</h2>
-            <button onclick="closeModal()" class="close-btn">&times;</button>
+            
         </div>
         <div class="modal-body">
             <div class="loading">Please wait while we load the reviews...</div>
@@ -302,7 +302,7 @@ async function showReviews(shoeId) {
             modalContent.innerHTML = `
                 <div class="modal-header">
                     <h2>No Reviews Yet</h2>
-                    <button onclick="closeModal()" class="close-btn">&times;</button>
+                    
                 </div>
                 <div class="modal-body">
                     <p>This shoe hasn't received any reviews yet.</p>
@@ -331,7 +331,7 @@ async function showReviews(shoeId) {
             modalContent.innerHTML = `
                 <div class="modal-header">
                     <h2>No Reviews Yet</h2>
-                    <button onclick="closeModal()" class="close-btn">&times;</button>
+                    
                 </div>
                 <div class="modal-body">
                     <p>This shoe hasn't received any reviews yet.</p>
@@ -396,7 +396,7 @@ async function showReviews(shoeId) {
         modalContent.innerHTML = `
             <div class="modal-header">
                 <h2>Customer Reviews</h2>
-                <button onclick="closeModal()" class="close-btn">&times;</button>
+                
             </div>
             <div class="modal-body">
                 <div class="average-rating-container">
@@ -417,7 +417,7 @@ async function showReviews(shoeId) {
         modalContent.innerHTML = `
             <div class="modal-header">
                 <h2>Error Loading Reviews</h2>
-                <button onclick="closeModal()" class="close-btn">&times;</button>
+                
             </div>
             <div class="modal-body">
                 <p>Failed to load reviews. Please try again later.</p>
@@ -579,7 +579,7 @@ function testFeedback(shoeId) {
     modalContent.innerHTML = `
         <div class="modal-header">
             <h2>Feedback Test Preview</h2>
-            <button onclick="closeModal()" class="close-btn">&times;</button>
+            
         </div>
         <div class="modal-body">
             <div class="test-feedback-notice">
