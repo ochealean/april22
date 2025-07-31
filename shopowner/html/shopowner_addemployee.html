@@ -4,15 +4,530 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Employee - Shop Owner</title>
-    <link rel="stylesheet" href="/shopowner/css/shopowner_addemployee.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --error: #ef233c;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #adb5bd;
+            --gray-light: #e9ecef;
+            --gray-dark: #495057;
+            --text-primary: #212529;
+            --text-secondary: #343a40;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
+        }
+
+        /* Header - Same as template */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header h1 i {
+            color: var(--primary);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            background: rgba(255,255,255,0.2);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .main-content {
+            padding: 2rem;
+            overflow-x: auto;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+            border: 1px solid var(--gray-light);
+            max-width: 1200px;
+        }
+
+        .form-container h1 {
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-container h1 i {
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background-color: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .phone-input-container {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: white;
+        }
+
+        .country-code {
+            padding: 0 1rem;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            background: var(--light);
+            color: var(--gray-dark);
+            font-weight: 500;
+        }
+
+        .phone-input-container input {
+            border: none;
+            flex: 1;
+            padding: 0.8rem 1rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 3rem;
+            cursor: pointer;
+            color: var(--gray-dark);
+            transition: var(--transition);
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        #passwordRequirements {
+            background-color: var(--light);
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            margin-top: 0.5rem;
+            border: 1px solid var(--gray-light);
+        }
+
+        #passwordRequirements p {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        #passwordRequirements ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        #passwordRequirements li {
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+            color: var(--gray-dark);
+        }
+
+        #passwordRequirements li::before {
+            content: "•";
+            color: var(--error);
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.65rem 1.25rem;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .btn i {
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary {
+            background-color: var(--gray-light);
+            color: var(--gray-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dfe3e8;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .navigation {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        /* Batch Creation Styles */
+        .creation-options {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .creation-option {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            background: var(--light);
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--gray-light);
+            font-weight: 500;
+        }
+
+        .creation-option.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .batch-controls {
+            margin-bottom: 1.5rem;
+        }
+
+        .batch-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .batch-size-selector input {
+            width: 80px;
+            padding: 0.5rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+        }
+
+        .batch-preview {
+            margin: 1rem 0;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            background: var(--light);
+            display: none;
+        }
+
+        .batch-preview.active {
+            display: block;
+        }
+
+        .batch-account {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-light);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .batch-account p {
+            margin: 0.25rem 0;
+        }
+
+        .email-domain {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .email-domain input {
+            flex: 1;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .email-domain span {
+            padding: 0.8rem 1rem;
+            background: var(--light);
+            border: 1px solid var(--gray-light);
+            border-right: none;
+            border-top-left-radius: var(--radius-sm);
+            border-bottom-left-radius: var(--radius-sm);
+        }
+
+        .email-options {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-light);
+        }
+
+        .email-options label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+
+        .account-creation-type {
+            margin-bottom: 2rem;
+        }
+
+        .single-creation {
+            display: block;
+        }
+
+        .batch-creation {
+            display: none;
+        }
+
+        .batch-creation.active {
+            display: block;
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: fixed;
+                left: -350px;
+                height: 100vh;
+                transition: var(--transition);
+                z-index: 100;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 0.5rem;
+            }
+            
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 99;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
+            }
+            
+            .form-container {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .form-container {
+                padding: 1.25rem;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .batch-account {
+                grid-template-columns: 1fr;
+            }
+            
+            .creation-options {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard">
         <!-- Sidebar -->
         <div class="sidebar">
-            <div class="logo">SHOP DASHBOARD</div>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-shoe-prints"></i>
+                </div>
+                SHOP DASHBOARD
+            </div>
             <div class="nav-items">
                 <a href="/shopowner/html/shop_dashboard.html" class="nav-item">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
@@ -45,76 +560,182 @@
         </div>
         
         <!-- Main Content -->
-        <div class="form-container">
-            <h1><i class="fas fa-users"></i> Add New Employee</h1>
-            <form id="addEmployeeForm">
-                <div class="form-group">
-                    <label for="employeeName">Full Name</label>
-                    <input type="text" id="employeeName" required placeholder="e.g., Juan Dela Cruz">
+        <div class="main-content">
+            <div class="header">
+                <!-- Mobile Menu Toggle (same as template) -->
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
                 </div>
+                <h1><i class="fas fa-users"></i>Add New Employee</h1>
+                <div class="user-profile">
+                    <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="User" class="user-avatar">
+                    <span>Shop Owner</span>
+                </div>
+            </div>
 
-                <div class="form-group">
-                    <label for="employeeEmail">Email</label>
-                    <input type="email" id="employeeEmail" required placeholder="e.g., employee@example.com">
+
+            <div class="form-container">
+                <h1> Create Account</h1>
+                
+                <!-- Account Creation Type Selector -->
+                <div class="account-creation-type">
+                    <div class="creation-options">
+                        <div class="creation-option active" data-type="single">Single Employee</div>
+                        <div class="creation-option" data-type="batch">Batch Employees</div>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="employeeRole">Role</label>
-                    <select id="employeeRole" required>
-                        <option value="">Select Role</option>
-                        <option value="Manager">Manager</option>
-                        <option value="SalesPerson">Sales Person</option>
-                    </select>
-                </div>
+                <!-- Single Employee Creation -->
+                <div class="single-creation" id="singleCreation">
+                    <form id="addEmployeeForm">
+                        <div class="form-group">
+                            <label for="employeeName">Full Name</label>
+                            <input type="text" id="employeeName" required placeholder="e.g., Juan Dela Cruz">
+                        </div>
 
-                <div class="form-group">
-                    <label for="employeePhone">Phone Number</label>
-                    <div class="phone-input-container">
-                        <span class="country-code">+63</span>
-                        <input type="tel" id="employeePhone" placeholder="e.g., 9123456789" maxlength="10">
+                        <div class="form-group">
+                            <label for="employeeEmail">Email</label>
+                            <input type="email" id="employeeEmail" required placeholder="e.g., employee@example.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="employeeRole">Role</label>
+                            <select id="employeeRole" required>
+                                <option value="">Select Role</option>
+                                <option value="Manager">Manager</option>
+                                <option value="SalesPerson">Sales Person</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="employeePhone">Phone Number</label>
+                            <div class="phone-input-container">
+                                <span class="country-code">+63</span>
+                                <input type="tel" id="employeePhone" placeholder="e.g., 9123456789" maxlength="10">
+                            </div>
+                            <small>Enter your 10-digit Philippine mobile number (without +63)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="employeePassword">Password</label>
+                            <input type="password" id="employeePassword" required placeholder="Enter password">
+                            <i class="fas fa-eye password-toggle" onclick="togglePassword('employeePassword')"></i>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm Password</label>
+                            <input type="password" id="confirmPassword" required placeholder="Confirm password">
+                            <i class="fas fa-eye password-toggle" onclick="togglePassword('confirmPassword')"></i>
+                        </div>
+
+                        <div class="form-group">
+                            <div id="passwordRequirements">
+                                <p>Password must contain:</p>
+                                <ul>
+                                    <li id="reqLength">At least 8 characters</li>
+                                    <li id="reqUppercase">At least one uppercase letter</li>
+                                    <li id="reqLowercase">At least one lowercase letter</li>
+                                    <li id="reqNumber">At least one number</li>
+                                    <li id="reqSpecial">At least one special character</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Add Employee
+                        </button>
+                    </form>
+                    
+                    <div class="navigation">
+                        <a href="/shopowner/html/shop_dashboard.html" class="btn btn-secondary">
+                            <i class="fas fa-tachometer-alt"></i> Back to Dashboard
+                        </a>
                     </div>
-                    <small>Enter your 10-digit Philippine mobile number (without +63)</small>
                 </div>
-
-                <div class="form-group">
-                    <label for="employeePassword">Password</label>
-                    <input type="password" id="employeePassword" required placeholder="Enter password">
-                    <i class="fas fa-eye password-toggle" onclick="togglePassword('employeePassword')"></i>
-                </div>
-
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <input type="password" id="confirmPassword" required placeholder="Confirm password">
-                    <i class="fas fa-eye password-toggle" onclick="togglePassword('confirmPassword')"></i>
-                </div>
-
-                <div class="form-group">
-                    <div id="passwordRequirements">
-                        <p>Password must contain:</p>
-                        <ul>
-                            <li id="reqLength">At least 8 characters</li>
-                            <li id="reqUppercase">At least one uppercase letter</li>
-                            <li id="reqLowercase">At least one lowercase letter</li>
-                            <li id="reqNumber">At least one number</li>
-                            <li id="reqSpecial">At least one special character</li>
-                        </ul>
+                
+                <!-- Batch Employee Creation -->
+                <div class="batch-creation" id="batchCreation">
+                    <div class="batch-controls">
+                        <div class="form-group">
+                            <label>Number of Employees to Create</label>
+                            <div class="batch-size-selector">
+                                <input type="number" id="employeeCount" min="1" max="100" value="5">
+                                <button class="btn btn-primary" id="generateEmployees">
+                                    <i class="fas fa-users"></i> Generate Employees
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Employee Role</label>
+                            <select id="batchEmployeeRole" class="full-width">
+                                <option value="SalesPerson">Sales Person</option>
+                                <option value="Manager">Manager</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Email Domain</label>
+                            <div class="email-domain">
+                                <span>@</span>
+                                <input type="text" id="emailDomain" placeholder="yourcompany.com" value="yourcompany.com">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="email-options">
+                        <label>
+                            <input type="checkbox" id="sendEmails" checked>
+                            Send account details via email
+                        </label>
+                        <label>
+                            <input type="checkbox" id="includePasswordInEmail" checked>
+                            Include password in email
+                        </label>
+                    </div>
+                    
+                    <div class="batch-preview" id="batchPreview">
+                        <!-- Generated accounts will appear here -->
+                    </div>
+                    
+                    <div class="form-group">
+                        <button class="btn btn-primary" id="createBatchEmployees" disabled>
+                            <i class="fas fa-save"></i> Create All Employees
+                        </button>
+                    </div>
+                    
+                    <div class="navigation">
+                        <a href="/shopowner/html/shop_dashboard.html" class="btn btn-secondary">
+                            <i class="fas fa-tachometer-alt"></i> Back to Dashboard
+                        </a>
                     </div>
                 </div>
-
-                <button type="submit" class="btn-primary">
-                    <i class="fas fa-user-plus"></i> Add Employee
-                </button>
-            </form>
-            
-            <div class="navigation">
-                <a href="/shopowner/html/shop_dashboard.html" class="btn-secondary">
-                    <i class="fas fa-tachometer-alt"></i> Back to Dashboard
-                </a>
             </div>
         </div>
     </div>
 
+    <!-- Mobile Overlay (dynamically added via JS) -->
+    <div class="sidebar-overlay"></div>
+
     <script>
+
+        // Mobile sidebar toggle - same as template
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            mobileToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        });
+
         // Password toggle functionality
         function togglePassword(fieldId) {
             const field = document.getElementById(fieldId);
@@ -192,17 +813,237 @@
                 e.target.value = phoneNumber;
             });
 
-            // You can also add this to format it properly when submitting
+            // Format phone number when submitting
             document.getElementById('addEmployeeForm').addEventListener('submit', function(e) {
                 const phoneInput = document.getElementById('employeePhone');
                 if (phoneInput.value) {
-                    // Format as +639XXXXXXXXX before submitting
                     phoneInput.value = '+63' + phoneInput.value;
                 }
             });
+
+            // Batch creation functionality
+            const creationOptions = document.querySelectorAll('.creation-option');
+            const singleCreation = document.getElementById('singleCreation');
+            const batchCreation = document.getElementById('batchCreation');
+            const generateBtn = document.getElementById('generateEmployees');
+            const createBatchBtn = document.getElementById('createBatchEmployees');
+            const batchPreview = document.getElementById('batchPreview');
+            const employeeCount = document.getElementById('employeeCount');
+            const batchRole = document.getElementById('batchEmployeeRole');
+            const emailDomain = document.getElementById('emailDomain');
+            const sendEmails = document.getElementById('sendEmails');
+            const includePasswordInEmail = document.getElementById('includePasswordInEmail');
+
+            // Switch between single and batch creation
+            creationOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    creationOptions.forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                    
+                    if (option.dataset.type === 'single') {
+                        singleCreation.style.display = 'block';
+                        batchCreation.style.display = 'none';
+                    } else {
+                        singleCreation.style.display = 'none';
+                        batchCreation.style.display = 'block';
+                    }
+                });
+            });
+            
+            // Generate batch employees with email addresses
+            generateBtn.addEventListener('click', () => {
+                const count = parseInt(employeeCount.value);
+                const role = batchRole.value;
+                const domain = emailDomain.value.trim() || 'yourcompany.com';
+                
+                if (count < 1 || count > 100) {
+                    alert('Please enter a number between 1 and 100');
+                    return;
+                }
+                
+                if (!domain.match(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)) {
+                    alert('Please enter a valid email domain (e.g., company.com)');
+                    return;
+                }
+                
+                batchPreview.innerHTML = '';
+                
+                for (let i = 1; i <= count; i++) {
+                    const employeeNum = i.toString().padStart(3, '0');
+                    const username = `employee${employeeNum}`;
+                    const email = `${username}@${domain}`;
+                    const password = generatePassword();
+                    
+                    const accountDiv = document.createElement('div');
+                    accountDiv.className = 'batch-account';
+                    accountDiv.innerHTML = `
+                        <div>
+                            <p><strong>Username:</strong> ${username}</p>
+                            <p><strong>Email:</strong> ${email}</p>
+                            <p><strong>Role:</strong> ${role}</p>
+                        </div>
+                        <div>
+                            <p><strong>Password:</strong> ${password}</p>
+                            <p><small>Email will ${sendEmails.checked ? '' : 'not '}be sent</small></p>
+                            ${sendEmails.checked && !includePasswordInEmail.checked ? 
+                              '<p><small>Password will not be included in email</small></p>' : ''}
+                        </div>
+                        <input type="hidden" name="batchUsername[]" value="${username}">
+                        <input type="hidden" name="batchEmail[]" value="${email}">
+                        <input type="hidden" name="batchPassword[]" value="${password}">
+                        <input type="hidden" name="batchRole[]" value="${role}">
+                    `;
+                    
+                    batchPreview.appendChild(accountDiv);
+                }
+                
+                batchPreview.classList.add('active');
+                createBatchBtn.disabled = false;
+            });
+
+            // Initialize EmailJS with your User ID
+            // (function() {
+            //     emailjs.init("YOUR_EMAILJS_USER_ID"); // Replace with your actual EmailJS user ID
+            // })();
+            
+            // Create all batch employees with email sending
+            createBatchBtn.addEventListener('click', async () => {
+                const accounts = [];
+                const accountDivs = batchPreview.querySelectorAll('.batch-account');
+                const shouldSendEmails = sendEmails.checked;
+                const shouldIncludePassword = includePasswordInEmail.checked;
+                
+                // Show loading state
+                createBatchBtn.disabled = true;
+                createBatchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Employees...';
+                
+                accountDivs.forEach(div => {
+                    accounts.push({
+                        username: div.querySelector('input[name="batchUsername[]"]').value,
+                        email: div.querySelector('input[name="batchEmail[]"]').value,
+                        password: div.querySelector('input[name="batchPassword[]"]').value,
+                        role: div.querySelector('input[name="batchRole[]"]').value
+                    });
+                });
+                
+                try {
+                    // First create all accounts in your system
+                    const creationResponse = await createAccountsOnBackend(accounts);
+                    console.log('Accounts created:', creationResponse);
+                    
+                    // Then send emails if requested
+                    if (shouldSendEmails) {
+                        const emailResults = await sendAccountEmails(
+                            accounts, 
+                            shouldIncludePassword
+                        );
+                        console.log('Email results:', emailResults);
+                        
+                        // Check for any failed emails
+                        const failedEmails = emailResults.filter(result => !result.success);
+                        if (failedEmails.length > 0) {
+                            console.error('Failed to send some emails:', failedEmails);
+                        }
+                    }
+                    
+                    alert(`Successfully created ${accounts.length} employees! ${
+                        shouldSendEmails ? 'Emails have been sent.' : ''
+                    }`);
+                    
+                    // Reset the form
+                    batchPreview.innerHTML = '';
+                    batchPreview.classList.remove('active');
+                    createBatchBtn.innerHTML = '<i class="fas fa-save"></i> Create All Employees';
+                } catch (error) {
+                    console.error('Error creating accounts:', error);
+                    alert('Error creating accounts. Please check console for details.');
+                    createBatchBtn.disabled = false;
+                    createBatchBtn.innerHTML = '<i class="fas fa-save"></i> Create All Employees';
+                }
+            });
+            
+            // // Function to send account emails
+            // async function sendAccountEmails(accounts, includePassword) {
+            //     const emailResults = [];
+                
+            //     for (const account of accounts) {
+            //         try {
+            //             const templateParams = {
+            //                 to_email: account.email,
+            //                 to_name: account.username,
+            //                 username: account.username,
+            //                 password: includePassword ? account.password : 'Please use password reset',
+            //                 role: account.role,
+            //                 login_link: window.location.origin + '/login'
+            //             };
+                        
+            //             // Send email using EmailJS
+            //             const result = await emailjs.send(
+            //                 'default_service', // Your EmailJS service ID
+            //                 'employee_account_template', // Your EmailJS template ID
+            //                 templateParams
+            //             );
+                        
+            //             emailResults.push({
+            //                 email: account.email,
+            //                 success: true,
+            //                 result
+            //             });
+            //         } catch (error) {
+            //             emailResults.push({
+            //                 email: account.email,
+            //                 success: false,
+            //                 error
+            //             });
+            //         }
+            //     }
+                
+            //     return emailResults;
+            // }
+            
+            // // Mock function - replace with your actual backend call
+            // async function createAccountsOnBackend(accounts) {
+            //     // In a real implementation, you would make an API call here
+            //     console.log('Creating accounts on backend:', accounts);
+                
+            //     // Simulate API delay
+            //     return new Promise(resolve => {
+            //         setTimeout(() => {
+            //             resolve({ success: true, count: accounts.length });
+            //         }, 1500);
+            //     });
+            // }
+            
+            // Generate random password
+            function generatePassword() {
+                const length = 12;
+                const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+                let password = "";
+                
+                // Ensure at least one of each character type
+                password += getRandomChar("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+                password += getRandomChar("abcdefghijklmnopqrstuvwxyz");
+                password += getRandomChar("0123456789");
+                password += getRandomChar("!@#$%^&*");
+                
+                // Fill the rest randomly
+                for (let i = password.length; i < length; i++) {
+                    const randomIndex = Math.floor(Math.random() * charset.length);
+                    password += charset[randomIndex];
+                }
+                
+                // Shuffle the password
+                return password.split('').sort(() => 0.5 - Math.random()).join('');
+            }
+            
+            function getRandomChar(charSet) {
+                return charSet[Math.floor(Math.random() * charSet.length)];
+            }
         });
     </script>
-      
-    <script src="/shopowner/js/shopowner_addemployee.js" type="module"></script>
+
+    <!-- <script src="/shopowner/js/shopowner_addemployee.js" type="module"></script> -->
+
 </body>
 </html>
+
