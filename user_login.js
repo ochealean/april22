@@ -81,7 +81,6 @@ loginButton_customer.addEventListener('click', (event) => {
                         if (snapshot.exists()) {
                             alert("Login successful");
                             window.location.href = "/customer/html/customer_dashboard.html";
-                            // window.location.href = "testinghtml/shopdashboardshopowner.html";
                         } else {
                             alert("Account does not exist");
                             auth.signOut();
@@ -152,8 +151,7 @@ function checkShopStatus(uid) {
                 window.location.href = "shopowner/html/shop_rejected.html?shopID="+uid; // Redirect to rejected page
             } else {
                 // If approved, redirect to the shop dashboard
-                // window.location.href = "shopowner/html/shop_dashboard.html";
-                window.location.href = "testinghtml/shopdashboardshopowner.html";
+                window.location.href = "shopowner/html/shop_dashboard.html";
             }
         } else {
             const shopStatusRefEmployee = ref(db, `AR_shoe_users/employees/${uid}/shopId`);
@@ -170,8 +168,7 @@ function checkShopStatus(uid) {
                         window.location.href = "shopowner/html/shop_rejected.html"; // Redirect to rejected page
                     } else {
                         // If approved, redirect to the shop dashboard
-                        // window.location.href = "shopowner/html/shop_dashboard.html";
-                        window.location.href = "testinghtml/shopdashboardshopowner.html";
+                        window.location.href = "shopowner/html/shop_dashboard.html";
                     }
                 } else {
                     console.error("Shop status not found.");
