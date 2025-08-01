@@ -5,10 +5,239 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Customer</title>
-    <link rel="stylesheet" href="/customer/css/customer_dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* DELETE mo tong style if want mo */
+        :root {
+            --primary: #a777e3;
+            --primary-dark: #8e5fd5;
+            --secondary: #8a4fff;
+            --accent: #ff6b6b;
+            --success: #48cfad;
+            --warning: #ffaa00;
+            --error: #ff6b6b;
+            --light: #f8f9fa;
+            --dark: #2c3e50;
+            --gray: #bdc3c7;
+            --gray-light: #ecf0f1;
+            --gray-dark: #7f8c8d;
+            --text-primary: #2c3e50;
+            --text-secondary: #34495e;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar - Purple Theme */
+        .sidebar {
+            background: linear-gradient(180deg, var(--secondary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            overflow-x: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .search-bar {
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-light);
+            width: 100%;
+            max-width: 400px;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            background-color: white;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(167, 119, 227, 0.2);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Stats Cards - Modern Design */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80px;
+            height: 80px;
+            background: rgba(167, 119, 227, 0.1);
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-card h3 {
+            color: var(--gray-dark);
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .stat-card .change {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            color: var(--success);
+        }
+
+        .change.negative {
+            color: var(--error);
+        }
+
+        /* Shoes Section */
         .shoes-section {
             padding: 20px;
             margin-top: 30px;
@@ -16,7 +245,16 @@
 
         .section-title {
             margin-bottom: 20px;
-            color: #333;
+            color: var(--dark);
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--primary);
         }
 
         .shoes-container {
@@ -27,15 +265,17 @@
         }
 
         .shoe-card {
-            border: 1px solid #ddd;
+            background: white;
+            border: 1px solid var(--gray-light);
             border-radius: 8px;
             overflow: hidden;
-            transition: transform 0.3s ease;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
         }
 
         .shoe-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-md);
         }
 
         .shoe-image img {
@@ -45,22 +285,23 @@
         }
 
         .shoe-details {
-            padding: 15px;
+            padding: 1.25rem;
         }
 
         .shoe-details h3 {
             margin: 0 0 10px 0;
             font-size: 1.2rem;
+            color: var(--dark);
         }
 
         .shoe-code {
-            color: #666;
+            color: var(--gray-dark);
             font-size: 0.9rem;
             margin: 5px 0;
         }
 
         .shoe-description {
-            color: #444;
+            color: var(--gray-dark);
             height: 50px;
             font-size: 0.95rem;
             margin: 10px 0;
@@ -72,43 +313,48 @@
 
         .shoe-price {
             font-weight: bold;
-            color: #2a6496;
+            color: var(--primary);
             margin: 10px 0;
+            font-size: 1.2rem;
         }
 
         .shoe-variants {
             font-size: 0.9rem;
-            color: #555;
+            color: var(--gray-dark);
             margin: 10px 0;
         }
 
         .btn-view {
-            background-color: #2a6496;
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
             cursor: pointer;
             width: 100%;
-            transition: background-color 0.3s;
+            transition: var(--transition);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .btn-view:hover {
-            background-color: #1d4b75;
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
         }
 
         .no-shoes {
             text-align: center;
-            color: #666;
+            color: var(--gray-dark);
             font-style: italic;
             grid-column: 1 / -1;
-        }
-
-        /* Update the card-grid to be more compact */
-        .card-grid {
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            padding: 2rem;
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
         }
 
         /* Modal Styles */
@@ -121,7 +367,8 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
         }
 
         .modal.show {
@@ -129,33 +376,46 @@
         }
 
         .modal-content {
-            background-color: #fefefe;
+            background-color: white;
             margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
             width: 80%;
             max-width: 800px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             max-height: 80vh;
             overflow-y: auto;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .close-btn {
-            color: #aaa;
+            color: var(--gray);
             float: right;
-            font-size: 28px;
+            font-size: 1.5rem;
             font-weight: bold;
             cursor: pointer;
+            transition: var(--transition);
         }
 
         .close-btn:hover {
-            color: black;
+            color: var(--dark);
+            transform: rotate(90deg);
         }
 
         .modal-header {
             padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--gray-light);
             margin-bottom: 20px;
         }
 
@@ -165,11 +425,11 @@
 
         .modal-footer {
             padding: 15px 0;
-            border-top: 1px solid #eee;
+            border-top: 1px solid var(--gray-light);
             margin-top: 20px;
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
+            gap: 1rem;
         }
 
         /* Product Details Styles */
@@ -179,15 +439,29 @@
             margin-bottom: 20px;
         }
 
+        @media (max-width: 768px) {
+            .product-details-container {
+                flex-direction: column;
+            }
+        }
+
         .product-main-image {
             flex: 1;
             max-width: 300px;
+            background: var(--gray-light);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
         }
 
         .product-main-image img {
             width: 100%;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            object-fit: contain;
         }
 
         .product-info {
@@ -197,13 +471,14 @@
         .product-price {
             font-size: 1.5rem;
             font-weight: bold;
-            color: #2a6496;
+            color: var(--primary);
             margin: 10px 0;
         }
 
         .product-description {
             margin: 15px 0;
             line-height: 1.6;
+            color: var(--gray-dark);
         }
 
         .product-variants {
@@ -212,21 +487,21 @@
 
         .variant-option {
             margin-bottom: 15px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-md);
             cursor: pointer;
-            transition: all 0.3s;
+            transition: var(--transition);
         }
 
         .variant-option:hover {
-            border-color: #2a6496;
-            background-color: #f5f9ff;
+            border-color: var(--primary);
+            background-color: rgba(167, 119, 227, 0.05);
         }
 
         .variant-option.selected {
-            border-color: #2a6496;
-            background-color: #e6f0ff;
+            border-color: var(--primary);
+            background-color: rgba(167, 119, 227, 0.1);
         }
 
         .variant-header {
@@ -237,10 +512,11 @@
 
         .variant-name {
             font-weight: bold;
+            color: var(--dark);
         }
 
         .variant-price {
-            color: #2a6496;
+            color: var(--primary);
             font-weight: bold;
         }
 
@@ -259,21 +535,22 @@
         }
 
         .size-option {
-            padding: 5px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
             cursor: pointer;
-            transition: all 0.3s;
+            transition: var(--transition);
+            font-size: 0.85rem;
         }
 
         .size-option:hover {
-            border-color: #2a6496;
+            border-color: var(--primary);
         }
 
         .size-option.selected {
-            background-color: #2a6496;
+            background-color: var(--primary);
             color: white;
-            border-color: #2a6496;
+            border-color: var(--primary);
         }
 
         .size-option.out-of-stock {
@@ -281,14 +558,164 @@
             text-decoration: line-through;
             cursor: not-allowed;
         }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary {
+            background-color: var(--gray-light);
+            color: var(--gray-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dfe3e8;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #3ab7d8;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* mobile navigation */
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 240px 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard {
+                grid-template-columns: 220px 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .shoes-container {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -350px;
+                transition: var(--transition);
+                z-index: 100;
+                height: 100vh;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 0.5rem;
+                color: var(--dark);
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 99;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .search-bar {
+                max-width: 100%;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .modal-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="dashboard">
-        <!-- Sidebar -->
+        <!-- Sidebar - Purple Theme -->
         <div class="sidebar">
-            <div class="logo">SHOE PORTAL</div>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <span>SHOE PORTAL</span>
+            </div>
             <div class="nav-items">
                 <a href="/customer/html/customer_dashboard.html" class="nav-item active">
                     <i class="fas fa-home"></i> Dashboard
@@ -326,97 +753,103 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="header">
-                <!-- nilagyan ng span at id -->
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
                 <h1>Welcome Back, <span id="userName_display1"></span>!</h1>
-                <input type="text" class="search-bar" placeholder="Search shoes by name, code or description...">
+                <!-- <input type="text" class="search-bar" placeholder="Search shoes by name, code or description..."> -->
                 <div class="user-profile">
                     <img id="imageProfile" src="#" alt="Profile" class="user-avatar">
-                    <!-- nilagyan ng id -->
                     <span id="userName_display2">Alex Johnson</span>
                 </div>
             </div>
 
-            <!-- Stats Cards -->
-            <div class="card-grid">
-                <div class="card">
+            <!-- Stats Cards - Modern Design -->
+            <div class="stats-grid">
+                <div class="stat-card">
                     <h3>Recent Orders</h3>
-                    <p id="Recent_Orders">0</p>
+                    <div class="value" id="Recent_Orders">0</div>
+                    <div class="change">
+                        <i class="fas fa-info-circle"></i> <span>Check your orders</span>
+                    </div>
                 </div>
-                <div class="card">
+                <div class="stat-card">
                     <h3>Wishlist Items</h3>
-                    <p>0</p>
+                    <div class="value">0</div>
+                    <div class="change">
+                        <i class="fas fa-plus"></i> <span>Start adding items</span>
+                    </div>
                 </div>
-                <div class="card">
+                <div class="stat-card">
                     <h3>Store Credits</h3>
-                    <p>₱ 0.00</p>
+                    <div class="value">₱ 0.00</div>
+                    <div class="change">
+                        <i class="fas fa-info-circle"></i> <span>Earn with purchases</span>
+                    </div>
                 </div>
-                <div class="card">
+                <div class="stat-card">
                     <h3>Saved Items</h3>
-                    <p>0</p>
+                    <div class="value">0</div>
+                    <div class="change">
+                        <i class="fas fa-eye"></i> <span>Browse products</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Recent Orders -->
+            <!-- Available Shoes -->
             <div class="shoes-section">
-                <h2 class="section-title">Available Shoes</h2>
+                <h2 class="section-title">
+                    <i class="fas fa-shoe-prints"></i> Available Shoes
+                </h2>
                 <div class="shoes-container" id="shoesContainer">
                     <!-- Shoes will be dynamically loaded here -->
+                    <div class="no-shoes">
+                        <i class="fas fa-shoe-prints"></i>
+                        <h3>No Shoes Available</h3>
+                        <p>Check back later for new arrivals</p>
+                    </div>
                 </div>
             </div>
-
-            <!-- old code mo -->
-            <!-- <h2 class="section-title">Recent Orders</h2>
-            <table class="order-table">
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Date</th>
-                        <th>Items</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>#ORD-1001</td>
-                        <td>Jun 12, 2023</td>
-                        <td>2</td>
-                        <td>$129.99</td>
-                        <td><span class="status shipped">Shipped</span></td>
-                        <td><button class="btn btn-view"><i class="fas fa-eye"></i> View</button></td>
-                    </tr>
-                    <tr>
-                        <td>#ORD-1002</td>
-                        <td>Jun 10, 2023</td>
-                        <td>1</td>
-                        <td>$89.99</td>
-                        <td><span class="status pending">Processing</span></td>
-                        <td><button class="btn btn-view"><i class="fas fa-eye"></i> View</button></td>
-                    </tr>
-                    <tr>
-                        <td>#ORD-1003</td>
-                        <td>Jun 5, 2023</td>
-                        <td>3</td>
-                        <td>$199.99</td>
-                        <td><span class="status shipped">Delivered</span></td>
-                        <td><button class="btn btn-view"><i class="fas fa-eye"></i> View</button></td>
-                    </tr>
-                </tbody>
-            </table>-->
         </div>
     </div>
 
-    <!-- nilagay ni deepseek -->
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay"></div>
+
     <!-- Product Details Modal -->
     <div id="productDetailsModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeProductModal()">&times;</span>
             <div class="modal-header">
-                <h2 id="productModalTitle"></h2>
+                <h2 id="productModalTitle">Product Details</h2>
             </div>
             <div class="modal-body" id="productModalBody">
-                <!-- Content will be loaded dynamically -->
+                <div class="product-details-container">
+                    <div class="product-main-image">
+                        <img src="https://via.placeholder.com/300x200?text=Product+Image" alt="Product" id="productModalImage">
+                    </div>
+                    <div class="product-info">
+                        <h3 id="productModalName">Product Name</h3>
+                        <div class="product-price" id="productModalPrice">₱ 0.00</div>
+                        <div class="product-description" id="productModalDescription">
+                            Product description will appear here.
+                        </div>
+                        <div class="product-variants">
+                            <div class="variant-option selected">
+                                <div class="variant-header">
+                                    <span class="variant-name">Standard Version</span>
+                                    <span class="variant-price">₱ 0.00</span>
+                                </div>
+                                <div class="variant-sizes">
+                                    <span class="size-option">US 7</span>
+                                    <span class="size-option selected">US 8</span>
+                                    <span class="size-option">US 9</span>
+                                    <span class="size-option out-of-stock">US 10</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeProductModal()">
@@ -431,8 +864,56 @@
             </div>
         </div>
     </div>
-    <!-- nilagyan ng script -->
+
+    <script>
+        // Mobile sidebar toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            if (mobileToggle && sidebar && overlay) {
+                mobileToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                });
+                
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
+
+            // Initialize with sample data
+            initializeSampleData();
+        });
+
+        function initializeSampleData() {
+            // This would be replaced with actual API calls in a real application
+            document.getElementById('userName_display1').textContent = 'Alex';
+            document.getElementById('userName_display2').textContent = 'Alex Johnson';
+            document.getElementById('imageProfile').src = 'https://randomuser.me/api/portraits/men/32.jpg';
+        }
+
+        function openProductModal(productId) {
+            // This would be replaced with actual API call to get product details
+            const modal = document.getElementById('productDetailsModal');
+            modal.classList.add('show');
+        }
+
+        function closeProductModal() {
+            const modal = document.getElementById('productDetailsModal');
+            modal.classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('productDetailsModal');
+            if (event.target == modal) {
+                closeProductModal();
+            }
+        }
+    </script>
     <script src="/customer/js/customer_dashboard.js" type="module"></script>
 </body>
-
 </html>
