@@ -5,24 +5,186 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop Profile | Shop Owner</title>
-    <link rel="stylesheet" href="/shopowner/css/shop_dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Profile-specific styles */
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --error: #ef233c;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #adb5bd;
+            --gray-light: #e9ecef;
+            --gray-dark: #495057;
+            --text-primary: #212529;
+            --text-secondary: #343a40;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar - Matching inventory style */
+        .sidebar {
+            background: linear-gradient(180deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
+            transition: var(--transition);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo-icon {
+            background: rgba(255,255,255,0.2);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            overflow-x: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Profile Container */
         .profile-container {
-            background-color: white;
+            background: white;
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-sm);
             padding: 2rem;
             margin-bottom: 2rem;
+            transition: var(--transition);
         }
 
+        .profile-container:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Profile Header */
         .profile-header {
             display: flex;
             align-items: center;
             margin-bottom: 2rem;
             flex-wrap: wrap;
             gap: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--gray-light);
         }
 
         .profile-avatar {
@@ -52,6 +214,11 @@
             padding: 0.5rem;
             font-size: 0.8rem;
             cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .avatar-upload:hover {
+            background-color: rgba(0, 0, 0, 0.8);
         }
 
         .avatar-upload input {
@@ -67,6 +234,7 @@
             font-size: 1.5rem;
             margin-bottom: 0.5rem;
             color: var(--secondary);
+            font-weight: 600;
         }
 
         .profile-email {
@@ -81,10 +249,14 @@
 
         .stat-item {
             text-align: center;
+            padding: 0.75rem 1rem;
+            background: var(--gray-light);
+            border-radius: var(--radius-sm);
+            min-width: 80px;
         }
 
         .stat-value {
-            font-weight: 600;
+            font-weight: 700;
             font-size: 1.2rem;
             color: var(--primary);
         }
@@ -94,9 +266,9 @@
             color: var(--gray-dark);
         }
 
-        /* Form styles */
+        /* Form Styles */
         .profile-form {
-            margin-top: 2rem;
+            margin-top: 1rem;
         }
 
         .form-section {
@@ -107,6 +279,8 @@
 
         .form-section:last-child {
             border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
 
         .section-title {
@@ -115,7 +289,7 @@
             color: var(--secondary);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
 
         .form-row {
@@ -133,82 +307,54 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
+            color: var(--gray-dark);
         }
 
         .form-control {
             width: 100%;
-            padding: 0.8rem;
-            border: 1px solid var(--gray);
+            padding: 1rem 1rem;
+            border: 1px solid var(--gray-light);
             border-radius: var(--radius-sm);
-            font-size: 1rem;
+            font-size: 0.95rem;
             transition: var(--transition);
+            background-color: var(--gray-light);
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            background-color: white;
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
         }
 
         .form-select {
             width: 100%;
-            padding: 0.8rem;
-            border: 1px solid var(--gray);
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--gray-light);
             border-radius: var(--radius-sm);
-            font-size: 1rem;
-            background-color: white;
+            font-size: 0.95rem;
+            background-color: var(--gray-light);
             appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
-            background-position: right 0.8rem center;
+            background-position: right 1rem center;
             background-size: 1rem;
-        }
-
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .btn-save {
-            background-color: var(--success);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-save:hover {
-            background-color: #1e8449;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .btn-cancel {
-            background-color: var(--gray-light);
-            color: var(--text-primary);
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
             transition: var(--transition);
         }
 
-        .btn-cancel:hover {
-            background-color: var(--gray);
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            background-color: white;
         }
 
-        /* Document upload styles */
+        /* Document Upload Styles */
         .document-upload {
             margin-top: 1rem;
         }
@@ -221,6 +367,12 @@
             padding: 1rem;
             background-color: var(--gray-light);
             border-radius: var(--radius-sm);
+            transition: var(--transition);
+            overflow: auto;
+        }
+
+        .document-preview:hover {
+            background-color: #e2e6ea;
         }
 
         .document-icon {
@@ -247,18 +399,29 @@
             gap: 0.5rem;
         }
 
-        .btn-view,
-        .btn-replace {
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius-sm);
-            font-size: 0.8rem;
+        /* Button Styles */
+        .btn {
+            padding: 0.65rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
             cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            border: none;
         }
 
         .btn-view {
             background-color: var(--primary);
             color: white;
-            border: none;
+        }
+
+        .btn-view:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
         }
 
         .btn-replace {
@@ -267,33 +430,150 @@
             border: 1px solid var(--primary);
         }
 
-        /* Password change section */
+        .btn-replace:hover {
+            background-color: var(--gray-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-save {
+            background-color: var(--success);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .btn-save:hover {
+            background-color: #1da1c1;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-cancel {
+            background-color: var(--gray-light);
+            color: var(--text-primary);
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .btn-cancel:hover {
+            background-color: var(--gray);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Password Toggle */
         .password-toggle {
             position: relative;
         }
 
         .password-toggle-icon {
             position: absolute;
-            right: 15px;
-            top: 72.5%;
+            right: 1rem;
+            top: 70%;
             transform: translateY(-50%);
             cursor: pointer;
             color: var(--gray-dark);
+            transition: var(--transition);
         }
 
-        /* Responsive adjustments */
+        .password-toggle-icon:hover {
+            color: var(--dark);
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 240px 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard {
+                grid-template-columns: 220px 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: fixed;
+                left: -350px;
+                height: 100vh;
+                transition: var(--transition);
+                z-index: 100;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 0.5rem;
+            }
+            
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 99;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
+            }
+            
             .profile-header {
                 flex-direction: column;
                 text-align: center;
             }
-
+            
             .profile-stats {
                 justify-content: center;
             }
-
+            
             .form-row {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn-save, .btn-cancel {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
@@ -303,7 +583,12 @@
     <div class="dashboard">
         <!-- Sidebar Navigation -->
         <div class="sidebar">
-            <div class="logo">SHOP DASHBOARD</div>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <span>SHOP DASHBOARD</span>
+            </div>
             <div class="nav-items">
                 <a href="/shopowner/html/shop_dashboard.html" class="nav-item">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
@@ -315,19 +600,19 @@
                     <i class="fas fa-users"></i> Add Employee
                 </a>
                 <a href="/shopowner/html/shop_inventory.html" class="nav-item">
-                    <i class="fas fa-box"></i> Inventory
+                    <i class="fas fa-boxes"></i> Inventory
                 </a>
                 <a href="/shopowner/html/shop_order.html" class="nav-item">
                     <i class="fas fa-shopping-cart"></i> Orders
                 </a>
                 <a id="issuereport" href="/shopowner/html/issue_report.html" class="nav-item manager">
-                    <i class="fas fa-warning"></i> Issue Report
+                    <i class="fas fa-exclamation-circle"></i> Issue Report
                 </a>
                 <a id="analyticsbtn" href="/shopowner/html/analytics.html" class="nav-item manager">
                     <i class="fas fa-chart-line"></i> Analytics
                 </a>
                 <a href="/shopowner/html/shopprofile.html" class="nav-item active">
-                    <i class="fas fa-cog"></i> Profile Settings
+                    <i class="fas fa-cog"></i> Settings
                 </a>
                 <a id="logout_btn" class="nav-item">
                     <i class="fas fa-sign-out-alt"></i> Logout
@@ -338,6 +623,10 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="header">
+                <!-- Mobile Menu Toggle -->
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
                 <h1><i class="fas fa-user-cog"></i> Profile Settings</h1>
                 <div class="user-profile">
                     <img id="imageProfile" src="#" alt="Profile" class="user-avatar">
@@ -404,8 +693,7 @@
 
                         <div class="form-group">
                             <label for="shopDescription" class="form-label">Shop Description</label>
-                            <textarea id="shopDescription" class="form-control"
-                                rows="4">Shop Description</textarea>
+                            <textarea id="shopDescription" class="form-control" rows="4">Shop Description</textarea>
                         </div>
                     </div>
 
@@ -421,18 +709,16 @@
 
                             <div class="form-group">
                                 <label for="ownerEmail" class="form-label">Email</label>
-                                <input type="email" id="ownerEmail" class="form-control"
-                                    value="elitefootwear@example.com">
+                                <input type="email" id="ownerEmail" class="form-control" value="elitefootwear@example.com">
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="ownerPhone" class="form-label">Phone Number</label>
-                                <div class="phone-input-container">
-                                    <span class="country-code">+63</span>
-                                    <input type="tel" id="ownerPhone" class="form-control" value="9XX XXX XXXX"
-                                        maxlength="10">
+                                <div style="display: flex; align-items: center;">
+                                    <span style="padding: 0.8rem 0.5rem; background: var(--gray-light); border-radius: var(--radius-sm) 0 0 var(--radius-sm);">+63</span>
+                                    <input type="tel" id="ownerPhone" class="form-control" value="9XX XXX XXXX" maxlength="10" style="border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-left: -1px;">
                                 </div>
                             </div>
                         </div>
@@ -488,9 +774,8 @@
                                     <div class="document-upload-date">Uploaded: When</div>
                                 </div>
                                 <div class="document-actions">
-                                    <button type="button" class="btn-view"><i class="fas fa-eye"></i> View</button>
-                                    <button type="button" class="btn-replace"><i class="fas fa-sync"></i>
-                                        Replace</button>
+                                    <button type="button" class="btn btn-view"><i class="fas fa-eye"></i> View</button>
+                                    <button type="button" class="btn btn-replace"><i class="fas fa-sync"></i> Replace</button>
                                 </div>
                             </div>
                         </div>
@@ -509,9 +794,8 @@
                                     <div class="document-upload-date">Uploaded: When</div>
                                 </div>
                                 <div class="document-actions">
-                                    <button type="button" class="btn-view"><i class="fas fa-eye"></i> View</button>
-                                    <button type="button" class="btn-replace"><i class="fas fa-sync"></i>
-                                        Replace</button>
+                                    <button type="button" class="btn btn-view"><i class="fas fa-eye"></i> View</button>
+                                    <button type="button" class="btn btn-replace"><i class="fas fa-sync"></i> Replace</button>
                                 </div>
                             </div>
                         </div>
@@ -544,91 +828,63 @@
 
                     <!-- Form Actions -->
                     <div class="form-actions">
-                        <button type="button" class="btn-cancel">Cancel</button>
-                        <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save Changes</button>
+                        <button type="button" class="btn btn-cancel">Cancel</button>
+                        <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> Save Changes</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- <script>
-        document.addEventListener('DOMContentLoaded', function () {
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay"></div>
+
+    <script src="/shopowner/js/shopprofile.js" type="module"></script>
+    <script>
+        // Mobile sidebar toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            if (mobileToggle) {
+                mobileToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                });
+            }
+            
+            if (overlay) {
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
+
             // Password toggle functionality
             function setupPasswordToggle(inputId, toggleId) {
                 const passwordInput = document.getElementById(inputId);
                 const toggleIcon = document.getElementById(toggleId);
 
-                toggleIcon.addEventListener('click', function () {
-                    if (passwordInput.type === 'password') {
-                        passwordInput.type = 'text';
-                        toggleIcon.classList.remove('fa-eye');
-                        toggleIcon.classList.add('fa-eye-slash');
-                    } else {
-                        passwordInput.type = 'password';
-                        toggleIcon.classList.remove('fa-eye-slash');
-                        toggleIcon.classList.add('fa-eye');
-                    }
-                });
+                if (passwordInput && toggleIcon) {
+                    toggleIcon.addEventListener('click', function() {
+                        if (passwordInput.type === 'password') {
+                            passwordInput.type = 'text';
+                            toggleIcon.classList.remove('fa-eye');
+                            toggleIcon.classList.add('fa-eye-slash');
+                        } else {
+                            passwordInput.type = 'password';
+                            toggleIcon.classList.remove('fa-eye-slash');
+                            toggleIcon.classList.add('fa-eye');
+                        }
+                    });
+                }
             }
 
             setupPasswordToggle('currentPassword', 'toggleCurrentPassword');
             setupPasswordToggle('newPassword', 'toggleNewPassword');
             setupPasswordToggle('confirmPassword', 'toggleConfirmPassword');
-
-            // Avatar upload preview
-            const avatarUpload = document.querySelector('.avatar-upload input');
-            const avatarPreview = document.querySelector('.profile-avatar img');
-
-            avatarUpload.addEventListener('change', function (e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        avatarPreview.src = e.target.result;
-                    }
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            // Form submission
-            document.getElementById('profileForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-                // In a real app, this would send data to your backend
-                alert('Profile changes saved successfully!');
-            });
-
-            // Cancel button
-            document.querySelector('.btn-cancel').addEventListener('click', function () {
-                if (confirm('Are you sure you want to discard your changes?')) {
-                    // In a real app, this would reset the form
-                    window.location.reload();
-                }
-            });
-
-            // Logout button
-            document.getElementById('logout_btn').addEventListener('click', function () {
-                alert('Logging out...');
-                // In real implementation, this would call your logout function
-            });
-
-            // Document view/replace buttons
-            document.querySelectorAll('.btn-view').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    alert('Viewing document...');
-                    // In a real app, this would open the document
-                });
-            });
-
-            document.querySelectorAll('.btn-replace').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    alert('Replace document functionality would go here');
-                    // In a real app, this would open a file upload dialog
-                });
-            });
         });
-    </script> -->
-    <script src="/shopowner/js/shopprofile.js" type="module"></script>
+    </script>
 </body>
-
 </html>
