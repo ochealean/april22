@@ -9,39 +9,39 @@
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <style>
         :root {
-            --primary: #3498db;
-            --primary-dark: #2980b9;
-            --secondary: #2c3e50;
-            --accent: #e74c3c;
-            --success: #27ae60;
-            --warning: #f39c12;
-            --error: #c0392b;
-            --light: #ecf0f1;
-            --dark: #2c3e50;
-            --gray: #bdc3c7;
-            --gray-light: #ecf0f1;
-            --gray-dark: #7f8c8d;
-            --text-primary: #2c3e50;
-            --text-secondary: #34495e;
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --error: #ef233c;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #adb5bd;
+            --gray-light: #e9ecef;
+            --gray-dark: #495057;
+            --text-primary: #212529;
+            --text-secondary: #343a40;
             --white: #ffffff;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
             --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            --radius-sm: 4px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
-            background-color: var(--gray-light);
+            background-color: #f5f7fa;
             color: var(--text-primary);
             line-height: 1.6;
             min-height: 100vh;
@@ -49,46 +49,84 @@
 
         .dashboard {
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: 280px 1fr;
             min-height: 100vh;
         }
 
-        /* Sidebar Styles */
+        /* Sidebar - New Design */
         .sidebar {
-            background-color: var(--secondary);
-            color: var(--light);
-            padding: 2rem 1rem;
+            background: linear-gradient(180deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
             position: sticky;
             top: 0;
             height: 100vh;
-            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
+            transition: var(--transition);
         }
 
         .logo {
-            color: var(--primary);
-            font-size: 1.5rem;
-            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
             margin-bottom: 2rem;
-            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo-icon {
+            background: rgba(255,255,255,0.2);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         .nav-item {
-            padding: 0.8rem 1rem;
-            margin: 0.5rem 0;
+            padding: 0.75rem 1rem;
             border-radius: var(--radius-sm);
             cursor: pointer;
             transition: var(--transition);
-            display: block;
-            color: var(--light);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255,255,255,0.9);
             text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
         }
 
-        .nav-item:hover, .nav-item.active {
-            background-color: var(--primary-dark);
-            color: var(--light);
+        .nav-item:hover {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            transform: translateX(4px);
         }
 
-        /* Main Content Styles */
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
         .container {
             padding: 2rem;
             overflow-x: auto;
@@ -104,11 +142,25 @@
             gap: 1rem;
         }
 
-        h1 {
-            color: var(--secondary);
-            font-size: 1.8rem;
-            position: relative;
-            padding-bottom: 0.5rem;
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow-sm);
         }
 
         /* Search Container */
@@ -123,17 +175,18 @@
         .search-input {
             flex: 1;
             min-width: 250px;
-            padding: 0.8rem 1rem;
-            border: 1px solid var(--gray);
+            padding: 0.8rem 1.5rem;
+            border: 1px solid var(--gray-light);
             border-radius: var(--radius-md);
-            font-size: 1rem;
+            font-size: 0.95rem;
             transition: var(--transition);
+            max-width: 500px;
         }
 
         .search-input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
         }
 
         .search-btn, .clear-btn {
@@ -170,41 +223,45 @@
             box-shadow: var(--shadow-sm);
         }
 
-        /* Table Styles */
+        /* Table Styles - New Design */
         .table-container {
-            width: 100%;
-            overflow-x: auto;
-            background: var(--white);
+            background: white;
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-sm);
-            margin-bottom: 2rem;
+            overflow: auto;
+            margin-bottom: 2.5rem;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
         }
 
         th, td {
-            padding: 1rem;
+            padding: 1rem 1.5rem;
             text-align: left;
             border-bottom: 1px solid var(--gray-light);
+            vertical-align: middle;
         }
 
         th {
-            background-color: var(--secondary);
-            color: var(--light);
+            background-color: #f8f9fa;
+            color: var(--gray-dark);
             font-weight: 600;
-            position: sticky;
-            top: 0;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
         }
 
         tr:hover {
-            background-color: rgba(52, 152, 219, 0.05);
+            background-color: #f8f9fa;
         }
 
-        /* Status Classes */
+        /* Status Classes - Kept original classes */
         .status-pending { 
             color: var(--warning);
             font-weight: 500;
@@ -240,7 +297,7 @@
             margin-right: 5px;
             cursor: pointer;
             border-radius: var(--radius-sm);
-            border: 1px solid var(--gray);
+            border: 1px solid var(--gray-light);
             transition: var(--transition);
         }
 
@@ -249,140 +306,89 @@
             box-shadow: var(--shadow-sm);
         }
 
-        /* View Button - Enhanced Design */
+        /* Buttons - New Design but keeping original classes */
         .view-btn {
-            padding: 0.65rem 1.25rem;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            margin: 0.15rem;
-            position: relative;
-            overflow: hidden;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
             border: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            font-size: 0.9rem;
+            background-color: var(--primary);
             color: white;
-            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .response-btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 0.9rem;
+            background-color: var(--success);
+            color: white;
+        }
+
+        .view-btn:hover,
+        .response-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
         }
 
         .view-btn:hover {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
-        }
-
-        .view-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 3px rgba(52, 152, 219, 0.3);
-        }
-
-        /* Respond Button - Enhanced Design */
-        .response-btn {
-            padding: 0.65rem 1.25rem;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            margin: 0.15rem;
-            position: relative;
-            overflow: hidden;
-            border: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            background: linear-gradient(135deg, var(--success), #229954);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
+            background-color: var(--primary-dark);
         }
 
         .response-btn:hover {
-            background: linear-gradient(135deg, #229954, var(--success));
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+            background-color: #1da1c1;
         }
 
-        .response-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 3px rgba(39, 174, 96, 0.3);
-        }
-
-        .view-btn i, .response-btn i {
-            font-size: 0.9em;
-            transition: transform 0.3s ease;
-        }
-
-        .view-btn:hover i, .response-btn:hover i {
-            transform: scale(1.1);
-        }
-
-        .view-btn:focus, .response-btn:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.4);
-        }
-
-        /* Add a new delete button style */
-        .delete-btn {
-            background-color: var(--accent);
-            color: white;
-            border: 1px solid var(--error);
-        }
-
-        .delete-btn:hover {
-            background-color: var(--error);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        /* Pagination */
-        .pagination {
+        .action-buttons {
             display: flex;
-            justify-content: center;
-            align-items: center;
             gap: 0.5rem;
-            margin-top: 2rem;
-            flex-wrap: wrap;
         }
 
-        .pagination-btn {
-            padding: 0.6rem 1rem;
-            border: 1px solid var(--gray);
-            background-color: white;
-            color: var(--text-primary);
-            border-radius: var(--radius-sm);
-            transition: var(--transition);
-            min-width: 40px;
+        /* Empty State */
+        .empty-state {
             text-align: center;
-            cursor: pointer;
+            padding: 3rem 1rem;
         }
 
-        .pagination-btn:hover:not(:disabled) {
-            background-color: var(--gray-light);
-            transform: translateY(-2px);
+        .empty-state-content {
+            max-width: 400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .pagination-btn.active {
-            background-color: var(--primary);
-            color: white;
-            border-color: var(--primary);
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--gray);
+            margin-bottom: 1.5rem;
         }
 
-        .pagination-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+        .empty-state h3 {
+            color: var(--dark);
+            font-size: 1.3rem;
+            margin-bottom: 0.75rem;
         }
 
-        /* Modal Styles */
+        .empty-state p {
+            color: var(--gray-dark);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        /* Modals - New Design but keeping original structure */
         .modal-dialog {
             display: none;
             position: fixed;
@@ -390,7 +396,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -466,28 +472,43 @@
             padding: 1.75rem;
         }
 
-        /* Confirmation Dialog */
+        /* Confirmation Dialog - New Design */
         .confirmation-dialog {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+        }
+
+        .confirmation-dialog.show {
+            display: flex;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .confirmation-content {
             background: white;
             padding: 30px;
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-lg);
-            z-index: 1001;
             max-width: 450px;
             width: 90%;
-            opacity: 0;
-            visibility: hidden;
+            transform: translateY(-30px) scale(0.95);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .confirmation-dialog.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translate(-50%, -50%) scale(1);
+        .confirmation-dialog.show .confirmation-content {
+            transform: translateY(0) scale(1);
         }
 
         .confirmation-dialog p {
@@ -505,58 +526,67 @@
             margin-top: 2rem;
         }
 
-        .confirmation-buttons button {
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius-md);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
+        .cancel-btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            min-width: 120px;
-            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
             border: none;
-        }
-
-        .confirmation-buttons button i {
-            font-size: 0.9em;
-        }
-
-        .cancel-btn {
+            font-size: 0.9rem;
             background-color: var(--gray-light);
             color: var(--text-primary);
-            box-shadow: var(--shadow-sm);
+        }
+
+        .approve-btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 0.9rem;
+            background-color: var(--success);
+            color: white;
+        }
+
+        .reject-btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 0.9rem;
+            background-color: var(--error);
+            color: white;
         }
 
         .cancel-btn:hover {
             background-color: var(--gray);
             transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .approve-btn {
-            background-color: var(--success);
-            color: white;
             box-shadow: var(--shadow-sm);
         }
 
         .approve-btn:hover {
-            background-color: #229954;
+            background-color: #1da1c1;
             transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .reject-btn {
-            background-color: var(--accent);
-            color: white;
             box-shadow: var(--shadow-sm);
         }
 
         .reject-btn:hover {
-            background-color: var(--error);
+            background-color: #d71f32;
             transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-sm);
         }
 
         /* Form Elements */
@@ -566,49 +596,64 @@
 
         .form-group label {
             display: block;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
             color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 0.95rem;
+            font-weight: 500;
         }
 
         .form-control {
             width: 100%;
-            padding: 0.9rem 1rem;
-            border: 1px solid var(--gray);
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--gray-light);
             border-radius: var(--radius-md);
-            font-size: 1rem;
+            font-size: 0.95rem;
             transition: var(--transition);
-            background-color: var(--gray-light);
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-            background-color: white;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
         }
 
-        .rejection-reason {
-            width: 100%;
-            padding: 1rem;
-            border: 1px solid var(--gray);
-            border-radius: var(--radius-md);
-            min-height: 150px;
+        textarea.form-control {
+            min-height: 120px;
             resize: vertical;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid var(--gray-light);
+            background-color: white;
+            color: var(--text-primary);
+            border-radius: var(--radius-sm);
             transition: var(--transition);
-            font-family: inherit;
-            line-height: 1.5;
+            cursor: pointer;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
             background-color: var(--gray-light);
         }
 
-        .rejection-reason:focus {
-            outline: none;
+        .pagination-btn.active {
+            background-color: var(--primary);
+            color: white;
             border-color: var(--primary);
-            box-shadow: 0 0 0 1.5px var(--secondary);
-            background-color: white;
         }
 
+        .pagination-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
         /* Notification */
         .notification {
@@ -617,7 +662,6 @@
             right: 20px;
             padding: 1rem 1.5rem;
             border-radius: var(--radius-md);
-            background-color: var(--error);
             color: white;
             font-weight: 500;
             box-shadow: var(--shadow-lg);
@@ -643,6 +687,13 @@
             background-color: var(--error);
         }
 
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
         /* Overlay */
         .overlay {
             position: fixed;
@@ -663,24 +714,16 @@
             visibility: visible;
         }
 
-        /* Responsive Styles */
+        /* Mobile Responsiveness */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 240px 1fr;
+            }
+        }
+
         @media (max-width: 992px) {
             .dashboard {
-                grid-template-columns: 200px 1fr;
-            }
-            
-            .sidebar {
-                padding: 1.5rem 0.8rem;
-            }
-            
-            .logo {
-                font-size: 1.3rem;
-                margin-bottom: 1.5rem;
-            }
-            
-            .nav-item {
-                padding: 0.6rem 0.8rem;
-                font-size: 0.9rem;
+                grid-template-columns: 220px 1fr;
             }
         }
 
@@ -690,49 +733,57 @@
             }
             
             .sidebar {
-                height: auto;
-                position: relative;
-                padding: 1rem;
+                position: fixed;
+                left: -350px;
+                height: 100vh;
+                transition: var(--transition);
+                z-index: 100;
             }
             
-            .nav-items {
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 0.5rem;
+            .sidebar.active {
+                left: 0;
             }
             
-            .nav-item {
-                margin: 0;
-                padding: 0.6rem;
-                font-size: 0.85rem;
+            .mobile-menu-toggle {
+                display: block;
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 0.5rem;
             }
             
-            .main-content {
-                padding: 1.5rem;
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 99;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
             }
             
             .search-container {
                 flex-direction: column;
-                gap: 0.8rem;
             }
             
-            .search-input, .search-btn, .clear-btn {
-                width: 100%;
+            table {
+                display: block;
+                overflow-x: auto;
             }
 
-            .view-btn, .response-btn {
-                padding: 0.6rem 1rem;
-                font-size: 0.8rem;
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
             }
         }
 
         @media (max-width: 576px) {
-            .main-content {
+            .container {
                 padding: 1rem;
-            }
-            
-            h1 {
-                font-size: 1.5rem;
             }
             
             .confirmation-buttons {
@@ -742,36 +793,16 @@
             .confirmation-buttons button {
                 width: 100%;
             }
-
-            .view-btn, .response-btn {
-                width: 100%;
-                justify-content: center;
-                margin: 0.25rem 0;
-            }
-            
-            .modal-content, .confirmation-dialog {
-                width: 95%;
-                padding: 1.2rem;
-            }
         }
 
         /* Animation Classes */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(20px); }
-            to { transform: translateY(0); }
-        }
-
         .animate-fade {
             animation: fadeIn 0.6s ease-out forwards;
         }
 
-        .animate-slide {
-            animation: slideIn 0.6s ease-out forwards;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
@@ -780,7 +811,12 @@
     <div class="dashboard">
         <!-- Sidebar -->
         <div class="sidebar">
-            <div class="logo">SHOP DASHBOARD</div>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <span>SHOP DASHBOARD</span>
+            </div>
             <div class="nav-items">
                 <a href="/shopowner/html/shop_dashboard.html" class="nav-item">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
@@ -792,84 +828,54 @@
                     <i class="fas fa-users"></i> Add Employee
                 </a>
                 <a href="/shopowner/html/shop_inventory.html" class="nav-item">
-                    <i class="fas fa-box"></i> Inventory
+                    <i class="fas fa-boxes"></i> Inventory
                 </a>
                 <a href="/shopowner/html/shop_order.html" class="nav-item">
                     <i class="fas fa-shopping-cart"></i> Orders
                 </a>
                 <a id="issuereport" href="/shopowner/html/issue_report.html" class="nav-item manager active">
-                    <i class="fas fa-warning"></i> Issue Report
+                    <i class="fas fa-exclamation-circle"></i> Issue Report
                 </a>
                 <a id="analyticsbtn" href="/shopowner/html/analytics.html" class="nav-item manager">
                     <i class="fas fa-chart-line"></i> Analytics
                 </a>
                 <a href="/shopowner/html/shopprofile.html" class="nav-item">
-                    <i class="fas fa-cog"></i> Profile Settings
+                    <i class="fas fa-cog"></i> Settings
                 </a>
                 <a id="logout_btn" class="nav-item">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </div>
         </div>
-    <!-- Notification element -->
-    <div id="notification" class="notification"></div>
 
-    <!-- Response Dialog -->
-    <div id="responseDialog" class="confirmation-dialog">
-        <p id="dialogMessage">Respond to this issue report</p>
-        <div class="form-group">
-            <label for="responseStatus">Status:</label>
-            <select id="responseStatus" class="form-control">
-                <option value="processing">Processing</option>
-                <option value="resolved">Resolved</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <textarea id="adminResponse" placeholder="Enter your response..." cols="50" rows="5" class="rejection-reason"></textarea>
-        </div>
-        <div class="confirmation-buttons">
-            <button id="cancelResponse" class="cancel-btn"><i class="fas fa-times"></i> Cancel</button>
-            <button id="confirmResponse" class="approve-btn"><i class="fas fa-check"></i> Submit Response</button>
-        </div>
-    </div>
-
-    <!-- Issue Details Modal -->
-    <div id="issueDetailsModal" class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalIssueTitle">Issue Report Details</h2>
-                <button id="closeIssueModal" class="close-modal">&times;</button>
+        <!-- Main Content -->
+        <div class="container">
+            <div class="header">
+                <!-- Mobile Menu Toggle -->
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <h1 class="animate-fade">Customer Issue Reports</h1>
+                <div class="user-profile">
+                    <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="User" class="user-avatar">
+                    <span>Shop Owner</span>
+                </div>
             </div>
-            <div id="modalIssueContent" class="modal-body">
-                <!-- Dynamic content will load here -->
+
+            <!-- Search and Filter -->
+            <div class="search-container animate-fade">
+                <input type="text" id="issueSearch" placeholder="Search issues by order ID, user ID, or type..."
+                    class="search-input">
+                <button id="searchBtn" class="search-btn">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                <button id="clearSearch" class="clear-btn">
+                    <i class="fas fa-times"></i> Clear
+                </button>
             </div>
-        </div>
-    </div>
 
-    <!-- Logout Confirmation Dialog -->
-    <div id="logoutDialog" class="confirmation-dialog">
-        <p>Are you sure you want to logout?</p>
-        <div class="confirmation-buttons">
-            <button id="cancelLogout" class="cancel-btn"><i class="fas fa-times"></i> Cancel</button>
-            <button id="confirmLogout" class="reject-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
-        </div>
-    </div>
-
-    <!-- Overlay -->
-    <div id="overlay" class="overlay"></div>
-
-    <div class="container animate-fade">
-        <h1 class="animate-slide">Customer Issue Reports</h1>
-
-        <div class="search-container animate-slide">
-            <input type="text" id="issueSearch" placeholder="Search issues by order ID, user ID, or type..."
-                class="search-input">
-            <button id="searchBtn" class="search-btn">Search</button>
-            <button id="clearSearch" class="clear-btn">Clear</button>
-        </div>
-
-        <section id="issue-reports" class="animate-fade">
-            <div class="table-container">
+            <!-- Issue Reports Table -->
+            <div class="table-container animate-fade">
                 <table>
                     <thead>
                         <tr>
@@ -889,16 +895,146 @@
                     </tbody>
                 </table>
             </div>
-        </section>
 
-        <div class="pagination">
-            <button class="pagination-btn" id="prevBtn" disabled>Previous</button>
-            <!-- Page numbers will be inserted here by JavaScript -->
-            <button class="pagination-btn" id="nextBtn">Next</button>
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="pagination-btn" id="prevBtn" disabled>Previous</button>
+                <!-- Page numbers will be inserted here by JavaScript -->
+                <button class="pagination-btn" id="nextBtn">Next</button>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Notification element -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Response Dialog -->
+    <div id="responseDialog" class="confirmation-dialog">
+        <div class="confirmation-content">
+            <p id="dialogMessage">Respond to this issue report</p>
+            <div class="form-group">
+                <label for="responseStatus">Status:</label>
+                <select id="responseStatus" class="form-control">
+                    <option value="processing">Processing</option>
+                    <option value="resolved">Resolved</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <textarea id="adminResponse" placeholder="Enter your response..." cols="50" rows="5" class="form-control"></textarea>
+            </div>
+            <div class="confirmation-buttons">
+                <button id="cancelResponse" class="cancel-btn"><i class="fas fa-times"></i> Cancel</button>
+                <button id="confirmResponse" class="approve-btn"><i class="fas fa-check"></i> Submit Response</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Issue Details Modal -->
+    <div id="issueDetailsModal" class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalIssueTitle">Issue Report Details</h2>
+                <button id="closeIssueModal" class="close-modal">&times;</button>
+            </div>
+            <div id="modalIssueContent" class="modal-body">
+                <!-- Dynamic content will load here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Dialog -->
+    <div id="logoutDialog" class="confirmation-dialog">
+        <div class="confirmation-content">
+            <p>Are you sure you want to logout?</p>
+            <div class="confirmation-buttons">
+                <button id="cancelLogout" class="cancel-btn"><i class="fas fa-times"></i> Cancel</button>
+                <button id="confirmLogout" class="reject-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div id="overlay" class="overlay"></div>
+
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay"></div>
 
     <script src="/shopowner/js/issue_report.js" type="module"></script>
+    <script>
+        // Mobile sidebar toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            if (mobileToggle) {
+                mobileToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                });
+            }
+            
+            if (overlay) {
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
+
+            // Make all thumbnail images clickable
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('photo-thumbnail')) {
+                    e.stopPropagation();
+                    window.open(e.target.src, '_blank');
+                }
+            });
+
+            // Close modals when clicking outside
+            document.addEventListener('click', function(event) {
+                // For issue details modal
+                const issueModal = document.getElementById('issueDetailsModal');
+                if (event.target === issueModal) {
+                    issueModal.classList.remove('show');
+                    document.getElementById('overlay').classList.remove('show');
+                }
+
+                // For response dialog
+                const responseDialog = document.getElementById('responseDialog');
+                if (event.target === responseDialog) {
+                    responseDialog.classList.remove('show');
+                    document.getElementById('overlay').classList.remove('show');
+                }
+
+                // For logout dialog
+                const logoutDialog = document.getElementById('logoutDialog');
+                if (event.target === logoutDialog) {
+                    logoutDialog.classList.remove('show');
+                    document.getElementById('overlay').classList.remove('show');
+                }
+            });
+
+            // Close buttons
+            document.getElementById('closeIssueModal')?.addEventListener('click', function() {
+                document.getElementById('issueDetailsModal').classList.remove('show');
+                document.getElementById('overlay').classList.remove('show');
+            });
+
+            document.getElementById('cancelResponse')?.addEventListener('click', function() {
+                document.getElementById('responseDialog').classList.remove('show');
+                document.getElementById('overlay').classList.remove('show');
+            });
+
+            document.getElementById('cancelLogout')?.addEventListener('click', function() {
+                document.getElementById('logoutDialog').classList.remove('show');
+                document.getElementById('overlay').classList.remove('show');
+            });
+        });
+
+        // Function to show modal with overlay
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+            document.getElementById('overlay').classList.add('show');
+        }
+    </script>
 </body>
 </html>
