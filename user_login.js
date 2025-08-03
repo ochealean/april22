@@ -107,8 +107,10 @@ loginButton_shop.addEventListener('click', (event) => {
         .then((userCredential) => {
             const user = userCredential.user;
             if (user.emailVerified) {
+                alert("email verified");
                 get(ref(db, `AR_shoe_users/shop/${user.uid}`))
                     .then((snapshot) => {
+                        console.log("user uid:", user.uid); // Debugging line
                         if (snapshot.exists()) {
                             // Check shop status after successful login
                             checkShopStatus(user.uid);
