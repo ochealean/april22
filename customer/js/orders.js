@@ -17,9 +17,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase(app);
 
-// ito ay kapag may nagtype ng url papuntang dashboard kahit di naka login
-// document.body.style.display = 'none';
-
 // Initialize the page when auth state changes
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -91,6 +88,7 @@ function loadOrders(userId) {
         alert("Failed to load orders. Please try again.");
     });
 }
+
 function createOrderCard(order) {
     if (!order) return null;
 
@@ -98,7 +96,7 @@ function createOrderCard(order) {
 
     // Only show these statuses
     const allowedStatuses = [
-        'pending',                 // ✅ Added pending here
+        'pending',
         'order processed', 
         'shipped', 
         'accepted',
@@ -109,7 +107,6 @@ function createOrderCard(order) {
         'other'
     ];
     
-console.log("Orders.js loaded successfully");
     // Skip if status is not in allowed list
     if (!allowedStatuses.includes(status)) return null;
 
@@ -129,15 +126,14 @@ console.log("Orders.js loaded successfully");
 
     let statusClass = '';
     let statusText = '';
-    console.log('asdasdasd');
-    console.log("Order Status:", status); // Debugging line to check status
+    
     switch (status) {
         case 'pending':
             statusClass = 'status-pending';
             statusText = 'Pending';
             break;
         case 'accepted':
-            statusClass = 'status-processed';
+            statusClass = 'status-accepted';
             statusText = 'Accepted';
             break;
         case 'order processed':
@@ -194,18 +190,30 @@ console.log("Orders.js loaded successfully");
 
     if (status === 'delivered') {
         actionButtons = `
-            <button class="btn btn-received" onclick="markAsReceived('${order.id}')">Order Received</button>
-            <button class="btn btn-issue" onclick="reportIssue('${order.id}')">Report Issue</button>
-            <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
+            <button class="btn btn-received" onclick="markAsReceived('${order.id}')">
+                <i class="fas fa-check"></i> Order Received
+            </button>
+            <button class="btn btn-issue" onclick="reportIssue('${order.id}')">
+                <i class="fas fa-exclamation"></i> Report Issue
+            </button>
+            <button class="btn btn-track" onclick="trackOrder('${order.id}')">
+                <i class="fas fa-truck"></i> Track Package
+            </button>
         `;
     } else if (status === 'pending') {
         actionButtons = `
-            <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
-            <button class="btn btn-cancel" onclick="cancelOrder('${order.id}')">Cancel Order</button>
+            <button class="btn btn-track" onclick="trackOrder('${order.id}')">
+                <i class="fas fa-truck"></i> Track Package
+            </button>
+            <button class="btn btn-cancel" onclick="cancelOrder('${order.id}')">
+                <i class="fas fa-times"></i> Cancel Order
+            </button>
         `;
-    }else {
+    } else {
         actionButtons = `
-            <button class="btn btn-track" onclick="trackOrder('${order.id}')">Track Package</button>
+            <button class="btn btn-track" onclick="trackOrder('${order.id}')">
+                <i class="fas fa-truck"></i> Track Package
+            </button>
         `;
     }
 
@@ -232,9 +240,6 @@ console.log("Orders.js loaded successfully");
 
     return orderCard;
 }
-
-
-
 
 function setupOrderFilters() {
     const filterSelect = document.getElementById('activeFilter');
