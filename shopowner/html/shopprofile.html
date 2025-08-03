@@ -833,6 +833,129 @@
                     </div>
                 </form>
             </div>
+
+            <div class="profile-container" id="employeeProfileSection">
+            <!-- Employee Profile Header -->
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img src="" alt="Employee Photo" id="employeePhotoImg">
+                    <label class="avatar-upload">
+                        <i class="fas fa-camera"></i> Change
+                        <input type="file" accept="image/*" id="employeePhotoUpload">
+                    </label>
+                </div>
+
+                <div class="profile-info">
+                    <h2 class="profile-name">Employee Name</h2>
+                    <div class="profile-email">employee@example.com</div>
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Orders Processed</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Tasks Completed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employee Profile Form -->
+            <form class="profile-form" id="employeeProfileForm">
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <h3 class="section-title"><i class="fas fa-user"></i> Personal Information</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="employeeFullName" class="form-label">Full Name</label>
+                            <input type="text" id="employeeFullName" class="form-control" value="">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="employeeRole" class="form-label">Role</label>
+                            <input type="text" id="employeeRole" class="form-control" value="" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="employeeEmail" class="form-label">Email</label>
+                            <input type="email" id="employeeEmail" class="form-control" value="" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="employeePhone" class="form-label">Phone Number</label>
+                            <div style="display: flex; align-items: center;">
+                                <span style="padding: 0.8rem 0.5rem; background: var(--gray-light); border-radius: var(--radius-sm) 0 0 var(--radius-sm);">+63</span>
+                                <input type="tel" id="employeePhone" class="form-control" value="" maxlength="10" style="border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-left: -1px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Contact Section -->
+                <div class="form-section">
+                    <h3 class="section-title"><i class="fas fa-phone-alt"></i> Emergency Contact</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emergencyContactName" class="form-label">Contact Name</label>
+                            <input type="text" id="emergencyContactName" class="form-control" value="">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emergencyContactRelation" class="form-label">Relationship</label>
+                            <input type="text" id="emergencyContactRelation" class="form-control" value="">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emergencyContactPhone" class="form-label">Phone Number</label>
+                            <div style="display: flex; align-items: center;">
+                                <span style="padding: 0.8rem 0.5rem; background: var(--gray-light); border-radius: var(--radius-sm) 0 0 var(--radius-sm);">+63</span>
+                                <input type="tel" id="emergencyContactPhone" class="form-control" value="" maxlength="10" style="border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-left: -1px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password Change Section -->
+                <div class="form-section">
+                    <h3 class="section-title"><i class="fas fa-lock"></i> Change Password</h3>
+
+                    <div class="form-row">
+                        <div class="form-group password-toggle">
+                            <label for="employeeCurrentPassword" class="form-label">Current Password</label>
+                            <input type="password" id="employeeCurrentPassword" class="form-control">
+                            <i class="fas fa-eye password-toggle-icon" id="toggleEmployeeCurrentPassword"></i>
+                        </div>
+
+                        <div class="form-group password-toggle">
+                            <label for="employeeNewPassword" class="form-label">New Password</label>
+                            <input type="password" id="employeeNewPassword" class="form-control">
+                            <i class="fas fa-eye password-toggle-icon" id="toggleEmployeeNewPassword"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group password-toggle">
+                        <label for="employeeConfirmPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" id="employeeConfirmPassword" class="form-control">
+                        <i class="fas fa-eye password-toggle-icon" id="toggleEmployeeConfirmPassword"></i>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+            </form>
+        </div>
+
+
         </div>
     </div>
 
