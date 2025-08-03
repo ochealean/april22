@@ -111,8 +111,16 @@ function displayRecentOrders(orders) {
     if (!ordersTable) return;
 
     ordersTable.innerHTML = orders.length === 0 ?
-        '<tr><td colspan="6" style="text-align: center;">No orders found</td></tr>' :
-        orders.map(order => {
+        ordersContainer.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1; min-height: 200px;">
+                <i class="fas fa-shopping-bag"></i>
+                <h3>No Orders Yet</h3>
+                <p>When customers place orders, they'll appear here</p>
+                <a href="/shopowner/html/shopowner_addshoe.html" class="btn">
+                    <i class="fas fa-plus"></i> Add shoe to start selling
+                </a>
+            </div>
+        ` : orders.map(order => {
             const customerName = order.shippingInfo ?
                 `${order.shippingInfo.firstName} ${order.shippingInfo.lastName}` :
                 'Unknown Customer';
@@ -244,7 +252,16 @@ function loadRecentProducts() {
 
             displayRecentProducts(recentShoes, recentAddedContainer);
         } else if (recentAddedContainer) {
-            recentAddedContainer.innerHTML = '<p>No shoes added yet</p>';
+            recentAddedContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-shoe-prints"></i>
+                    <h3>No Recent Additions</h3>
+                    <p>New products you add will appear here</p>
+                    <a href="/shopowner/html/shopowner_addshoe.html" class="btn">
+                        <i class="fas fa-plus"></i> Add Another Product
+                    </a>
+                </div>
+            `;
         }
     });
 }
@@ -284,10 +301,14 @@ function displayRecentProducts(shoes, container) {
                 ${imageUrl
                 ? `<img src="${imageUrl}" alt="${shoe.shoeName}" class="shoe-thumbnail">`
                 : '<div class="no-image">No Image</div>'
-            }
+                }
             </div>
             <div class="product-info">
-                <div class="product-title">${shoe.shoeName || 'No Name'}</div>
+                <h3 class="product-title">${shoe.shoeName || 'No Name'}</h3>
+                <div class="product-meta">
+                    <span class="product-brand">${shoe.brand || 'No Brand'}</span>
+                    <span class="product-type">${shoe.type || 'No Type'}</span>
+                </div>
                 <div class="product-code">Code: ${shoe.shoeCode || 'N/A'}</div>
                 <div class="product-price">${price}</div>
                 <div class="product-color">Colors: ${colorText}</div>
@@ -613,10 +634,13 @@ function displayTopProducts(products) {
 
     if (products.length === 0) {
         topProductsGrid.innerHTML = `
-            <div class="empty-state" style="grid-column: 1 / -1;">
-                <i class="fas fa-star"></i>
-                <h3>No Top Rated Products Yet</h3>
-                <p>Products with ratings will appear here once customers leave feedback</p>
+            <div class="empty-state">
+                <i class="fas fa-shoe-prints"></i>
+                <h3>No Products Added</h3>
+                <p>Start by adding your first product to showcase in your store</p>
+                <a href="/shopowner/html/shopowner_addshoe.html" class="btn">
+                    <i class="fas fa-plus"></i> Add First Product
+                </a>
             </div>
         `;
         return;
@@ -648,13 +672,17 @@ function displayTopProducts(products) {
                 ${imageUrl
                 ? `<img src="${imageUrl}" alt="${product.shoeName}" class="shoe-thumbnail">`
                 : '<div class="no-image">No Image</div>'
-            }
+                }
                 <div class="product-badge">
                     ${product.avgRating.toFixed(1)} <i class="fas fa-star"></i>
                 </div>
             </div>
             <div class="product-info">
-                <div class="product-title">${product.shoeName || 'No Name'}</div>
+                <h3 class="product-title">${product.shoeName || 'No Name'}</h3>
+                <div class="product-meta">
+                    <span class="product-brand">${product.brand || 'No Brand'}</span>
+                    <span class="product-type">${product.type || 'No Type'}</span>
+                </div>
                 <div class="product-code">Code: ${product.shoeCode || 'N/A'}</div>
                 <div class="product-price">${price}</div>
                 <div class="product-color">Colors: ${colorText}</div>
