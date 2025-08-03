@@ -147,11 +147,18 @@ function createOrderRow(order) {
         `;
     } else if (status === 'rejected' || status === 'cancelled') {
         actionButtons = `<span class="no-actions">No actions available</span>`;
+    }
+    else if (status === 'completed' || status === 'delivered') {
+    actionButtons = `
+        <button class="btn btn-track" onclick="trackbtn('${order.orderId}', '${order.userId}')">
+            <i class="fas fa-eye"></i> View Details
+        </button>
+    `;
     } else { // line 123 redirect to track.html
-        actionButtons = `
-            <button class="btn btn-track" onclick="trackbtn('${order.orderId}', '${order.userId}')">
-                <i class="fas fa-plus"></i> Add Track Status
-            </button>
+    actionButtons = `
+        <button class="btn btn-track" onclick="trackbtn('${order.orderId}', '${order.userId}')">
+            <i class="fas fa-plus"></i> Add Track Status
+        </button>
         `;
     }
 
