@@ -80,9 +80,9 @@ onAuthStateChanged(auth, (user) => {
 const domElements = {
     orderTitle: document.querySelector(".order-title"),
     customerName: document.querySelector(".meta-value:nth-child(2)"),
-    orderDate: document.querySelector(".meta-value:nth-child(4)"),
-    itemCount: document.querySelector(".meta-value:nth-child(6)"),
-    orderTotal: document.querySelector(".meta-value:nth-child(8)"),
+    orderDate: document.querySelector(".meta-item:nth-child(2) .meta-value"),
+    itemCount: document.querySelector(".meta-item:nth-child(3) .meta-value"),
+    orderTotal: document.querySelector(".meta-item:nth-child(4) .meta-value"),
     carrierInput: document.getElementById("carrier"),
     trackingNumberInput: document.getElementById("trackingNumber"),
     shipDateInput: document.getElementById("shipDate"),
@@ -155,7 +155,7 @@ function setupEventListeners() {
     // Delete update (delegated event)
     if (domElements.updateList) {
         domElements.updateList.addEventListener("click", (e) => {
-            const deleteBtn = e.target.closest(".btn-delete");
+            const deleteBtn = e.target.closest(".btn-danger");
             if (deleteBtn) {
                 const updateID = deleteBtn.dataset.id;
                 if (confirm("Are you sure you want to delete this update?")) {
@@ -253,7 +253,7 @@ function addUpdateToDOM(updateID, update) {
         <p class="update-message">${update.message}</p>
         ${update.location ? `<p class="update-location">${update.location}</p>` : ''}
         <div class="update-actions">
-            <button class="btn-delete" data-id="${updateID}">
+            <button class="btn btn-danger" data-id="${updateID}">
                 <i class="fas fa-trash"></i> Delete
             </button>
         </div>
