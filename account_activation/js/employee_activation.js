@@ -138,7 +138,17 @@ async function findDefaultEmployee(email, password) {
 }
 
 async function updateEmployeeRecord(employeeId, uid, newEmail) {
-    const updates = {
+    // First get the current employee data
+    const employeeRef = ref(db, `AR_shoe_users/employees/${employeeId}`);
+    const snapshot = await get(employeeRef);
+    const employeeData = snapshot.val();
+    
+    // Create updates object
+    const updates = {};
+    
+    // Prepare the new employee data with UID as key
+    updates[`AR_shoe_users/employees/${uid}`] = {
+        ...employeeData,
         uid: uid,
         email: newEmail,
         status: 'active',
@@ -147,7 +157,11 @@ async function updateEmployeeRecord(employeeId, uid, newEmail) {
         lastActivated: new Date().toISOString()
     };
     
-    await update(ref(db, `AR_shoe_users/employees/${employeeId}`), updates);
+    // Remove the old default entry
+    updates[`AR_shoe_users/employees/${employeeId}`] = null;
+    
+    // Perform the update
+    await update(ref(db), updates);
 }
 
 function handleActivationError(error) {
