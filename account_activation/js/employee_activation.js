@@ -18,6 +18,11 @@ const app = initializeApp(firebaseConfig, "EmployeeActivation");
 const auth = getAuth(app);
 const db = getDatabase(app);
 
+// Get email and password from URL query parameters
+const urlParams = new URLSearchParams(window.location.search);
+const urlEmail = urlParams.get('email');
+const urlPassword = urlParams.get('password');
+
 // DOM Elements
 const activationForm = document.getElementById('activationForm');
 const defaultEmailInput = document.getElementById('defaultEmail');
@@ -26,6 +31,9 @@ const newEmailInput = document.getElementById('newEmail');
 const newPasswordInput = document.getElementById('newPassword');
 const confirmPasswordInput = document.getElementById('confirmPassword');
 const activateBtn = document.getElementById('activateBtn');
+
+defaultEmailInput.value = urlEmail || '';
+defaultPasswordInput.value = urlPassword || '';
 
 function initActivation() {
     if (activationForm) {
@@ -108,7 +116,7 @@ async function handleActivation(e) {
             Please check your inbox.
         `);
         
-        activationForm.reset();
+        window.location.href = "/user_login.html#shop"; 
     } catch (error) {
         console.error("Activation error:", error);
         handleActivationError(error);
