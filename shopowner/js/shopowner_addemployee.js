@@ -59,7 +59,7 @@ function setupAuthStateListener() {
             loadShopData(user.uid);
             loadLastEmployeeNumber(user.uid);
         } else {
-            window.location.href = '/shopowner/html/shopowner_login.html';
+            window.location.href = '/user_login.html';
         }
     });
 }
@@ -463,7 +463,7 @@ function handleLogout() {
 
     auth.signOut().then(() => {
         // Redirect to login page after successful signout
-        window.location.href = "/shopowner/html/shopowner_login.html";
+        window.location.href = "/user_login.html";
     }).catch((error) => {
         console.error("Logout error:", error);
         alert("Failed to logout. Please try again.");
