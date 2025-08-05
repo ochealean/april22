@@ -103,35 +103,50 @@ loginButton_shop.addEventListener('click', (event) => {
     const email = document.getElementById('shop-email').value;
     const password = document.getElementById('shop-password').value;
 
-    signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            const user = userCredential.user;
-            if (user.emailVerified) {
-                get(ref(db, `AR_shoe_users/shop/${user.uid}`))
-                    .then((snapshot) => {
-                        if (snapshot.exists()) {
-                            // Check shop status after successful login
-                            checkShopStatus(user.uid);
-                        } else {
-                            get(ref(db, `AR_shoe_users/employees/${user.uid}`))
-                                .then((snapshot) => {
-                                    if (snapshot.exists()) {
-                                        // Check shop status after successful login
-                                        checkShopStatus(user.uid);
-                                    } else {
-                                        alert("Account does not exist");
-                                        auth.signOut();
-                                    }
-                                });
-                        }
-                    });
-            } else {
-                alert("Please verify your email address before logging in.");
+    // First check if this is a default account needing activation
+    accountExistButNeedToActivate(email, password)
+        .then(activationStatus => {
+            if (activationStatus.needsActivation) {
+                window.location.href = "account_activation/html/employee_activation.html?email=" + 
+                    encodeURIComponent(email) + "&password=" + encodeURIComponent(password);
+                return;
             }
+            
+            // If not a default account, proceed with normal login
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    if (user.emailVerified) {
+                        alert("email verified");
+                        get(ref(db, `AR_shoe_users/shop/${user.uid}`))
+                            .then((snapshot) => {
+                                console.log("user uid:", user.uid);
+                                if (snapshot.exists()) {
+                                    checkShopStatus(user.uid);
+                                } else {
+                                    get(ref(db, `AR_shoe_users/employees/${user.uid}`))
+                                        .then((snapshot) => {
+                                            if (snapshot.exists()) {
+                                                checkShopStatus(user.uid);
+                                            } else {
+                                                alert("Account does not exist");
+                                                auth.signOut();
+                                            }
+                                        });
+                                }
+                            });
+                    } else {
+                        alert("Please verify your email address before logging in.");
+                    }
+                })
+                .catch((error) => {
+                    console.log("Error logging in: " + error.message);
+                    alert("Wrong email or password. Please try again.");
+                });
         })
-        .catch((error) => {
-            console.log("Error logging in: " + error.message);
-            alert("Wrong email or password. Please try again.");
+        .catch(error => {
+            console.error("Activation check failed:", error);
+            alert("An error occurred. Please try again.");
         });
 });
 
@@ -148,7 +163,7 @@ function checkShopStatus(uid) {
                 window.location.href = "shopowner/html/shop_pending.html"; // Redirect to pending page
             } else if (status === 'rejected') {
                 console.log("Shop status:", status); // Debugging line
-                window.location.href = "shopowner/html/shop_rejected.html?shopID="+uid; // Redirect to rejected page
+                window.location.href = "shopowner/html/shop_rejected.html?shopID=" + uid; // Redirect to rejected page
             } else {
                 // If approved, redirect to the shop dashboard
                 window.location.href = "shopowner/html/shop_dashboard.html";
@@ -305,3 +320,37 @@ document.getElementById('forgotPass_customer').addEventListener('click', async (
         alert(errorMessage);
     }
 });
+
+function accountExistButNeedToActivate(email, password) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Check in employees collection for default accounts
+            const employeesRef = ref(db, 'AR_shoe_users/employees');
+            const snapshot = await get(employeesRef);
+
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const employee = childSnapshot.val();
+                    // Check if it's a default account with matching email AND tempPassword
+                    if (employee.email && 
+                        employee.email.toLowerCase() === email.toLowerCase() &&
+                        employee.isDefaultAccount === true &&
+                        employee.tempPassword === password) {
+                        resolve({
+                            needsActivation: true,
+                            employeeId: childSnapshot.key,
+                            employeeData: employee
+                        });
+                        return; // Exit early if match found
+                    }
+                });
+            }
+
+            // If no matching default account found
+            resolve({ needsActivation: false });
+        } catch (error) {
+            console.error("Error checking account status:", error);
+            reject(error);
+        }
+    });
+}
