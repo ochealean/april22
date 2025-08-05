@@ -318,7 +318,6 @@ body {
     cursor: pointer;
     width: 100%;
     transition: var(--transition);
-    margin-top: 1.5rem;
     box-shadow: var(--shadow-sm);
     position: relative;
     overflow: hidden;
@@ -351,7 +350,7 @@ body {
 
 .register-link {
     text-align: center;
-    margin-top: 2rem;
+    margin-top: 1rem;
     color: var(--text-secondary);
     font-size: 0.9rem;
     animation: fadeIn 0.6s ease-out 0.5s both;
