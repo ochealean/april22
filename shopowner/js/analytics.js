@@ -571,9 +571,7 @@ function renderInventoryStatusChart(inventoryChanges) {
 document.getElementById('printInventoryBtn').addEventListener('click', async () => {
     // Show loading indicator
     const btn = document.getElementById('printInventoryBtn');
-    const originalText = btn.textContent;
-    const originalHTML = btn.innerHTML; // Store original HTML including icon
-
+    const originalHTML = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
     btn.disabled = true;
     btn.classList.add('loading');
@@ -584,19 +582,29 @@ document.getElementById('printInventoryBtn').addEventListener('click', async () 
         printContainer.style.padding = '20px';
         printContainer.style.fontFamily = 'Arial, sans-serif';
 
-        // Add title and date
-        const title = document.createElement('h1');
-        title.textContent = `${sname || 'Shop'} Analytics Report`;
-        title.style.textAlign = 'center';
-        title.style.marginBottom = '10px';
-        printContainer.appendChild(title);
-
-        const date = document.createElement('p');
-        date.textContent = `Generated: ${new Date().toLocaleString()}`;
-        date.style.textAlign = 'center';
-        date.style.marginBottom = '30px';
-        date.style.color = '#666';
-        printContainer.appendChild(date);
+        // Add header with shop name and logo
+        const header = document.createElement('div');
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.alignItems = 'center';
+        header.style.marginBottom = '20px';
+        header.style.borderBottom = '1px solid #ddd';
+        header.style.paddingBottom = '20px';
+        
+        const shopTitle = document.createElement('h1');
+        shopTitle.textContent = `${sname || 'Shop'} Analytics Report`;
+        shopTitle.style.margin = '0';
+        shopTitle.style.fontSize = '24px';
+        shopTitle.style.color = '#333';
+        
+        const reportDate = document.createElement('div');
+        reportDate.textContent = `Report Date: ${new Date().toLocaleDateString()}`;
+        reportDate.style.fontSize = '14px';
+        reportDate.style.color = '#666';
+        
+        header.appendChild(shopTitle);
+        header.appendChild(reportDate);
+        printContainer.appendChild(header);
 
         // Convert charts to images first
         const charts = [
@@ -617,6 +625,7 @@ document.getElementById('printInventoryBtn').addEventListener('click', async () 
                 // Create a container for the chart
                 const chartContainer = document.createElement('div');
                 chartContainer.style.marginBottom = '30px';
+                chartContainer.style.pageBreakInside = 'avoid';
                 chartContainer.appendChild(img);
 
                 // Add the chart title
@@ -625,6 +634,7 @@ document.getElementById('printInventoryBtn').addEventListener('click', async () 
                     const titleClone = chartTitle.cloneNode(true);
                     titleClone.style.marginBottom = '15px';
                     titleClone.style.textAlign = 'center';
+                    titleClone.style.fontSize = '18px';
                     chartContainer.insertBefore(titleClone, img);
                 }
 
@@ -636,74 +646,107 @@ document.getElementById('printInventoryBtn').addEventListener('click', async () 
         const analyticsCards = document.querySelectorAll('.analytics-card');
 
         for (const card of analyticsCards) {
-            // Skip if this is one of the chart cards (we already processed them)
             if (card.querySelector('canvas')) continue;
 
             const clone = card.cloneNode(true);
-
-            // Style adjustments for PDF
             clone.style.boxShadow = 'none';
             clone.style.border = '1px solid #ddd';
             clone.style.borderRadius = '5px';
             clone.style.padding = '15px';
             clone.style.marginBottom = '20px';
-            clone.style.pageBreakInside = 'avoid'; // Prevent splitting across pages
+            clone.style.pageBreakInside = 'avoid';
 
-            // Ensure tables are properly scaled
+            const cardTitle = clone.querySelector('.card-title');
+            if (cardTitle) {
+                cardTitle.style.fontSize = '18px';
+                cardTitle.style.marginBottom = '15px';
+            }
+
             const tables = clone.querySelectorAll('table');
             tables.forEach(table => {
                 table.style.width = '100%';
                 table.style.fontSize = '10pt';
                 table.style.borderCollapse = 'collapse';
+                
+                const ths = table.querySelectorAll('th');
+                ths.forEach(th => {
+                    th.style.backgroundColor = '#f5f5f5';
+                    th.style.padding = '8px';
+                    th.style.textAlign = 'left';
+                });
+                
+                const tds = table.querySelectorAll('td');
+                tds.forEach(td => {
+                    td.style.padding = '8px';
+                    td.style.borderBottom = '1px solid #ddd';
+                });
             });
 
             printContainer.appendChild(clone);
         }
 
-        // PDF options
+        // PDF options - now with landscape orientation and visible footer
         const opt = {
-            margin: [15, 15, 15, 15], // Slightly larger margins
+            margin: [20, 40, 30, 40], // Increased bottom margin for footer
             filename: `${sname || 'Shop'}_Analytics_${new Date().toISOString().slice(0, 10)}.pdf`,
-            image: {
-                type: 'jpeg',
-                quality: 1.0 // Higher quality
-            },
+            image: { type: 'jpeg', quality: 1.0 },
             html2canvas: {
                 scale: 2,
-                logging: false, // Disable logging for production
+                logging: false,
                 useCORS: true,
-                scrollX: 0,
-                scrollY: 0,
                 allowTaint: true,
                 letterRendering: true,
-                onclone: (clonedDoc) => {
-                    // Ensure all content is visible
-                    clonedDoc.querySelectorAll('table, img, div').forEach(el => {
-                        el.style.visibility = 'visible';
-                        el.style.opacity = '1';
-                    });
+                // Ensure footer is rendered
+                onclone: function(clonedDoc) {
+                    const footer = clonedDoc.createElement('div');
+                    footer.style.position = 'fixed';
+                    footer.style.bottom = '0';
+                    footer.style.width = '100%';
+                    footer.style.textAlign = 'center';
+                    footer.style.fontSize = '10px';
+                    footer.style.color = '#666';
+                    footer.style.padding = '5px';
+                    footer.style.borderTop = '1px solid #eee';
+                    footer.innerHTML = `Page <span class="pageNumber"></span> of <span class="totalPages"></span>`;
+                    clonedDoc.body.appendChild(footer);
                 }
             },
-            jsPDF: {
-                unit: 'mm',
-                format: 'a4',
-                orientation: 'portrait',
-                hotfixes: ['px_scaling'] // Fix for pixel scaling issues
+            jsPDF: { 
+                unit: 'mm', 
+                format: 'a4', 
+                orientation: 'landscape' // Changed to landscape
+            },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+            // Header configuration
+            header: {
+                height: '15mm',
+                contents: `<div style="text-align: center; font-size: 12px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px;">
+                    ${sname || 'Shop'} Analytics Report - ${new Date().toLocaleDateString()}
+                </div>`
+            },
+            // Footer configuration - now properly visible
+            footer: {
+                height: '15mm',
+                contents: {
+                    first: '',
+                    default: function(pageNum, numPages) {
+                        return `<div style="text-align: center; font-size: 10px; color: #666; border-top: 1px solid #eee; padding-top: 5px; margin-top: 10px;">
+                            Page ${pageNum} of ${numPages}
+                        </div>`;
+                    },
+                    last: ''
+                }
             }
         };
 
-        // Add a small delay to ensure everything is ready
         await new Promise(resolve => setTimeout(resolve, 300));
-
-        // Generate PDF
         await html2pdf().set(opt).from(printContainer).save();
 
     } catch (error) {
         console.error('Error generating PDF:', error);
         alert('Failed to generate PDF. Please try again.');
     } finally {
-        // Restore button state
-        btn.innerHTML = originalHTML; // Restore original HTML including icon
+        btn.innerHTML = originalHTML;
         btn.disabled = false;
         btn.classList.remove('loading');
     }
