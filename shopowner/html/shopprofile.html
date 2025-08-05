@@ -22,9 +22,9 @@
             --gray-dark: #495057;
             --text-primary: #212529;
             --text-secondary: #343a40;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             --radius-sm: 6px;
             --radius-md: 10px;
@@ -75,7 +75,7 @@
         }
 
         .logo-icon {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             width: 36px;
             height: 36px;
             border-radius: 8px;
@@ -98,23 +98,23 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
             font-size: 0.95rem;
             font-weight: 500;
         }
 
         .nav-item:hover {
-            background: rgba(255,255,255,0.15);
+            background: rgba(255, 255, 255, 0.15);
             color: white;
             transform: translateX(4px);
         }
 
         .nav-item.active {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             color: white;
             font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .nav-item i {
@@ -513,7 +513,7 @@
             .dashboard {
                 grid-template-columns: 1fr;
             }
-            
+
             .sidebar {
                 position: fixed;
                 left: -350px;
@@ -521,18 +521,18 @@
                 transition: var(--transition);
                 z-index: 100;
             }
-            
+
             .sidebar.active {
                 left: 0;
             }
-            
+
             .mobile-menu-toggle {
                 display: block;
                 font-size: 1.5rem;
                 cursor: pointer;
                 padding: 0.5rem;
             }
-            
+
             .sidebar-overlay {
                 display: none;
                 position: fixed;
@@ -540,23 +540,23 @@
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: rgba(0,0,0,0.5);
+                background: rgba(0, 0, 0, 0.5);
                 z-index: 99;
             }
-            
+
             .sidebar-overlay.active {
                 display: block;
             }
-            
+
             .profile-header {
                 flex-direction: column;
                 text-align: center;
             }
-            
+
             .profile-stats {
                 justify-content: center;
             }
-            
+
             .form-row {
                 grid-template-columns: 1fr;
             }
@@ -566,15 +566,40 @@
             .main-content {
                 padding: 1rem;
             }
-            
+
             .form-actions {
                 flex-direction: column;
             }
-            
-            .btn-save, .btn-cancel {
+
+            .btn-save,
+            .btn-cancel {
                 width: 100%;
                 justify-content: center;
             }
+        }
+
+        /* Add to your existing CSS */
+        #employeeProfileSection {
+            display: none;
+            /* Hidden by default */
+        }
+
+        /* For shop owners */
+        .shop-owner #employeeProfileSection {
+            display: none !important;
+        }
+
+        .shop-owner .profile-container {
+            display: block !important;
+        }
+
+        /* For employees */
+        .employee .profile-container {
+            display: none !important;
+        }
+
+        .employee #employeeProfileSection {
+            display: block !important;
         }
     </style>
 </head>
@@ -709,7 +734,8 @@
 
                             <div class="form-group">
                                 <label for="ownerEmail" class="form-label">Email</label>
-                                <input type="email" id="ownerEmail" class="form-control" value="elitefootwear@example.com">
+                                <input type="email" id="ownerEmail" class="form-control"
+                                    value="elitefootwear@example.com">
                             </div>
                         </div>
 
@@ -717,8 +743,11 @@
                             <div class="form-group">
                                 <label for="ownerPhone" class="form-label">Phone Number</label>
                                 <div style="display: flex; align-items: center;">
-                                    <span style="padding: 0.8rem 0.5rem; background: var(--gray-light); border-radius: var(--radius-sm) 0 0 var(--radius-sm);">+63</span>
-                                    <input type="tel" id="ownerPhone" class="form-control" value="9XX XXX XXXX" maxlength="10" style="border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-left: -1px;">
+                                    <span
+                                        style="padding: 0.8rem 0.5rem; background: var(--gray-light); border-radius: var(--radius-sm) 0 0 var(--radius-sm);">+63</span>
+                                    <input type="tel" id="ownerPhone" class="form-control" value="9XX XXX XXXX"
+                                        maxlength="10"
+                                        style="border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-left: -1px;">
                                 </div>
                             </div>
                         </div>
@@ -775,7 +804,8 @@
                                 </div>
                                 <div class="document-actions">
                                     <button type="button" class="btn btn-view"><i class="fas fa-eye"></i> View</button>
-                                    <button type="button" class="btn btn-replace"><i class="fas fa-sync"></i> Replace</button>
+                                    <button type="button" class="btn btn-replace"><i class="fas fa-sync"></i>
+                                        Replace</button>
                                 </div>
                             </div>
                         </div>
@@ -795,7 +825,8 @@
                                 </div>
                                 <div class="document-actions">
                                     <button type="button" class="btn btn-view"><i class="fas fa-eye"></i> View</button>
-                                    <button type="button" class="btn btn-replace"><i class="fas fa-sync"></i> Replace</button>
+                                    <button type="button" class="btn btn-replace"><i class="fas fa-sync"></i>
+                                        Replace</button>
                                 </div>
                             </div>
                         </div>
@@ -835,125 +866,130 @@
             </div>
 
             <div class="profile-container" id="employeeProfileSection">
-            <!-- Employee Profile Header -->
-            <div class="profile-header">
-                <div class="profile-avatar">
-                    <img src="" alt="Employee Photo" id="employeePhotoImg">
-                    <label class="avatar-upload">
-                        <i class="fas fa-camera"></i> Change
-                        <input type="file" accept="image/*" id="employeePhotoUpload">
-                    </label>
-                </div>
+                <!-- Employee Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <img src="" alt="Employee Photo" id="employeePhotoImg">
+                        <label class="avatar-upload">
+                            <i class="fas fa-camera"></i> Change
+                            <input type="file" accept="image/*" id="employeePhotoUpload">
+                        </label>
+                    </div>
 
-                <div class="profile-info">
-                    <h2 class="profile-name">Employee Name</h2>
-                    <div class="profile-email">employee@example.com</div>
-                    <div class="profile-stats">
-                        <div class="stat-item">
-                            <div class="stat-value">0</div>
-                            <div class="stat-label">Orders Processed</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">0</div>
-                            <div class="stat-label">Tasks Completed</div>
+                    <div class="profile-info">
+                        <h2 class="profile-name">Employee Name</h2>
+                        <div class="profile-email">employee@example.com</div>
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Orders Processed</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Tasks Completed</div>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Employee Profile Form -->
+                <form class="profile-form" id="employeeProfileForm">
+                    <!-- Personal Information Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-user"></i> Personal Information</h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="employeeFullName" class="form-label">Full Name</label>
+                                <input type="text" id="employeeFullName" class="form-control" value="">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="employeeRole" class="form-label">Role</label>
+                                <input type="text" id="employeeRole" class="form-control" value="" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="employeeEmail" class="form-label">Email</label>
+                                <input type="email" id="employeeEmail" class="form-control" value="" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="employeePhone" class="form-label">Phone Number</label>
+                                <div style="display: flex; align-items: center;">
+                                    <span
+                                        style="padding: 0.8rem 0.5rem; background: var(--gray-light); border-radius: var(--radius-sm) 0 0 var(--radius-sm);">+63</span>
+                                    <input type="tel" id="employeePhone" class="form-control" value="" maxlength="10"
+                                        style="border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-left: -1px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Emergency Contact Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-phone-alt"></i> Emergency Contact</h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="emergencyContactName" class="form-label">Contact Name</label>
+                                <input type="text" id="emergencyContactName" class="form-control" value="">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="emergencyContactRelation" class="form-label">Relationship</label>
+                                <input type="text" id="emergencyContactRelation" class="form-control" value="">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="emergencyContactPhone" class="form-label">Phone Number</label>
+                                <div style="display: flex; align-items: center;">
+                                    <span
+                                        style="padding: 0.8rem 0.5rem; background: var(--gray-light); border-radius: var(--radius-sm) 0 0 var(--radius-sm);">+63</span>
+                                    <input type="tel" id="emergencyContactPhone" class="form-control" value=""
+                                        maxlength="10"
+                                        style="border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-left: -1px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password Change Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-lock"></i> Change Password</h3>
+
+                        <div class="form-row">
+                            <div class="form-group password-toggle">
+                                <label for="employeeCurrentPassword" class="form-label">Current Password</label>
+                                <input type="password" id="employeeCurrentPassword" class="form-control">
+                                <i class="fas fa-eye password-toggle-icon" id="toggleEmployeeCurrentPassword"></i>
+                            </div>
+
+                            <div class="form-group password-toggle">
+                                <label for="employeeNewPassword" class="form-label">New Password</label>
+                                <input type="password" id="employeeNewPassword" class="form-control">
+                                <i class="fas fa-eye password-toggle-icon" id="toggleEmployeeNewPassword"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group password-toggle">
+                            <label for="employeeConfirmPassword" class="form-label">Confirm New Password</label>
+                            <input type="password" id="employeeConfirmPassword" class="form-control">
+                            <i class="fas fa-eye password-toggle-icon" id="toggleEmployeeConfirmPassword"></i>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-cancel">Cancel</button>
+                        <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> Save Changes</button>
+                    </div>
+                </form>
             </div>
-
-            <!-- Employee Profile Form -->
-            <form class="profile-form" id="employeeProfileForm">
-                <!-- Personal Information Section -->
-                <div class="form-section">
-                    <h3 class="section-title"><i class="fas fa-user"></i> Personal Information</h3>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="employeeFullName" class="form-label">Full Name</label>
-                            <input type="text" id="employeeFullName" class="form-control" value="">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="employeeRole" class="form-label">Role</label>
-                            <input type="text" id="employeeRole" class="form-control" value="" readonly>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="employeeEmail" class="form-label">Email</label>
-                            <input type="email" id="employeeEmail" class="form-control" value="" readonly>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="employeePhone" class="form-label">Phone Number</label>
-                            <div style="display: flex; align-items: center;">
-                                <span style="padding: 0.8rem 0.5rem; background: var(--gray-light); border-radius: var(--radius-sm) 0 0 var(--radius-sm);">+63</span>
-                                <input type="tel" id="employeePhone" class="form-control" value="" maxlength="10" style="border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-left: -1px;">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Emergency Contact Section -->
-                <div class="form-section">
-                    <h3 class="section-title"><i class="fas fa-phone-alt"></i> Emergency Contact</h3>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="emergencyContactName" class="form-label">Contact Name</label>
-                            <input type="text" id="emergencyContactName" class="form-control" value="">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="emergencyContactRelation" class="form-label">Relationship</label>
-                            <input type="text" id="emergencyContactRelation" class="form-control" value="">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="emergencyContactPhone" class="form-label">Phone Number</label>
-                            <div style="display: flex; align-items: center;">
-                                <span style="padding: 0.8rem 0.5rem; background: var(--gray-light); border-radius: var(--radius-sm) 0 0 var(--radius-sm);">+63</span>
-                                <input type="tel" id="emergencyContactPhone" class="form-control" value="" maxlength="10" style="border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-left: -1px;">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Password Change Section -->
-                <div class="form-section">
-                    <h3 class="section-title"><i class="fas fa-lock"></i> Change Password</h3>
-
-                    <div class="form-row">
-                        <div class="form-group password-toggle">
-                            <label for="employeeCurrentPassword" class="form-label">Current Password</label>
-                            <input type="password" id="employeeCurrentPassword" class="form-control">
-                            <i class="fas fa-eye password-toggle-icon" id="toggleEmployeeCurrentPassword"></i>
-                        </div>
-
-                        <div class="form-group password-toggle">
-                            <label for="employeeNewPassword" class="form-label">New Password</label>
-                            <input type="password" id="employeeNewPassword" class="form-control">
-                            <i class="fas fa-eye password-toggle-icon" id="toggleEmployeeNewPassword"></i>
-                        </div>
-                    </div>
-
-                    <div class="form-group password-toggle">
-                        <label for="employeeConfirmPassword" class="form-label">Confirm New Password</label>
-                        <input type="password" id="employeeConfirmPassword" class="form-control">
-                        <i class="fas fa-eye password-toggle-icon" id="toggleEmployeeConfirmPassword"></i>
-                    </div>
-                </div>
-
-                <!-- Form Actions -->
-                <div class="form-actions">
-                    <button type="button" class="btn btn-cancel">Cancel</button>
-                    <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> Save Changes</button>
-                </div>
-            </form>
-        </div>
 
 
         </div>
@@ -965,18 +1001,18 @@
     <script src="/shopowner/js/shopprofile.js" type="module"></script>
     <script>
         // Mobile sidebar toggle
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const mobileToggle = document.querySelector('.mobile-menu-toggle');
             const sidebar = document.querySelector('.sidebar');
             const overlay = document.querySelector('.sidebar-overlay');
-            
+
             if (mobileToggle) {
                 mobileToggle.addEventListener('click', () => {
                     sidebar.classList.toggle('active');
                     overlay.classList.toggle('active');
                 });
             }
-            
+
             if (overlay) {
                 overlay.addEventListener('click', () => {
                     sidebar.classList.remove('active');
@@ -990,7 +1026,7 @@
                 const toggleIcon = document.getElementById(toggleId);
 
                 if (passwordInput && toggleIcon) {
-                    toggleIcon.addEventListener('click', function() {
+                    toggleIcon.addEventListener('click', function () {
                         if (passwordInput.type === 'password') {
                             passwordInput.type = 'text';
                             toggleIcon.classList.remove('fa-eye');
@@ -1010,4 +1046,5 @@
         });
     </script>
 </body>
+
 </html>

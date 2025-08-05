@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-storage.js";
-import { getAuth, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAuPALylh11cTArigeGJZmLwrFwoAsNPSI",
@@ -19,6 +19,35 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const storage = getStorage(app);
 const auth = getAuth(app);
+
+// State variables
+let avatarFile = null;
+let licenseFile = null;
+let permitFile = null;
+let frontIdFile = null;
+let backIdFile = null;
+let shopData = {};
+let originalEmail = '';
+
+// Global variables
+let shopLoggedin; // shop ID of the logged-in user
+let roleLoggedin; // role of the logged-in user
+let sname; //shop name
+
+// Initialize the page
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        loadShopProfile(user.uid);
+        setupEventListeners();
+        setupPasswordToggles();
+        
+        // Also setup event listeners for employee form
+        setupEmployeeEventListeners();
+    } else {
+        window.location.href = "/user_login.html#shop";
+    }
+});
+
 
 // DOM Elements
 const elements = {
@@ -78,15 +107,6 @@ const elements = {
     form: document.getElementById('profileForm')
 };
 
-// State variables
-let avatarFile = null;
-let licenseFile = null;
-let permitFile = null;
-let frontIdFile = null;
-let backIdFile = null;
-let shopData = {};
-let originalEmail = '';
-
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function () {
     auth.onAuthStateChanged(user => {
@@ -95,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setupEventListeners();
             setupPasswordToggles();
         } else {
-            window.location.href = '/shopowner/html/shopowner_login.html';
+            window.location.href = '/user_login.html#shop';
         }
     });
 
@@ -120,29 +140,64 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-function loadShopProfile(shopId) {
-    const shopRef = ref(db, `AR_shoe_users/shop/${shopId}`);
+function loadShopProfile(userId) {
+    // First determine if this is a shop owner or employee
+    const employeeRef = ref(db, `AR_shoe_users/employees/${userId}`);
+    const shopRef = ref(db, `AR_shoe_users/shop/${userId}`);
 
-    onValue(shopRef, (snapshot) => {
-        if (snapshot.exists()) {
-            shopData = snapshot.val();
-            console.log('Shop Data:', shopData);
-            originalEmail = shopData.email || '';
-
-            // Update Header
-            updateHeader(shopData);
-
-            // Update Profile Section
-            updateProfileSection(shopData);
-
-            // Update Form Fields
-            updateFormFields(shopData);
-
-            // Update Documents
-            updateDocuments(shopData);
-
-            // Load statistics
-            loadShopStatistics(shopId);
+    // Check if user is an employee first
+    onValue(employeeRef, (employeeSnapshot) => {
+        if (employeeSnapshot.exists()) {
+            // This is an employee
+            const employeeData = employeeSnapshot.val();
+            console.log('Employee Data:', employeeData);
+            originalEmail = employeeData.email || '';
+            
+            // Hide shop profile section and show employee section
+            document.querySelector('.profile-container').style.display = 'none';
+            document.getElementById('employeeProfileSection').style.display = 'block';
+            
+            // Load employee data
+            loadEmployeeProfile(employeeData);
+            
+            // Set role-based UI elements
+            if (employeeData.role.toLowerCase() === "salesperson") {
+                document.getElementById("addemployeebtn").style.display = "none";
+                document.getElementById("analyticsbtn").style.display = "none";
+                document.getElementById("issuereport").style.display = "none";
+            }
+        } else {
+            // Not an employee, check if shop owner
+            onValue(shopRef, (shopSnapshot) => {
+                if (shopSnapshot.exists()) {
+                    // This is a shop owner
+                    shopData = shopSnapshot.val();
+                    console.log('Shop Data:', shopData);
+                    originalEmail = shopData.email || '';
+                    
+                    // Show shop profile section and hide employee section
+                    document.querySelector('.profile-container').style.display = 'block';
+                    document.getElementById('employeeProfileSection').style.display = 'none';
+                    
+                    // Update Header
+                    updateHeader(shopData);
+                    
+                    // Update Profile Section
+                    updateProfileSection(shopData);
+                    
+                    // Update Form Fields
+                    updateFormFields(shopData);
+                    
+                    // Update Documents
+                    updateDocuments(shopData);
+                    
+                    // Load statistics
+                    loadShopStatistics(userId);
+                } else {
+                    console.error('User is neither shop owner nor employee');
+                    window.location.href = '/user_login.html';
+                }
+            });
         }
     });
 }
@@ -651,4 +706,190 @@ async function uploadFile(userId, file, type, oldUrl = null) {
         console.error('Error in uploadFile:', error);
         throw error;
     }
+}
+
+function setupEmployeeEventListeners() {
+    const employeeForm = document.getElementById('employeeProfileForm');
+    if (!employeeForm) return;
+    
+    employeeForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        try {
+            showLoading(true);
+            const user = auth.currentUser;
+            const updates = {};
+            let emailChanged = false;
+            let passwordChanged = false;
+            
+            // Get form values
+            const fullName = document.getElementById('employeeFullName').value;
+            const phone = document.getElementById('employeePhone').value;
+            const emergencyName = document.getElementById('emergencyContactName').value;
+            const emergencyRelation = document.getElementById('emergencyContactRelation').value;
+            const emergencyPhone = document.getElementById('emergencyContactPhone').value;
+            const currentPassword = document.getElementById('employeeCurrentPassword').value;
+            const newPassword = document.getElementById('employeeNewPassword').value;
+            const confirmPassword = document.getElementById('employeeConfirmPassword').value;
+            
+            // Basic validation
+            if (newPassword && newPassword !== confirmPassword) {
+                throw new Error('New passwords do not match');
+            }
+            
+            // Check if password is being changed
+            if (newPassword) {
+                if (!currentPassword) {
+                    throw new Error('Please enter your current password to change password');
+                }
+                
+                const credential = EmailAuthProvider.credential(
+                    user.email,
+                    currentPassword
+                );
+                
+                await reauthenticateWithCredential(user, credential);
+                await updatePassword(user, newPassword);
+                passwordChanged = true;
+            }
+            
+            // Prepare updates
+            updates.name = fullName;
+            updates.phone = phone;
+            updates.emergencyContact = {
+                name: emergencyName,
+                relationship: emergencyRelation,
+                phone: emergencyPhone
+            };
+            
+            // Handle avatar upload if changed
+            const avatarInput = document.getElementById('employeePhotoUpload');
+            if (avatarInput.files.length > 0) {
+                const avatarFile = avatarInput.files[0];
+                const avatarUrl = await uploadFile(user.uid, avatarFile, 'employeeAvatar');
+                updates.profilePhoto = {
+                    url: avatarUrl,
+                    name: avatarFile.name,
+                    uploadedAt: new Date().toISOString()
+                };
+                
+                // Update UI
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('employeePhotoImg').src = e.target.result;
+                    document.getElementById('imageProfile').src = e.target.result;
+                };
+                reader.readAsDataURL(avatarFile);
+            }
+            
+            // Update database
+            await update(ref(db, `AR_shoe_users/employees/${user.uid}`), updates);
+            
+            // Update UI
+            document.querySelector('#employeeProfileSection .profile-name').textContent = fullName;
+            document.getElementById('userName_display2').textContent = fullName;
+            
+            if (passwordChanged) {
+                document.getElementById('employeeCurrentPassword').value = '';
+                document.getElementById('employeeNewPassword').value = '';
+                document.getElementById('employeeConfirmPassword').value = '';
+            }
+            
+            showAlert('Profile updated successfully!', 'success');
+            
+        } catch (error) {
+            console.error('Error updating employee profile:', error);
+            showAlert(error.message, 'error');
+        } finally {
+            showLoading(false);
+        }
+    });
+    
+    // Cancel button for employee form
+    const employeeCancelBtn = document.querySelector('#employeeProfileForm .btn-cancel');
+    if (employeeCancelBtn) {
+        employeeCancelBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to discard your changes?')) {
+                window.location.reload();
+            }
+        });
+    }
+    
+    // Avatar upload for employee
+    const employeeAvatarUpload = document.getElementById('employeePhotoUpload');
+    if (employeeAvatarUpload) {
+        employeeAvatarUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('employeePhotoImg').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+}
+
+// function to load employee profile
+function loadEmployeeProfile(employeeData) {
+    // Update Header
+    document.getElementById('userName_display2').textContent = employeeData.name || 'Employee';
+    
+    // Update profile image if exists
+    if (employeeData.profilePhoto?.url) {
+        document.getElementById('employeePhotoImg').src = employeeData.profilePhoto.url;
+        document.getElementById('imageProfile').src = employeeData.profilePhoto.url;
+    } else {
+        setDefaultAvatar(document.getElementById('employeePhotoImg'));
+        setDefaultAvatar(document.getElementById('imageProfile'));
+    }
+    
+    // Update Employee Profile Section
+    const employeeSection = document.getElementById('employeeProfileSection');
+    employeeSection.querySelector('.profile-name').textContent = employeeData.name || 'Employee';
+    employeeSection.querySelector('.profile-email').textContent = employeeData.email || '';
+    
+    // Update Employee Form Fields
+    document.getElementById('employeeFullName').value = employeeData.name || '';
+    document.getElementById('employeeRole').value = employeeData.role || '';
+    document.getElementById('employeeEmail').value = employeeData.email || '';
+    document.getElementById('employeePhone').value = employeeData.phone || '';
+    
+    // Update Emergency Contact Fields
+    if (employeeData.emergencyContact) {
+        console.log('Emergency Contact Data:', employeeData.emergencyContact);
+        document.getElementById('emergencyContactName').value = employeeData.emergencyContact.name || '';
+        document.getElementById('emergencyContactRelation').value = employeeData.emergencyContact.relationship || '';
+        document.getElementById('emergencyContactPhone').value = employeeData.emergencyContact.phone || '';
+    } else {
+        // Clear fields if no emergency contact data exists
+        document.getElementById('emergencyContactName').value = '';
+        document.getElementById('emergencyContactRelation').value = '';
+        document.getElementById('emergencyContactPhone').value = '';
+    }
+    
+    // Load employee statistics
+    loadEmployeeStatistics(employeeData.shopId);
+}
+
+// function for employee statistics
+function loadEmployeeStatistics(shopId) {
+    // You can implement employee-specific statistics here
+    const ordersRef = ref(db, 'AR_shoe_users/transactions');
+    onValue(ordersRef, (snapshot) => {
+        let ordersProcessed = 0;
+        
+        snapshot.forEach(userSnapshot => {
+            userSnapshot.forEach(orderSnapshot => {
+                const order = orderSnapshot.val();
+                if (order.shopId === shopId) {
+                    // Check if this employee processed the order (you'll need to track this in your data)
+                    ordersProcessed++;
+                }
+            });
+        });
+        
+        document.querySelector('#employeeProfileSection .stat-item:nth-child(1) .stat-value').textContent = ordersProcessed;
+    });
 }
