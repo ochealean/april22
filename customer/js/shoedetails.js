@@ -1,8 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getDatabase, ref, get, set, push } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+import { getDatabase, onValue, ref, get, set, push } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-// Import the cursed words list
-import { cursedWords } from '../../cursedwords.js'; 
+
 
 // Firebase Config
 const firebaseConfig = {
@@ -24,6 +23,7 @@ let selectedColor = null;
 let selectedSize = null;
 let maxAvailableQty = 1; // Default
 
+let cursedWords = []; // This will store our censored words from Firebase
 
 function updateQuantityLimit() {
     if (selectedColor && selectedSize) {
@@ -102,6 +102,28 @@ function loadProductDetails() {
         console.error("Error loading product details:", error);
     });
 }
+
+function loadCensoredWords() {
+    const curseWordsRef = ref(db, 'AR_shoe_users/curseWords');
+    
+    onValue(curseWordsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            // Convert the object of words into an array
+            const wordsObj = snapshot.val();
+            cursedWords = Object.values(wordsObj).map(wordData => wordData.word.toLowerCase());
+            console.log("Loaded censored words:", cursedWords);
+        } else {
+            console.log("No censored words found in database");
+            cursedWords = []; // Reset to empty array if no words exist
+        }
+    }, (error) => {
+        console.error("Error loading censored words:", error);
+        cursedWords = []; // Fallback to empty array if error occurs
+    });
+}
+
+// Call this function when your script initializes
+loadCensoredWords();
 
 function isWishlisted() {
     const user = auth.currentUser;
@@ -833,10 +855,15 @@ addToCartBtn.disabled = true;
 
 function censoredText(text) {
     if (!text) return text; // Return empty or null text as is
+    
     let censored = text;
+    
+    // Check each word in the text against our censored words list
     cursedWords.forEach(word => {
-        const regex = new RegExp(`\\b${word}\\b`, 'gi'); // Match whole words, case insensitive
+        // Create a regex that matches the word with word boundaries
+        const regex = new RegExp(`\\b${word}\\b`, 'gi');
         censored = censored.replace(regex, '****');
     });
+    
     return censored;
 }

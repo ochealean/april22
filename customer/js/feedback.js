@@ -1,8 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-// Import the cursed words list
-import { cursedWords } from '../../cursedwords.js'; 
 
 // Firebase configuration
 const firebaseConfig = {
@@ -23,10 +21,13 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-console.log(cursedWords);
+let cursedWords = []; // This will store our censored words from Firebase
 
 document.addEventListener("DOMContentLoaded", async () => {
     try {
+        // First load the censored words
+        await loadCensoredWords();
+        
         const stars = document.querySelectorAll('#starRating .star');
         const ratingValue = document.getElementById('ratingValue');
         const feedbackForm = document.getElementById('feedbackForm');
@@ -124,7 +125,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     orderID,
                     shoeID: orderData.item.shoeId,
                     rating,
-                    comment,
+                    comment: censorText(comment), // Censor the comment before saving
                     timestamp: Date.now()
                 };
 
@@ -185,66 +186,67 @@ document.addEventListener("DOMContentLoaded", async () => {
         feedbackForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            if (checkForCursedWords(document.getElementById('comment').value)) {
+            const comment = document.getElementById('comment').value;
+            
+            if (checkForCursedWords(comment)) {
                 alert("Your comment contains inappropriate language. Please revise it.");
                 return;
-            } else {
-                const rating = parseInt(ratingValue.value);
-                const comment = document.getElementById('comment').value;
+            }
 
-                if (rating === 0) {
-                    alert("Please select a rating.");
-                    return;
-                }
+            const rating = parseInt(ratingValue.value);
 
-                submitBtn.disabled = true;
-                loader.style.display = 'block';
-                submitBtn.querySelector('span').textContent = 'Submitting...';
+            if (rating === 0) {
+                alert("Please select a rating.");
+                return;
+            }
 
-                try {
-                    const feedbackData = {
-                        orderID,
-                        shoeID: orderData.item.shoeId,
-                        rating,
-                        comment,
-                        timestamp: Date.now()
-                    };
+            submitBtn.disabled = true;
+            loader.style.display = 'block';
+            submitBtn.querySelector('span').textContent = 'Submitting...';
 
-                    const feedbackRef = ref(db, `AR_shoe_users/feedbacks/${userID}/${orderID}`);
-                    const transactionFeedbackRef = ref(db, `AR_shoe_users/transactions/${userID}/${orderID}/feedback`);
+            try {
+                const feedbackData = {
+                    orderID,
+                    shoeID: orderData.item.shoeId,
+                    rating,
+                    comment: censorText(comment), // Censor the comment before saving
+                    timestamp: Date.now()
+                };
 
-                    await set(feedbackRef, feedbackData);
-                    await set(transactionFeedbackRef, feedbackData);
+                const feedbackRef = ref(db, `AR_shoe_users/feedbacks/${userID}/${orderID}`);
+                const transactionFeedbackRef = ref(db, `AR_shoe_users/transactions/${userID}/${orderID}/feedback`);
 
-                    loader.style.display = 'none';
-                    successMessage.style.display = 'block';
-                    successMessage.textContent = "Thank you for your feedback!";
+                await set(feedbackRef, feedbackData);
+                await set(transactionFeedbackRef, feedbackData);
 
-                    // Update the displayed feedback
-                    updateRatingDisplay(existingStars, rating);
-                    existingComment.textContent = comment;
+                loader.style.display = 'none';
+                successMessage.style.display = 'block';
+                successMessage.textContent = "Thank you for your feedback!";
 
-                    // Switch to feedback display view
-                    feedbackForm.style.display = 'none';
-                    existingFeedbackSection.style.display = 'block';
+                // Update the displayed feedback
+                updateRatingDisplay(existingStars, rating);
+                existingComment.textContent = feedbackData.comment; // Show censored version
 
-                    // Make existing stars interactive
-                    makeStarsInteractive(existingStars, rating, true);
+                // Switch to feedback display view
+                feedbackForm.style.display = 'none';
+                existingFeedbackSection.style.display = 'block';
 
-                    // Reset form state
-                    setTimeout(() => {
-                        submitBtn.disabled = false;
-                        submitBtn.querySelector('span').textContent = 'Submit Feedback';
-                        successMessage.style.display = 'none';
-                    }, 3000);
+                // Make existing stars interactive
+                makeStarsInteractive(existingStars, rating, true);
 
-                } catch (error) {
-                    console.error("Error submitting feedback:", error);
-                    alert("Failed to submit feedback. Please try again.");
+                // Reset form state
+                setTimeout(() => {
                     submitBtn.disabled = false;
-                    loader.style.display = 'none';
                     submitBtn.querySelector('span').textContent = 'Submit Feedback';
-                }
+                    successMessage.style.display = 'none';
+                }, 3000);
+
+            } catch (error) {
+                console.error("Error submitting feedback:", error);
+                alert("Failed to submit feedback. Please try again.");
+                submitBtn.disabled = false;
+                loader.style.display = 'none';
+                submitBtn.querySelector('span').textContent = 'Submit Feedback';
             }
         });
     } catch (error) {
@@ -253,6 +255,52 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
+function loadCensoredWords() {
+    const curseWordsRef = ref(db, 'AR_shoe_users/curseWords');
+    
+    return new Promise((resolve) => {
+        onValue(curseWordsRef, (snapshot) => {
+            if (snapshot.exists()) {
+                // Convert the object of words into an array
+                const wordsObj = snapshot.val();
+                cursedWords = Object.values(wordsObj).map(wordData => wordData.word.toLowerCase());
+                console.log("Loaded censored words:", cursedWords);
+            } else {
+                console.log("No censored words found in database");
+                cursedWords = []; // Reset to empty array if no words exist
+            }
+            resolve();
+        }, (error) => {
+            console.error("Error loading censored words:", error);
+            cursedWords = []; // Fallback to empty array if error occurs
+            resolve();
+        });
+    });
+}
+
 function checkForCursedWords(comment) {
-    return cursedWords.some(word => comment.toLowerCase().includes(word.toLowerCase()));
+    if (!comment || !cursedWords.length) return false;
+    const lowerComment = comment.toLowerCase();
+    return cursedWords.some(word => {
+        // Create regex to match whole words only
+        const regex = new RegExp(`\\b${word}\\b`, 'i');
+        return regex.test(lowerComment);
+    });
+}
+
+function censorText(text) {
+    if (!text || !cursedWords.length) return text;
+    
+    return text.split(/\b/).map(word => {
+        // Check if the word (case insensitive) is in our cursed words list
+        const isCursed = cursedWords.some(cursed => 
+            word.toLowerCase() === cursed.toLowerCase()
+        );
+        
+        // If it's a cursed word, replace all but first character with *
+        if (isCursed) {
+            return word.charAt(0) + '*'.repeat(word.length - 1);
+        }
+        return word;
+    }).join('');
 }
