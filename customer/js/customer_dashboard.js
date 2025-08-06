@@ -99,10 +99,10 @@ function loadAllShoes() {
                         const shoeData = shoeSnapshot.val();
                         // Handle both shopID and shopId cases
                         const actualShopId = shoeData.shopID || shoeData.shopId || shopId;
-                        const shopName = shopNames[actualShopId] || 
-                                         shoeData.shopName || 
-                                         'Unknown Shop';
-                        
+                        const shopName = shopNames[actualShopId] ||
+                            shoeData.shopName ||
+                            'Unknown Shop';
+
                         // Create a clean shoe object with guaranteed fields
                         const shoe = {
                             ...shoeData,
@@ -110,7 +110,7 @@ function loadAllShoes() {
                             shopName: shopName,
                             shoeId: shoeSnapshot.key
                         };
-                        
+
                         allShoes.push(shoe);
                     });
                 });
@@ -297,19 +297,19 @@ function updateButtonStates() {
     if (selectedSizeKey === null) {
         addToCartBtn.disabled = true;
         buyNowBtn.disabled = true;
-        addToCartBtn.title = "Please select a size first";
-        buyNowBtn.title = "Please select a size first";
+        addToCartBtn.classList.add('btn-disabled');
+        buyNowBtn.classList.add('btn-disabled');
     } else {
         addToCartBtn.disabled = false;
         buyNowBtn.disabled = false;
-        addToCartBtn.title = "";
-        buyNowBtn.title = "";
+        addToCartBtn.classList.remove('btn-disabled');
+        buyNowBtn.classList.remove('btn-disabled');
     }
 }
 
 async function searchShoes(searchTerm) {
     searchTerm = searchTerm.toLowerCase().trim();
-    
+
     if (!searchTerm) {
         loadAllShoes(); // Show all shoes if search is empty
         return;
@@ -318,7 +318,7 @@ async function searchShoes(searchTerm) {
     const shoesRef = ref(db, 'AR_shoe_users/shoe/');
     const snapshot = await get(shoesRef);
     const shoesContainer = document.getElementById('shoesContainer');
-    
+
     if (!shoesContainer) return;
     shoesContainer.innerHTML = '';
 
@@ -341,7 +341,8 @@ async function searchShoes(searchTerm) {
                 shoe.shoeName.toLowerCase().includes(searchTerm) ||
                 shoe.shoeCode.toLowerCase().includes(searchTerm) ||
                 (shoe.generalDescription && shoe.generalDescription.toLowerCase().includes(searchTerm))
-        )});
+            )
+        });
 
         if (filteredShoes.length > 0) {
             filteredShoes.forEach(shoe => {
@@ -446,7 +447,15 @@ window.addToCart = async function (cartItem) {
 };
 
 document.getElementById('addToCartBtn').addEventListener('click', async function () {
-    if (!currentShoeData || !selectedVariantKey || !selectedSizeKey) return;
+    if (!currentShoeData || !selectedVariantKey) {
+        alert('Please select a variant first');
+        return;
+    }
+
+    if (!selectedSizeKey) {
+        alert('Please select a size first');
+        return;
+    }
 
     const variant = currentShoeData.variants[selectedVariantKey];
     const sizeObj = variant.sizes[selectedSizeKey];
@@ -471,14 +480,23 @@ document.getElementById('addToCartBtn').addEventListener('click', async function
 
         const success = await addToCart(cartItem);
         if (success) {
-            // closeProductModal();
             alert('Item added to cart successfully!');
         }
+    } else {
+        alert('Selected quantity exceeds available stock');
     }
 });
 
 document.getElementById('buyNowBtn').addEventListener('click', function () {
-    if (!currentShoeData || !selectedVariantKey || !selectedSizeKey) return;
+    if (!currentShoeData || !selectedVariantKey) {
+        alert('Please select a variant first');
+        return;
+    }
+
+    if (!selectedSizeKey) {
+        alert('Please select a size first');
+        return;
+    }
 
     const variant = currentShoeData.variants[selectedVariantKey];
     const sizeObj = variant.sizes[selectedSizeKey];
@@ -518,9 +536,9 @@ document.addEventListener('keydown', function (e) {
 });
 
 // for search bar
-document.querySelector('.search-bar').addEventListener('input', function(e) {
-    searchShoes(e.target.value);
-});
+// document.querySelector('.search-bar').addEventListener('input', function (e) {
+//     searchShoes(e.target.value);
+// });
 
 // for logout
 document.getElementById('logout_btn').addEventListener('click', () => {
