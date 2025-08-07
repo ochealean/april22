@@ -7,80 +7,119 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary: #3498db;
-            --primary-dark: #2980b9;
-            --secondary: #2c3e50;
-            --accent: #e74c3c;
-            --success: #27ae60;
-            --warning: #f39c12;
-            --error: #c0392b;
-            --light: #ecf0f1;
+            --primary: #a777e3;
+            --primary-dark: #8e5fd5;
+            --secondary: #8a4fff;
+            --secondary-dark: #7a3ed1;
+            --accent: #ff6b6b;
+            --success: #48cfad;
+            --warning: #ffaa00;
+            --error: #ff6b6b;
+            --light: #f8f9fa;
             --dark: #2c3e50;
             --gray: #bdc3c7;
             --gray-light: #ecf0f1;
             --gray-dark: #7f8c8d;
             --text-primary: #2c3e50;
             --text-secondary: #34495e;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            --radius-sm: 4px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
-            background-color: var(--gray-light);
+            background-color: #f5f7fa;
             color: var(--text-primary);
             line-height: 1.6;
         }
 
         .dashboard {
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: 280px 1fr;
             min-height: 100vh;
         }
 
-        /* Sidebar */
+        /* Sidebar - Purple Theme */
         .sidebar {
-            background-color: var(--secondary);
-            color: var(--light);
-            padding: 2rem 1rem;
+            background: linear-gradient(180deg, var(--secondary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
             position: sticky;
             top: 0;
             height: 100vh;
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
         }
 
         .logo {
-            color: var(--primary);
-            font-size: 1.5rem;
-            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
             margin-bottom: 2rem;
-            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         .nav-item {
-            padding: 0.8rem 1rem;
-            margin: 0.5rem 0;
+            padding: 0.75rem 1rem;
             border-radius: var(--radius-sm);
             cursor: pointer;
             transition: var(--transition);
-            display: block;
-            color: var(--light);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
         }
 
-        .nav-item:hover, .nav-item.active {
-            background-color: var(--primary-dark);
-            color: var(--light);
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
         }
 
         /* Main Content */
@@ -96,6 +135,73 @@
             margin-bottom: 2rem;
             flex-wrap: wrap;
             gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Model Selection */
+        .model-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .model-option {
+            background-color: white;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            border: 2px solid transparent;
+        }
+
+        .model-option:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .model-option.selected {
+            border-color: var(--primary);
+            background-color: rgba(167, 119, 227, 0.1);
+        }
+
+        .model-image {
+            width: 100%;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+        }
+
+        .model-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .model-price {
+            color: var(--primary);
+            font-weight: 700;
         }
 
         /* Customizer Styles */
@@ -119,6 +225,28 @@
             height: fit-content;
         }
 
+        .view-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .view-btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-light);
+            background: white;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .view-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
         .shoe-image-container {
             width: 100%;
             max-width: 400px;
@@ -130,10 +258,15 @@
             overflow: hidden;
         }
 
-        .shoe-base-image {
+        .shoe-view {
             width: 100%;
             height: 100%;
             object-fit: contain;
+            display: none;
+        }
+
+        .shoe-view.active {
+            display: block;
         }
 
         .component-image {
@@ -166,7 +299,7 @@
 
         .component-title {
             font-size: 1.2rem;
-            color: var(--secondary);
+            color: var(--dark);
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
@@ -184,7 +317,7 @@
         }
 
         .component-option {
-            border: 2px solid var(--gray);
+            border: 2px solid var(--gray-light);
             border-radius: var(--radius-sm);
             padding: 0.8rem;
             cursor: pointer;
@@ -195,11 +328,13 @@
 
         .component-option:hover {
             border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
         }
 
         .component-option.selected {
             border-color: var(--primary);
-            background-color: rgba(52, 152, 219, 0.1);
+            background-color: rgba(167, 119, 227, 0.1);
         }
 
         .component-option-image {
@@ -266,6 +401,7 @@
             margin-top: 2rem;
             position: sticky;
             bottom: 20px;
+            width: 100%;
         }
 
         .summary-row {
@@ -326,11 +462,153 @@
         }
 
         .btn-outline:hover {
-            background-color: rgba(52, 152, 219, 0.1);
+            background-color: rgba(167, 119, 227, 0.1);
+            transform: translateY(-2px);
         }
 
-        /* Responsive */
+        .btn-buy {
+            background-color: var(--secondary);
+            color: white;
+            justify-content: center;
+        }
+
+        .btn-buy:hover {
+            background-color: var(--secondary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        shoe-preview {
+            background-color: white;
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .shoe-image-container {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            position: relative;
+            margin-bottom: 1.5rem;
+            background-color: #f9f9f9;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .shoe-base-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .component-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Additional Views Container */
+        .additional-views {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .additional-view {
+            background-color: #f9f9f9;
+            border-radius: var(--radius-sm);
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        .additional-view img {
+            width: 100%;
+            height: 100px;
+            object-fit: contain;
+        }
+
+        .additional-view-label {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            color: var(--gray-dark);
+        }
+
+        /* Info Buttons */
+        .info-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            width: 100%;
+        }
+
+        .info-btn {
+            padding: 0.6rem 1rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            flex: 1;
+            justify-content: center;
+            background-color: var(--gray-light);
+            color: var(--dark);
+        }
+
+        .info-btn:hover {
+            background-color: var(--gray);
+        }
+
+        .info-btn i {
+            font-size: 1rem;
+        }
+
+        /* Mobile navigation */
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 240px 1fr;
+            }
+        }
+
         @media (max-width: 992px) {
+            .dashboard {
+                grid-template-columns: 220px 1fr;
+            }
+
             .customizer-container {
                 grid-template-columns: 1fr;
             }
@@ -344,23 +622,44 @@
             .dashboard {
                 grid-template-columns: 1fr;
             }
-            
+
             .sidebar {
-                height: auto;
-                position: relative;
-                padding: 1rem;
+                position: fixed;
+                left: -350px;
+                transition: var(--transition);
+                z-index: 100;
+                height: 100vh;
             }
-            
-            .nav-items {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.5rem;
+
+            .sidebar.active {
+                left: 0;
             }
-            
-            .nav-item {
-                margin: 0;
+
+            .mobile-menu-toggle {
+                display: block;
+                font-size: 1.5rem;
+                cursor: pointer;
                 padding: 0.5rem;
-                font-size: 0.9rem;
+                color: var(--dark);
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 99;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .model-selection {
+                grid-template-columns: 1fr 1fr;
             }
         }
 
@@ -369,7 +668,7 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
-            
+
             .component-options {
                 justify-content: center;
             }
@@ -377,14 +676,23 @@
             .action-buttons {
                 flex-direction: column;
             }
+
+            .model-selection {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="dashboard">
-        <!-- Sidebar -->
+        <!-- Sidebar - Purple Theme -->
         <div class="sidebar">
-            <div class="logo">SHOE PORTAL</div>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <span>SHOE PORTAL</span>
+            </div>
             <div class="nav-items">
                 <a href="/customer/html/customer_dashboard.html" class="nav-item">
                     <i class="fas fa-home"></i> Dashboard
@@ -422,6 +730,9 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="header">
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
                 <h1>Customize Your Shoes</h1>
                 <div class="user-profile">
                     <img id="imageProfile" src="#" alt="Profile" class="user-avatar">
@@ -429,17 +740,67 @@
                 </div>
             </div>
 
+            <!-- Model Selection -->
+            <div class="model-selection" id="modelSelection">
+                <div class="model-option selected" data-model="classic" data-price="2499">
+                    <img src="https://via.placeholder.com/200x120?text=Classic+Sneaker" alt="Classic Sneaker" class="model-image">
+                    <div class="model-name">Classic Sneaker</div>
+                    <div class="model-price">₱2,499.00</div>
+                </div>
+                <div class="model-option" data-model="runner" data-price="2799">
+                    <img src="https://via.placeholder.com/200x120?text=Performance+Runner" alt="Performance Runner" class="model-image">
+                    <div class="model-name">Performance Runner</div>
+                    <div class="model-price">₱2,799.00</div>
+                </div>
+                <div class="model-option" data-model="basketball" data-price="2999">
+                    <img src="https://via.placeholder.com/200x120?text=High-Top+Basketball" alt="High-Top Basketball" class="model-image">
+                    <div class="model-name">High-Top Basketball</div>
+                    <div class="model-price">₱2,999.00</div>
+                </div>
+                <div class="model-option" data-model="slipon" data-price="2199">
+                    <img src="https://via.placeholder.com/200x120?text=Slip-On+Comfort" alt="Slip-On Comfort" class="model-image">
+                    <div class="model-name">Slip-On Comfort</div>
+                    <div class="model-price">₱2,199.00</div>
+                </div>
+            </div>
+
             <div class="customizer-container">
                 <!-- Shoe Preview Section -->
                 <div class="shoe-preview">
                     <h2>Your Custom Design</h2>
+                  
                     <div class="shoe-image-container">
-                        <img src="https://via.placeholder.com/400x300?text=Shoe+Base" alt="Shoe Base" class="shoe-base-image" id="shoeBaseImage">
                         <!-- Component images will be layered here -->
                         <img src="" alt="Sole" class="component-image" id="soleImage" style="display: none;">
                         <img src="" alt="Upper" class="component-image" id="upperImage" style="display: none;">
                         <img src="" alt="Laces" class="component-image" id="lacesImage" style="display: none;">
                         <img src="" alt="Tongue" class="component-image" id="tongueImage" style="display: none;">
+                    </div>
+
+                    <!-- Additional Views -->
+                    <div class="additional-views">
+                        <div class="additional-view">
+                            <img src="https://via.placeholder.com/150x100?text=Front+View" alt="Front View" id="frontViewImage">
+                            <div class="additional-view-label">Front View</div>
+                        </div>
+                        <div class="additional-view">
+                            <img src="https://via.placeholder.com/150x100?text=Side+View" alt="Side View" id="sideViewImage">
+                            <div class="additional-view-label">Side View</div>
+                        </div>
+                        <div class="additional-view">
+                            <img src="https://via.placeholder.com/150x100?text=Back+View" alt="Back View" id="backViewImage">
+                            <div class="additional-view-label">Back View</div>
+                        </div>
+                    </div>
+
+                    <!-- Info Buttons -->
+                    <div class="info-buttons">
+                        <button class="info-btn" id="partsInfoBtn">
+                            <i class="fas fa-info-circle"></i> Shoe Parts
+                        </button>
+                        <button class="info-btn" id="sizeInfoBtn">
+                            <i class="fas fa-ruler"></i> Size Reference
+                        </button>
                     </div>
                     
                     <div class="summary-panel">
@@ -467,49 +828,52 @@
                             <button class="btn btn-primary">
                                 <i class="fas fa-cart-plus"></i> Add to Cart
                             </button>
+                            <button class="btn btn-buy btn-sm">
+                                <i class="fas fa-basket-shopping"></i> Buy Now
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Customization Controls -->
-                <div class="customizer-controls">
-                    <div class="component-section">
+                <div class="customizer-controls" id="customizerControls">
+                    <!-- Classic Sneaker Options (default visible) -->
+                    <div class="component-section model-specific classic">
                         <h3 class="component-title"><i class="fas fa-shoe-prints"></i> Sole</h3>
                         <div class="component-options" id="soleOptions">
-                            <!-- Options will be populated by JavaScript -->
-                            <div class="component-option selected" data-id="sole1" data-price="0" data-days="0" data-image="https://via.placeholder.com/100x60?text=Sole+1">
-                                <img src="https://via.placeholder.com/100x60?text=Sole+1" alt="Standard Sole" class="component-option-image">
+                            <div class="component-option selected" data-id="sole1" data-price="0" data-days="0" data-image="https://via.placeholder.com/100x60?text=Classic+Sole+1">
+                                <img src="https://via.placeholder.com/100x60?text=Classic+Sole+1" alt="Standard Sole" class="component-option-image">
                                 <div class="component-option-name">Standard</div>
                                 <div class="component-option-price">+₱0</div>
                             </div>
-                            <div class="component-option" data-id="sole2" data-price="300" data-days="2" data-image="https://via.placeholder.com/100x60?text=Sole+2">
-                                <img src="https://via.placeholder.com/100x60?text=Sole+2" alt="Performance Sole" class="component-option-image">
+                            <div class="component-option" data-id="sole2" data-price="300" data-days="2" data-image="https://via.placeholder.com/100x60?text=Classic+Sole+2">
+                                <img src="https://via.placeholder.com/100x60?text=Classic+Sole+2" alt="Performance Sole" class="component-option-image">
                                 <div class="component-option-name">Performance</div>
                                 <div class="component-option-price">+₱300</div>
                             </div>
-                            <div class="component-option" data-id="sole3" data-price="500" data-days="3" data-image="https://via.placeholder.com/100x60?text=Sole+3">
-                                <img src="https://via.placeholder.com/100x60?text=Sole+3" alt="Premium Sole" class="component-option-image">
+                            <div class="component-option" data-id="sole3" data-price="500" data-days="3" data-image="https://via.placeholder.com/100x60?text=Classic+Sole+3">
+                                <img src="https://via.placeholder.com/100x60?text=Classic+Sole+3" alt="Premium Sole" class="component-option-image">
                                 <div class="component-option-name">Premium</div>
                                 <div class="component-option-price">+₱500</div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="component-section">
+                    <div class="component-section model-specific classic">
                         <h3 class="component-title"><i class="fas fa-socks"></i> Upper</h3>
                         <div class="component-options" id="upperOptions">
-                            <div class="component-option selected" data-id="upper1" data-price="0" data-days="0" data-image="https://via.placeholder.com/100x60?text=Upper+1">
-                                <img src="https://via.placeholder.com/100x60?text=Upper+1" alt="Canvas Upper" class="component-option-image">
+                            <div class="component-option selected" data-id="upper1" data-price="0" data-days="0" data-image="https://via.placeholder.com/100x60?text=Classic+Upper+1">
+                                <img src="https://via.placeholder.com/100x60?text=Classic+Upper+1" alt="Canvas Upper" class="component-option-image">
                                 <div class="component-option-name">Canvas</div>
                                 <div class="component-option-price">+₱0</div>
                             </div>
-                            <div class="component-option" data-id="upper2" data-price="400" data-days="2" data-image="https://via.placeholder.com/100x60?text=Upper+2">
-                                <img src="https://via.placeholder.com/100x60?text=Upper+2" alt="Leather Upper" class="component-option-image">
+                            <div class="component-option" data-id="upper2" data-price="400" data-days="2" data-image="https://via.placeholder.com/100x60?text=Classic+Upper+2">
+                                <img src="https://via.placeholder.com/100x60?text=Classic+Upper+2" alt="Leather Upper" class="component-option-image">
                                 <div class="component-option-name">Leather</div>
                                 <div class="component-option-price">+₱400</div>
                             </div>
-                            <div class="component-option" data-id="upper3" data-price="600" data-days="3" data-image="https://via.placeholder.com/100x60?text=Upper+3">
-                                <img src="https://via.placeholder.com/100x60?text=Upper+3" alt="Knit Upper" class="component-option-image">
+                            <div class="component-option" data-id="upper3" data-price="600" data-days="3" data-image="https://via.placeholder.com/100x60?text=Classic+Upper+3">
+                                <img src="https://via.placeholder.com/100x60?text=Classic+Upper+3" alt="Knit Upper" class="component-option-image">
                                 <div class="component-option-name">Knit</div>
                                 <div class="component-option-price">+₱600</div>
                             </div>
@@ -526,23 +890,31 @@
                             <div class="color-option" style="background-color: #000000;" data-color="#000000"></div>
                             <div class="color-option" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="#ffffff"></div>
                         </div>
+                        
+                        <h4 style="margin: 1rem 0 0.5rem;">Body Color</h4>
+                        <div class="color-options" id="bodyColorOptions">
+                            <div class="color-option selected" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="#ffffff"></div>
+                            <div class="color-option" style="background-color: #000000;" data-color="#000000"></div>
+                            <div class="color-option" style="background-color: #2c3e50;" data-color="#2c3e50"></div>
+                            <div class="color-option" style="background-color: #e74c3c;" data-color="#e74c3c"></div>
+                        </div>
                     </div>
 
-                    <div class="component-section">
+                    <div class="component-section model-specific classic">
                         <h3 class="component-title"><i class="fas fa-grip-lines"></i> Laces</h3>
                         <div class="component-options" id="lacesOptions">
-                            <div class="component-option selected" data-id="laces1" data-price="0" data-days="0" data-image="https://via.placeholder.com/100x20?text=Laces+1">
-                                <img src="https://via.placeholder.com/100x20?text=Laces+1" alt="Standard Laces" class="component-option-image">
+                            <div class="component-option selected" data-id="laces1" data-price="0" data-days="0" data-image="https://via.placeholder.com/100x20?text=Classic+Laces+1">
+                                <img src="https://via.placeholder.com/100x20?text=Classic+Laces+1" alt="Standard Laces" class="component-option-image">
                                 <div class="component-option-name">Standard</div>
                                 <div class="component-option-price">+₱0</div>
                             </div>
-                            <div class="component-option" data-id="laces2" data-price="150" data-days="1" data-image="https://via.placeholder.com/100x20?text=Laces+2">
-                                <img src="https://via.placeholder.com/100x20?text=Laces+2" alt="Flat Laces" class="component-option-image">
+                            <div class="component-option" data-id="laces2" data-price="150" data-days="1" data-image="https://via.placeholder.com/100x20?text=Classic+Laces+2">
+                                <img src="https://via.placeholder.com/100x20?text=Classic+Laces+2" alt="Flat Laces" class="component-option-image">
                                 <div class="component-option-name">Flat</div>
                                 <div class="component-option-price">+₱150</div>
                             </div>
-                            <div class="component-option" data-id="laces3" data-price="200" data-days="1" data-image="https://via.placeholder.com/100x20?text=Laces+3">
-                                <img src="https://via.placeholder.com/100x20?text=Laces+3" alt="Elastic Laces" class="component-option-image">
+                            <div class="component-option" data-id="laces3" data-price="200" data-days="1" data-image="https://via.placeholder.com/100x20?text=Classic+Laces+3">
+                                <img src="https://via.placeholder.com/100x20?text=Classic+Laces+3" alt="Elastic Laces" class="component-option-image">
                                 <div class="component-option-name">Elastic</div>
                                 <div class="component-option-price">+₱200</div>
                             </div>
@@ -556,26 +928,146 @@
                             <div class="color-option" style="background-color: #e74c3c;" data-color="#e74c3c"></div>
                             <div class="color-option" style="background-color: #27ae60;" data-color="#27ae60"></div>
                         </div>
+                        
+                        <h4 style="margin: 1rem 0 0.5rem;">Heel Color</h4>
+                        <div class="color-options" id="heelColorOptions">
+                            <div class="color-option selected" style="background-color: #2c3e50;" data-color="#2c3e50"></div>
+                            <div class="color-option" style="background-color: #000000;" data-color="#000000"></div>
+                            <div class="color-option" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="#ffffff"></div>
+                        </div>
                     </div>
 
-                    <div class="component-section">
-                        <h3 class="component-title"><i class="fas fa-tag"></i> Tongue</h3>
-                        <div class="component-options" id="tongueOptions">
-                            <div class="component-option selected" data-id="tongue1" data-price="0" data-days="0" data-image="https://via.placeholder.com/100x40?text=Tongue+1">
-                                <img src="https://via.placeholder.com/100x40?text=Tongue+1" alt="Standard Tongue" class="component-option-image">
+                    <!-- Performance Runner Options (hidden by default) -->
+                    <div class="component-section model-specific runner" style="display: none;">
+                        <h3 class="component-title"><i class="fas fa-shoe-prints"></i> Sole</h3>
+                        <div class="component-options" id="runnerSoleOptions">
+                            <div class="component-option selected" data-id="runnerSole1" data-price="0" data-days="0" data-image="https://via.placeholder.com/100x60?text=Runner+Sole+1">
+                                <img src="https://via.placeholder.com/100x60?text=Runner+Sole+1" alt="Standard Sole" class="component-option-image">
                                 <div class="component-option-name">Standard</div>
                                 <div class="component-option-price">+₱0</div>
                             </div>
-                            <div class="component-option" data-id="tongue2" data-price="250" data-days="1" data-image="https://via.placeholder.com/100x40?text=Tongue+2">
-                                <img src="https://via.placeholder.com/100x40?text=Tongue+2" alt="Padded Tongue" class="component-option-image">
-                                <div class="component-option-name">Padded</div>
-                                <div class="component-option-price">+₱250</div>
+                            <div class="component-option" data-id="runnerSole2" data-price="400" data-days="3" data-image="https://via.placeholder.com/100x60?text=Runner+Sole+2">
+                                <img src="https://via.placeholder.com/100x60?text=Runner+Sole+2" alt="Performance Sole" class="component-option-image">
+                                <div class="component-option-name">Performance</div>
+                                <div class="component-option-price">+₱400</div>
                             </div>
-                            <div class="component-option" data-id="tongue3" data-price="350" data-days="2" data-image="https://via.placeholder.com/100x40?text=Tongue+3">
-                                <img src="https://via.placeholder.com/100x40?text=Tongue+3" alt="Mesh Tongue" class="component-option-image">
-                                <div class="component-option-name">Mesh</div>
+                            <div class="component-option" data-id="runnerSole3" data-price="600" data-days="4" data-image="https://via.placeholder.com/100x60?text=Runner+Sole+3">
+                                <img src="https://via.placeholder.com/100x60?text=Runner+Sole+3" alt="Premium Sole" class="component-option-image">
+                                <div class="component-option-name">Premium</div>
+                                <div class="component-option-price">+₱600</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="component-section model-specific runner" style="display: none;">
+                        <h3 class="component-title"><i class="fas fa-socks"></i> Upper</h3>
+                        <div class="component-options" id="runnerUpperOptions">
+                            <div class="component-option selected" data-id="runnerUpper1" data-price="0" data-days="0" data-image="https://via.placeholder.com/100x60?text=Runner+Upper+1">
+                                <img src="https://via.placeholder.com/100x60?text=Runner+Upper+1" alt="Canvas Upper" class="component-option-image">
+                                <div class="component-option-name">Canvas</div>
+                                <div class="component-option-price">+₱0</div>
+                            </div>
+                            <div class="component-option" data-id="runnerUpper2" data-price="500" data-days="3" data-image="https://via.placeholder.com/100x60?text=Runner+Upper+2">
+                                <img src="https://via.placeholder.com/100x60?text=Runner+Upper+2" alt="Knit Upper" class="component-option-image">
+                                <div class="component-option-name">Knit</div>
+                                <div class="component-option-price">+₱500</div>
+                            </div>
+                        </div>
+                        
+                        <h4 style="margin: 1rem 0 0.5rem;">Body Color</h4>
+                        <div class="color-options" id="runnerBodyColorOptions">
+                            <div class="color-option selected" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="#ffffff"></div>
+                            <div class="color-option" style="background-color: #000000;" data-color="#000000"></div>
+                            <div class="color-option" style="background-color: #2c3e50;" data-color="#2c3e50"></div>
+                            <div class="color-option" style="background-color: #e74c3c;" data-color="#e74c3c"></div>
+                            <div class="color-option" style="background-color: #3498db;" data-color="#3498db"></div>
+                        </div>
+                        
+                        <h4 style="margin: 1rem 0 0.5rem;">Collar Color</h4>
+                        <div class="color-options" id="runnerCollarColorOptions">
+                            <div class="color-option selected" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="#ffffff"></div>
+                            <div class="color-option" style="background-color: #000000;" data-color="#000000"></div>
+                        </div>
+                    </div>
+
+                    <!-- High-Top Basketball Options (hidden by default) -->
+                    <div class="component-section model-specific basketball" style="display: none;">
+                        <h3 class="component-title"><i class="fas fa-shoe-prints"></i> Sole</h3>
+                        <div class="component-options" id="basketballSoleOptions">
+                            <div class="component-option selected" data-id="basketballSole1" data-price="0" data-days="0" data-image="https://via.placeholder.com/100x60?text=Basketball+Sole+1">
+                                <img src="https://via.placeholder.com/100x60?text=Basketball+Sole+1" alt="Standard Sole" class="component-option-image">
+                                <div class="component-option-name">Standard</div>
+                                <div class="component-option-price">+₱0</div>
+                            </div>
+                            <div class="component-option" data-id="basketballSole2" data-price="500" data-days="4" data-image="https://via.placeholder.com/100x60?text=Basketball+Sole+2">
+                                <img src="https://via.placeholder.com/100x60?text=Basketball+Sole+2" alt="Performance Sole" class="component-option-image">
+                                <div class="component-option-name">Performance</div>
+                                <div class="component-option-price">+₱500</div>
+                            </div>
+                            <div class="component-option" data-id="basketballSole3" data-price="700" data-days="5" data-image="https://via.placeholder.com/100x60?text=Basketball+Sole+3">
+                                <img src="https://via.placeholder.com/100x60?text=Basketball+Sole+3" alt="Premium Sole" class="component-option-image">
+                                <div class="component-option-name">Premium</div>
+                                <div class="component-option-price">+₱700</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="component-section model-specific basketball" style="display: none;">
+                        <h3 class="component-title"><i class="fas fa-socks"></i> Upper</h3>
+                        <div class="component-options" id="basketballUpperOptions">
+                            <div class="component-option selected" data-id="basketballUpper1" data-price="0" data-days="0" data-image="https://via.placeholder.com/100x60?text=Basketball+Upper+1">
+                                <img src="https://via.placeholder.com/100x60?text=Basketball+Upper+1" alt="Canvas Upper" class="component-option-image">
+                                <div class="component-option-name">Canvas</div>
+                                <div class="component-option-price">+₱0</div>
+                            </div>
+                        </div>
+                        
+                        <h4 style="margin: 1rem 0 0.5rem;">Mudguard Color</h4>
+                        <div class="color-options" id="basketballMudguardColorOptions">
+                            <div class="color-option selected" style="background-color: #000000;" data-color="#000000"></div>
+                            <div class="color-option" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="#ffffff"></div>
+                            <div class="color-option" style="background-color: #2c3e50;" data-color="#2c3e50"></div>
+                        </div>
+                        
+                        <h4 style="margin: 1rem 0 0.5rem;">Heel Color</h4>
+                        <div class="color-options" id="basketballHeelColorOptions">
+                            <div class="color-option selected" style="background-color: #2c3e50;" data-color="#2c3e50"></div>
+                            <div class="color-option" style="background-color: #000000;" data-color="#000000"></div>
+                        </div>
+                    </div>
+
+                    <!-- Slip-On Comfort Options (hidden by default) -->
+                    <div class="component-section model-specific slipon" style="display: none;">
+                        <h3 class="component-title"><i class="fas fa-shoe-prints"></i> Midsole</h3>
+                        <div class="component-options" id="sliponMidsoleOptions">
+                            <div class="component-option selected" data-id="sliponMidsole1" data-price="0" data-days="0" data-image="https://via.placeholder.com/100x60?text=SlipOn+Midsole+1">
+                                <img src="https://via.placeholder.com/100x60?text=SlipOn+Midsole+1" alt="Standard Midsole" class="component-option-image">
+                                <div class="component-option-name">Standard</div>
+                                <div class="component-option-price">+₱0</div>
+                            </div>
+                            <div class="component-option" data-id="sliponMidsole2" data-price="350" data-days="3" data-image="https://via.placeholder.com/100x60?text=SlipOn+Midsole+2">
+                                <img src="https://via.placeholder.com/100x60?text=SlipOn+Midsole+2" alt="Performance Midsole" class="component-option-image">
+                                <div class="component-option-name">Performance</div>
                                 <div class="component-option-price">+₱350</div>
                             </div>
+                            <div class="component-option" data-id="sliponMidsole3" data-price="550" data-days="4" data-image="https://via.placeholder.com/100x60?text=SlipOn+Midsole+3">
+                                <img src="https://via.placeholder.com/100x60?text=SlipOn+Midsole+3" alt="Premium Midsole" class="component-option-image">
+                                <div class="component-option-name">Premium</div>
+                                <div class="component-option-price">+₱550</div>
+                            </div>
+                        </div>
+                        
+                        <h4 style="margin: 1rem 0 0.5rem;">Outsole Color</h4>
+                        <div class="color-options" id="sliponOutsoleColorOptions">
+                            <div class="color-option selected" style="background-color: #2c3e50;" data-color="#2c3e50"></div>
+                            <div class="color-option" style="background-color: #000000;" data-color="#000000"></div>
+                            <div class="color-option" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="#ffffff"></div>
+                        </div>
+                        
+                        <h4 style="margin: 1rem 0 0.5rem;">Midsole Color</h4>
+                        <div class="color-options" id="sliponMidsoleColorOptions">
+                            <div class="color-option selected" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="#ffffff"></div>
+                            <div class="color-option" style="background-color: #000000;" data-color="#000000"></div>
                         </div>
                     </div>
                 </div>
@@ -583,72 +1075,298 @@
         </div>
     </div>
 
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay"></div>
+
+    <!-- Info Modals -->
+    <div class="modal" id="partsInfoModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div class="modal-content" style="background: white; padding: 2rem; border-radius: var(--radius-md); max-width: 600px; width: 90%;">
+            <h3 style="margin-bottom: 1rem;">Shoe Parts Information</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <p><strong>Sole:</strong> The bottom part of the shoe that provides cushioning and traction.</p>
+                    <p><strong>Upper:</strong> The part of the shoe that covers the top of the foot.</p>
+                    <p><strong>Laces:</strong> Used to secure the shoe to the foot.</p>
+                </div>
+                <div>
+                    <p><strong>Tongue:</strong> The flap under the laces that protects the top of the foot.</p>
+                    <p><strong>Heel:</strong> The back part of the shoe that supports the heel.</p>
+                    <p><strong>Toe Box:</strong> The front part that protects the toes.</p>
+                </div>
+            </div>
+            <button id="closePartsModal" style="margin-top: 1.5rem; padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer;">Close</button>
+        </div>
+    </div>
+
+    <div class="modal" id="sizeInfoModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div class="modal-content" style="background: white; padding: 2rem; border-radius: var(--radius-md); max-width: 600px; width: 90%;">
+            <h3 style="margin-bottom: 1rem;">Size Reference Guide</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;">
+                <thead>
+                    <tr style="background: var(--gray-light);">
+                        <th style="padding: 0.5rem; text-align: left;">US Size</th>
+                        <th style="padding: 0.5rem; text-align: left;">EU Size</th>
+                        <th style="padding: 0.5rem; text-align: left;">UK Size</th>
+                        <th style="padding: 0.5rem; text-align: left;">Length (cm)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--gray-light);">
+                        <td style="padding: 0.5rem;">5</td>
+                        <td style="padding: 0.5rem;">38</td>
+                        <td style="padding: 0.5rem;">3</td>
+                        <td style="padding: 0.5rem;">23.5</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--gray-light);">
+                        <td style="padding: 0.5rem;">6</td>
+                        <td style="padding: 0.5rem;">39</td>
+                        <td style="padding: 0.5rem;">4</td>
+                        <td style="padding: 0.5rem;">24.1</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--gray-light);">
+                        <td style="padding: 0.5rem;">7</td>
+                        <td style="padding: 0.5rem;">40</td>
+                        <td style="padding: 0.5rem;">5</td>
+                        <td style="padding: 0.5rem;">24.8</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--gray-light);">
+                        <td style="padding: 0.5rem;">8</td>
+                        <td style="padding: 0.5rem;">41</td>
+                        <td style="padding: 0.5rem;">6</td>
+                        <td style="padding: 0.5rem;">25.4</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.5rem;">9</td>
+                        <td style="padding: 0.5rem;">42</td>
+                        <td style="padding: 0.5rem;">7</td>
+                        <td style="padding: 0.5rem;">26.0</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-bottom: 1rem;"><strong>Note:</strong> For best fit, measure your foot length and compare with our size chart.</p>
+            <button id="closeSizeModal" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer;">Close</button>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile sidebar toggle
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+
+            if (mobileToggle && sidebar && overlay) {
+                mobileToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                });
+
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
+
             // Base values
-            const basePrice = 2499;
-            const baseDays = 7;
+            let currentModel = 'classic';
+            let basePrice = 2499;
+            let baseDays = 7;
+        
             
             // Initialize selections
             let selections = {
-                sole: {
-                    id: 'sole1',
-                    price: 0,
-                    days: 0,
-                    image: 'https://via.placeholder.com/100x60?text=Sole+1'
+                classic: {
+                    sole: {
+                        id: 'sole1',
+                        price: 0,
+                        days: 0,
+                        image: 'https://via.placeholder.com/100x60?text=Classic+Sole+1'
+                    },
+                    upper: {
+                        id: 'upper1',
+                        price: 0,
+                        days: 0,
+                        image: 'https://via.placeholder.com/100x60?text=Classic+Upper+1',
+                        color: '#2c3e50'
+                    },
+                    laces: {
+                        id: 'laces1',
+                        price: 0,
+                        days: 0,
+                        image: 'https://via.placeholder.com/100x20?text=Classic+Laces+1',
+                        color: '#ffffff'
+                    },
+                    bodyColor: '#ffffff',
+                    heelColor: '#2c3e50'
                 },
-                upper: {
-                    id: 'upper1',
-                    price: 0,
-                    days: 0,
-                    image: 'https://via.placeholder.com/100x60?text=Upper+1',
-                    color: '#2c3e50'
+                runner: {
+                    sole: {
+                        id: 'runnerSole1',
+                        price: 0,
+                        days: 0,
+                        image: 'https://via.placeholder.com/100x60?text=Runner+Sole+1'
+                    },
+                    upper: {
+                        id: 'runnerUpper1',
+                        price: 0,
+                        days: 0,
+                        image: 'https://via.placeholder.com/100x60?text=Runner+Upper+1'
+                    },
+                    bodyColor: '#ffffff',
+                    collarColor: '#ffffff'
                 },
-                laces: {
-                    id: 'laces1',
-                    price: 0,
-                    days: 0,
-                    image: 'https://via.placeholder.com/100x20?text=Laces+1',
-                    color: '#ffffff'
+                basketball: {
+                    sole: {
+                        id: 'basketballSole1',
+                        price: 0,
+                        days: 0,
+                        image: 'https://via.placeholder.com/100x60?text=Basketball+Sole+1'
+                    },
+                    upper: {
+                        id: 'basketballUpper1',
+                        price: 0,
+                        days: 0,
+                        image: 'https://via.placeholder.com/100x60?text=Basketball+Upper+1'
+                    },
+                    mudguardColor: '#000000',
+                    heelColor: '#2c3e50'
                 },
-                tongue: {
-                    id: 'tongue1',
-                    price: 0,
-                    days: 0,
-                    image: 'https://via.placeholder.com/100x40?text=Tongue+1'
+                slipon: {
+                    midsole: {
+                        id: 'sliponMidsole1',
+                        price: 0,
+                        days: 0,
+                        image: 'https://via.placeholder.com/100x60?text=SlipOn+Midsole+1'
+                    },
+                    outsoleColor: '#2c3e50',
+                    midsoleColor: '#ffffff'
                 }
             };
             
+            // Current view (front, side, back)
+            let currentView = 'front';
+            
             // Update the shoe preview and summary
             function updatePreview() {
-                // Update component images
-                document.getElementById('soleImage').src = selections.sole.image;
-                document.getElementById('soleImage').style.display = 'block';
                 
-                document.getElementById('upperImage').src = selections.upper.image;
-                document.getElementById('upperImage').style.display = 'block';
-                document.getElementById('upperImage').style.filter = `drop-shadow(0 0 5px ${selections.upper.color})`;
-                
-                document.getElementById('lacesImage').src = selections.laces.image;
-                document.getElementById('lacesImage').style.display = 'block';
-                document.getElementById('lacesImage').style.filter = `drop-shadow(0 0 3px ${selections.laces.color})`;
-                
-                document.getElementById('tongueImage').src = selections.tongue.image;
-                document.getElementById('tongueImage').style.display = 'block';
+                // Update component images based on model
+                if (currentModel === 'classic') {
+                    document.getElementById('soleImage').src = selections.classic.sole.image;
+                    document.getElementById('soleImage').style.display = 'block';
+                    
+                    document.getElementById('upperImage').src = selections.classic.upper.image;
+                    document.getElementById('upperImage').style.display = 'block';
+                    document.getElementById('upperImage').style.filter = `drop-shadow(0 0 5px ${selections.classic.upper.color})`;
+                    
+                    document.getElementById('lacesImage').src = selections.classic.laces.image;
+                    document.getElementById('lacesImage').style.display = 'block';
+                    document.getElementById('lacesImage').style.filter = `drop-shadow(0 0 3px ${selections.classic.laces.color})`;
+                    
+                    // Hide components not used in this model
+                    document.getElementById('tongueImage').style.display = 'none';
+                } 
+                else if (currentModel === 'runner') {
+                    document.getElementById('soleImage').src = selections.runner.sole.image;
+                    document.getElementById('soleImage').style.display = 'block';
+                    
+                    document.getElementById('upperImage').src = selections.runner.upper.image;
+                    document.getElementById('upperImage').style.display = 'block';
+                    
+                    // Hide components not used in this model
+                    document.getElementById('lacesImage').style.display = 'none';
+                    document.getElementById('tongueImage').style.display = 'none';
+                }
+                else if (currentModel === 'basketball') {
+                    document.getElementById('soleImage').src = selections.basketball.sole.image;
+                    document.getElementById('soleImage').style.display = 'block';
+                    
+                    document.getElementById('upperImage').src = selections.basketball.upper.image;
+                    document.getElementById('upperImage').style.display = 'block';
+                    
+                    // Hide components not used in this model
+                    document.getElementById('lacesImage').style.display = 'none';
+                    document.getElementById('tongueImage').style.display = 'none';
+                }
+                else if (currentModel === 'slipon') {
+                    document.getElementById('soleImage').src = selections.slipon.midsole.image;
+                    document.getElementById('soleImage').style.display = 'block';
+                    
+                    // Hide components not used in this model
+                    document.getElementById('upperImage').style.display = 'none';
+                    document.getElementById('lacesImage').style.display = 'none';
+                    document.getElementById('tongueImage').style.display = 'none';
+                }
                 
                 // Calculate totals
-                const customizationPrice = Object.values(selections).reduce((sum, component) => sum + component.price, 0);
-                const totalDays = baseDays + Math.max(...Object.values(selections).map(c => c.days));
+                let customizationPrice = 0;
+                let maxDays = 0;
+                
+                if (currentModel === 'classic') {
+                    customizationPrice = selections.classic.sole.price + selections.classic.upper.price + selections.classic.laces.price;
+                    maxDays = Math.max(selections.classic.sole.days, selections.classic.upper.days, selections.classic.laces.days);
+                } 
+                else if (currentModel === 'runner') {
+                    customizationPrice = selections.runner.sole.price + selections.runner.upper.price;
+                    maxDays = Math.max(selections.runner.sole.days, selections.runner.upper.days);
+                }
+                else if (currentModel === 'basketball') {
+                    customizationPrice = selections.basketball.sole.price + selections.basketball.upper.price;
+                    maxDays = Math.max(selections.basketball.sole.days, selections.basketball.upper.days);
+                }
+                else if (currentModel === 'slipon') {
+                    customizationPrice = selections.slipon.midsole.price;
+                    maxDays = selections.slipon.midsole.days;
+                }
+                
+                const totalDays = baseDays + maxDays;
                 const totalPrice = basePrice + customizationPrice;
                 
                 // Update summary
+                document.getElementById('basePrice').textContent = `₱${basePrice.toFixed(2)}`;
                 document.getElementById('customizationPrice').textContent = `+₱${customizationPrice.toFixed(2)}`;
                 document.getElementById('productionTime').textContent = `${totalDays}-${totalDays + 3} days`;
                 document.getElementById('totalPrice').textContent = `₱${totalPrice.toFixed(2)}`;
             }
             
+            // Handle model selection
+            function setupModelSelection() {
+                const modelOptions = document.querySelectorAll('.model-option');
+                
+                modelOptions.forEach(option => {
+                    option.addEventListener('click', function() {
+                        // Remove selected class from all options
+                        modelOptions.forEach(opt => opt.classList.remove('selected'));
+                        
+                        // Add selected class to clicked option
+                        this.classList.add('selected');
+                        
+                        // Update current model and base price
+                        currentModel = this.dataset.model;
+                        basePrice = parseFloat(this.dataset.price);
+                        
+                        // Hide all model-specific sections
+                        document.querySelectorAll('.model-specific').forEach(section => {
+                            section.style.display = 'none';
+                        });
+                        
+                        // Show sections for selected model
+                        document.querySelectorAll(`.model-specific.${currentModel}`).forEach(section => {
+                            section.style.display = 'block';
+                        });
+                        
+                        // Reset view to front
+                        currentView = 'front';
+                        document.querySelectorAll('.view-btn').forEach(btn => {
+                            btn.classList.remove('active');
+                        });                        
+                        // Update preview
+                        updatePreview();
+                    });
+                });
+            }
+            
             // Handle component selection
-            function setupComponentOptions(componentType, optionsContainer) {
+            function setupComponentOptions(componentType, optionsContainer, model) {
                 const options = optionsContainer.querySelectorAll('.component-option');
                 
                 options.forEach(option => {
@@ -659,13 +1377,13 @@
                         // Add selected class to clicked option
                         this.classList.add('selected');
                         
-                        // Update selections
-                        selections[componentType] = {
+                        // Update selections for current model
+                        selections[model][componentType] = {
                             id: this.dataset.id,
                             price: parseFloat(this.dataset.price),
                             days: parseInt(this.dataset.days),
                             image: this.dataset.image,
-                            color: selections[componentType]?.color // Preserve color if it exists
+                            color: selections[model][componentType]?.color // Preserve color if it exists
                         };
                         
                         updatePreview();
@@ -674,7 +1392,7 @@
             }
             
             // Handle color selection
-            function setupColorOptions(componentType, optionsContainer) {
+            function setupColorOptions(colorType, optionsContainer, model) {
                 const options = optionsContainer.querySelectorAll('.color-option');
                 
                 options.forEach(option => {
@@ -686,35 +1404,122 @@
                         this.classList.add('selected');
                         
                         // Update color in selections
-                        selections[componentType].color = this.dataset.color;
+                        selections[model][colorType] = this.dataset.color;
                         
                         updatePreview();
                     });
                 });
             }
             
-            // Initialize all component options
-            setupComponentOptions('sole', document.getElementById('soleOptions'));
-            setupComponentOptions('upper', document.getElementById('upperOptions'));
-            setupComponentOptions('laces', document.getElementById('lacesOptions'));
-            setupComponentOptions('tongue', document.getElementById('tongueOptions'));
+            // Handle view selection
+            function setupViewSelection() {
+                const viewButtons = document.querySelectorAll('.view-btn');
+                
+                viewButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        // Remove active class from all buttons
+                        viewButtons.forEach(btn => btn.classList.remove('active'));
+                        
+                        // Add active class to clicked button
+                        this.classList.add('active');
+                        
+                        // Update current view
+                        currentView = this.dataset.view;
+                        
+                        // Update preview
+                        updatePreview();
+                    });
+                });
+            }
             
-            // Initialize color options
-            setupColorOptions('upper', document.getElementById('upperColorOptions'));
-            setupColorOptions('laces', document.getElementById('lacesColorOptions'));
+            // Initialize all component options for each model
+            setupComponentOptions('sole', document.getElementById('soleOptions'), 'classic');
+            setupComponentOptions('upper', document.getElementById('upperOptions'), 'classic');
+            setupComponentOptions('laces', document.getElementById('lacesOptions'), 'classic');
+            
+            setupComponentOptions('sole', document.getElementById('runnerSoleOptions'), 'runner');
+            setupComponentOptions('upper', document.getElementById('runnerUpperOptions'), 'runner');
+            
+            setupComponentOptions('sole', document.getElementById('basketballSoleOptions'), 'basketball');
+            setupComponentOptions('upper', document.getElementById('basketballUpperOptions'), 'basketball');
+            
+            setupComponentOptions('midsole', document.getElementById('sliponMidsoleOptions'), 'slipon');
+            
+            // Initialize color options for each model
+            setupColorOptions('upper.color', document.getElementById('upperColorOptions'), 'classic');
+            setupColorOptions('laces.color', document.getElementById('lacesColorOptions'), 'classic');
+            setupColorOptions('bodyColor', document.getElementById('bodyColorOptions'), 'classic');
+            setupColorOptions('heelColor', document.getElementById('heelColorOptions'), 'classic');
+            
+            setupColorOptions('bodyColor', document.getElementById('runnerBodyColorOptions'), 'runner');
+            setupColorOptions('collarColor', document.getElementById('runnerCollarColorOptions'), 'runner');
+            
+            setupColorOptions('mudguardColor', document.getElementById('basketballMudguardColorOptions'), 'basketball');
+            setupColorOptions('heelColor', document.getElementById('basketballHeelColorOptions'), 'basketball');
+            
+            setupColorOptions('outsoleColor', document.getElementById('sliponOutsoleColorOptions'), 'slipon');
+            setupColorOptions('midsoleColor', document.getElementById('sliponMidsoleColorOptions'), 'slipon');
+            
+            // Initialize model selection
+            setupModelSelection();
+            
+            // Initialize view selection
+            setupViewSelection();
             
             // Initial preview update
             updatePreview();
             
             // Save design button
             document.querySelector('.btn-outline').addEventListener('click', function() {
-                alert('Design saved to your account!');
+                alert(`Your ${currentModel} design has been saved to your account!`);
             });
             
             // Add to cart button
             document.querySelector('.btn-primary').addEventListener('click', function() {
-                alert('Custom shoe added to your cart!');
+                const totalPrice = parseFloat(document.getElementById('totalPrice').textContent.replace('₱', ''));
+                alert(`Your custom ${currentModel} shoe (₱${totalPrice.toFixed(2)}) has been added to your cart!`);
             });
+
+            // Info button functionality
+            const partsInfoBtn = document.getElementById('partsInfoBtn');
+            const sizeInfoBtn = document.getElementById('sizeInfoBtn');
+            const partsModal = document.getElementById('partsInfoModal');
+            const sizeModal = document.getElementById('sizeInfoModal');
+            const closePartsModal = document.getElementById('closePartsModal');
+            const closeSizeModal = document.getElementById('closeSizeModal');
+
+            if (partsInfoBtn && sizeInfoBtn && partsModal && sizeModal) {
+                // Show modals
+                partsInfoBtn.addEventListener('click', () => {
+                    partsModal.style.display = 'flex';
+                });
+
+                sizeInfoBtn.addEventListener('click', () => {
+                    sizeModal.style.display = 'flex';
+                });
+
+                // Hide modals
+                closePartsModal.addEventListener('click', () => {
+                    partsModal.style.display = 'none';
+                });
+
+                closeSizeModal.addEventListener('click', () => {
+                    sizeModal.style.display = 'none';
+                });
+
+                // Close when clicking outside modal content
+                window.addEventListener('click', (event) => {
+                    if (event.target === partsModal) {
+                        partsModal.style.display = 'none';
+                    }
+                    if (event.target === sizeModal) {
+                        sizeModal.style.display = 'none';
+                    }
+                });
+            } else {
+                console.error('One or more modal elements not found');
+            }
+
         });
     </script>
 </body>
