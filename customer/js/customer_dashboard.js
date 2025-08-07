@@ -163,6 +163,10 @@ function displayShoe(shoe) {
             <h3>${shoe.shoeName}</h3>
             <p class="shoe-code">Code: ${shoe.shoeCode}</p>
             <h4>Shop Name: ${shoe.shopName}</h4>
+            <div class="product-meta">
+                <span class="product-brand">${shoe.brand || 'No Brand'}</span>
+                <span class="product-type">${shoe.type || 'No Type'}</span>
+            </div>
             <p class="shoe-description">${fixedDescription(shoe.generalDescription) || 'No description available'}</p>
             <p class="shoe-price">From ₱${lowestPrice.toFixed(2)}</p>
             <div class="shoe-variants">
