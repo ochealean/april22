@@ -255,39 +255,93 @@ async function loadShoes() {
 function toggleWishlist(shoeID, shopID, btnElement) {
     const user = auth.currentUser;
     if (!user) {
-      console.log("User not authenticated");
-      return;
+        showToast("Please login to manage wishlist", true);
+        return;
     }
-  
+
     const userID = user.uid;
     const wishlistRef = ref(db, `AR_shoe_users/wishlist/${userID}/${shopID}/${shoeID}`);
-  
+
     get(wishlistRef).then((snapshot) => {
-      const icon = btnElement.querySelector("i");
-  
-      if (snapshot.exists()) {
-        // Shoe is already in wishlist -> remove it
-        set(wishlistRef, null).then(() => {
-          console.log("Shoe removed from wishlist");
-          icon.classList.remove("fas");
-          icon.classList.add("far");
-          icon.style.color = "";
-        }).catch((error) => {
-          console.error("Error removing from wishlist:", error);
-        });
-      } else {
-        // Shoe is not in wishlist -> add it
-        set(wishlistRef, true).then(() => {
-          console.log("Shoe added to wishlist");
-          icon.classList.remove("far");
-          icon.classList.add("fas");
-          icon.style.color = "red";
-        }).catch((error) => {
-          console.error("Error adding to wishlist:", error);
-        });
-      }
+        const icon = btnElement.querySelector("i");
+
+        if (snapshot.exists()) {
+            // Shoe is already in wishlist -> remove it
+            set(wishlistRef, null).then(() => {
+                showToast("Removed shoe from wishlist");
+                icon.classList.remove("fas");
+                icon.classList.add("far");
+                icon.style.color = "";
+            }).catch((error) => {
+                console.error("Error removing from wishlist:", error);
+                showToast("Failed to remove from wishlist", true);
+            });
+        } else {
+            // Shoe is not in wishlist -> add it
+            set(wishlistRef, true).then(() => {
+                showToast("Added shoe to wishlist");
+                icon.classList.remove("far");
+                icon.classList.add("fas");
+                icon.style.color = "red";
+            }).catch((error) => {
+                console.error("Error adding to wishlist:", error);
+                showToast("Failed to add to wishlist", true);
+            });
+        }
     });
-  }
+}
+
+    // Add toast styles
+    const style = document.createElement('style');
+    style.textContent = `
+    .toast {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #4CAF50;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .toast.error {
+        background-color: #f44336;
+    }
+
+    .toast.show {
+        opacity: 1;
+    }
+
+    .toast i {
+        font-size: 20px;
+    }
+    `;
+    document.head.appendChild(style);
+
+    // Function to show toast messages
+    function showToast(message, isError = false) {
+        const toast = document.createElement('div');
+        toast.className = `toast ${isError ? 'error' : ''}`;
+        toast.innerHTML = `<i class="fas ${isError ? 'fa-times-circle' : 'fa-check-circle'}"></i> ${message}`;
+        document.body.appendChild(toast);
+        
+        // Show the toast
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
   
 
 function addToWishlist(shoeID, shopID, btnElement) {
