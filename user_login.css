@@ -97,15 +97,6 @@ body {
     position: relative;
 }
 
-.login-header h1::after {
-    content: '';
-    display: block;
-    width: 60px;
-    height: 3px;
-    background: var(--accent);
-    margin: 0.8rem auto;
-    border-radius: 3px;
-}
 
 .login-header p {
     color: var(--text-secondary);
