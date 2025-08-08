@@ -196,7 +196,7 @@ async function saveDesignToDatabase() {
         };
 
         // Save to Realtime Database
-        const newDesignRef = ref(db, 'AR_shoe_users/saved_customShoes/' + userId);
+        const newDesignRef = ref(db, 'AR_shoe_users/saved_customShoes/' + userId + '/' + generateUniqueId());
         await set(newDesignRef, designData);
         console.log('Design saved with ID: ', newDesignRef.key);
 
@@ -255,13 +255,22 @@ async function addToCart() {
 
         // Save to customized_cart in Realtime Database
         const newCartItemRef = ref(db, `AR_shoe_users/customized_cart/${userId}/${generateUniqueId()}`);
+        console.log('1');
         await set(newCartItemRef, cartItem);
-
+        console.log('2');
         alert(`Your custom ${currentModel} shoe has been added to your cart!`);
     } catch (error) {
         console.error('Error adding to cart: ', error);
         alert('There was an error adding your design to the cart. Please try again.');
     }
+}
+
+function generateUniqueId() {
+    // Generates a unique ID using current timestamp and a random string
+    return (
+        Date.now().toString(36) +
+        Math.random().toString(36).substr(2, 9)
+    );
 }
 
 // Helper function to get preview image URL

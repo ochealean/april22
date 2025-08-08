@@ -1,6 +1,6 @@
 // savedDesigns.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getDatabase, ref, get, remove } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+import { getDatabase, ref, get, remove, push } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -111,9 +111,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Safely access nested properties with fallbacks
         const selections = design.selections || {};
-        const upper = selections.upper || { id: 'N/A', color: 'N/A' };
-        const sole = selections.sole || { id: 'N/A' };
-        const laces = selections.laces || { id: 'N/A', color: 'N/A' };
+        
+        // Access upper properties with proper fallbacks
+        const upper = selections.upper || {};
+        const upperId = upper.id || 'N/A';
+        const upperColor = upper.color || 'N/A';
+        const upperImage = upper.image || 'https://via.placeholder.com/100x60?text=No+Upper';
+        const upperDays = upper.days || 0;
+        const upperPrice = upper.price || 0;
+        
+        // Access sole properties
+        const sole = selections.sole || {};
+        const soleId = sole.id || 'N/A';
+        const soleImage = sole.image || 'https://via.placeholder.com/100x60?text=No+Sole';
+        const soleDays = sole.days || 0;
+        const solePrice = sole.price || 0;
+        
+        // Access laces properties
+        const laces = selections.laces || {};
+        const lacesId = laces.id || 'N/A';
+        const lacesColor = laces.color || 'N/A';
+        const lacesImage = laces.image || 'https://via.placeholder.com/100x20?text=No+Laces';
+        const lacesDays = laces.days || 0;
+        const lacesPrice = laces.price || 0;
+        
+        // Access color properties
         const bodyColor = selections.bodyColor || 'N/A';
         const heelColor = selections.heelColor || 'N/A';
 
@@ -123,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <span class="saved-design-date">Saved: ${formattedDate}</span>
             </div>
             <div class="saved-design-preview">
-                <img src="${design.image || 'https://via.placeholder.com/200x150?text=No+Preview'}" alt="Custom Design" class="saved-design-image">
+                <img src="${upperImage}" alt="Custom Design" class="saved-design-image">
                 <div class="saved-design-details">
                     <div class="design-detail-row">
                         <span class="design-detail-label">Model:</span>
@@ -135,23 +157,25 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                     <div class="design-detail-row">
                         <span class="design-detail-label">Body Color:</span>
+                        <span class="design-detail-value" style="background-color: ${bodyColor}; width: 20px; height: 20px; display: inline-block; border: 1px solid #ddd;"></span>
                         <span class="design-detail-value">${bodyColor}</span>
                     </div>
                     <div class="design-detail-row">
                         <span class="design-detail-label">Heel Color:</span>
+                        <span class="design-detail-value" style="background-color: ${heelColor}; width: 20px; height: 20px; display: inline-block; border: 1px solid #ddd;"></span>
                         <span class="design-detail-value">${heelColor}</span>
                     </div>
                     <div class="design-detail-row">
                         <span class="design-detail-label">Upper:</span>
-                        <span class="design-detail-value">${upper.id} (${upper.color})</span>
+                        <span class="design-detail-value">${upperId} (${upperColor})</span>
                     </div>
                     <div class="design-detail-row">
                         <span class="design-detail-label">Sole:</span>
-                        <span class="design-detail-value">${sole.id}</span>
+                        <span class="design-detail-value">${soleId}</span>
                     </div>
                     <div class="design-detail-row">
                         <span class="design-detail-label">Laces:</span>
-                        <span class="design-detail-value">${laces.id} (${laces.color})</span>
+                        <span class="design-detail-value">${lacesId} (${lacesColor})</span>
                     </div>
                     <div class="design-detail-row">
                         <span class="design-detail-label">Production Time:</span>
@@ -227,11 +251,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 const design = snapshot.val();
                 const cartRef = ref(database, `AR_shoe_users/customized_cart/${userId}`);
                 
-                // Push the design to the cart
-                return push(cartRef, {
+                // Create a new cart item with the design data
+                const cartItem = {
                     ...design,
-                    addedAt: Date.now()
-                });
+                    addedAt: Date.now(),
+                    isCustom: true
+                };
+                
+                // Push the design to the cart
+                return push(cartRef, cartItem);
             })
             .then(() => {
                 alert('Design added to cart successfully!');
@@ -295,27 +323,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const modelCards = document.querySelectorAll('.model-card');
     const customizeBtn = document.getElementById('customizeBtn');
 
-    modelCards.forEach(card => {
-        card.addEventListener('click', function () {
-            modelCards.forEach(c => c.classList.remove('selected'));
-            this.classList.add('selected');
+    if (modelCards && customizeBtn) {
+        modelCards.forEach(card => {
+            card.addEventListener('click', function () {
+                modelCards.forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
 
-            selectedModel = {
-                id: this.dataset.model,
-                basePrice: parseFloat(this.dataset.basePrice),
-                baseDays: parseInt(this.dataset.baseDays),
-                baseImage: this.dataset.baseImage,
-                name: this.querySelector('.model-name').textContent
-            };
+                selectedModel = {
+                    id: this.dataset.model,
+                    basePrice: parseFloat(this.dataset.basePrice),
+                    baseDays: parseInt(this.dataset.baseDays),
+                    baseImage: this.dataset.baseImage,
+                    name: this.querySelector('.model-name').textContent
+                };
 
-            customizeBtn.disabled = false;
+                customizeBtn.disabled = false;
+            });
         });
-    });
 
-    customizeBtn.addEventListener('click', function () {
-        if (selectedModel) {
-            sessionStorage.setItem('selectedShoeModel', JSON.stringify(selectedModel));
-            window.location.href = 'customizeshoe.html';
-        }
-    });
+        customizeBtn.addEventListener('click', function () {
+            if (selectedModel) {
+                sessionStorage.setItem('selectedShoeModel', JSON.stringify(selectedModel));
+                window.location.href = 'customizeshoe.html';
+            }
+        });
+    }
 });
