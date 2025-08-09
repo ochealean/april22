@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Load saved designs for this user
             loadSavedDesigns(user.uid);
-            
+
             // Setup model selection after auth is confirmed
             setupModelSelection();
         } else {
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Safely access nested properties with fallbacks
         const selections = design.selections || {};
 
-        // Access properties with proper fallbacks
+        // Access common properties with fallbacks
         const upper = selections.upper || {};
         const upperId = upper.id || null;
         const upperColor = upper.color || null;
@@ -158,8 +158,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const lacesColor = laces.color || null;
         const lacesImage = laces.image || null;
 
+        // Model-specific properties with fallbacks
         const bodyColor = selections.bodyColor || null;
         const heelColor = selections.heelColor || null;
+        const collarColor = selections.collarColor || null; // Runner specific
+        const mudguardColor = selections.mudguardColor || null; // Basketball specific
+        const outsoleColor = selections.outsoleColor || null; // Slipon specific
+        const midsoleColor = selections.midsoleColor || null; // Slipon specific
+        const midsole = selections.midsole || {}; // Slipon specific
+        const midsoleId = midsole.id || null;
 
         // Helper function to create a detail row only if value exists
         const createDetailRow = (label, value, isColor = false) => {
@@ -167,43 +174,80 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (isColor) {
                 return `
-                <div class="design-detail-row">
-                    <span class="design-detail-label">${label}:</span>
-                    <span class="design-detail-value" style="background-color: ${value}; width: 20px; height: 20px; display: inline-block; border: 1px solid #ddd;"></span>
-                    <span class="design-detail-value">${value}</span>
-                </div>
-            `;
-            }
-
-            return `
             <div class="design-detail-row">
                 <span class="design-detail-label">${label}:</span>
+                <span class="design-detail-value" style="background-color: ${value}; width: 20px; height: 20px; display: inline-block; border: 1px solid #ddd;"></span>
                 <span class="design-detail-value">${value}</span>
             </div>
         `;
+            }
+
+            return `
+        <div class="design-detail-row">
+            <span class="design-detail-label">${label}:</span>
+            <span class="design-detail-value">${value}</span>
+        </div>
+    `;
         };
 
-        // Build the details HTML
+        // Build the common details HTML
         let detailsHTML = `
         ${createDetailRow('Model', design.model)}
         ${createDetailRow('Size', design.size)}
-        ${createDetailRow('Body Color', bodyColor, true)}
-        ${createDetailRow('Heel Color', heelColor, true)}
     `;
 
-        // Only add upper details if we have data
-        if (upperId) {
-            detailsHTML += createDetailRow('Upper', `${upperId}${upperColor ? ` (${upperColor})` : ''}`);
-        }
+        // Add model-specific details
+        if (design.model === 'classic') {
+            detailsHTML += `
+            ${createDetailRow('Body Color', bodyColor, true)}
+            ${createDetailRow('Heel Color', heelColor, true)}
+        `;
 
-        // Only add sole details if we have data
-        if (soleId) {
-            detailsHTML += createDetailRow('Sole', soleId);
+            if (upperId) {
+                detailsHTML += createDetailRow('Upper', `${upperId}${upperColor ? ` (${upperColor})` : ''}`);
+            }
+            if (soleId) {
+                detailsHTML += createDetailRow('Sole', soleId);
+            }
+            if (lacesId) {
+                detailsHTML += createDetailRow('Laces', `${lacesId}${lacesColor ? ` (${lacesColor})` : ''}`);
+            }
         }
+        else if (design.model === 'runner') {
+            detailsHTML += `
+            ${createDetailRow('Body Color', bodyColor, true)}
+            ${createDetailRow('Collar Color', collarColor, true)}
+        `;
 
-        // Only add laces details if we have data
-        if (lacesId) {
-            detailsHTML += createDetailRow('Laces', `${lacesId}${lacesColor ? ` (${lacesColor})` : ''}`);
+            if (upperId) {
+                detailsHTML += createDetailRow('Upper', upperId);
+            }
+            if (soleId) {
+                detailsHTML += createDetailRow('Sole', soleId);
+            }
+        }
+        else if (design.model === 'basketball') {
+            detailsHTML += `
+            ${createDetailRow('Mudguard Color', mudguardColor, true)}
+            ${createDetailRow('Heel Color', heelColor, true)}
+        `;
+
+            if (upperId) {
+                detailsHTML += createDetailRow('Upper', upperId);
+            }
+            if (soleId) {
+                detailsHTML += createDetailRow('Sole', soleId);
+            }
+        }
+        else if (design.model === 'slipon') {
+            detailsHTML += `
+            ${createDetailRow('Outsole Color', outsoleColor, true)}
+            ${createDetailRow('Midsole Color', midsoleColor, true)}
+        `;
+
+            if (midsoleId) {
+                detailsHTML += createDetailRow('Midsole', midsoleId);
+            }
         }
 
         // Add production time and price (always shown)
@@ -215,8 +259,13 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
     `;
 
-        // Use the first available image (upper, sole, or laces) or a placeholder
-        const previewImage = upperImage || soleImage || lacesImage || 'https://via.placeholder.com/200x150?text=No+Preview';
+        // Use the first available image or a placeholder
+        let previewImage = 'https://via.placeholder.com/200x150?text=No+Preview';
+        if (design.model === 'slipon') {
+            previewImage = midsole.image || previewImage;
+        } else {
+            previewImage = upperImage || soleImage || lacesImage || previewImage;
+        }
 
         element.innerHTML = `
         <div class="saved-design-header">
@@ -276,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     id: designId,
                     ...design
                 }));
-                window.location.href = 'customizeshoe.html';
+                window.location.href = 'customizeshoeedit.html?designId=' + designId;
             })
             .catch((error) => {
                 console.error('Error loading design:', error);
