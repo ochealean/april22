@@ -1,4 +1,3 @@
-// savedDesigns.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getDatabase, ref, get, remove, push } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
@@ -16,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function () {
         measurementId: "G-QC2JSR1FJW"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
     const auth = getAuth(app);
@@ -38,6 +36,37 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Model selection functionality
+    let selectedModel = null;
+    const modelCards = document.querySelectorAll('.model-card');
+    const customizeBtn = document.getElementById('customizeBtn');
+
+    function setupModelSelection() {
+        modelCards.forEach(card => {
+            card.addEventListener('click', function () {
+                modelCards.forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+
+                selectedModel = {
+                    id: this.dataset.model,
+                    basePrice: parseFloat(this.dataset.basePrice),
+                    baseDays: parseInt(this.dataset.baseDays),
+                    baseImage: this.dataset.baseImage,
+                    name: this.querySelector('.model-name').textContent
+                };
+
+                customizeBtn.disabled = false;
+            });
+        });
+
+        customizeBtn.addEventListener('click', function () {
+            if (selectedModel) {
+                sessionStorage.setItem('selectedShoeModel', JSON.stringify(selectedModel));
+                window.location.href = `customizeshoe.html?model=${encodeURIComponent(selectedModel.id)}`;
+            }
+        });
+    }
+
     // Handle user authentication state
     onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -51,6 +80,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Load saved designs for this user
             loadSavedDesigns(user.uid);
+            
+            // Setup model selection after auth is confirmed
+            setupModelSelection();
         } else {
             // User is signed out, redirect to login
             window.location.href = '/login.html';
@@ -327,35 +359,4 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('Error signing out. Please try again.');
             });
     });
-
-    // Model selection functionality
-    let selectedModel = null;
-    const modelCards = document.querySelectorAll('.model-card');
-    const customizeBtn = document.getElementById('customizeBtn');
-
-    if (modelCards && customizeBtn) {
-        modelCards.forEach(card => {
-            card.addEventListener('click', function () {
-                modelCards.forEach(c => c.classList.remove('selected'));
-                this.classList.add('selected');
-
-                selectedModel = {
-                    id: this.dataset.model,
-                    basePrice: parseFloat(this.dataset.basePrice),
-                    baseDays: parseInt(this.dataset.baseDays),
-                    baseImage: this.dataset.baseImage,
-                    name: this.querySelector('.model-name').textContent
-                };
-
-                customizeBtn.disabled = false;
-            });
-        });
-
-        customizeBtn.addEventListener('click', function () {
-            if (selectedModel) {
-                sessionStorage.setItem('selectedShoeModel', JSON.stringify(selectedModel));
-                window.location.href = 'customizeshoe.html';
-            }
-        });
-    }
 });
