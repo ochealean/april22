@@ -40,17 +40,17 @@ let selections = {
             price: 0,
             days: 0,
             image: 'https://via.placeholder.com/100x60?text=Classic+Upper+1',
-            color: '#2c3e50'
+            color: 'gray'
         },
         laces: {
             id: 'laces1',
             price: 0,
             days: 0,
             image: 'https://via.placeholder.com/100x20?text=Classic+Laces+1',
-            color: '#ffffff'
+            color: 'white'
         },
-        bodyColor: '#ffffff',
-        heelColor: '#2c3e50'
+        bodyColor: 'white',
+        heelColor: 'gray'
     },
     runner: {
         sole: {
@@ -65,8 +65,8 @@ let selections = {
             days: 0,
             image: 'https://via.placeholder.com/100x60?text=Runner+Upper+1'
         },
-        bodyColor: '#ffffff',
-        collarColor: '#ffffff'
+        bodyColor: 'white',
+        collarColor: 'white'
     },
     basketball: {
         sole: {
@@ -81,8 +81,8 @@ let selections = {
             days: 0,
             image: 'https://via.placeholder.com/100x60?text=Basketball+Upper+1'
         },
-        mudguardColor: '#000000',
-        heelColor: '#2c3e50'
+        mudguardColor: 'black',
+        heelColor: '#gray'
     },
     slipon: {
         midsole: {
@@ -91,8 +91,8 @@ let selections = {
             days: 0,
             image: 'https://via.placeholder.com/100x60?text=SlipOn+Midsole+1'
         },
-        outsoleColor: '#2c3e50',
-        midsoleColor: '#ffffff'
+        outsoleColor: '#gray',
+        midsoleColor: 'white'
     }
 };
 
@@ -493,21 +493,21 @@ function initializeEventListeners() {
 }
 
 // Initialize the application when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializeEventListeners();
     checkUrlParameters();
-    
+
     // Load user profile if available
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUserId = user.uid;
             const userProfile = document.getElementById('imageProfile');
             const userName = document.getElementById('userName_display2');
-            
+
             // Set default values
             userProfile.src = 'https://via.placeholder.com/150?text=User';
             userName.textContent = 'Guest';
-            
+
             // Try to get user data from Realtime Database
             get(child(ref(db), `users/${user.uid}`))
                 .then((snapshot) => {
@@ -520,6 +520,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error('Error getting user data:', error);
                 });
         }
+    });
+
+    const sizeOptions = document.querySelectorAll('#sizeOptions .component-option');
+    let selectedSize = 5;
+    sizeOptions.forEach(btn => {
+        btn.addEventListener('click', function () {
+            sizeOptions.forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedSize = this.dataset.size;
+        });
     });
 });
 
