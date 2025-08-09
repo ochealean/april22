@@ -91,7 +91,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    // Helper function to create a saved design element
     function createSavedDesignElement(id, design) {
         const element = document.createElement('div');
         element.className = 'saved-design';
@@ -111,97 +110,108 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Safely access nested properties with fallbacks
         const selections = design.selections || {};
-        
-        // Access upper properties with proper fallbacks
-        const upper = selections.upper || {};
-        const upperId = upper.id || 'N/A';
-        const upperColor = upper.color || 'N/A';
-        const upperImage = upper.image || 'https://via.placeholder.com/100x60?text=No+Upper';
-        const upperDays = upper.days || 0;
-        const upperPrice = upper.price || 0;
-        
-        // Access sole properties
-        const sole = selections.sole || {};
-        const soleId = sole.id || 'N/A';
-        const soleImage = sole.image || 'https://via.placeholder.com/100x60?text=No+Sole';
-        const soleDays = sole.days || 0;
-        const solePrice = sole.price || 0;
-        
-        // Access laces properties
-        const laces = selections.laces || {};
-        const lacesId = laces.id || 'N/A';
-        const lacesColor = laces.color || 'N/A';
-        const lacesImage = laces.image || 'https://via.placeholder.com/100x20?text=No+Laces';
-        const lacesDays = laces.days || 0;
-        const lacesPrice = laces.price || 0;
-        
-        // Access color properties
-        const bodyColor = selections.bodyColor || 'N/A';
-        const heelColor = selections.heelColor || 'N/A';
 
-        element.innerHTML = `
-            <div class="saved-design-header">
-                <h3 class="saved-design-title">${design.model || 'Custom Design'}</h3>
-                <span class="saved-design-date">Saved: ${formattedDate}</span>
-            </div>
-            <div class="saved-design-preview">
-                <img src="${upperImage}" alt="Custom Design" class="saved-design-image">
-                <div class="saved-design-details">
-                    <div class="design-detail-row">
-                        <span class="design-detail-label">Model:</span>
-                        <span class="design-detail-value">${design.model || 'N/A'}</span>
-                    </div>
-                    <div class="design-detail-row">
-                        <span class="design-detail-label">Size:</span>
-                        <span class="design-detail-value">${design.size || 'N/A'}</span>
-                    </div>
-                    <div class="design-detail-row">
-                        <span class="design-detail-label">Body Color:</span>
-                        <span class="design-detail-value" style="background-color: ${bodyColor}; width: 20px; height: 20px; display: inline-block; border: 1px solid #ddd;"></span>
-                        <span class="design-detail-value">${bodyColor}</span>
-                    </div>
-                    <div class="design-detail-row">
-                        <span class="design-detail-label">Heel Color:</span>
-                        <span class="design-detail-value" style="background-color: ${heelColor}; width: 20px; height: 20px; display: inline-block; border: 1px solid #ddd;"></span>
-                        <span class="design-detail-value">${heelColor}</span>
-                    </div>
-                    <div class="design-detail-row">
-                        <span class="design-detail-label">Upper:</span>
-                        <span class="design-detail-value">${upperId} (${upperColor})</span>
-                    </div>
-                    <div class="design-detail-row">
-                        <span class="design-detail-label">Sole:</span>
-                        <span class="design-detail-value">${soleId}</span>
-                    </div>
-                    <div class="design-detail-row">
-                        <span class="design-detail-label">Laces:</span>
-                        <span class="design-detail-value">${lacesId} (${lacesColor})</span>
-                    </div>
-                    <div class="design-detail-row">
-                        <span class="design-detail-label">Production Time:</span>
-                        <span class="design-detail-value">${design.productionTime || 'N/A'}</span>
-                    </div>
-                    <div class="design-detail-row">
-                        <span class="design-detail-label">Total Price:</span>
-                        <span class="design-detail-value" style="font-weight: 600; color: var(--primary);">₱${totalPrice.toFixed(2)}</span>
-                    </div>
+        // Access properties with proper fallbacks
+        const upper = selections.upper || {};
+        const upperId = upper.id || null;
+        const upperColor = upper.color || null;
+        const upperImage = upper.image || null;
+
+        const sole = selections.sole || {};
+        const soleId = sole.id || null;
+        const soleImage = sole.image || null;
+
+        const laces = selections.laces || {};
+        const lacesId = laces.id || null;
+        const lacesColor = laces.color || null;
+        const lacesImage = laces.image || null;
+
+        const bodyColor = selections.bodyColor || null;
+        const heelColor = selections.heelColor || null;
+
+        // Helper function to create a detail row only if value exists
+        const createDetailRow = (label, value, isColor = false) => {
+            if (!value) return '';
+
+            if (isColor) {
+                return `
+                <div class="design-detail-row">
+                    <span class="design-detail-label">${label}:</span>
+                    <span class="design-detail-value" style="background-color: ${value}; width: 20px; height: 20px; display: inline-block; border: 1px solid #ddd;"></span>
+                    <span class="design-detail-value">${value}</span>
                 </div>
-            </div>
-            <div class="saved-design-actions">
-                <button class="btn btn-outline btn-sm edit-design" data-id="${id}">
-                    <i class="fas fa-edit"></i> Edit Design
-                </button>
-                <button class="btn btn-add btn-sm add-to-cart" data-id="${id}">
-                    <i class="fas fa-plus"></i> Add to Cart
-                </button>
-                <button class="btn btn-buy btn-sm buy-now" data-id="${id}">
-                    <i class="fas fa-basket-shopping"></i> Buy Now
-                </button>
-                <button class="btn btn-danger btn-sm delete-design" data-id="${id}">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
+            `;
+            }
+
+            return `
+            <div class="design-detail-row">
+                <span class="design-detail-label">${label}:</span>
+                <span class="design-detail-value">${value}</span>
             </div>
         `;
+        };
+
+        // Build the details HTML
+        let detailsHTML = `
+        ${createDetailRow('Model', design.model)}
+        ${createDetailRow('Size', design.size)}
+        ${createDetailRow('Body Color', bodyColor, true)}
+        ${createDetailRow('Heel Color', heelColor, true)}
+    `;
+
+        // Only add upper details if we have data
+        if (upperId) {
+            detailsHTML += createDetailRow('Upper', `${upperId}${upperColor ? ` (${upperColor})` : ''}`);
+        }
+
+        // Only add sole details if we have data
+        if (soleId) {
+            detailsHTML += createDetailRow('Sole', soleId);
+        }
+
+        // Only add laces details if we have data
+        if (lacesId) {
+            detailsHTML += createDetailRow('Laces', `${lacesId}${lacesColor ? ` (${lacesColor})` : ''}`);
+        }
+
+        // Add production time and price (always shown)
+        detailsHTML += `
+        ${createDetailRow('Production Time', design.productionTime)}
+        <div class="design-detail-row">
+            <span class="design-detail-label">Total Price:</span>
+            <span class="design-detail-value" style="font-weight: 600; color: var(--primary);">₱${totalPrice.toFixed(2)}</span>
+        </div>
+    `;
+
+        // Use the first available image (upper, sole, or laces) or a placeholder
+        const previewImage = upperImage || soleImage || lacesImage || 'https://via.placeholder.com/200x150?text=No+Preview';
+
+        element.innerHTML = `
+        <div class="saved-design-header">
+            <h3 class="saved-design-title">${design.model || 'Custom Design'}</h3>
+            <span class="saved-design-date">Saved: ${formattedDate}</span>
+        </div>
+        <div class="saved-design-preview">
+            <img src="${previewImage}" alt="Custom Design" class="saved-design-image">
+            <div class="saved-design-details">
+                ${detailsHTML}
+            </div>
+        </div>
+        <div class="saved-design-actions">
+            <button class="btn btn-outline btn-sm edit-design" data-id="${id}">
+                <i class="fas fa-edit"></i> Edit Design
+            </button>
+            <button class="btn btn-add btn-sm add-to-cart" data-id="${id}">
+                <i class="fas fa-plus"></i> Add to Cart
+            </button>
+            <button class="btn btn-buy btn-sm buy-now" data-id="${id}">
+                <i class="fas fa-basket-shopping"></i> Buy Now
+            </button>
+            <button class="btn btn-danger btn-sm delete-design" data-id="${id}">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+        </div>
+    `;
         return element;
     }
 
@@ -250,14 +260,14 @@ document.addEventListener('DOMContentLoaded', function () {
             .then((snapshot) => {
                 const design = snapshot.val();
                 const cartRef = ref(database, `AR_shoe_users/customized_cart/${userId}`);
-                
+
                 // Create a new cart item with the design data
                 const cartItem = {
                     ...design,
                     addedAt: Date.now(),
                     isCustom: true
                 };
-                
+
                 // Push the design to the cart
                 return push(cartRef, cartItem);
             })
@@ -291,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     // Check if we need to show the empty state
                     const container = document.getElementById('savedDesignsList');
-                    if (container.children.length === 0 || 
+                    if (container.children.length === 0 ||
                         (container.children.length === 1 && container.children[0].id === 'emptySavedDesigns')) {
                         const emptyState = document.getElementById('emptySavedDesigns');
                         container.innerHTML = '';
