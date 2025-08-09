@@ -270,6 +270,110 @@ async function addToCart() {
     }
 }
 
+// Function to handle Buy Now action
+async function buyNow() {
+    try {
+        const userId = await getCurrentUserId();
+
+        // Calculate totals
+        let customizationPrice = 0;
+        let maxDays = 0;
+
+        if (currentModel === 'classic') {
+            customizationPrice = selections.classic.sole.price + selections.classic.upper.price + selections.classic.laces.price;
+            maxDays = Math.max(selections.classic.sole.days, selections.classic.upper.days, selections.classic.laces.days);
+        }
+        else if (currentModel === 'runner') {
+            customizationPrice = selections.runner.sole.price + selections.runner.upper.price;
+            maxDays = Math.max(selections.runner.sole.days, selections.runner.upper.days);
+        }
+        else if (currentModel === 'basketball') {
+            customizationPrice = selections.basketball.sole.price + selections.basketball.upper.price;
+            maxDays = Math.max(selections.basketball.sole.days, selections.basketball.upper.days);
+        }
+        else if (currentModel === 'slipon') {
+            customizationPrice = selections.slipon.midsole.price;
+            maxDays = selections.slipon.midsole.days;
+        }
+
+        const totalPrice = basePrice + customizationPrice;
+        const totalDays = baseDays + maxDays;
+
+        // Clean up the selections object to remove undefined values
+        const cleanSelections = {};
+        Object.keys(selections[currentModel]).forEach(key => {
+            if (selections[currentModel][key] !== undefined) {
+                if (typeof selections[currentModel][key] === 'object') {
+                    cleanSelections[key] = {};
+                    Object.keys(selections[currentModel][key]).forEach(subKey => {
+                        if (selections[currentModel][key][subKey] !== undefined) {
+                            cleanSelections[key][subKey] = selections[currentModel][key][subKey];
+                        }
+                    });
+                } else {
+                    cleanSelections[key] = selections[currentModel][key];
+                }
+            }
+        });
+
+        // Create order data
+        const orderData = {
+            userId: userId,
+            model: currentModel,
+            size: selectedSize,
+            price: totalPrice,
+            quantity: 1,
+            addedAt: Date.now(),
+            image: getPreviewImageUrl(),
+            isCustom: true,
+            selections: cleanSelections, // Use the cleaned selections
+            basePrice: basePrice,
+            customizationPrice: customizationPrice,
+            productionTime: `${totalDays}-${totalDays + 3} days`,
+            status: "pending",
+            statusUpdates: {
+                initial: {
+                    status: "pending",
+                    timestamp: Date.now(),
+                    message: "Order received and being processed"
+                }
+            },
+            orderDate: new Date().toISOString()
+        };
+
+        // Generate a unique order ID
+        const orderId = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+
+        // Save to boughtshoe in Realtime Database
+        const boughtShoeRef = ref(db, `AR_shoe_users/boughtshoe/${userId}/${orderId}`);
+        await set(boughtShoeRef, orderData);
+
+        // Also save to transactions for order history
+        const transactionRef = ref(db, `AR_shoe_users/transactions/${userId}/${orderId}`);
+        await set(transactionRef, {
+            date: new Date().toISOString(),
+            item: {
+                name: `Custom ${currentModel} shoe`,
+                price: totalPrice,
+                quantity: 1,
+                size: selectedSize,
+                isCustom: true,
+                image: getPreviewImageUrl()
+            },
+            status: "pending",
+            totalAmount: totalPrice,
+            userId: userId
+        });
+
+        alert(`Your custom ${currentModel} shoe order has been placed successfully! Order ID: ${orderId}`);
+        // Redirect to order confirmation or tracking page
+        window.location.href = `/customer/html/order-confirmation.html?orderId=${orderId}`;
+    } catch (error) {
+        console.error('Error during buy now: ', error);
+        alert('There was an error placing your order. Please try again.');
+    }
+}
+
 function generateUniqueId() {
     // Generates a unique ID using current timestamp and a random string
     return (
@@ -452,14 +556,7 @@ function initializeEventListeners() {
     document.querySelector('.btn-primary').addEventListener('click', addToCart);
 
     // Buy now button
-    // document.querySelector('.btn-buy').addEventListener('click', async function () {
-    //     try {
-    //         await addToCart();
-    //         window.location.href = '/customer/html/checkout.html';
-    //     } catch (error) {
-    //         console.error('Error during buy now: ', error);
-    //     }
-    // });
+    document.querySelector('.btn-buy').addEventListener('click', buyNow);
 
     // Info button functionality
     const partsInfoBtn = document.getElementById('partsInfoBtn');
