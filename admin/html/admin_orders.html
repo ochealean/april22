@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5649c0;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --error: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #b2bec3;
+            --gray-light: #dfe6e9;
+            --text-primary: #2d3436;
+            --text-secondary: #636e72;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            color: var(--text-primary);
+        }
+
+        /* Navigation */
+        nav {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-links a.active {
+            background-color: rgba(255, 255, 255, 0.3);
+            font-weight: 600;
+        }
+
+        .right-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .username-display {
+            font-weight: 600;
+        }
+
+        .menu-btn {
+            display: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        /* Main Container */
+        .container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            font-size: 1.8rem;
+        }
+
+        /* Order Tabs */
+        .order-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .order-tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .order-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .order-tab-badge {
+            position: absolute;
+            top: -5px;
+            right: 5px;
+            background-color: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        /* Search and Filters */
+        .search-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+        }
+
+        .search-btn, .clear-btn, .filter-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-btn {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .search-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .clear-btn {
+            background-color: var(--gray-light);
+            color: var(--text-secondary);
+        }
+
+        .clear-btn:hover {
+            background-color: var(--gray);
+        }
+
+        .filter-btn {
+            background-color: white;
+            border: 1px solid var(--gray);
+            color: var(--text-secondary);
+        }
+
+        .filter-btn:hover {
+            background-color: var(--gray-light);
+        }
+
+        /* Order Table */
+        .table-container {
+            background-color: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--text-secondary);
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-processing {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-btn {
+            padding: 0.5rem 0.75rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+        }
+
+        .action-btn i {
+            font-size: 0.9rem;
+        }
+
+        .btn-view {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-view:hover {
+            background-color: #8c7ae6;
+        }
+
+        .btn-process {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-process:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-complete {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-complete:hover {
+            background-color: #00a884;
+        }
+
+        .btn-cancel {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background-color: #c0392b;
+        }
+
+        /* Order Details Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--radius-md);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 1;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--error);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .order-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .detail-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-section h3 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 0.75rem;
+        }
+
+        .detail-label {
+            width: 150px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            flex: 1;
+        }
+
+        .shoe-preview-container {
+            width: 100%;
+            height: 250px;
+            background-color: #f9f9f9;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .component-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+            gap: 0.5rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--gray);
+            background-color: white;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background-color: var(--gray-light);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .pagination-number.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .order-details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: fixed;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background-color: white;
+                flex-direction: column;
+                padding: 1rem;
+                box-shadow: var(--shadow-md);
+                z-index: 99;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links a {
+                color: var(--text-primary);
+            }
+
+            .menu-btn {
+                display: block;
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            .search-input, .search-btn, .clear-btn, .filter-btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .action-btns {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-header">
+            <ul class="nav-links">
+                <li><a href="/admin/html/admin_dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="/admin/html/admin_pendingshops.html"><i class="fas fa-clock"></i> Pending Shops</a></li>
+                <li><a href="/admin/html/admin_approvedshops.html"><i class="fas fa-check-circle"></i> Approved Shops</a></li>
+                <li><a href="/admin/html/admin_rejectedshops.html"><i class="fas fa-times-circle"></i> Rejected Shops</a></li>
+                <li><a href="/admin/html/admin_orders.html" class="active"><i class="fas fa-shopping-bag"></i> Orders</a></li>
+                <li><a href="/chatbot/html/responses.html"><i class="fas fa-robot"></i> Chatbot Manager</a></li>
+                <li><a href="/censoredWords/html/censoredWords.html"><i class="fas fa-ban"></i> Censored Words</a></li>
+                <li><a href="/admin/html/admin_login.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+            <div class="right-menu">
+                <span class="username-display">Admin</span>
+                <div class="menu-btn"><i class="fas fa-bars"></i></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1><i class="fas fa-shopping-bag"></i> Order Management</h1>
+        
+        <!-- Order Tabs -->
+        <div class="order-tabs">
+            <div class="order-tab active" data-tab="pending">
+                <i class="fas fa-clock"></i> Pending Orders
+                <span class="order-tab-badge">5</span>
+            </div>
+            <div class="order-tab" data-tab="processing">
+                <i class="fas fa-cog"></i> In Process
+                <span class="order-tab-badge">3</span>
+            </div>
+            <div class="order-tab" data-tab="completed">
+                <i class="fas fa-check-circle"></i> Order History
+            </div>
+        </div>
+        
+        <!-- Search and Filters -->
+        <div class="search-container">
+            <input type="text" id="orderSearch" placeholder="Search orders by ID, customer name, or email..." class="search-input">
+            <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i> Search</button>
+            <button id="clearSearch" class="clear-btn"><i class="fas fa-times"></i> Clear</button>
+            <button id="filterBtn" class="filter-btn"><i class="fas fa-filter"></i> Filters</button>
+        </div>
+        
+        <!-- Orders Table -->
+        <div class="table-container">
+            <table id="ordersTable">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Pending Orders -->
+                    <tr data-status="pending" style="display: table-row;">
+                        <td>#ORD-1001</td>
+                        <td>John Doe</td>
+                        <td>2023-06-15</td>
+                        <td>Custom Shoe</td>
+                        <td><span class="status-badge status-pending">Pending</span></td>
+                        <td>₱2,499.00</td>
+                        <td>
+                            <button class="action-btn btn-view" data-order="1001"><i class="fas fa-eye"></i> View</button>
+                            <button class="action-btn btn-process" data-order="1001"><i class="fas fa-cog"></i> Process</button>
+                        </td>
+                    </tr>
+                    <tr data-status="pending" style="display: table-row;">
+                        <td>#ORD-1002</td>
+                        <td>Jane Smith</td>
+                        <td>2023-06-16</td>
+                        <td>Pre-made</td>
+                        <td><span class="status-badge status-pending">Pending</span></td>
+                        <td>₱1,799.00</td>
+                        <td>
+                            <button class="action-btn btn-view" data-order="1002"><i class="fas fa-eye"></i> View</button>
+                            <button class="action-btn btn-process" data-order="1002"><i class="fas fa-cog"></i> Process</button>
+                        </td>
+                    </tr>
+                    
+                    <!-- In Process Orders (initially hidden) -->
+                    <tr data-status="processing" style="display: none;">
+                        <td>#ORD-1003</td>
+                        <td>Robert Johnson</td>
+                        <td>2023-06-10</td>
+                        <td>Custom Shoe</td>
+                        <td><span class="status-badge status-processing">In Process</span></td>
+                        <td>₱2,899.00</td>
+                        <td>
+                            <button class="action-btn btn-view" data-order="1003"><i class="fas fa-eye"></i> View</button>
+                            <button class="action-btn btn-complete" data-order="1003"><i class="fas fa-check"></i> Complete</button>
+                        </td>
+                    </tr>
+                    
+                    <!-- Completed Orders (initially hidden) -->
+                    <tr data-status="completed" style="display: none;">
+                        <td>#ORD-1004</td>
+                        <td>Emily Davis</td>
+                        <td>2023-06-05</td>
+                        <td>Pre-made</td>
+                        <td><span class="status-badge status-completed">Completed</span></td>
+                        <td>₱1,599.00</td>
+                        <td>
+                            <button class="action-btn btn-view" data-order="1004"><i class="fas fa-eye"></i> View</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination">
+            <button class="pagination-btn" id="prevBtn" disabled><i class="fas fa-chevron-left"></i> Previous</button>
+            <button class="pagination-btn pagination-number active">1</button>
+            <button class="pagination-btn pagination-number">2</button>
+            <button class="pagination-btn pagination-number">3</button>
+            <button class="pagination-btn" id="nextBtn">Next <i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+    
+    <!-- Order Details Modal -->
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Order Details - #ORD-1001</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="order-details-grid">
+                    <div>
+                        <div class="detail-section">
+                            <h3><i class="fas fa-user"></i> Customer Information</h3>
+                            <div class="detail-row">
+                                <div class="detail-label">Name:</div>
+                                <div class="detail-value">John Doe</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Email:</div>
+                                <div class="detail-value">john.doe@example.com</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Phone:</div>
+                                <div class="detail-value">+63 912 345 6789</div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h3><i class="fas fa-truck"></i> Shipping Information</h3>
+                            <div class="detail-row">
+                                <div class="detail-label">Address:</div>
+                                <div class="detail-value">123 Main St, Quezon City, Metro Manila</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">City:</div>
+                                <div class="detail-value">Quezon City</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">ZIP Code:</div>
+                                <div class="detail-value">1100</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Country:</div>
+                                <div class="detail-value">Philippines</div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h3><i class="fas fa-credit-card"></i> Payment Information</h3>
+                            <div class="detail-row">
+                                <div class="detail-label">Method:</div>
+                                <div class="detail-value">GCash</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Status:</div>
+                                <div class="detail-value">Paid</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Transaction ID:</div>
+                                <div class="detail-value">GC123456789</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="detail-section">
+                            <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
+                            <div class="shoe-preview-container">
+                                <img src="" alt="Sole" class="component-preview" id="modalSoleImage">
+                                <img src="" alt="Upper" class="component-preview" id="modalUpperImage">
+                                <img src="" alt="Laces" class="component-preview" id="modalLacesImage">
+                                <img src="" alt="Tongue" class="component-preview" id="modalTongueImage">
+                            </div>
+                            
+                            <div class="detail-row">
+                                <div class="detail-label">Order Type:</div>
+                                <div class="detail-value">Custom Shoe</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Model:</div>
+                                <div class="detail-value">Classic Sneaker</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Size:</div>
+                                <div class="detail-value">9</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Production Time:</div>
+                                <div class="detail-value">7-10 days</div>
+                            </div>
+                            
+                            <h3 style="margin-top: 1.5rem;"><i class="fas fa-palette"></i> Customization</h3>
+                            <div class="detail-row">
+                                <div class="detail-label">Sole Color:</div>
+                                <div class="detail-value">Black</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Upper Color:</div>
+                                <div class="detail-value">White</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Laces Color:</div>
+                                <div class="detail-value">Red</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Tongue Color:</div>
+                                <div class="detail-value">White</div>
+                            </div>
+                            
+                            <div class="detail-row" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-light);">
+                                <div class="detail-label" style="font-weight: 600;">Total:</div>
+                                <div class="detail-value" style="font-weight: 600;">₱2,499.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="action-btn btn-outline" id="closeModalBtn"><i class="fas fa-times"></i> Close</button>
+                    <button class="action-btn btn-process" id="processOrderBtn"><i class="fas fa-cog"></i> Mark as Processing</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        document.querySelector('.menu-btn').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+
+        // Order tabs functionality
+        const tabs = document.querySelectorAll('.order-tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Get the tab status to show
+                const statusToShow = this.getAttribute('data-tab');
+                
+                // Show/hide rows in the table
+                const rows = document.querySelectorAll('#ordersTable tbody tr');
+                rows.forEach(row => {
+                    if (row.getAttribute('data-status') === statusToShow || statusToShow === 'all') {
+                        row.style.display = 'table-row';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Order modal functionality
+        const viewButtons = document.querySelectorAll('.btn-view');
+        const orderModal = document.getElementById('orderModal');
+        const closeModal = document.querySelector('.close-modal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const orderId = this.getAttribute('data-order');
+                // Here you would typically fetch order details from your backend
+                // For now we'll just show the modal with sample data
+                document.querySelector('.modal-header h2').textContent = `Order Details - #ORD-${orderId}`;
+                orderModal.style.display = 'flex';
+            });
+        });
+        
+        [closeModal, closeModalBtn].forEach(element => {
+            element.addEventListener('click', function() {
+                orderModal.style.display = 'none';
+            });
+        });
+        
+        // Process order button
+        const processOrderBtn = document.getElementById('processOrderBtn');
+        if (processOrderBtn) {
+            processOrderBtn.addEventListener('click', function() {
+                alert('Order marked as processing!');
+                orderModal.style.display = 'none';
+                // Here you would typically update the order status via your backend
+            });
+        }
+
+        // Process buttons in table
+        const processButtons = document.querySelectorAll('.btn-process');
+        processButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const orderId = this.getAttribute('data-order');
+                if (confirm(`Mark order #ORD-${orderId} as processing?`)) {
+                    // Here you would typically update the order status via your backend
+                    alert(`Order #ORD-${orderId} is now being processed!`);
+                }
+            });
+        });
+
+        // Complete buttons in table
+        const completeButtons = document.querySelectorAll('.btn-complete');
+        completeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const orderId = this.getAttribute('data-order');
+                if (confirm(`Mark order #ORD-${orderId} as completed?`)) {
+                    // Here you would typically update the order status via your backend
+                    alert(`Order #ORD-${orderId} has been completed!`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
