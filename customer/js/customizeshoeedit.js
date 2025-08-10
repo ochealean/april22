@@ -555,7 +555,7 @@ function initializeEventListeners() {
     });
 
     // Add to cart button
-    document.querySelector('.btn-primary').addEventListener('click', addToCart);
+    // document.querySelector('.btn-primary').addEventListener('click', addToCart);
 
     // Info button functionality
     const partsInfoBtn = document.getElementById('partsInfoBtn');
