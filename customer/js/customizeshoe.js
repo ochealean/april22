@@ -553,7 +553,7 @@ function initializeEventListeners() {
     });
 
     // Add to cart button
-    document.querySelector('.btn-primary').addEventListener('click', addToCart);
+    // document.querySelector('.btn-primary').addEventListener('click', addToCart);
 
     // Buy now button
     document.querySelector('.btn-buy').addEventListener('click', buyNow);
