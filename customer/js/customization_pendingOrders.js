@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+import { getDatabase, ref, get, update, set } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
 // Firebase configuration
@@ -134,11 +134,127 @@ function processOrder(orderId) {
     alert(`Order ${orderId} is being processed`);
 }
 
-function cancelOrder(orderId) {
-    console.log(`Canceling order ${orderId}`);
-    // Add your order cancellation logic here
-    if (confirm(`Are you sure you want to cancel order ${orderId}?`)) {
-        alert(`Order ${orderId} has been canceled`);
+async function cancelOrder(orderId) {
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            alert('You must be logged in to cancel orders');
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to cancel order ${orderId}? This action cannot be undone.`)) {
+            return;
+        }
+
+        // Show loading state
+        const cancelButton = document.querySelector(`.btn-cancel[data-order-id="${orderId}"]`);
+        const originalText = cancelButton.textContent;
+        cancelButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Canceling...';
+        cancelButton.disabled = true;
+
+        // Get the order details first
+        const orderRef = ref(database, `AR_shoe_users/boughtshoe/${user.uid}/${orderId}`);
+        const orderSnapshot = await get(orderRef);
+        
+        if (!orderSnapshot.exists()) {
+            throw new Error('Order not found');
+        }
+
+        const orderData = orderSnapshot.val();
+
+        // Update the order status to 'cancelled'
+        const updates = {
+            status: 'cancelled',
+            cancelledAt: Date.now(),
+            statusUpdates: {
+                ...orderData.statusUpdates,
+                cancelled: {
+                    status: 'cancelled',
+                    timestamp: Date.now(),
+                    message: 'Order was cancelled by customer'
+                }
+            }
+        };
+
+        // Update in both boughtshoe and transactions
+        await Promise.all([
+            set(orderRef, { ...orderData, ...updates }),
+            set(ref(database, `AR_shoe_users/transactions/${user.uid}/${orderId}`), { 
+                ...orderData, 
+                ...updates,
+                status: 'cancelled'
+            })
+        ]);
+
+        // If it's a non-custom order, restore stock (if applicable)
+        if (!orderData.isCustom && orderData.shoeId && orderData.shopId) {
+            await restoreStock(orderData);
+        }
+
+        // Refresh the orders list
+        const orders = await fetchPendingOrders(user.uid);
+        renderOrders(orders);
+
+        alert(`Order ${orderId} has been successfully cancelled.`);
+
+    } catch (error) {
+        console.error('Error cancelling order:', error);
+        alert(`Failed to cancel order: ${error.message}`);
+
+        // Restore button state if error occurs
+        const cancelButton = document.querySelector(`.btn-cancel[data-order-id="${orderId}"]`);
+        if (cancelButton) {
+            cancelButton.textContent = originalText;
+            cancelButton.disabled = false;
+        }
+    }
+}
+
+async function restoreStock(orderData) {
+    try {
+        const { shoeId, shopId, size, quantity = 1 } = orderData;
+        
+        // Get current stock
+        const shoeRef = ref(database, `AR_shoe_users/shoe/${shopId}/${shoeId}`);
+        const shoeSnapshot = await get(shoeRef);
+        
+        if (shoeSnapshot.exists()) {
+            const shoeData = shoeSnapshot.val();
+            const variantKey = orderData.variantKey || 'variant_0';
+            const sizeKey = orderData.sizeKey || `size_${size}`;
+            
+            if (shoeData.variants && shoeData.variants[variantKey] && shoeData.variants[variantKey].sizes) {
+                const sizes = shoeData.variants[variantKey].sizes;
+                
+                // Find the size object (handles both numeric and string size keys)
+                let sizeObj = null;
+                for (const key in sizes) {
+                    if (sizes[key][size] !== undefined) {
+                        sizeObj = sizes[key][size];
+                        break;
+                    }
+                }
+                
+                if (sizeObj) {
+                    // Update stock
+                    const newStock = (sizeObj.stock || 0) + quantity;
+                    
+                    // Need to update the specific size object in the nested structure
+                    const updates = {};
+                    for (const key in sizes) {
+                        if (sizes[key][size] !== undefined) {
+                            updates[`variants/${variantKey}/sizes/${key}/${size}/stock`] = newStock;
+                            break;
+                        }
+                    }
+                    
+                    await update(ref(database, `AR_shoe_users/shoe/${shopId}/${shoeId}`), updates);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error restoring stock:', error);
+        // Don't fail the whole cancellation if stock restore fails
     }
 }
 

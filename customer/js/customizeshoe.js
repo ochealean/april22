@@ -349,7 +349,7 @@ async function buyNow() {
         await set(boughtShoeRef, orderData);
 
         // Also save to transactions for order history
-        const transactionRef = ref(db, `AR_shoe_users/transactions/${userId}/${orderId}`);
+        const transactionRef = ref(db, `AR_shoe_users/customizedtransactions/${userId}/${orderId}`);
         await set(transactionRef, {
             date: new Date().toISOString(),
             item: {
@@ -367,7 +367,7 @@ async function buyNow() {
 
         alert(`Your custom ${currentModel} shoe order has been placed successfully! Order ID: ${orderId}`);
         // Redirect to order confirmation or tracking page
-        window.location.href = `/customer/html/order-confirmation.html?orderId=${orderId}`;
+        window.location.href = `/customer/html/checkoutcustomize.html?orderId=${orderId}`;
     } catch (error) {
         console.error('Error during buy now: ', error);
         alert('There was an error placing your order. Please try again.');
