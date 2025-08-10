@@ -137,6 +137,31 @@
             gap: 1rem;
         }
 
+        .back-button {
+            color: var(--dark);
+            text-decoration: none;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .back-button:hover {
+            background-color: rgba(167, 119, 227, 0.1);
+            color: var(--primary);
+            transform: translateX(-3px);
+        }
+
+        .back-button i {
+            transition: var(--transition);
+        }
+
+
         .header h1 {
             font-size: 1.75rem;
             font-weight: 700;
@@ -314,6 +339,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .component-option {
@@ -736,6 +762,9 @@
                 <div class="mobile-menu-toggle">
                     <i class="fas fa-bars"></i>
                 </div>
+                <a href="/customer/html/pickshoe.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
                 <h1>Customize Your Shoes</h1>
                 <div class="user-profile">
                     <img id="imageProfile" src="#" alt="Profile" class="user-avatar">
@@ -842,7 +871,7 @@
                 <div class="customizer-controls" id="customizerControls">
                     <!-- Classic Sneaker Options (default visible) -->
                     <div class="component-section model-specific classic">
-                        <h4 style="margin: 1rem 0 0.5rem;">Shoe Size</h4>
+                        <h4 class="component-title"> <i class="fas fa-ruler"></i> Shoe Size</h4>
                         <div class="component-options" id="sizeOptions">
                             <button type="button" class="component-option selected" data-size="5">5</button>
                             <button type="button" class="component-option" data-size="6">6</button>
@@ -901,12 +930,12 @@
                             <div class="color-option" style="background-color: #3498db;" data-color="blue"></div>
                             <div class="color-option" style="background-color: #9b59b6;" data-color="violet"></div>
                             <div class="color-option" style="background-color: #000000;" data-color="black"></div>
-                            <div class="color-option" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="white"></div>
+                            <div class="color-option" style="background-color: #ffffff;" data-color="white"></div>
                         </div>
                         
                         <h4 style="margin: 1rem 0 0.5rem;">Body Color</h4>
                         <div class="color-options" id="bodyColorOptions">
-                            <div class="color-option selected" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="white"></div>
+                            <div class="color-option selected" style="background-color: #ffffff;" data-color="white"></div>
                             <div class="color-option" style="background-color: #000000;" data-color="black"></div>
                             <div class="color-option" style="background-color: #2c3e50;" data-color="gray"></div>
                             <div class="color-option" style="background-color: #e74c3c;" data-color="red"></div>
@@ -935,7 +964,7 @@
                         
                         <h4 style="margin: 1rem 0 0.5rem;">Laces Color</h4>
                         <div class="color-options" id="lacesColorOptions">
-                            <div class="color-option selected" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="white"></div>
+                            <div class="color-option selected" style="background-color: #ffffff;" data-color="white"></div>
                             <div class="color-option" style="background-color: #000000;" data-color="black"></div>
                             <div class="color-option" style="background-color: #2c3e50;" data-color="gray"></div>
                             <div class="color-option" style="background-color: #e74c3c;" data-color="red"></div>
@@ -946,13 +975,13 @@
                         <div class="color-options" id="heelColorOptions">
                             <div class="color-option selected" style="background-color: #2c3e50;" data-color="gray"></div>
                             <div class="color-option" style="background-color: #000000;" data-color="black"></div>
-                            <div class="color-option" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="white"></div>
+                            <div class="color-option" style="background-color: #ffffff;" data-color="white"></div>
                         </div>
                     </div>
 
                     <!-- Performance Runner Options (hidden by default) -->
                     <div class="component-section model-specific runner" style="display: none;">
-                        <h4 style="margin: 1rem 0 0.5rem;">Shoe Size</h4>
+                        <h4 class="component-title"> <i class="fas fa-ruler"></i> Shoe Size</h4>
                         <div class="component-options" id="sizeOptions">
                             <button type="button" class="component-option selected" data-size="5">5</button>
                             <button type="button" class="component-option" data-size="6">6</button>
@@ -999,7 +1028,7 @@
                         
                         <h4 style="margin: 1rem 0 0.5rem;">Body Color</h4>
                         <div class="color-options" id="runnerBodyColorOptions">
-                            <div class="color-option selected" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="white"></div>
+                            <div class="color-option selected" style="background-color: #ffffff;" data-color="white"></div>
                             <div class="color-option" style="background-color: #000000;" data-color="black"></div>
                             <div class="color-option" style="background-color: #2c3e50;" data-color="gray"></div>
                             <div class="color-option" style="background-color: #e74c3c;" data-color="red"></div>
@@ -1008,14 +1037,14 @@
                         
                         <h4 style="margin: 1rem 0 0.5rem;">Collar Color</h4>
                         <div class="color-options" id="runnerCollarColorOptions">
-                            <div class="color-option selected" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="white"></div>
+                            <div class="color-option selected" style="background-color: #ffffff;" data-color="white"></div>
                             <div class="color-option" style="background-color: #000000;" data-color="black"></div>
                         </div>
                     </div>
 
                     <!-- High-Top Basketball Options (hidden by default) -->
                     <div class="component-section model-specific basketball" style="display: none;">
-                        <h4 style="margin: 1rem 0 0.5rem;">Shoe Size</h4>
+                        <h4 class="component-title"> <i class="fas fa-ruler"></i> Shoe Size</h4>
                         <div class="component-options" id="sizeOptions">
                             <button type="button" class="component-option selected" data-size="5">5</button>
                             <button type="button" class="component-option" data-size="6">6</button>
@@ -1058,7 +1087,7 @@
                         <h4 style="margin: 1rem 0 0.5rem;">Mudguard Color</h4>
                         <div class="color-options" id="basketballMudguardColorOptions">
                             <div class="color-option selected" style="background-color: #000000;" data-color="black"></div>
-                            <div class="color-option" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="white"></div>
+                            <div class="color-option" style="background-color: #ffffff;" data-color="white"></div>
                             <div class="color-option" style="background-color: #2c3e50;" data-color="gray"></div>
                         </div>
                         
@@ -1071,8 +1100,7 @@
 
                     <!-- Slip-On Comfort Options (hidden by default) -->
                     <div class="component-section model-specific slipon" style="display: none;">
-                        <h3 class="component-title"><i class="fas fa-shoe-prints"></i> Midsole</h3>
-                        <h4 style="margin: 1rem 0 0.5rem;">Shoe Size</h4>
+                        <h4 class="component-title"> <i class="fas fa-ruler"></i> Shoe Size</h4>
                         <div class="component-options" id="sizeOptions">
                             <button type="button" class="component-option selected" data-size="5">5</button>
                             <button type="button" class="component-option" data-size="6">6</button>
@@ -1082,6 +1110,7 @@
                             <button type="button" class="component-option" data-size="10">10</button>
                             <button type="button" class="component-option" data-size="11">11</button>
                         </div>
+                        <h3 class="component-title"><i class="fas fa-shoe-prints"></i> Midsole</h3>
                         <div class="component-options" id="sliponMidsoleOptions">
                             <div class="component-option selected" data-id="Standard" data-price="0" data-days="0" data-image="https://via.placeholder.com/100x60?text=SlipOn+Midsole+1">
                                 <img src="https://via.placeholder.com/100x60?text=SlipOn+Midsole+1" alt="Standard Midsole" class="component-option-image">
@@ -1104,12 +1133,12 @@
                         <div class="color-options" id="sliponOutsoleColorOptions">
                             <div class="color-option selected" style="background-color: #2c3e50;" data-color="gray"></div>
                             <div class="color-option" style="background-color: #000000;" data-color="black"></div>
-                            <div class="color-option" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="white"></div>
+                            <div class="color-option" style="background-color: #ffffff;" data-color="white"></div>
                         </div>
                         
                         <h4 style="margin: 1rem 0 0.5rem;">Midsole Color</h4>
                         <div class="color-options" id="sliponMidsoleColorOptions">
-                            <div class="color-option selected" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="white"></div>
+                            <div class="color-option selected" style="background-color: #ffffff;" data-color="white"></div>
                             <div class="color-option" style="background-color: #000000;" data-color="black"></div>
                         </div>
                     </div>
