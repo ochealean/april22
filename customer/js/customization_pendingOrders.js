@@ -179,7 +179,7 @@ async function cancelOrder(orderId) {
         // Update in both boughtshoe and transactions
         await Promise.all([
             set(orderRef, { ...orderData, ...updates }),
-            set(ref(database, `AR_shoe_users/transactions/${user.uid}/${orderId}`), { 
+            set(ref(database, `AR_shoe_users/customizedtransactions/${user.uid}`), { 
                 ...orderData, 
                 ...updates,
                 status: 'cancelled'
