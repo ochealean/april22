@@ -282,12 +282,6 @@ document.addEventListener('DOMContentLoaded', function () {
             <button class="btn btn-outline btn-sm edit-design" data-id="${id}">
                 <i class="fas fa-edit"></i> Edit Design
             </button>
-            <button class="btn btn-add btn-sm add-to-cart" data-id="${id}">
-                <i class="fas fa-plus"></i> Add to Cart
-            </button>
-            <button class="btn btn-buy btn-sm buy-now" data-id="${id}">
-                <i class="fas fa-basket-shopping"></i> Buy Now
-            </button>
             <button class="btn btn-danger btn-sm delete-design" data-id="${id}">
                 <i class="fas fa-trash"></i> Delete
             </button>
