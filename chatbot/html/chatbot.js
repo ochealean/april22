@@ -89,6 +89,21 @@ function initChatbot() {
     }, 1000);
 }
 
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        get(ref(db, `AR_shoe_users/customer/${user.uid}`))
+            .then((snapshot) => {
+                if (!snapshot.exists()) {
+                    alert("Account does not exist");
+                    auth.signOut();
+                }
+            });
+    } else {
+        window.location.href = "/user_login.html";
+    }
+});
+
+
 function loadResponsesFromFirebase() {
     onValue(chatbotResponsesRef, (snapshot) => {
         const responses = snapshot.val() || {};
@@ -125,19 +140,59 @@ function loadResponsesFromFirebase() {
     });
 }
 
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        get(ref(db, `AR_shoe_users/customer/${user.uid}`))
-            .then((snapshot) => {
-                if (!snapshot.exists()) {
-                    alert("Account does not exist");
-                    auth.signOut();
-                }
-            });
+// Get the best response from Firebase or AI
+async function askQuestion(question) {
+    // First check Firebase for a response
+    const firebaseResponse = getBestResponse(question);
+    
+    if (firebaseResponse && firebaseResponse !== faqResponses.default.response) {
+        // If found in Firebase, use that
+        addMessageToChat('user', question);
+        addMessageToChat('assistant', firebaseResponse);
     } else {
-        window.location.href = "/user_login.html";
+        // If not found, use AI
+        addMessageToChat("user", question);
+        messages.push({ role: "user", content: question });
+        
+        // Show typing indicator
+        const typingIndicator = document.createElement('div');
+        typingIndicator.id = "typing-indicator";
+        typingIndicator.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span>Assistant is typing</span>
+                <div class="typing-dots">
+                    <span>.</span><span>.</span><span>.</span>
+                </div>
+            </div>
+        `;
+        chatMessages.appendChild(typingIndicator);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        try {
+            const response = await fetch(BackendServer, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ messages })
+            });
+            
+            const data = await response.json();
+            
+            // Remove typing indicator
+            chatMessages.removeChild(typingIndicator);
+            
+            // Add assistant response
+            addMessageToChat("assistant", data.response);
+            messages.push({ role: "assistant", content: data.response });
+            
+        } catch (error) {
+            console.error("Error:", error);
+            chatMessages.removeChild(typingIndicator);
+            addMessageToChat("assistant", firebaseResponse); // Fallback to default Firebase response
+        }
     }
-});
+}
 
 function updateQuickQuestions() {
     quickQuestionsContainer.innerHTML = '';
@@ -239,59 +294,60 @@ async function sendMessage() {
     const userMessage = inputField.value.trim();
     if (!userMessage) return;
 
-    // Add user message to chat
-    addMessageToChat("user", userMessage);
-    messages.push({ role: "user", content: userMessage });
-    inputField.value = '';
+    // First check if we have a Firebase response
+    const firebaseResponse = getBestResponse(userMessage);
+    
+    if (firebaseResponse && firebaseResponse !== faqResponses.default.response) {
+        // If found in Firebase, use that
+        addMessageToChat('user', userMessage);
+        addMessageToChat('assistant', firebaseResponse);
+        inputField.value = '';
+    } else {
+        // If not found, use AI
+        addMessageToChat("user", userMessage);
+        messages.push({ role: "user", content: userMessage });
+        inputField.value = '';
 
-    // Show typing indicator
-    const typingIndicator = document.createElement('div');
-    typingIndicator.id = "typing-indicator";
-    typingIndicator.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <span>Assistant is typing</span>
-            <div class="typing-dots">
-                <span>.</span><span>.</span><span>.</span>
+        // Show typing indicator
+        const typingIndicator = document.createElement('div');
+        typingIndicator.id = "typing-indicator";
+        typingIndicator.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span>Assistant is typing</span>
+                <div class="typing-dots">
+                    <span>.</span><span>.</span><span>.</span>
+                </div>
             </div>
-        </div>
-    `;
-    chatMessages.appendChild(typingIndicator);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+        `;
+        chatMessages.appendChild(typingIndicator);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    try {
-        const response = await fetch(BackendServer, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ messages })
-        });
-        
-        const data = await response.json();
-        
-        // Remove typing indicator
-        chatMessages.removeChild(typingIndicator);
-        
-        // Add assistant response
-        addMessageToChat("assistant", data.response);
-        messages.push({ role: "assistant", content: data.response });
-        
-    } catch (error) {
-        console.error("Error:", error);
-        chatMessages.removeChild(typingIndicator);
-        addMessageToChat("assistant", 
-            "Sorry, I'm having trouble connecting to the assistant. Please try again later.\n\n" +
-            "For immediate help, you can:\n" +
-            "1. Email support@smartfitshoes.com\n" +
-            "2. Call our helpline at (800) 555-0199");
+        try {
+            const response = await fetch(BackendServer, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ messages })
+            });
+            
+            const data = await response.json();
+            
+            // Remove typing indicator
+            chatMessages.removeChild(typingIndicator);
+            
+            // Add assistant response
+            addMessageToChat("assistant", data.response);
+            messages.push({ role: "assistant", content: data.response });
+            
+        } catch (error) {
+            console.error("Error:", error);
+            chatMessages.removeChild(typingIndicator);
+            addMessageToChat("assistant", firebaseResponse); // Fallback to default Firebase response
+        }
     }
 }
 
-// Handle quick question clicks
-function askQuestion(question) {
-    inputField.value = question;
-    sendMessage();
-}
 
 // Set up event listeners
 function setupEventListeners() {
