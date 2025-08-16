@@ -18,6 +18,9 @@ const auth = getAuth();
 const db = getDatabase(app);
 const chatbotResponsesRef = ref(db, 'AR_shoe_users/chatbot/responses');
 
+// Backend server URL for ChatGPT API
+const BackendServer = 'https://github-chat-backend.onrender.com/api/chat';
+
 // DOM Elements
 const inputField = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
@@ -62,12 +65,28 @@ const quickQuestions = {
 
 function createDefaultResponse() {
     return `<div class="troubleshooting-section">
-        I'm sorry, I couldn't find an answer to that question. Here are some topics I can help with:<br><br>
-        <strong>Features:</strong> AR try-on, Customization, Products<br>
-        <strong>Orders:</strong> Shipping, Returns, Payments<br>
-        <strong>Help:</strong> Issues, Problems, Troubleshooting<br><br>
+        I'm sorry, I couldn't find an answer to that question. Here are some topics I can help with:
+        Features: AR try-on, Customization, Products
+        Orders: Shipping, Returns, Payments
+        Help: Issues, Problems, Troubleshooting
         Try asking about one of these topics or click any quick question above!
         </div>`;
+}
+
+// Initialize the chatbot
+function initChatbot() {
+    setupEventListeners();
+    updateQuickQuestions();
+
+    // Show welcome message after a short delay
+    setTimeout(() => {
+        addMessageToChat('assistant', `Welcome to SmartFit's Help Center! 👟
+            How can I assist you today? Try asking about:<br>
+            - AR shoe try-on
+            - Order status
+            - Returns policy
+            - Product customization`);
+    }, 1000);
 }
 
 function loadResponsesFromFirebase() {
@@ -240,7 +259,7 @@ async function sendMessage() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
     try {
-        const response = await fetch('https://github-chat-backend.onrender.com/api/chat', {
+        const response = await fetch(BackendServer, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -291,21 +310,6 @@ function setupEventListeners() {
     });
 }
 
-// Initialize the chatbot
-function initChatbot() {
-    setupEventListeners();
-    updateQuickQuestions();
-
-    // Show welcome message after a short delay
-    setTimeout(() => {
-        addMessageToChat('assistant', `Welcome to SmartFit's Help Center! 👟<br><br>
-            How can I assist you today? Try asking about:<br>
-            - AR shoe try-on<br>
-            - Order status<br>
-            - Returns policy<br>
-            - Product customization`);
-    }, 1000);
-}
 
 document.getElementById('logout_btn').addEventListener('click', () => {
     auth.signOut().then(() => {
