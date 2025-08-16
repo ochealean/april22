@@ -74,7 +74,8 @@ function createDefaultResponse() {
 }
 
 // Initialize the chatbot
-function initChatbot() {
+async function initChatbot() {
+    await loadResponsesFromFirebase(); // Wait for Firebase data to load
     setupEventListeners();
     updateQuickQuestions();
 
@@ -105,38 +106,42 @@ onAuthStateChanged(auth, (user) => {
 
 
 function loadResponsesFromFirebase() {
-    onValue(chatbotResponsesRef, (snapshot) => {
-        const responses = snapshot.val() || {};
-        
-        responseKeys = responses;
-        faqResponses = Object.entries(responses).reduce((acc, [key, response]) => {
-            if (response.keyword && response.responses) {
-                const keyword = response.keyword.toLowerCase();
-                acc[keyword] = {
-                    response: Array.isArray(response.responses) 
-                        ? response.responses.join('<br>')
-                        : response.responses,
-                    firebaseKey: key,
-                    popularity: response.popularity || 0,
-                    lastQuestionSentence: response.lastQuestionSentence || response.keyword,
-                    category: response.category || 'general' // Default to general if no category specified
-                };
-            }
-            return acc;
-        }, {});
-        
-        faqResponses.default = {
-            response: createDefaultResponse(),
-            firebaseKey: null,
-            popularity: 0,
-            lastQuestionSentence: "Help topics",
-            category: 'general'
-        };
-        
-        updateQuickQuestions();
-        
-    }, (error) => {
-        console.error("Error loading responses:", error);
+    return new Promise((resolve) => {
+        onValue(chatbotResponsesRef, (snapshot) => {
+            const responses = snapshot.val() || {};
+            
+            responseKeys = responses;
+            faqResponses = Object.entries(responses).reduce((acc, [key, response]) => {
+                if (response.keyword && response.responses) {
+                    const keyword = response.keyword.toLowerCase();
+                    acc[keyword] = {
+                        response: Array.isArray(response.responses) 
+                            ? response.responses.join('<br>')
+                            : response.responses,
+                        firebaseKey: key,
+                        popularity: response.popularity || 0,
+                        lastQuestionSentence: response.lastQuestionSentence || response.keyword,
+                        category: response.category || 'general'
+                    };
+                }
+                return acc;
+            }, {});
+            
+            faqResponses.default = {
+                response: createDefaultResponse(),
+                firebaseKey: null,
+                popularity: 0,
+                lastQuestionSentence: "Help topics",
+                category: 'general'
+            };
+            
+            updateQuickQuestions();
+            resolve(); // Resolve the promise when data is loaded
+            
+        }, (error) => {
+            console.error("Error loading responses:", error);
+            resolve(); // Still resolve even if there's an error
+        });
     });
 }
 
@@ -242,6 +247,10 @@ function createQuestionButton(question) {
 }
 
 function getBestResponse(input) {
+    if (!faqResponses || Object.keys(faqResponses).length === 0) {
+        return createDefaultResponse();
+    }
+
     const lowerInput = input.toLowerCase().trim();
     
     if (faqResponses[lowerInput]) {
