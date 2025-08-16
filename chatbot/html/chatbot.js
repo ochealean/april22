@@ -386,11 +386,19 @@ document.getElementById('logout_btn').addEventListener('click', () => {
 
 // Format message text with bold support and prevent XSS
 function formatMessageText(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML
+    // Convert Markdown-style formatting to HTML
+    let formatted = text
+        // Convert **bold** to <strong>
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        // Convert #### headers to <h4>
+        .replace(/####\s?(.*)/g, '<h4>$1</h4>')
+        // Convert newlines to <br>
         .replace(/\n/g, '<br>');
+    
+    // Basic HTML safety - only allow certain tags
+    formatted = formatted.replace(/<\/?(?!br|strong|h4|a\b)[^>]+>/g, '');
+    
+    return formatted;
 }
 
 function addMessageToChat(role, content) {
@@ -399,6 +407,8 @@ function addMessageToChat(role, content) {
     
     const contentWrapper = document.createElement('div');
     contentWrapper.classList.add('message-content');
+    
+    // Process the content through our simplified formatter
     contentWrapper.innerHTML = formatMessageText(content);
     
     messageDiv.appendChild(contentWrapper);
