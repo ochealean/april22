@@ -124,33 +124,34 @@ function loadIssueResponses() {
                     <td>${formatDisplayDate(issue.timestamp)}</td>
                     <td>${latestResponse.timestamp ? formatDisplayDate(latestResponse.timestamp) : 'No responses'}</td>
                     <td>
-                        <button class="view-btn" data-id="${issue.id}">
+                        <button class="action-btn view-btn" data-id="${issue.id}">
                             <i class="fas fa-eye"></i> View
                         </button>
                     </td>
                 `;
                 
+                // Make sure to use event delegation or attach the listener properly
                 row.querySelector('.view-btn').addEventListener('click', () => showIssueDetails(issue.id));
                 issueResponsesTable.appendChild(row);
             });
         }
 
         function showIssueDetails(issueId) {
-    const issueRef = ref(database, `AR_shoe_users/issueReports/${issueId}`);
+            const issueRef = ref(database, `AR_shoe_users/issueReports/${issueId}`);
 
-    get(issueRef).then(snapshot => {
-        if (snapshot.exists()) {
-            const issue = snapshot.val();
-            updateModalContent(issueId, issue);
-            issueDetailsModal.style.display = 'block';
-            overlay.style.display = 'block';
-        } else {
-            showNotification('Issue report not found', 'error');
+            get(issueRef).then(snapshot => {
+                if (snapshot.exists()) {
+                    const issue = snapshot.val();
+                    updateModalContent(issueId, issue);
+                    // Use classList.add instead of style.display
+                    document.getElementById('issueDetailsModal').classList.add('show');
+                } else {
+                    showNotification('Issue report not found', 'error');
+                }
+            }).catch(error => {
+                showNotification(`Error fetching issue: ${error.message}`, 'error');
+            });
         }
-    }).catch(error => {
-        showNotification(`Error fetching issue: ${error.message}`, 'error');
-    });
-}
 
         function updateModalContent(issueId, issue) {
             document.getElementById('modalIssueTitle').textContent = `Issue Report #${issueId.substring(0, 8)}`;
@@ -185,7 +186,7 @@ function loadIssueResponses() {
                     `).join('');
             }
             
-            modalIssueContent.innerHTML = `
+             modalIssueContent.innerHTML = `
                 <div class="modal-section">
                     <h3>Issue Information</h3>
                     <div class="info-grid">
@@ -199,7 +200,7 @@ function loadIssueResponses() {
                         </div>
                         <div class="info-item">
                             <span class="info-label">Current Status: </span>
-                            <span class="info-value ${'status-' + issue.status}">
+                            <span class="info-value status-${issue.status || 'pending'}">
                                 ${issue.status ? issue.status.charAt(0).toUpperCase() + issue.status.slice(1) : 'Pending'}
                             </span>
                         </div>
@@ -220,14 +221,32 @@ function loadIssueResponses() {
                 <div class="modal-section">
                     <h3>Submitted Photos</h3>
                     <div class="document-grid">
-                        ${photosHTML}
+                        ${issue.photoURLs && issue.photoURLs.length > 0 ? 
+                            issue.photoURLs.map(url => 
+                                `<div class="document-item">
+                                    <img src="${url}" alt="Issue photo">
+                                </div>`
+                            ).join('') : '<p>No photos submitted</p>'}
                     </div>
                 </div>
                 
                 <div class="modal-section">
                     <h3>Admin Responses</h3>
                     <div class="responses-container">
-                        ${responsesHTML}
+                        ${issue.adminResponses ? 
+                            Object.entries(issue.adminResponses)
+                                .sort(([a], [b]) => b - a)
+                                .map(([timestamp, response]) => `
+                                    <div class="response-item">
+                                        <div class="response-header">
+                                            <span class="response-date">${formatDisplayDate(parseInt(timestamp))}</span>
+                                            <span class="response-status status-${response.status}">
+                                                Status: ${response.status.charAt(0).toUpperCase() + response.status.slice(1)}
+                                            </span>
+                                        </div>
+                                        <div class="response-message">${response.message}</div>
+                                    </div>`
+                                ).join('') : '<p>No responses yet</p>'}
                     </div>
                 </div>
             `;
@@ -235,9 +254,13 @@ function loadIssueResponses() {
 
         function setupEventListeners() {
             // Modal close button
-            closeModalBtn.addEventListener('click', () => {
-                issueDetailsModal.style.display = 'none';
-                overlay.style.display = 'none';
+            // closeModalBtn.addEventListener('click', () => {
+            //     issueDetailsModal.style.display = 'none';
+            //     overlay.style.display = 'none';
+            // });
+
+             document.querySelector('.close-btn').addEventListener('click', () => {
+                document.getElementById('issueDetailsModal').classList.remove('show');
             });
             
             // Pagination buttons
@@ -275,9 +298,13 @@ function loadIssueResponses() {
             });
             
             // Overlay click
-            overlay.addEventListener('click', () => {
-                issueDetailsModal.style.display = 'none';
-                overlay.style.display = 'none';
+            // overlay.addEventListener('click', () => {
+            //     issueDetailsModal.style.display = 'none';
+            //     overlay.style.display = 'none';
+            // });
+
+            document.querySelector('.sidebar-overlay').addEventListener('click', () => {
+                document.getElementById('issueDetailsModal').classList.remove('show');
             });
         }
 
