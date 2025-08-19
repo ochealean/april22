@@ -19,13 +19,13 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-// Get the container where products will be displayed
-const productsGrid = document.querySelector('.products-grid');
+// Get the container where products will be displayed - FIXED THIS LINE
+const productsGrid = document.querySelector('.wishlist-container');
 
 // Helper to display a single product
 function createProductCard(data, shoeID) {
   const card = document.createElement('div');
-  card.className = 'product-card';
+  card.className = 'shoe-card';
 
   // Get the first variant price or default to 0
   const firstVariant = data.variants ? Object.values(data.variants)[0] : null;
@@ -34,22 +34,61 @@ function createProductCard(data, shoeID) {
   // Safely handle missing image
   const imageUrl = data.defaultImage || 'path/to/placeholder-image.jpg';
 
-  console.log("data sa 37" + data);
-  console.log("shoe ID sa 38 "+shoeID);
+  // Create the card HTML that matches your wishlist structure
   card.innerHTML = `
-      <img src="${imageUrl}" alt="${data.shoeName || 'Shoe image'}" class="product-image">
-      <div class="product-info">
-        <div class="product-shop">${data.shopName || 'Unknown shop'}</div>
-        <h3 class="product-name">${data.shoeName || 'Unnamed product'}</h3>
-        <div class="product-price">₱${price.toFixed(2)}</div>
-        <div class="product-actions">
-          <button class="add-to-cart">Add to Cart</button>
-          <button class="wishlist-btn"><i class="fas fa-heart"></i></button>
-        </div>
+    <div class="remove-wishlist">
+      <i class="fas fa-times"></i>
+    </div>
+    <div class="shoe-image">
+      <img src="${imageUrl}" alt="${data.shoeName || 'Shoe image'}">
+    </div>
+    <div class="shoe-details">
+      <h3>${data.shoeName || 'Unnamed product'}</h3>
+      <div class="shoe-code">SKU: ${shoeID}</div>
+      <div class="product-meta">
+        <span class="product-brand">${data.brand || 'Unknown brand'}</span>
+        <span class="product-type">${data.category || 'Shoes'}</span>
       </div>
-    `;
+      <div class="shoe-description">${data.description || 'No description available.'}</div>
+      <div class="shoe-price">₱${price.toFixed(2)}</div>
+      <div class="shoe-actions">
+        <button class="btn-view">
+          <i class="fas fa-eye"></i> View Details
+        </button>
+        <button class="btn-cart">
+          <i class="fas fa-shopping-cart"></i>
+        </button>
+      </div>
+    </div>
+  `;
 
-  card.querySelector('.add-to-cart').addEventListener('click', () => {
+  // Add event listener for remove button
+  card.querySelector('.remove-wishlist').addEventListener('click', () => {
+    const user = auth.currentUser;
+    if (!user) {
+      alert("You must be logged in to modify your wishlist.");
+      return;
+    }
+
+    if (confirm(`Remove ${data.shoeName} from your wishlist?`)) {
+      const wishlistRef = ref(db, `AR_shoe_users/wishlist/${user.uid}/${data.shopID}/${shoeID}`);
+      remove(wishlistRef).then(() => {
+        card.remove();
+        if (!productsGrid.querySelector('.shoe-card')) {
+          showEmptyState();
+        }
+      });
+    }
+  });
+
+  // Add event listener for view button
+  card.querySelector('.btn-view').addEventListener('click', () => {
+    // You can implement navigation to product details page here
+    console.log("View details for:", shoeID);
+  });
+
+  // Add event listener for add to cart button
+  card.querySelector('.btn-cart').addEventListener('click', () => {
     const user = auth.currentUser;
     console.log(user);
     if (!user) {
@@ -94,6 +133,8 @@ function createProductCard(data, shoeID) {
       addedAt: new Date().toISOString()
     };
 
+    console.log(cartItem);
+
     // Generate unique cart ID (MUST match dashboard behavior)
     const cartId = generate18CharID();
     const cartRef = ref(db, `AR_shoe_users/carts/${user.uid}/${cartId}`);
@@ -108,66 +149,21 @@ function createProductCard(data, shoeID) {
       });
   });
 
-
-  card.querySelector('.wishlist-btn').addEventListener('click', () => {
-    const user = auth.currentUser;
-    if (!user) {
-      alert("You must be logged in to modify your wishlist.");
-      return;
-    }
-
-    const shopID = data.shopID;
-    console.log(data);
-    const wishlistRef = ref(db, `AR_shoe_users/wishlist/${user.uid}/${shopID}/${shoeID}`);
-
-    // Check if already in wishlist
-    get(wishlistRef).then(snapshot => {
-      if (snapshot.exists()) {
-        // Already in wishlist — remove it
-        if (confirm(`Remove ${data.shoeName} from your wishlist?`)) {
-          remove(wishlistRef).then(() => {
-            card.remove();
-            if (!productsGrid.querySelector('.product-card')) {
-              showEmptyState();
-            }
-          });
-        }
-      } else {
-        // Not in wishlist — add it
-        const wishlistItem = {
-          shoeID,
-          shopID,
-          shoeName: data.shoeName || '',
-          image: data.defaultImage || '',
-          price: (data.variants && Object.values(data.variants)[0]?.price) || 0
-        };
-
-        set(wishlistRef, wishlistItem)
-          .then(() => {
-            alert(`${data.shoeName} added to your wishlist.`);
-          })
-          .catch(err => {
-            console.error("Error adding to wishlist:", err);
-            alert("Failed to add to wishlist");
-          });
-      }
-    });
-  });
-
-
   return card;
 }
 
 // Show empty state
 function showEmptyState() {
   productsGrid.innerHTML = `
-    <div class="empty-state" style="grid-column: 1 / -1;">
+    <div class="empty-state">
       <i class="fas fa-heart empty-icon"></i>
       <h3 class="empty-title">Your wishlist is empty</h3>
       <p class="empty-description">
-        You haven't added any items to your wishlist yet. Browse our collection and click the heart icon to save your favorites.
+          You haven't added any items to your wishlist yet. Browse our collection and click the heart icon to save your favorites.
       </p>
-      <a href="/customer/html/browse.html" class="browse-btn">Browse Shoes</a>
+      <a href="/customer/html/browse.html" class="browse-btn">
+          <i class="fas fa-shopping-bag"></i> Browse Shoes
+      </a>
     </div>
   `;
 }
@@ -197,24 +193,21 @@ onAuthStateChanged(auth, user => {
                 console.log('Shoe data:', data); // Debugging line
                 if (!data) {
                   console.error('Empty data for shoe:', shoeId);
-            console.log(shoeId);
+                  console.log(shoeId);
                   return;
                 }
-            console.log(shoeId);
+                console.log(shoeId);
 
                 // Ensure required fields exist
                 const cardData = {
                   ...data,
-                  shopID:shopId,
+                  shopID: shopId,
                   shoeName: data.shoeName || 'Unknown Shoe',
                   price: data.price || 0,
                   shopName: data.shopName || 'Unknown Shop',
                   defaultImage: data.defaultImage || 'path/to/placeholder.jpg'
                 };
-            console.log(shoeId);
-
-                // para lang mawala yung inline css sa html
-                document.querySelector('.products-grid').removeAttribute('style');
+                console.log(shoeId);
 
                 const card = createProductCard(cardData, shoeId);
                 productsGrid.appendChild(card);
