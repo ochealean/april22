@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,9 +22,9 @@
             --gray-dark: #7f8c8d;
             --text-primary: #2c3e50;
             --text-secondary: #34495e;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             --radius-sm: 4px;
             --radius-md: 8px;
@@ -37,7 +38,8 @@
             padding: 0;
         }
 
-        html, body {
+        html,
+        body {
             min-height: 100%;
             min-width: 350px;
             margin: 0;
@@ -139,9 +141,20 @@
         }
 
         @keyframes pulse {
-            0% { transform: translateY(-50%) scale(1); opacity: 1; }
-            50% { transform: translateY(-50%) scale(1.3); opacity: 0.7; }
-            100% { transform: translateY(-50%) scale(1); opacity: 1; }
+            0% {
+                transform: translateY(-50%) scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: translateY(-50%) scale(1.3);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: translateY(-50%) scale(1);
+                opacity: 1;
+            }
         }
 
         .menu-btn {
@@ -154,6 +167,7 @@
         .menu-btn:hover {
             transform: rotate(90deg);
         }
+
         /* Container */
         .container {
             padding: 2rem;
@@ -189,7 +203,8 @@
             border-collapse: collapse;
         }
 
-        th, td {
+        th,
+        td {
             padding: 1rem;
             text-align: left;
             border-bottom: 1px solid var(--gray-light);
@@ -322,7 +337,8 @@
             color: var(--dark);
         }
 
-        .form-input, .form-select {
+        .form-input,
+        .form-select {
             width: 100%;
             padding: 0.75rem 1rem;
             border: 1px solid var(--gray-light);
@@ -331,7 +347,8 @@
             transition: var(--transition);
         }
 
-        .form-input:focus, .form-select:focus {
+        .form-input:focus,
+        .form-select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
@@ -526,15 +543,15 @@
             .nav-links {
                 gap: 0.75rem;
             }
-            
+
             .nav-links a {
                 padding: 0.5rem;
             }
-            
+
             .nav-links a span {
                 display: none;
             }
-            
+
             .nav-links a i {
                 margin-right: 0;
                 font-size: 1.1rem;
@@ -545,7 +562,7 @@
             nav {
                 padding: 1rem;
             }
-            
+
             .nav-links {
                 position: fixed;
                 top: 0;
@@ -559,40 +576,40 @@
                 transition: var(--transition);
                 box-shadow: var(--shadow-lg);
             }
-            
+
             .nav-links.active {
                 left: 0;
             }
-            
+
             .nav-links a {
                 padding: 1rem;
             }
-            
+
             .nav-links a span {
                 display: inline;
             }
-            
+
             .menu-btn {
                 display: block;
                 z-index: 1001;
             }
-            
+
             .container {
                 padding: 1rem;
             }
-            
+
             .modal-images {
                 grid-template-columns: 1fr;
             }
-            
+
             .nav-tabs {
                 flex-direction: column;
             }
-            
+
             .filter-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .bulk-actions {
                 flex-direction: column;
                 gap: 1rem;
@@ -606,23 +623,37 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation -->
     <nav>
         <div class="nav-header">
             <ul class="nav-links">
-                <li><a href="/admin/html/admin_dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
-                <li><a href="/admin/html/admin_pendingshops.html"><i class="fas fa-clock"></i> <span>Pending Shops</span></a></li>
-                <li><a href="/admin/html/admin_approvedshops.html"><i class="fas fa-check-circle"></i> <span>Approved Shops</span></a></li>
-                <li><a href="/admin/html/admin_rejectedshops.html"><i class="fas fa-times-circle"></i> <span>Rejected Shops</span></a></li>
+                <li><a href="/admin/html/admin_dashboard.html"><i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span></a></li>
+                <li><a href="/admin/html/admin_pendingshops.html"><i class="fas fa-clock"></i> <span>Pending
+                            Shops</span></a></li>
+                <li><a href="/admin/html/admin_approvedshops.html"><i class="fas fa-check-circle"></i> <span>Approved
+                            Shops</span></a></li>
+                <li><a href="/admin/html/admin_rejectedshops.html"><i class="fas fa-times-circle"></i> <span>Rejected
+                            Shops</span></a></li>
                 <li><a href="/admin/html/admin_orders.html"><i class="fas fa-shopping-bag"></i> Orders</a></li>
-                <li><a href="/admin/html/admin_shoeverification.html" class="active"><i class="fas fa-check-circle"></i> <span>Shoe Validation</span></a></li>
-                <li><a href="/chatbot/html/responses.html"><i class="fas fa-robot"></i> <span>Chatbot Manager</span></a></li>
+                <li><a href="/admin/html/admin_shoeverification.html" class="active"><i class="fas fa-check-circle"></i>
+                        <span>Shoe Validation</span></a></li>
+                <li><a href="/chatbot/html/responses.html"><i class="fas fa-robot"></i> <span>Chatbot Manager</span></a>
+                </li>
                 <li><a href="/admin/html/censoredWords.html"><i class="fas fa-ban"></i> Censored Words</a></li>
                 <li><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
             </ul>
@@ -654,8 +685,8 @@
                     <select id="statusFilter" class="form-select">
                         <option value="">All Statuses</option>
                         <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
+                        <option value="verified">Verified</option>
+                        <option value="invalid">Invalid</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -688,7 +719,7 @@
             </div>
             <div class="bulk-buttons">
                 <button class="btn btn-approve" id="approveSelected">
-                    <i class="fas fa-check"></i> Approve Selected
+                    <i class="fas fa-check"></i> Verified Selected
                 </button>
                 <button class="btn btn-reject" id="rejectSelected">
                     <i class="fas fa-times"></i> Reject Selected
@@ -698,8 +729,8 @@
 
         <!-- Validation Table -->
         <div class="table-container animate-fade">
-            <h2><i class="fas fa-list"></i> <span id="tableTitle">Pending</span> Validations</h2>
-            
+            <h2><i class="fas fa-list"></i>Validations</h2>
+
             <table class="validation-table" id="validationTable">
                 <thead>
                     <tr>
@@ -753,27 +784,33 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Description / Proof of Authenticity</label>
-                            <p id="modal-description">This is a limited edition release with special packaging and extra laces. The quality of materials is exceptional with no visible flaws in stitching or glue marks. The serial number matches the manufacturer's database.</p>
+                            <p id="modal-description">This is a limited edition release with special packaging and extra
+                                laces. The quality of materials is exceptional with no visible flaws in stitching or
+                                glue marks. The serial number matches the manufacturer's database.</p>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">Submitted Images</label>
                     <div class="modal-images">
-                        <img src="https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View" alt="Front View" class="modal-image" id="modal-front">
-                        <img src="https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View" alt="Back View" class="modal-image" id="modal-back">
-                        <img src="https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View" alt="Top View" class="modal-image" id="modal-top">
+                        <img src="https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View" alt="Front View"
+                            class="modal-image" id="modal-front">
+                        <img src="https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View" alt="Back View"
+                            class="modal-image" id="modal-back">
+                        <img src="https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View" alt="Top View"
+                            class="modal-image" id="modal-top">
                     </div>
                 </div>
-                
+
                 <div class="rejection-reason" id="rejectionSection">
                     <div class="form-group">
                         <label for="rejectReason" class="form-label">Rejection Reason (if applicable)</label>
-                        <textarea id="rejectReason" class="form-textarea" placeholder="Provide detailed reason for rejection..."></textarea>
+                        <textarea id="rejectReason" class="form-textarea"
+                            placeholder="Provide detailed reason for rejection..."></textarea>
                     </div>
                 </div>
-                
+
                 <div class="modal-actions" id="modalActions">
                     <button class="btn btn-reject reject-shoe">
                         <i class="fas fa-times"></i> Reject
@@ -789,18 +826,18 @@
     <!-- Overlay -->
     <div id="overlay" class="overlay"></div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
+    <!-- <script>
+        document.addEventListener('DOMContentLoaded', function () {
             // Mobile menu toggle
             const menuBtn = document.querySelector('.menu-btn');
             const navLinks = document.querySelector('.nav-links');
             const overlay = document.getElementById('overlay');
-            
+
             menuBtn.addEventListener('click', () => {
                 navLinks.classList.toggle('active');
                 overlay.style.display = navLinks.classList.contains('active') ? 'block' : 'none';
             });
-            
+
             overlay.addEventListener('click', () => {
                 navLinks.classList.remove('active');
                 overlay.style.display = 'none';
@@ -813,19 +850,19 @@
             const bulkActions = document.getElementById('bulkActions');
             const clearHistoryContainer = document.getElementById('clearHistoryContainer');
             const clearHistoryBtn = document.getElementById('clearHistory');
-            
+
             navTabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     // Remove active class from all tabs
                     navTabs.forEach(t => t.classList.remove('active'));
                     // Add active class to clicked tab
                     tab.classList.add('active');
-                    
+
                     // Update table based on selected tab
                     const tabName = tab.getAttribute('data-tab');
                     tableTitle.textContent = tabName.charAt(0).toUpperCase() + tabName.slice(1);
                     updateTable(tabName);
-                    
+
                     // Show/hide bulk actions and clear history button
                     if (tabName === 'pending') {
                         bulkActions.style.display = 'flex';
@@ -836,7 +873,7 @@
                     }
                 });
             });
-            
+
             // Clear history functionality
             clearHistoryBtn.addEventListener('click', () => {
                 const activeTab = document.querySelector('.nav-tab.active').getAttribute('data-tab');
@@ -846,7 +883,7 @@
                     updateTable(activeTab);
                 }
             });
-            
+
             // Sample data for validation details
             const validationData = {
                 1: {
@@ -918,6 +955,76 @@
                         back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
                         top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
                     }
+                },
+                6: {
+                    shop: "Sole Supreme (ID: SS789)",
+                    serial: "SN33445566",
+                    model: "Nike Air Force 1",
+                    date: "Oct 10, 2023",
+                    status: "Approved",
+                    statusClass: "status-legit",
+                    description: "Authentic pair with all original packaging. The quality checks passed all verification points including stitching, materials, and labeling.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
+                },
+                7: {
+                    shop: "Kicks Kingdom (ID: KK456)",
+                    serial: "SN77889900",
+                    model: "Adidas Ultraboost",
+                    date: "Oct 9, 2023",
+                    status: "Approved",
+                    statusClass: "status-legit",
+                    description: "Direct from Adidas confirmed through verification system. All authenticity markers check out perfectly.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
+                },
+                8: {
+                    shop: "Sneaker Haven (ID: SH123)",
+                    serial: "SN22334455",
+                    model: "Jordan 4 Retro",
+                    date: "Oct 8, 2023",
+                    status: "Approved",
+                    statusClass: "status-legit",
+                    description: "Limited release with certificate of authenticity. All details match the manufacturer specifications.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
+                },
+                9: {
+                    shop: "Kicks Kingdom (ID: KK456)",
+                    serial: "SN66778899",
+                    model: "Yeezy 700",
+                    date: "Oct 7, 2023",
+                    status: "Rejected",
+                    statusClass: "status-fake",
+                    description: "Seller claims these are authentic but several red flags were identified during inspection.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
+                },
+                10: {
+                    shop: "Sneaker Haven (ID: SH123)",
+                    serial: "SN44556677",
+                    model: "Off-White x Nike",
+                    date: "Oct 6, 2023",
+                    status: "Rejected",
+                    statusClass: "status-fake",
+                    description: "Inconsistent details compared to verified authentic pairs. Multiple indicators suggest these are replicas.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
                 }
             };
 
@@ -925,10 +1032,10 @@
             function updateTable(tabName) {
                 // Clear existing table content
                 tableBody.innerHTML = '';
-                
+
                 // Sample data for different tabs
                 let data = [];
-                
+
                 if (tabName === 'pending') {
                     data = [
                         { id: 1, shop: "Sneaker Haven (ID: SH123)", serial: "SN12345678", model: "Nike Air Jordan 1", date: "Oct 15, 2023", status: "Pending", statusClass: "status-pending" },
@@ -949,64 +1056,64 @@
                         { id: 10, shop: "Sneaker Haven (ID: SH123)", serial: "SN44556677", model: "Off-White x Nike", date: "Oct 6, 2023", status: "Rejected", statusClass: "status-fake", reason: "Serial number doesn't match database" }
                     ];
                 }
-                
+
                 // Populate table with data
                 data.forEach(item => {
                     const row = document.createElement('tr');
-                    
+
                     // Add checkbox only for pending items
                     if (tabName === 'pending') {
                         row.innerHTML = `
-                            <td><input type="checkbox" class="shoe-checkbox" data-id="${item.id}"></td>
-                            <td>${item.shop}</td>
-                            <td>${item.serial}</td>
-                            <td>${item.model}</td>
-                            <td>${item.date}</td>
-                            <td><span class="status-badge ${item.statusClass}">${item.status}</span></td>
-                            <td>
-                                <button class="btn btn-view view-details" data-id="${item.id}">
-                                    <i class="fas fa-eye"></i> Review
-                                </button>
-                            </td>
-                        `;
+                    <td><input type="checkbox" class="shoe-checkbox" data-id="${item.id}"></td>
+                    <td>${item.shop}</td>
+                    <td>${item.serial}</td>
+                    <td>${item.model}</td>
+                    <td>${item.date}</td>
+                    <td><span class="status-badge ${item.statusClass}">${item.status}</span></td>
+                    <td>
+                        <button class="btn btn-view view-details" data-id="${item.id}">
+                            <i class="fas fa-eye"></i> Review
+                        </button>
+                    </td>
+                `;
                     } else {
                         row.innerHTML = `
-                            <td></td>
-                            <td>${item.shop}</td>
-                            <td>${item.serial}</td>
-                            <td>${item.model}</td>
-                            <td>${item.date}</td>
-                            <td><span class="status-badge ${item.statusClass}">${item.status}</span></td>
-                            <td>
-                                <button class="btn btn-view view-details" data-id="${item.id}">
-                                    <i class="fas fa-eye"></i> View Details
-                                </button>
-                            </td>
-                        `;
+                    <td></td>
+                    <td>${item.shop}</td>
+                    <td>${item.serial}</td>
+                    <td>${item.model}</td>
+                    <td>${item.date}</td>
+                    <td><span class="status-badge ${item.statusClass}">${item.status}</span></td>
+                    <td>
+                        <button class="btn btn-view view-details" data-id="${item.id}">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    </td>
+                `;
                     }
-                    
+
                     tableBody.appendChild(row);
                 });
-                
+
                 // Reattach event listeners to the new buttons
                 attachEventListeners();
             }
-            
+
             // Initialize table with pending data
             updateTable('pending');
-            
+
             // Function to attach event listeners
             function attachEventListeners() {
                 // Modal functionality
                 const modal = document.getElementById('validationModal');
                 const closeModal = document.querySelector('.modal-close');
                 const viewButtons = document.querySelectorAll('.view-details');
-                
+
                 viewButtons.forEach(button => {
                     button.addEventListener('click', () => {
                         const id = button.getAttribute('data-id');
                         const data = validationData[id];
-                        
+
                         if (data) {
                             // Populate modal with data
                             document.getElementById('modal-shop').textContent = data.shop;
@@ -1014,20 +1121,20 @@
                             document.getElementById('modal-model').textContent = data.model;
                             document.getElementById('modal-date').textContent = data.date;
                             document.getElementById('modal-description').textContent = data.description;
-                            
+
                             // Update status
                             const statusElement = document.getElementById('modal-status');
                             statusElement.innerHTML = `<span class="status-badge ${data.statusClass}">${data.status}</span>`;
-                            
+
                             // Update images
                             document.getElementById('modal-front').src = data.images.front;
                             document.getElementById('modal-back').src = data.images.back;
                             document.getElementById('modal-top').src = data.images.top;
-                            
+
                             // Show/hide rejection section based on status
                             const rejectionSection = document.getElementById('rejectionSection');
                             const modalActions = document.getElementById('modalActions');
-                            
+
                             if (data.status === 'Pending') {
                                 rejectionSection.style.display = 'block';
                                 modalActions.style.display = 'flex';
@@ -1035,7 +1142,7 @@
                                 rejectionSection.style.display = 'none';
                                 modalActions.style.display = 'none';
                             }
-                            
+
                             // Show modal
                             modal.classList.add('active');
                             overlay.style.display = 'block';
@@ -1064,7 +1171,7 @@
                     alert('Shoe has been approved successfully!');
                     modal.classList.remove('active');
                     overlay.style.display = 'none';
-                    
+
                     // Update the table to reflect the change
                     updateTable('pending');
                 });
@@ -1073,20 +1180,20 @@
                 const rejectButton = document.querySelector('.reject-shoe');
                 rejectButton.addEventListener('click', () => {
                     const reason = document.getElementById('rejectReason').value;
-                    
+
                     if (!reason) {
                         alert('Please provide a reason for rejection.');
                         return;
                     }
-                    
+
                     // In a real application, this would send a request to the server
                     alert(`Shoe has been rejected. Reason: ${reason}`);
                     modal.classList.remove('active');
                     overlay.style.display = 'none';
-                    
+
                     // Clear the rejection reason textarea
                     document.getElementById('rejectReason').value = '';
-                    
+
                     // Update the table to reflect the change
                     updateTable('pending');
                 });
@@ -1100,7 +1207,7 @@
                     checkboxes.forEach(checkbox => {
                         checkbox.checked = selectAllTable.checked;
                     });
-                    
+
                     // Update the main select all checkbox
                     selectAll.checked = selectAllTable.checked;
                 });
@@ -1110,7 +1217,7 @@
                     checkboxes.forEach(checkbox => {
                         checkbox.checked = selectAll.checked;
                     });
-                    
+
                     // Update the table header checkbox
                     selectAllTable.checked = selectAll.checked;
                 });
@@ -1119,19 +1226,19 @@
                 const approveSelected = document.getElementById('approveSelected');
                 approveSelected.addEventListener('click', () => {
                     const selectedCheckboxes = document.querySelectorAll('.shoe-checkbox:checked');
-                    
+
                     if (selectedCheckboxes.length === 0) {
                         alert('Please select at least one shoe to approve.');
                         return;
                     }
-                    
+
                     if (confirm(`Are you sure you want to approve ${selectedCheckboxes.length} selected shoes?`)) {
                         // In a real application, this would send a request to the server
                         alert(`${selectedCheckboxes.length} shoes have been approved successfully!`);
-                        
+
                         // Update the table to reflect the changes
                         updateTable('pending');
-                        
+
                         // Uncheck select all checkboxes
                         selectAll.checked = false;
                         selectAllTable.checked = false;
@@ -1142,19 +1249,19 @@
                 const rejectSelected = document.getElementById('rejectSelected');
                 rejectSelected.addEventListener('click', () => {
                     const selectedCheckboxes = document.querySelectorAll('.shoe-checkbox:checked');
-                    
+
                     if (selectedCheckboxes.length === 0) {
                         alert('Please select at least one shoe to reject.');
                         return;
                     }
-                    
+
                     if (confirm(`Are you sure you want to reject ${selectedCheckboxes.length} selected shoes?`)) {
                         // In a real application, this would send a request to the server
                         alert(`${selectedCheckboxes.length} shoes have been rejected.`);
-                        
+
                         // Update the table to reflect the changes
                         updateTable('pending');
-                        
+
                         // Uncheck select all checkboxes
                         selectAll.checked = false;
                         selectAllTable.checked = false;
@@ -1169,102 +1276,141 @@
                     const shopFilter = document.getElementById('shopFilter').value;
                     const statusFilter = document.getElementById('statusFilter').value;
                     const dateFilter = document.getElementById('dateFilter').value;
-                    
-                    // In a real application, this would send a request to the server with filter parameters
+
+                    // Apply status filter
+                    statusFilterFunction(statusFilter);
+
+                    // In a real application, this would also apply shop and date filters
+                    // For this example, we're focusing on the status filter
                     alert(`Filters applied:\nShop: ${shopFilter || 'All'}\nStatus: ${statusFilter || 'All'}\nDate: ${dateFilter || 'Any'}`);
-                    
-                    // Update the table with filtered results
-                    const activeTab = document.querySelector('.nav-tab.active').getAttribute('data-tab');
-                    updateTable(activeTab);
                 });
 
                 clearFilters.addEventListener('click', () => {
                     document.getElementById('shopFilter').value = '';
                     document.getElementById('statusFilter').value = '';
                     document.getElementById('dateFilter').value = '';
-                    
-                    // Update the table with all results
-                    const activeTab = document.querySelector('.nav-tab.active').getAttribute('data-tab');
-                    updateTable(activeTab);
+
+                    // Show all data when filters are cleared
+                    statusFilterFunction('');
+                });
+            }
+
+            // Status Filter Function
+            function statusFilterFunction(status) {
+                const tableBody = document.getElementById('tableBody');
+                const tableTitle = document.getElementById('tableTitle');
+                const clearHistoryContainer = document.getElementById('clearHistoryContainer');
+                const bulkActions = document.getElementById('bulkActions');
+
+                // Clear existing table content
+                tableBody.innerHTML = '';
+
+                // Sample data for different statuses
+                let data = [];
+
+                if (status === 'pending') {
+                    tableTitle.textContent = 'Pending';
+                    data = [
+                        { id: 1, shop: "Sneaker Haven (ID: SH123)", serial: "SN12345678", model: "Nike Air Jordan 1", date: "Oct 15, 2023", status: "Pending", statusClass: "status-pending" },
+                        { id: 2, shop: "Kicks Kingdom (ID: KK456)", serial: "SN87654321", model: "Adidas Yeezy Boost 350", date: "Oct 14, 2023", status: "Pending", statusClass: "status-pending" },
+                        { id: 3, shop: "Sole Supreme (ID: SS789)", serial: "SN11223344", model: "New Balance 550", date: "Oct 13, 2023", status: "Pending", statusClass: "status-pending" },
+                        { id: 4, shop: "Sneaker Haven (ID: SH123)", serial: "SN55667788", model: "Nike Dunk Low", date: "Oct 12, 2023", status: "Pending", statusClass: "status-pending" },
+                        { id: 5, shop: "Kicks Kingdom (ID: KK456)", serial: "SN99887766", model: "Converse Chuck Taylor", date: "Oct 11, 2023", status: "Pending", statusClass: "status-pending" }
+                    ];
+
+                    // Show bulk actions for pending items
+                    bulkActions.style.display = 'flex';
+                    clearHistoryContainer.style.display = 'none';
+                } else if (status === 'approved') {
+                    tableTitle.textContent = 'Approved';
+                    data = [
+                        { id: 6, shop: "Sole Supreme (ID: SS789)", serial: "SN33445566", model: "Nike Air Force 1", date: "Oct 10, 2023", status: "Approved", statusClass: "status-legit" },
+                        { id: 7, shop: "Kicks Kingdom (ID: KK456)", serial: "SN77889900", model: "Adidas Ultraboost", date: "Oct 9, 2023", status: "Approved", statusClass: "status-legit" },
+                        { id: 8, shop: "Sneaker Haven (ID: SH123)", serial: "SN22334455", model: "Jordan 4 Retro", date: "Oct 8, 2023", status: "Approved", statusClass: "status-legit" }
+                    ];
+
+                    // Hide bulk actions for non-pending items
+                    bulkActions.style.display = 'none';
+                    clearHistoryContainer.style.display = 'flex';
+                } else if (status === 'rejected') {
+                    tableTitle.textContent = 'Rejected';
+                    data = [
+                        { id: 9, shop: "Kicks Kingdom (ID: KK456)", serial: "SN66778899", model: "Yeezy 700", date: "Oct 7, 2023", status: "Rejected", statusClass: "status-fake", reason: "Inconsistent stitching patterns" },
+                        { id: 10, shop: "Sneaker Haven (ID: SH123)", serial: "SN44556677", model: "Off-White x Nike", date: "Oct 6, 2023", status: "Rejected", statusClass: "status-fake", reason: "Serial number doesn't match database" }
+                    ];
+
+                    // Hide bulk actions for non-pending items
+                    bulkActions.style.display = 'none';
+                    clearHistoryContainer.style.display = 'flex';
+                } else {
+                    // Show all data if no specific status is selected
+                    tableTitle.textContent = 'All';
+                    data = [
+                        { id: 1, shop: "Sneaker Haven (ID: SH123)", serial: "SN12345678", model: "Nike Air Jordan 1", date: "Oct 15, 2023", status: "Pending", statusClass: "status-pending" },
+                        { id: 2, shop: "Kicks Kingdom (ID: KK456)", serial: "SN87654321", model: "Adidas Yeezy Boost 350", date: "Oct 14, 2023", status: "Pending", statusClass: "status-pending" },
+                        { id: 3, shop: "Sole Supreme (ID: SS789)", serial: "SN11223344", model: "New Balance 550", date: "Oct 13, 2023", status: "Pending", statusClass: "status-pending" },
+                        { id: 4, shop: "Sneaker Haven (ID: SH123)", serial: "SN55667788", model: "Nike Dunk Low", date: "Oct 12, 2023", status: "Pending", statusClass: "status-pending" },
+                        { id: 5, shop: "Kicks Kingdom (ID: KK456)", serial: "SN99887766", model: "Converse Chuck Taylor", date: "Oct 11, 2023", status: "Pending", statusClass: "status-pending" },
+                        { id: 6, shop: "Sole Supreme (ID: SS789)", serial: "SN33445566", model: "Nike Air Force 1", date: "Oct 10, 2023", status: "Approved", statusClass: "status-legit" },
+                        { id: 7, shop: "Kicks Kingdom (ID: KK456)", serial: "SN77889900", model: "Adidas Ultraboost", date: "Oct 9, 2023", status: "Approved", statusClass: "status-legit" },
+                        { id: 8, shop: "Sneaker Haven (ID: SH123)", serial: "SN22334455", model: "Jordan 4 Retro", date: "Oct 8, 2023", status: "Approved", statusClass: "status-legit" },
+                        { id: 9, shop: "Kicks Kingdom (ID: KK456)", serial: "SN66778899", model: "Yeezy 700", date: "Oct 7, 2023", status: "Rejected", statusClass: "status-fake", reason: "Inconsistent stitching patterns" },
+                        { id: 10, shop: "Sneaker Haven (ID: SH123)", serial: "SN44556677", model: "Off-White x Nike", date: "Oct 6, 2023", status: "Rejected", statusClass: "status-fake", reason: "Serial number doesn't match database" }
+                    ];
+
+                    // Show bulk actions only if there are pending items
+                    bulkActions.style.display = data.some(item => item.status === 'Pending') ? 'flex' : 'none';
+                    clearHistoryContainer.style.display = 'none';
+                }
+
+                // Populate table with data
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+
+                    // Add checkbox only for pending items
+                    if (item.status === 'Pending') {
+                        row.innerHTML = `
+                    <td><input type="checkbox" class="shoe-checkbox" data-id="${item.id}"></td>
+                    <td>${item.shop}</td>
+                    <td>${item.serial}</td>
+                    <td>${item.model}</td>
+                    <td>${item.date}</td>
+                    <td><span class="status-badge ${item.statusClass}">${item.status}</span></td>
+                    <td>
+                        <button class="btn btn-view view-details" data-id="${item.id}">
+                            <i class="fas fa-eye"></i> Review
+                        </button>
+                    </td>
+                `;
+                    } else {
+                        row.innerHTML = `
+                    <td></td>
+                    <td>${item.shop}</td>
+                    <td>${item.serial}</td>
+                    <td>${item.model}</td>
+                    <td>${item.date}</td>
+                    <td><span class="status-badge ${item.statusClass}">${item.status}</span></td>
+                    <td>
+                        <button class="btn btn-view view-details" data-id="${item.id}">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    </td>
+                `;
+                    }
+
+                    tableBody.appendChild(row);
                 });
 
-                // Add some sample data for approved and rejected tabs
-                validationData[6] = {
-                    shop: "Sole Supreme (ID: SS789)",
-                    serial: "SN33445566",
-                    model: "Nike Air Force 1",
-                    date: "Oct 10, 2023",
-                    status: "Approved",
-                    statusClass: "status-legit",
-                    description: "Authentic pair with all original packaging. The quality checks passed all verification points including stitching, materials, and labeling.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                };
+                // Add animation effect to the table container
+                const tableContainer = document.querySelector('.table-container');
+                tableContainer.classList.remove('animate-fade');
+                void tableContainer.offsetWidth; // Trigger reflow
+                tableContainer.classList.add('animate-fade');
 
-                validationData[7] = {
-                    shop: "Kicks Kingdom (ID: KK456)",
-                    serial: "SN77889900",
-                    model: "Adidas Ultraboost",
-                    date: "Oct 9, 2023",
-                    status: "Approved",
-                    statusClass: "status-legit",
-                    description: "Direct from Adidas confirmed through verification system. All authenticity markers check out perfectly.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                };
+                // Reattach event listeners to the new buttons
+                attachEventListeners();
+            }
 
-                validationData[8] = {
-                    shop: "Sneaker Haven (ID: SH123)",
-                    serial: "SN22334455",
-                    model: "Jordan 4 Retro",
-                    date: "Oct 8, 2023",
-                    status: "Approved",
-                    statusClass: "status-legit",
-                    description: "Limited release with certificate of authenticity. All details match the manufacturer specifications.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                };
-
-                validationData[9] = {
-                    shop: "Kicks Kingdom (ID: KK456)",
-                    serial: "SN66778899",
-                    model: "Yeezy 700",
-                    date: "Oct 7, 2023",
-                    status: "Rejected",
-                    statusClass: "status-fake",
-                    description: "Seller claims these are authentic but several red flags were identified during inspection.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                };
-
-                validationData[10] = {
-                    shop: "Sneaker Haven (ID: SH123)",
-                    serial: "SN44556677",
-                    model: "Off-White x Nike",
-                    date: "Oct 6, 2023",
-                    status: "Rejected",
-                    statusClass: "status-fake",
-                    description: "Inconsistent details compared to verified authentic pairs. Multiple indicators suggest these are replicas.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                };
-            };
-            
             // Logout functionality
             const logoutBtn = document.getElementById('logoutBtn');
             logoutBtn.addEventListener('click', (e) => {
@@ -1276,6 +1422,8 @@
                 }
             });
         });
-    </script>
+    </script> -->
+    <script src="../js/admin_shoeverification.js" type="module"></script>
 </body>
+
 </html>
