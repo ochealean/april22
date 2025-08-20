@@ -2,7 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebas
 import { getDatabase, onValue, ref, get, set, push } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
-
 // Firebase Config
 const firebaseConfig = {
     apiKey: "AIzaSyAuPALylh11cTArigeGJZmLwrFwoAsNPSI",
@@ -24,6 +23,25 @@ let selectedSize = null;
 let maxAvailableQty = 1; // Default
 
 let cursedWords = []; // This will store our censored words from Firebase
+
+// Mobile sidebar toggle functionality
+document.addEventListener('DOMContentLoaded', function () {
+    const mobileToggle = document.querySelector('.mobile-menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+
+    if (mobileToggle && sidebar && overlay) {
+        mobileToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+    }
+});
 
 function updateQuantityLimit() {
     if (selectedColor && selectedSize) {
@@ -55,7 +73,6 @@ function validateQuantity() {
     quantityInput.value = qty;
 }
 
-
 // HTML Elements
 const productName = document.getElementById("productName");
 const productShop = document.getElementById("productShop");
@@ -69,6 +86,8 @@ const sizeOptions = document.getElementById("sizeOptions");
 const wishlistBtn = document.getElementById("wishlistBtn");
 const mainProductImage = document.getElementById("mainProductImage");
 const reviewsList = document.getElementById("reviewsContainer");
+const userNameDisplay = document.getElementById("userName_display2");
+const userAvatar = document.getElementById("imageProfile");
 
 // URL Params
 const urlParams = new URLSearchParams(window.location.search);
@@ -92,6 +111,11 @@ function loadProductDetails() {
             const user = auth.currentUser;
             if (user) {
                 isWishlisted();
+                loadUserProfile(user.uid);
+            } else {
+                // Set default user info if not logged in
+                userNameDisplay.textContent = "Guest User";
+                userAvatar.src = "https://randomuser.me/api/portraits/men/32.jpg";
             }
             
             loadCustomerReviews();
@@ -100,6 +124,27 @@ function loadProductDetails() {
         }
     }).catch(error => {
         console.error("Error loading product details:", error);
+    });
+}
+
+// Load user profile
+function loadUserProfile(userId) {
+    const userRef = ref(db, `AR_shoe_users/customer/${userId}`);
+    
+    get(userRef).then(snapshot => {
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            userNameDisplay.textContent = `${userData.firstName} ${userData.lastName}`;
+            
+            // Set user avatar if available
+            if (userData.profilePicture) {
+                userAvatar.src = userData.profilePicture;
+            } else {
+                userAvatar.src = "https://randomuser.me/api/portraits/men/32.jpg";
+            }
+        }
+    }).catch(error => {
+        console.error("Error loading user profile:", error);
     });
 }
 
@@ -216,7 +261,6 @@ function selectSize(variantKey, sizeKey) {
     // You can store the selected sizeKey in a global variable if needed
 }
 
-
 function selectColor(selectedKey) {
     const allColorDivs = colorOptions.querySelectorAll(".color-option");
     allColorDivs.forEach(div => div.classList.remove("selected"));
@@ -224,8 +268,6 @@ function selectColor(selectedKey) {
     const selectedDiv = Array.from(allColorDivs).find(div => div.textContent.trim() === productData.variants[selectedKey].color);
     if (selectedDiv) selectedDiv.classList.add("selected");
 }
-
-
 
 // Update price and sizes when variant is selected
 function updatePriceAndSizes(variantKey) {
@@ -287,8 +329,6 @@ function updatePriceAndSizes(variantKey) {
         }
     }
 }
-
-
 
 // Load customer reviews from Firebase
 function loadCustomerReviews() {
@@ -573,7 +613,6 @@ function getSelectedSize() {
     return selectedSize;
 }
 
-
 // BUY NOW
 buyNowBtn.addEventListener("click", async () => {
     const check = canAddToCartOrBuy();
@@ -682,55 +721,6 @@ addToCartBtn.addEventListener("click", async () => {
     }
 });
 
-// // ADD TO CART
-// addToCartBtn.addEventListener("click", async () => {
-//     const user = auth.currentUser;
-//     if (!user) return alert("Please log in first.");
-
-//     if (!selectedVariantKey) return alert("Please select a color.");
-//     const selectedSize = getSelectedSize();
-//     if (!selectedSize) return alert("Please select a size.");
-
-//     const variant = productData.variants[selectedVariantKey];
-
-//     // Find the sizeKey that corresponds to the selected size
-//     let sizeKey = null;
-//     for (const [key, sizeObj] of Object.entries(variant.sizes)) {
-//         if (Object.keys(sizeObj)[0] === selectedSize) {
-//             sizeKey = key;
-//             break;
-//         }
-//     }
-
-//     if (!sizeKey) return alert("Invalid size selection");
-
-//     const cartItem = {
-//         shopId: shopID,
-//         shoeId: shoeID,
-//         variantKey: selectedVariantKey,
-//         sizeKey: sizeKey, // Use the sizeKey instead of the size value
-//         shoeName: productData.shoeName,
-//         variantName: variant.variantName || "",
-//         color: variant.color || "",
-//         size: selectedSize, // Keep the actual size value as well if needed
-//         price: variant.price,
-//         image: variant.imageUrl || productData.defaultImage || "",
-//         quantity: parseInt(document.getElementById("quantity").value || 1),
-//         addedAt: new Date().toISOString()
-//     };
-
-//     const cartItemId = generate18CharID();
-//     const cartRef = ref(db, `AR_shoe_users/carts/${ user.uid }/${ cartItemId }`);
-
-//     try {
-//         await set(cartRef, cartItem);
-//         alert("Item added to cart successfully!");
-//     } catch (error) {
-//         console.error("Error adding to cart:", error);
-//         alert("Failed to add item to cart");
-//     }
-// });
-
 window.adjustQuantity = function (change) {
     const quantityInput = document.getElementById("quantity");
     let currentValue = parseInt(quantityInput.value) || 1;
@@ -764,32 +754,6 @@ function formatTimestamp(timestamp) {
     return `${ month }/${day}/${ year } ${ hours }:${ minutes }`;
 }
 
-// Filter reviews by star rating
-window.filterReviews = function (rating) {
-    const reviewItems = document.querySelectorAll('.review-item');
-    const filters = document.querySelectorAll('.stars-filter');
-
-    // Update active filter button
-    filters.forEach(filter => {
-        filter.classList.remove('active');
-        if (parseInt(filter.dataset.rating) === rating) {
-            filter.classList.add('active');
-        }
-    });
-
-    // Show/hide reviews based on filter
-    reviewItems.forEach(item => {
-        if (rating === 0) {
-            item.style.display = 'block'; // Show all reviews
-        } else {
-            const itemRating = parseInt(item.dataset.rating);
-            item.style.display = itemRating === rating ? 'block' : 'none';
-        }
-    });
-}
-
-
-
 // Calculate and display average rating
 function calculateAverageRating(feedbacks) {
     let totalRating = 0;
@@ -813,16 +777,10 @@ function calculateAverageRating(feedbacks) {
 }
 
 function canAddToCartOrBuy() {
-    // Check if color is selected
-    // di na siguro need nito dahil di naman makakapili ng size kapag di nag pick ng color
-    // if (!selectedVariantKey) {
-    //     return { canProceed: false, message: "Please select a color first." };
-    // }
-    
     // Check if size is selected
-    // if (!selectedSize) {
-    //     return { canProceed: false, message: "Please select a size first." };
-    // }
+    if (!selectedSize) {
+        return { canProceed: false, message: "Please select a size first." };
+    }
     
     // Get the variant and check stock
     const variant = productData.variants[selectedVariantKey];
@@ -850,6 +808,8 @@ function clearSizeSelection() {
     addToCartBtn.disabled = true;
     quantitySelector.classList.remove("visible");
 }
+
+// Initialize buttons as disabled
 buyNowBtn.disabled = true;
 addToCartBtn.disabled = true;
 

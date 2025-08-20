@@ -8,87 +8,171 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary: #3498db;
-            --primary-dark: #2980b9;
-            --secondary: #2c3e50;
-            --accent: #e74c3c;
-            --success: #27ae60;
-            --warning: #f39c12;
-            --error: #c0392b;
-            --light: #ecf0f1;
+            --primary: #a777e3;
+            --primary-dark: #8e5fd5;
+            --secondary: #8a4fff;
+            --accent: #ff6b6b;
+            --success: #48cfad;
+            --warning: #ffaa00;
+            --error: #ff6b6b;
+            --light: #f8f9fa;
             --dark: #2c3e50;
             --gray: #bdc3c7;
             --gray-light: #ecf0f1;
             --gray-dark: #7f8c8d;
             --text-primary: #2c3e50;
             --text-secondary: #34495e;
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
             --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            --radius-sm: 4px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
-            background-color: var(--gray-light);
+            background-color: #f5f7fa;
             color: var(--text-primary);
             line-height: 1.6;
         }
 
         .dashboard {
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: 280px 1fr;
             min-height: 100vh;
         }
 
-        /* Sidebar */
+        /* Sidebar - Purple Theme */
         .sidebar {
-            background-color: var(--secondary);
-            color: var(--light);
-            padding: 2rem 1rem;
+            background: linear-gradient(180deg, var(--secondary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
             position: sticky;
             top: 0;
             height: 100vh;
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
         }
 
         .logo {
-            color: var(--primary);
-            font-size: 1.5rem;
-            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
             margin-bottom: 2rem;
-            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         .nav-item {
-            padding: 0.8rem 1rem;
-            margin: 0.5rem 0;
+            padding: 0.75rem 1rem;
             border-radius: var(--radius-sm);
             cursor: pointer;
             transition: var(--transition);
-            display: block;
-            color: var(--light);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
         }
 
-        .nav-item:hover,
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: translateX(4px);
+        }
+
         .nav-item.active {
-            background-color: var(--primary-dark);
-            color: var(--light);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
         }
 
         /* Main Content */
         .main-content {
-            flex-grow: 1;
             padding: 2rem;
+            overflow-x: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .search-bar {
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-light);
+            width: 100%;
+            max-width: 400px;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            background-color: white;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(167, 119, 227, 0.2);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow-sm);
         }
 
         /* Back Button */
@@ -100,6 +184,10 @@
             text-decoration: none;
             font-weight: 500;
             transition: var(--transition);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            background-color: white;
+            box-shadow: var(--shadow-sm);
         }
 
         .back-btn i {
@@ -108,6 +196,9 @@
 
         .back-btn:hover {
             color: var(--primary-dark);
+            background-color: var(--gray-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
 
         /* Product Details Container */
@@ -176,6 +267,7 @@
         .product-description h4 {
             margin-bottom: 0.5rem;
             font-size: 1.1rem;
+            color: var(--dark);
         }
 
         .product-description p {
@@ -210,6 +302,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: var(--radius-sm);
         }
 
         .quantity-btn:hover {
@@ -241,6 +334,7 @@
             font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 0.8rem;
+            color: var(--dark);
         }
 
         .color-options {
@@ -346,6 +440,8 @@
 
         .btn-primary:hover {
             background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
         }
 
         .btn-secondary {
@@ -356,7 +452,9 @@
         }
 
         .btn-secondary:hover {
-            background-color: var(--dark);
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
         }
 
         .wishlist-btn {
@@ -394,6 +492,7 @@
         .reviews-title {
             font-size: 1.5rem;
             font-weight: 600;
+            color: var(--dark);
         }
 
         .review-filters {
@@ -467,8 +566,20 @@
             color: var(--warning);
         }
 
-        /* Responsive Styles */
+        /* mobile navigation */
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* Responsive Design */
         @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 240px 1fr;
+            }
+            
             .product-details-container {
                 grid-template-columns: 1fr;
             }
@@ -480,36 +591,7 @@
 
         @media (max-width: 992px) {
             .dashboard {
-                grid-template-columns: 80px 1fr;
-            }
-
-            .sidebar {
-                padding: 1rem 0.5rem;
-            }
-
-            .logo {
-                font-size: 1rem;
-                margin-bottom: 1rem;
-            }
-
-            .nav-item {
-                padding: 0.5rem;
-                text-align: center;
-                font-size: 0.8rem;
-            }
-
-            .nav-item i {
-                display: block;
-                margin: 0 auto 0.3rem;
-                font-size: 1rem;
-            }
-
-            .nav-item span {
-                display: none;
-            }
-
-            .main-content {
-                padding: 1.5rem;
+                grid-template-columns: 220px 1fr;
             }
         }
 
@@ -519,36 +601,44 @@
             }
 
             .sidebar {
-                height: auto;
-                position: relative;
-                padding: 1rem;
+                position: fixed;
+                left: -350px;
+                transition: var(--transition);
+                z-index: 100;
+                height: 100vh;
             }
 
-            .nav-items {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 0.5rem;
+            .sidebar.active {
+                left: 0;
             }
 
-            .nav-item {
-                margin: 0;
+            .mobile-menu-toggle {
+                display: block;
+                font-size: 1.5rem;
+                cursor: pointer;
                 padding: 0.5rem;
-                font-size: 0.9rem;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                min-width: 60px;
+                color: var(--dark);
             }
 
-            .nav-item i {
-                margin-bottom: 0.3rem;
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 99;
             }
 
-            .action-buttons {
-                flex-direction: column;
+            .sidebar-overlay.active {
+                display: block;
             }
 
+            .main-content {
+                padding: 1.5rem;
+            }
+            
             .product-details-container {
                 padding: 1.5rem;
             }
@@ -689,9 +779,14 @@
 
 <body>
     <div class="dashboard">
-        <!-- Sidebar Navigation -->
+        <!-- Sidebar - Purple Theme -->
         <div class="sidebar">
-            <div class="logo">SHOE PORTAL</div>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <span>SHOE PORTAL</span>
+            </div>
             <div class="nav-items">
                 <a href="/customer/html/customer_dashboard.html" class="nav-item">
                     <i class="fas fa-home"></i> Dashboard
@@ -731,6 +826,17 @@
 
         <!-- Main Content -->
         <div class="main-content">
+            <div class="header">
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <h1>Product Details</h1>
+                <div class="user-profile">
+                    <img id="imageProfile" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile" class="user-avatar">
+                    <span id="userName_display2">Alex Johnson</span>
+                </div>
+            </div>
+
             <a href="/customer/html/browse.html" class="back-btn">
                 <i class="fas fa-arrow-left"></i> Back to Browse
             </a>
@@ -739,7 +845,7 @@
                 <!-- LEFT COLUMN -->
                 <div class="product-left">
                     <div class="product-main-image">
-                        <img src="" alt="Product Image" id="mainProductImage">
+                        <img src="https://via.placeholder.com/500x400/a777e3/ffffff?text=Shoe+Image" alt="Product Image" id="mainProductImage">
                     </div>
                     <div class="product-variants">
                         <h3>Available Variants</h3>
@@ -756,10 +862,10 @@
                 </div>
                 <!-- RIGHT COLUMN -->
                 <div class="product-info">
-                    <h1 class="product-name" id="productName"></h1>
-                    <div class="product-shop" id="productShop"></div>
-                    <div class="product-code" id="productCode"></div>
-                    <div class="product-price" id="productPrice"></div>
+                    <h1 class="product-name" id="productName">Nike Air Max 270 React</h1>
+                    <div class="product-shop" id="productShop">Shop Name: Elite Footwear</div>
+                    <div class="product-code" id="productCode">Product Code: NIKE-AM270-001</div>
+                    <div class="product-price" id="productPrice">₱150.00</div>
 
                     <div class="quantity-selector" id="quantitySelector">
                         <label for="quantity">Quantity:</label>
@@ -769,12 +875,12 @@
                                 onchange="validateQuantity()">
                             <button type="button" class="quantity-btn plus" onclick="adjustQuantity(1)">+</button>
                         </div>
-                        <div class="available-stock" id="availableStock"></div>
+                        <div class="available-stock" id="availableStock">Available: 10</div>
                     </div>
 
                     <div class="product-description">
                         <h4>Description</h4>
-                        <p id="productDescription"></p>
+                        <p id="productDescription">The Nike Air Max 270 React combines the oversized Air Max 270 cushioning with React foam for an incredibly comfortable and responsive feel. The breathable mesh upper provides lightweight support, while the bold colors and design make a statement wherever you go.</p>
                     </div>
 
                     <div class="action-buttons">
@@ -795,7 +901,7 @@
             <!-- Reviews Section -->
             <div class="reviews-section">
                 <div class="reviews-header">
-                    <h2 class="reviews-title">Customer Reviews <span id="averageRating"></span></h2>
+                    <h2 class="reviews-title">Customer Reviews <span id="averageRating" class="average-rating">4.5 <i class="fas fa-star"></i></span></h2>
                     <div class="review-filters">
                         <div class="stars-filter" data-rating="5" onclick="filterReviews(5)">
                             <div class="stars">
@@ -855,374 +961,64 @@
 
                 <div id="reviewsContainer">
                     <!-- Reviews will be populated here -->
+                    <div class="review-item">
+                        <div class="review-header">
+                            <span class="review-author">John D.</span>
+                            <span class="review-date">April 15, 2023</span>
+                        </div>
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p>These are the most comfortable shoes I've ever worn! The cushioning is amazing and they look great too.</p>
+                    </div>
+                    <div class="review-item">
+                        <div class="review-header">
+                            <span class="review-author">Sarah M.</span>
+                            <span class="review-date">March 28, 2023</span>
+                        </div>
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <p>Love the look and feel, but they run a half size small. I'd recommend going up a size.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- <script>
-        // Sample product data - in a real app this would come from your backend
-        const product = {
-            shoeName: "Nike Air Max 270 React",
-            shopName: "Elite Footwear",
-            shoeCode: "NIKE-AM270-001",
-            price: 150.00,
-            defaultImage: "/images/shoe1.png",
-            generalDescription: "The Nike Air Max 270 React combines the oversized Air Max 270 cushioning with React foam for an incredibly comfortable and responsive feel. The breathable mesh upper provides lightweight support, while the bold colors and design make a statement wherever you go.",
-            colors: [
-                {
-                    name: "Black",
-                    variantName: "Black/Anthracite",
-                    imageUrl: "/images/shoe1.png",
-                    sizes: [
-                        { size: "US 7", stock: 5, price: 150.00 },
-                        { size: "US 8", stock: 8, price: 150.00 },
-                        { size: "US 9", stock: 10, price: 150.00 },
-                        { size: "US 10", stock: 3, price: 150.00 }
-                    ]
-                },
-                {
-                    name: "White",
-                    variantName: "White/University Red",
-                    imageUrl: "/images/shoe2.png?text=White",
-                    sizes: [
-                        { size: "US 8", stock: 7, price: 150.00 },
-                        { size: "US 9", stock: 5, price: 150.00 },
-                        { size: "US 10", stock: 5, price: 150.00 }
-                    ]
-                },
-                {
-                    name: "Red",
-                    variantName: "University Red/Black",
-                    imageUrl: "/images/shoe3.png?text=Red",
-                    sizes: [
-                        { size: "US 9", stock: 2, price: 150.00 },
-                        { size: "US 10", stock: 4, price: 150.00 },
-                        { size: "US 11", stock: 6, price: 150.00 }
-                    ]
-                },
-                {
-                    name: "Blue",
-                    variantName: "Obsidian/White",
-                    imageUrl: "/images/shoe1.png?text=Blue",
-                    sizes: [
-                        { size: "US 8", stock: 3, price: 150.00 },
-                        { size: "US 9", stock: 4, price: 150.00 },
-                        { size: "US 10", stock: 2, price: 150.00 }
-                    ]
-                }
-            ],
-            reviews: [
-                {
-                    author: "John D.",
-                    date: "April 15, 2023",
-                    rating: 5,
-                    comment: "These are the most comfortable shoes I've ever worn! The cushioning is amazing and they look great too."
-                },
-                {
-                    author: "Sarah M.",
-                    date: "March 28, 2023",
-                    rating: 4,
-                    comment: "Love the look and feel, but they run a half size small. I'd recommend going up a size."
-                }
-            ]
-        };
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay"></div>
 
-        // Initialize the page with product data
-        function initializePage() {
-            // Set product info
-            document.getElementById('productName').textContent = product.shoeName;
-            document.getElementById('productShop').textContent = `Shop Name: ${product.shopName}`;
-            document.getElementById('productCode').textContent = `Product Code: ${product.shoeCode}`;
-            document.getElementById('productPrice').textContent = `₱${product.price.toFixed(2)}`;
-            document.getElementById('productDescription').textContent = product.generalDescription;
-            document.getElementById('mainProductImage').src = product.defaultImage;
-            
-            // Populate color options
-            populateColorOptions();
-            
-            // Populate reviews
-            populateReviews();
-            
-            // Set up event listeners
-            setupEventListeners();
-        }
+    <script>
+        // Mobile sidebar toggle
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
 
-        // Populate color options
-        function populateColorOptions() {
-            const colorOptions = document.getElementById('colorOptions');
-            colorOptions.innerHTML = '';
-            
-            product.colors.forEach((color, index) => {
-                const colorElement = document.createElement('div');
-                colorElement.className = 'color-option';
-                colorElement.innerHTML = `
-                    <div>${color.name}</div>
-                    <div class="variant-name">${color.variantName}</div>
-                `;
-                colorElement.dataset.colorIndex = index;
-                colorElement.addEventListener('click', function() {
-                    selectColor(this, color, index);
+            if (mobileToggle && sidebar && overlay) {
+                mobileToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
                 });
-                colorOptions.appendChild(colorElement);
-            });
-            
-            // Select first color by default and show its sizes
-            if (product.colors.length > 0) {
-                const firstColor = colorOptions.firstChild;
-                firstColor.classList.add('selected');
-                populateSizeOptions(0);
-            }
-        }
 
-        // Color selection
-        function selectColor(element, color, colorIndex) {
-            // Remove selected class from all colors
-            document.querySelectorAll('.color-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            
-            // Add selected class to clicked color
-            element.classList.add('selected');
-            
-            // Update product image
-            document.getElementById('mainProductImage').src = color.imageUrl;
-            
-            // Populate size options for this color
-            populateSizeOptions(colorIndex);
-            
-            // Reset quantity selector
-            document.getElementById('quantity').value = 1;
-        }
-
-        // Populate size options for selected color
-        function populateSizeOptions(colorIndex) {
-            const sizeOptions = document.getElementById('sizeOptions');
-            sizeOptions.innerHTML = ''; // Clear existing sizes
-            
-            product.colors[colorIndex].sizes.forEach((size, index) => {
-                const sizeElement = document.createElement('div');
-                sizeElement.className = 'size-option';
-                sizeElement.innerHTML = `
-                    <span class="size-label">${size.size}</span>
-                    <span class="size-stock">${size.stock} left</span>
-                `;
-                sizeElement.dataset.colorIndex = colorIndex;
-                sizeElement.dataset.sizeIndex = index;
-                sizeElement.addEventListener('click', function() {
-                    selectSize(this, colorIndex, index);
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
                 });
-                sizeOptions.appendChild(sizeElement);
-            });
-            
-            // Select first size by default
-            if (product.colors[colorIndex].sizes.length > 0) {
-                const firstSize = sizeOptions.firstChild;
-                firstSize.classList.add('selected');
-                updateStockInfo(colorIndex, 0);
             }
-        }
-
-        // Size selection
-        function selectSize(element, colorIndex, sizeIndex) {
-            // Remove selected class from all sizes
-            document.querySelectorAll('.size-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            
-            // Add selected class to clicked size
-            element.classList.add('selected');
-            
-            // Update stock info and quantity max
-            updateStockInfo(colorIndex, sizeIndex);
-        }
-
-        // Update stock information and quantity max
-        function updateStockInfo(colorIndex, sizeIndex) {
-            const selectedSize = product.colors[colorIndex].sizes[sizeIndex];
-            document.getElementById('availableStock').textContent = `Available: ${selectedSize.stock}`;
-            document.getElementById('quantity').max = selectedSize.stock;
-            
-            // Reset quantity if it exceeds new max
-            const quantityInput = document.getElementById('quantity');
-            if (parseInt(quantityInput.value) > selectedSize.stock) {
-                quantityInput.value = selectedSize.stock;
-            }
-        }
-
-        // Quantity adjustment
-        function adjustQuantity(change) {
-            const quantityInput = document.getElementById('quantity');
-            let newValue = parseInt(quantityInput.value) + change;
-            const max = parseInt(quantityInput.max) || 100;
-            
-            if (newValue < 1) newValue = 1;
-            if (newValue > max) newValue = max;
-            
-            quantityInput.value = newValue;
-        }
-
-        // Validate quantity input
-        function validateQuantity() {
-            const quantityInput = document.getElementById('quantity');
-            let value = parseInt(quantityInput.value);
-            const max = parseInt(quantityInput.max) || 100;
-            
-            if (isNaN(value)) value = 1;
-            if (value < 1) value = 1;
-            if (value > max) value = max;
-            
-            quantityInput.value = value;
-        }
-
-        // Populate reviews
-        function populateReviews() {
-            const reviewsContainer = document.getElementById('reviewsContainer');
-            reviewsContainer.innerHTML = '';
-            
-            product.reviews.forEach(review => {
-                const reviewElement = document.createElement('div');
-                reviewElement.className = 'review-item';
-                
-                // Create stars HTML
-                let starsHtml = '';
-                for (let i = 1; i <= 5; i++) {
-                    if (i <= review.rating) {
-                        starsHtml += '<i class="fas fa-star"></i>';
-                    } else {
-                        starsHtml += '<i class="far fa-star"></i>';
-                    }
-                }
-                
-                reviewElement.innerHTML = `
-                    <div class="review-header">
-                        <span class="review-author">${review.author}</span>
-                        <span class="review-date">${review.date}</span>
-                    </div>
-                    <div class="review-stars">
-                        ${starsHtml}
-                    </div>
-                    <p>${review.comment}</p>
-                `;
-                
-                reviewsContainer.appendChild(reviewElement);
-            });
-        }
-
-        // Wishlist toggle
-        function toggleWishlist() {
-            const btn = document.getElementById('wishlistBtn');
-            const icon = btn.querySelector('i');
-            
-            btn.classList.toggle('active');
-            icon.classList.toggle('far');
-            icon.classList.toggle('fas');
-            
-            if (btn.classList.contains('active')) {
-                alert('Added to your wishlist!');
-            } else {
-                alert('Removed from your wishlist!');
-            }
-        }
-
-        // Add to cart function
-        function addToCart() {
-            const selectedColor = document.querySelector('.color-option.selected');
-            const selectedSize = document.querySelector('.size-option.selected');
-            
-            if (!selectedColor || !selectedSize) {
-                alert('Please select both color and size first');
-                return;
-            }
-            
-            const colorIndex = selectedColor.dataset.colorIndex;
-            const sizeIndex = selectedSize.dataset.sizeIndex;
-            const selectedVariant = product.colors[colorIndex].sizes[sizeIndex];
-            const selectedColorData = product.colors[colorIndex];
-            
-            const productName = document.getElementById('productName').textContent;
-            const color = selectedColorData.name;
-            const variantName = selectedColorData.variantName;
-            const size = selectedVariant.size;
-            const quantity = document.getElementById('quantity').value;
-            const price = selectedVariant.price.toFixed(2);
-            
-            alert(`Added ${quantity} ${productName} (${variantName}, ${size}) to your cart. Total: ₱${(quantity * price).toFixed(2)}`);
-            // In a real implementation, this would add the item to the cart
-        }
-
-        // Buy now function
-        function buyNow() {
-            const selectedColor = document.querySelector('.color-option.selected');
-            const selectedSize = document.querySelector('.size-option.selected');
-            
-            if (!selectedColor || !selectedSize) {
-                alert('Please select both color and size first');
-                return;
-            }
-            
-            const colorIndex = selectedColor.dataset.colorIndex;
-            const sizeIndex = selectedSize.dataset.sizeIndex;
-            const selectedVariant = product.colors[colorIndex].sizes[sizeIndex];
-            const selectedColorData = product.colors[colorIndex];
-            
-            const productName = document.getElementById('productName').textContent;
-            const color = selectedColorData.name;
-            const variantName = selectedColorData.variantName;
-            const size = selectedVariant.size;
-            const quantity = document.getElementById('quantity').value;
-            const price = selectedVariant.price.toFixed(2);
-            
-            alert(`Proceeding to checkout with ${quantity} ${productName} (${variantName}, ${size}). Total: ₱${(quantity * price).toFixed(2)}`);
-            // In a real implementation, this would redirect to checkout
-        }
-
-        // Filter reviews by star rating
-        function filterReviews(rating) {
-            // Update active filter button
-            document.querySelectorAll('.stars-filter').forEach(btn => {
-                btn.classList.remove('active');
-                if (parseInt(btn.dataset.rating) === rating) {
-                    btn.classList.add('active');
-                }
-            });
-
-            // Show/hide reviews based on filter
-            document.querySelectorAll('.review-item').forEach(review => {
-                if (rating === 0 || parseInt(review.dataset.rating) === rating) {
-                    review.style.display = 'block';
-                } else {
-                    review.style.display = 'none';
-                }
-            });
-        }
-
-        // Initialize the page when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            initializePage();
-            // Set "All Reviews" as active by default
-            document.querySelector('.stars-filter[data-rating="0"]').classList.add('active');
         });
 
-        // Setup event listeners
-        function setupEventListeners() {
-            // Logout button
-            document.getElementById('logout_btn').addEventListener('click', function() {
-                alert('Logging out...');
-                // In real implementation, this would call your logout function
-            });
-            
-            // Back button
-            document.querySelector('.back-btn').addEventListener('click', function(e) {
-                e.preventDefault();
-                // In a real implementation, this would navigate back
-                window.history.back();
-            });
-        }
-
-        // Initialize the page when DOM is loaded
-        document.addEventListener('DOMContentLoaded', initializePage);
-    </script> -->
+        
+    </script>
     <script src="/customer/js/shoedetails.js" type="module"></script>
 </body>
 
