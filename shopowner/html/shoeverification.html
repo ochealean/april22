@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoe Validation - Shop Owner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #3f37c9;
+            --accent: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --error: #ef233c;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #adb5bd;
+            --gray-light: #e9ecef;
+            --gray-dark: #495057;
+            --text-primary: #212529;
+            --text-secondary: #343a40;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar - Modern Redesign */
+        .sidebar {
+            background: linear-gradient(180deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            overflow-x: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Tabs Navigation */
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab-btn {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--gray-dark);
+            transition: var(--transition);
+            position: relative;
+            flex: 1;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background-color: var(--gray-light);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form Styles */
+        .form-container {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-title i {
+            color: var(--primary);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 992px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .image-upload-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .image-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .image-upload-item {
+            border: 2px dashed var(--gray);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-upload-item:hover {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .image-upload-item i {
+            font-size: 2rem;
+            color: var(--gray);
+            margin-bottom: 0.75rem;
+        }
+
+        .image-upload-item p {
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--error);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+            display: none;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary {
+            background-color: var(--gray-light);
+            color: var(--gray-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dfe3e8;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            overflow-x: auto;
+        }
+
+        .validation-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .validation-table th,
+        .validation-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .validation-table th {
+            background-color: var(--gray-light);
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .validation-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .validation-table tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-legit {
+            background-color: rgba(76, 201, 240, 0.2);
+            color: #1890b9;
+        }
+
+        .status-fake {
+            background-color: rgba(239, 35, 60, 0.2);
+            color: #c81e2f;
+        }
+
+        .status-pending {
+            background-color: rgba(248, 150, 30, 0.2);
+            color: #c56f00;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .action-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--radius-md);
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-dark);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-images {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .modal-image {
+            width: 100%;
+            border-radius: var(--radius-sm);
+            aspect-ratio: 1;
+            object-fit: cover;
+        }
+
+        .modal-reason {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--gray-light);
+            border-radius: var(--radius-sm);
+        }
+
+        .modal-reason h4 {
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        /* Mobile navigation */
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -350px;
+                transition: var(--transition);
+                z-index: 100;
+                height: 100vh;
+                width: 280px;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            /* Add overlay when sidebar is open */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 99;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .modal-images {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <span>SHOP DASHBOARD</span>
+            </div>
+            <div class="nav-items">
+                <a href="/shopowner/html/shop_dashboard.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="/shopowner/html/shopowner_addshoe.html" class="nav-item">
+                    <i class="fas fa-shoe-prints"></i> Add Shoe
+                </a>
+                <a href="/shopowner/html/shoeverification.html" class="nav-item active">
+                    <i class="fas fa-check-circle"></i> Shoe Verification
+                </a>
+                <a id="addemployeebtn" href="/shopowner/html/shopowner_addemployee.html" class="nav-item shopowner">
+                    <i class="fas fa-users"></i> Add Employee
+                </a>
+                <a href="/shopowner/html/shop_inventory.html" class="nav-item">
+                    <i class="fas fa-boxes"></i> Inventory
+                </a>
+                <a href="/shopowner/html/shop_order.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a>
+                <a id="issuereport" href="/shopowner/html/issue_report.html" class="nav-item manager">
+                    <i class="fas fa-exclamation-circle"></i> Issue Report
+                </a>
+                <a id="analyticsbtn" href="/shopowner/html/analytics.html" class="nav-item manager">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+                <a href="/shopowner/html/shopprofile.html" class="nav-item">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a id="logout_btn" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <h1>Add New Shoe</h1>
+                <div class="user-profile">
+                    <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="User" class="user-avatar">
+                    <span>Shop Owner</span>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="validation-form">Submit Validation</button>
+                <button class="tab-btn" data-tab="validation-history">Validation History</button>
+            </div>
+
+            <!-- Validation Form Tab -->
+            <div class="tab-content active" id="validation-form">
+                <div class="form-container">
+                    <h2 class="form-title"><i class="fas fa-clipboard-check"></i> Submit Shoe for Validation</h2>
+                    
+                    <form id="shoeValidationForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="serialNumber" class="form-label">Serial Number</label>
+                                <input type="text" id="serialNumber" class="form-input" placeholder="Enter shoe serial number" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="shoeModel" class="form-label">Shoe Model</label>
+                                <input type="text" id="shoeModel" class="form-input" placeholder="Enter shoe model name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="description" class="form-label">General Description / Proof of Authenticity</label>
+                            <textarea id="description" class="form-textarea" placeholder="Provide detailed description and proof of authenticity..." required></textarea>
+                        </div>
+                        
+                        <div class="image-upload-section">
+                            <h3 class="form-label">Shoe Images (Required)</h3>
+                            <p style="color: var(--gray-dark); margin-bottom: 1rem;">Please upload clear images of the shoe from different angles</p>
+                            
+                            <div class="image-grid">
+                                <div class="image-upload-item" id="frontViewUpload">
+                                    <i class="fas fa-camera"></i>
+                                    <p>Front View</p>
+                                    <img id="frontViewPreview" class="image-preview">
+                                    <span class="remove-image">&times;</span>
+                                    <input type="file" id="frontView" accept="image/*" style="display: none;">
+                                </div>
+                                
+                                <div class="image-upload-item" id="backViewUpload">
+                                    <i class="fas fa-camera"></i>
+                                    <p>Back View</p>
+                                    <img id="backViewPreview" class="image-preview">
+                                    <span class="remove-image">&times;</span>
+                                    <input type="file" id="backView" accept="image/*" style="display: none;">
+                                </div>
+                                
+                                <div class="image-upload-item" id="topViewUpload">
+                                    <i class="fas fa-camera"></i>
+                                    <p>Top View</p>
+                                    <img id="topViewPreview" class="image-preview">
+                                    <span class="remove-image">&times;</span>
+                                    <input type="file" id="topView" accept="image/*" style="display: none;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary">Cancel</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit for Validation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Validation History Tab -->
+            <div class="tab-content" id="validation-history">
+                <div class="table-container">
+                    <h2 class="form-title"><i class="fas fa-history"></i> Past Validations</h2>
+                    
+                    <table class="validation-table">
+                        <thead>
+                            <tr>
+                                <th>Serial Number</th>
+                                <th>Model</th>
+                                <th>Submitted Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>SN12345678</td>
+                                <td>Nike Air Jordan 1</td>
+                                <td>Oct 15, 2023</td>
+                                <td><span class="status-badge status-legit">Legit</span></td>
+                                <td><button class="action-btn view-details" data-id="1">View Details</button></td>
+                            </tr>
+                            <tr>
+                                <td>SN87654321</td>
+                                <td>Adidas Yeezy Boost 350</td>
+                                <td>Oct 10, 2023</td>
+                                <td><span class="status-badge status-fake">Fake</span></td>
+                                <td><button class="action-btn view-details" data-id="2">View Details</button></td>
+                            </tr>
+                            <tr>
+                                <td>SN11223344</td>
+                                <td>New Balance 550</td>
+                                <td>Oct 5, 2023</td>
+                                <td><span class="status-badge status-pending">Pending</span></td>
+                                <td><button class="action-btn view-details" data-id="3">View Details</button></td>
+                            </tr>
+                            <tr>
+                                <td>SN55667788</td>
+                                <td>Nike Dunk Low</td>
+                                <td>Sep 28, 2023</td>
+                                <td><span class="status-badge status-legit">Legit</span></td>
+                                <td><button class="action-btn view-details" data-id="4">View Details</button></td>
+                            </tr>
+                            <tr>
+                                <td>SN99887766</td>
+                                <td>Converse Chuck Taylor</td>
+                                <td>Sep 20, 2023</td>
+                                <td><span class="status-badge status-fake">Fake</span></td>
+                                <td><button class="action-btn view-details" data-id="5">View Details</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Validation Details Modal -->
+    <div class="modal" id="validationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Validation Details</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Serial Number</label>
+                        <p id="modal-serial">SN12345678</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Shoe Model</label>
+                        <p id="modal-model">Nike Air Jordan 1</p>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <p id="modal-description">This is a limited edition release with special packaging and extra laces. The quality of materials is exceptional with no visible flaws in stitching or glue marks.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Submitted Images</label>
+                    <div class="modal-images">
+                        <img src="https://via.placeholder.com/300" alt="Front View" class="modal-image" id="modal-front">
+                        <img src="https://via.placeholder.com/300" alt="Back View" class="modal-image" id="modal-back">
+                        <img src="https://via.placeholder.com/300" alt="Top View" class="modal-image" id="modal-top">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Validation Status</label>
+                    <p id="modal-status"><span class="status-badge status-legit">Legit</span></p>
+                </div>
+                
+                <div class="modal-reason" id="modal-reason">
+                    <h4>Validation Notes:</h4>
+                    <p id="modal-reason-text">This shoe passed all authenticity checks. The serial number matches the manufacturer's database, materials are consistent with authentic products, and all design elements are correct for this model.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay"></div>
+
+    <script>
+        // Mobile sidebar toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            mobileToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        });
+    </script>
+
+    <script>
+        // Sample data for validation history
+        const validationData = {
+            1: {
+                serial: "SN12345678",
+                model: "Nike Air Jordan 1",
+                description: "This is a limited edition release with special packaging and extra laces. The quality of materials is exceptional with no visible flaws in stitching or glue marks.",
+                status: "Legit",
+                statusClass: "status-legit",
+                images: {
+                    front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                    back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                    top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                },
+                reason: "This shoe passed all authenticity checks. The serial number matches the manufacturer's database, materials are consistent with authentic products, and all design elements are correct for this model."
+            },
+            2: {
+                serial: "SN87654321",
+                model: "Adidas Yeezy Boost 350",
+                description: "Purchased from a third-party retailer. The boost technology feels comfortable but I'm concerned about the stitching on the left shoe.",
+                status: "Fake",
+                statusClass: "status-fake",
+                images: {
+                    front: "https://via.placeholder.com/300/ef233c/ffffff?text=Front+View",
+                    back: "https://via.placeholder.com/300/ef233c/ffffff?text=Back+View",
+                    top: "https://via.placeholder.com/300/ef233c/ffffff?text=Top+View"
+                },
+                reason: "This shoe failed authentication due to inconsistent boost pellet size, incorrect font on the inside tag, and poor stitching quality on the upper. The shape of the toe box is also inconsistent with authentic models."
+            },
+            3: {
+                serial: "SN11223344",
+                model: "New Balance 550",
+                description: "Bought directly from the New Balance website during the last drop. All packaging and documentation included.",
+                status: "Pending",
+                statusClass: "status-pending",
+                images: {
+                    front: "https://via.placeholder.com/300/f8961e/ffffff?text=Front+View",
+                    back: "https://via.placeholder.com/300/f8961e/ffffff?text=Back+View",
+                    top: "https://via.placeholder.com/300/f8961e/ffffff?text=Top+View"
+                },
+                reason: "This submission is currently under review by our authentication team. Typically takes 24-48 hours to complete."
+            },
+            4: {
+                serial: "SN55667788",
+                model: "Nike Dunk Low",
+                description: "Vintage pair from 2005, slight wear but well maintained. Original box included.",
+                status: "Legit",
+                statusClass: "status-legit",
+                images: {
+                    front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                    back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                    top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                },
+                reason: "Authentic vintage release. All details match the production specifications for this model and year. Wear patterns are consistent with age and use."
+            },
+            5: {
+                serial: "SN99887766",
+                model: "Converse Chuck Taylor",
+                description: "Limited edition collaboration with off-white branding. Purchased from a reseller.",
+                status: "Fake",
+                statusClass: "status-fake",
+                images: {
+                    front: "https://via.placeholder.com/300/ef233c/ffffff?text=Front+View",
+                    back: "https://via.placeholder.com/300/ef233c/ffffff?text=Back+View",
+                    top: "https://via.placeholder.com/300/ef233c/ffffff?text=Top+View"
+                },
+                reason: "The off-white branding is incorrectly positioned and uses the wrong font weight. The star on the ankle patch is misaligned, and the rubber sidewall shows molding imperfections not present in authentic pairs."
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab functionality
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    
+                    // Update active tab button
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    // Show active tab content
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Image upload functionality
+            const imageUploads = [
+                { container: 'frontViewUpload', input: 'frontView', preview: 'frontViewPreview' },
+                { container: 'backViewUpload', input: 'backView', preview: 'backViewPreview' },
+                { container: 'topViewUpload', input: 'topView', preview: 'topViewPreview' }
+            ];
+            
+            imageUploads.forEach(item => {
+                const container = document.getElementById(item.container);
+                const input = document.getElementById(item.input);
+                const preview = document.getElementById(item.preview);
+                const removeBtn = container.querySelector('.remove-image');
+                
+                container.addEventListener('click', () => {
+                    input.click();
+                });
+                
+                input.addEventListener('change', () => {
+                    if (input.files && input.files[0]) {
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            preview.src = e.target.result;
+                            preview.style.display = 'block';
+                            removeBtn.style.display = 'flex';
+                            container.querySelector('i').style.display = 'none';
+                            container.querySelector('p').style.display = 'none';
+                        }
+                        
+                        reader.readAsDataURL(input.files[0]);
+                    }
+                });
+                
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    input.value = '';
+                    preview.style.display = 'none';
+                    removeBtn.style.display = 'none';
+                    container.querySelector('i').style.display = 'block';
+                    container.querySelector('p').style.display = 'block';
+                });
+            });
+            
+            // Form submission
+            document.getElementById('shoeValidationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Basic validation
+                const serialNumber = document.getElementById('serialNumber').value;
+                const shoeModel = document.getElementById('shoeModel').value;
+                const description = document.getElementById('description').value;
+                const frontView = document.getElementById('frontView').files[0];
+                const backView = document.getElementById('backView').files[0];
+                const topView = document.getElementById('topView').files[0];
+                
+                if (!frontView || !backView || !topView) {
+                    alert('Please upload all three required images.');
+                    return;
+                }
+                
+                // In a real application, you would send this data to the server
+                console.log('Submitting shoe for validation:', {
+                    serialNumber,
+                    shoeModel,
+                    description,
+                    frontView,
+                    backView,
+                    topView
+                });
+                
+                // Show success message (in a real app, this would be after successful API call)
+                alert('Shoe submitted successfully for validation! You will be notified once it has been reviewed.');
+                this.reset();
+                
+                // Reset image previews
+                imageUploads.forEach(item => {
+                    const preview = document.getElementById(item.preview);
+                    const removeBtn = document.getElementById(item.container).querySelector('.remove-image');
+                    const container = document.getElementById(item.container);
+                    
+                    preview.style.display = 'none';
+                    removeBtn.style.display = 'none';
+                    container.querySelector('i').style.display = 'block';
+                    container.querySelector('p').style.display = 'block';
+                });
+            });
+            
+            // Modal functionality
+            const modal = document.getElementById('validationModal');
+            const closeModal = document.querySelector('.modal-close');
+            const viewButtons = document.querySelectorAll('.view-details');
+            
+            viewButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const id = button.getAttribute('data-id');
+                    const data = validationData[id];
+                    
+                    // Populate modal with data
+                    document.getElementById('modal-serial').textContent = data.serial;
+                    document.getElementById('modal-model').textContent = data.model;
+                    document.getElementById('modal-description').textContent = data.description;
+                    document.getElementById('modal-status').innerHTML = `<span class="status-badge ${data.statusClass}">${data.status}</span>`;
+                    document.getElementById('modal-status').innerHTML = `<span class="status-badge ${data.statusClass}">${data.status}</span>`;
+                    document.getElementById('modal-reason-text').textContent = data.reason;
+                    
+                    // Set images
+                    document.getElementById('modal-front').src = data.images.front;
+                    document.getElementById('modal-back').src = data.images.back;
+                    document.getElementById('modal-top').src = data.images.top;
+                    
+                    // Show the modal
+                    modal.classList.add('active');
+                });
+            });
+            
+            closeModal.addEventListener('click', () => {
+                modal.classList.remove('active');
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+            
+            // Role-based access control
+            const userRole = 'shopowner'; // This would normally come from your authentication system
+            
+            // Hide manager-only elements if user is not a manager
+            if (userRole !== 'manager') {
+                document.querySelectorAll('.manager').forEach(element => {
+                    element.style.display = 'none';
+                });
+            }
+            
+            // Hide shopowner-only elements if user is not a shopowner
+            if (userRole !== 'shopowner') {
+                document.querySelectorAll('.shopowner').forEach(element => {
+                    element.style.display = 'none';
+                });
+            }
+            
+            // Logout functionality
+            document.getElementById('logout_btn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to logout?')) {
+                    // In a real application, you would clear authentication tokens and redirect
+                    window.location.href = '/login.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+                        
