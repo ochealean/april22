@@ -242,11 +242,6 @@
             margin-bottom: 1rem;
         }
 
-        .profile-stats {
-            display: flex;
-            gap: 1.5rem;
-        }
-
         .stat-item {
             text-align: center;
             padding: 0.75rem 1rem;
@@ -508,9 +503,6 @@
                 text-align: center;
             }
 
-            .profile-stats {
-                justify-content: center;
-            }
 
             .form-row {
                 grid-template-columns: 1fr;
@@ -611,16 +603,6 @@
                     <div class="profile-info">
                         <h2 class="profile-name">Alex Johnson</h2>
                         <div class="profile-email">alex.johnson@example.com</div>
-                        <div class="profile-stats">
-                            <div class="stat-item">
-                                <div class="stat-value">5</div>
-                                <div class="stat-label">Orders</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value">3</div>
-                                <div class="stat-label">Wishlist</div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -661,7 +643,7 @@
 
                         <div class="form-group">
                             <label for="birthdate" class="form-label">Date of Birth</label>
-                            <input type="date" id="birthdate" class="form-control" value="depende sa backend mo na format">
+                            <input type="date" id="birthdate" class="form-control" >
                         </div>
                     </div>
 
@@ -739,7 +721,7 @@
     <!-- Mobile Overlay -->
     <div class="sidebar-overlay"></div>
 
-    <script>
+    <!-- <script>
         // Mobile sidebar toggle
         document.addEventListener('DOMContentLoaded', function () {
             const mobileToggle = document.querySelector('.mobile-menu-toggle');
@@ -808,7 +790,8 @@
                 }
             });
         });
-    </script>
+    </script> -->
+    <script src="../js/customerprofile.js" type="module"></script>
 </body>
 
 </html>
