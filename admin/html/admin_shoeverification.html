@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Shoe Validation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2c3e50;
+            --accent: #e74c3c;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --error: #c0392b;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray: #bdc3c7;
+            --gray-light: #ecf0f1;
+            --gray-dark: #7f8c8d;
+            --text-primary: #2c3e50;
+            --text-secondary: #34495e;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        /* Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            min-height: 100%;
+            min-width: 350px;
+            margin: 0;
+            padding: 0;
+            overflow-y: visible;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--gray-light);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* Navigation - Common to all pages */
+        nav {
+            background-color: var(--secondary);
+            color: white;
+            box-shadow: var(--shadow-lg);
+            padding: 0 15px;
+            position: sticky;
+            top: 0;
+            z-index: 800;
+            transition: all 0.3s ease;
+        }
+
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .nav-links {
+            display: flex;
+            transition: all 0.3s ease;
+            gap: 15px;
+        }
+
+        .nav-links li {
+            list-style: none;
+            position: relative;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 12px 18px;
+            display: block;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 3px;
+        }
+
+        .right-menu {
+            margin-right: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .username-display {
+            font-weight: bold;
+            position: relative;
+            padding-right: 10px;
+        }
+
+        .username-display::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: translateY(-50%) scale(1); opacity: 1; }
+            50% { transform: translateY(-50%) scale(1.3); opacity: 0.7; }
+            100% { transform: translateY(-50%) scale(1); opacity: 1; }
+        }
+
+        .menu-btn {
+            font-size: 24px;
+            cursor: pointer;
+            display: none;
+            transition: var(--transition);
+        }
+
+        .menu-btn:hover {
+            transform: rotate(90deg);
+        }
+        /* Container */
+        .container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        th {
+            background-color: var(--gray-light);
+            font-weight: 600;
+            color: var(--dark);
+            position: sticky;
+            top: 0;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background-color: rgba(248, 150, 30, 0.2);
+            color: #c56f00;
+        }
+
+        .status-legit {
+            background-color: rgba(76, 201, 240, 0.2);
+            color: #1890b9;
+        }
+
+        .status-fake {
+            background-color: rgba(239, 35, 60, 0.2);
+            color: #c81e2f;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .btn-view {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-view:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-approve {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background-color: #3ab3d6;
+        }
+
+        .btn-reject {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background-color: #d81b2d;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-danger {
+            background-color: var(--error);
+            color: white;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .btn-danger:hover {
+            background-color: #d81b2d;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .filter-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab:hover {
+            background-color: var(--gray-light);
+        }
+
+        .nav-tab.active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+
+        .nav-tab i {
+            margin-right: 0.5rem;
+        }
+
+        /* Bulk Actions */
+        .bulk-actions {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .bulk-select {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bulk-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Clear History Button */
+        .clear-history {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--radius-md);
+            width: 100%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-dark);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .modal-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .modal-images {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .modal-image {
+            width: 100%;
+            border-radius: var(--radius-sm);
+            aspect-ratio: 1;
+            object-fit: cover;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .rejection-reason {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            transition: var(--transition);
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .nav-links {
+                gap: 0.75rem;
+            }
+            
+            .nav-links a {
+                padding: 0.5rem;
+            }
+            
+            .nav-links a span {
+                display: none;
+            }
+            
+            .nav-links a i {
+                margin-right: 0;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                position: fixed;
+                top: 0;
+                left: -300px;
+                height: 100vh;
+                width: 280px;
+                background: linear-gradient(180deg, var(--secondary) 0%, var(--primary) 100%);
+                flex-direction: column;
+                padding: 2rem 1rem;
+                z-index: 1000;
+                transition: var(--transition);
+                box-shadow: var(--shadow-lg);
+            }
+            
+            .nav-links.active {
+                left: 0;
+            }
+            
+            .nav-links a {
+                padding: 1rem;
+            }
+            
+            .nav-links a span {
+                display: inline;
+            }
+            
+            .menu-btn {
+                display: block;
+                z-index: 1001;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .modal-images {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .bulk-actions {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
+
+        /* Animation */
+        .animate-fade {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-header">
+            <ul class="nav-links">
+                <li><a href="/admin/html/admin_dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                <li><a href="/admin/html/admin_pendingshops.html"><i class="fas fa-clock"></i> <span>Pending Shops</span></a></li>
+                <li><a href="/admin/html/admin_approvedshops.html"><i class="fas fa-check-circle"></i> <span>Approved Shops</span></a></li>
+                <li><a href="/admin/html/admin_rejectedshops.html"><i class="fas fa-times-circle"></i> <span>Rejected Shops</span></a></li>
+                <li><a href="/admin/html/admin_orders.html"><i class="fas fa-shopping-bag"></i> Orders</a></li>
+                <li><a href="/admin/html/admin_shoeverification.html" class="active"><i class="fas fa-check-circle"></i> <span>Shoe Validation</span></a></li>
+                <li><a href="/chatbot/html/responses.html"><i class="fas fa-robot"></i> <span>Chatbot Manager</span></a></li>
+                <li><a href="/censoredWords/html/censoredWords.html"><i class="fas fa-ban"></i> <span>Censored Words</span></a></li>
+                <li><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+            </ul>
+            <div class="right-menu">
+                <span class="username-display">Admin</span>
+                <div class="menu-btn"><i class="fas fa-bars"></i></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="animate-fade">Shoe Validation</h1>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-tab="pending">
+                <i class="fas fa-clock"></i> Pending
+            </div>
+            <div class="nav-tab" data-tab="approved">
+                <i class="fas fa-check-circle"></i> Approved
+            </div>
+            <div class="nav-tab" data-tab="rejected">
+                <i class="fas fa-times-circle"></i> Rejected
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section animate-fade">
+            <h2><i class="fas fa-filter"></i> Filter Submissions</h2>
+            <div class="filter-grid">
+                <div class="form-group">
+                    <label for="shopFilter" class="form-label">Shop Owner</label>
+                    <select id="shopFilter" class="form-select">
+                        <option value="">All Shops</option>
+                        <option value="shop1">Sneaker Haven</option>
+                        <option value="shop2">Kicks Kingdom</option>
+                        <option value="shop3">Sole Supreme</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="statusFilter" class="form-label">Status</label>
+                    <select id="statusFilter" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="dateFilter" class="form-label">Date Submitted</label>
+                    <input type="date" id="dateFilter" class="form-input">
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-danger" id="clearFilters">
+                    <i class="fas fa-times"></i> Clear Filters
+                </button>
+                <button class="btn btn-primary" id="applyFilters">
+                    <i class="fas fa-filter"></i> Apply Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- Clear History Button (for approved/rejected tabs) -->
+        <div class="clear-history" id="clearHistoryContainer" style="display: none;">
+            <button class="btn btn-danger" id="clearHistory">
+                <i class="fas fa-trash"></i> Clear History
+            </button>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="bulk-actions animate-fade" id="bulkActions">
+            <div class="bulk-select">
+                <input type="checkbox" id="selectAll">
+                <label for="selectAll">Select all from current filter</label>
+            </div>
+            <div class="bulk-buttons">
+                <button class="btn btn-approve" id="approveSelected">
+                    <i class="fas fa-check"></i> Approve Selected
+                </button>
+                <button class="btn btn-reject" id="rejectSelected">
+                    <i class="fas fa-times"></i> Reject Selected
+                </button>
+            </div>
+        </div>
+
+        <!-- Validation Table -->
+        <div class="table-container animate-fade">
+            <h2><i class="fas fa-list"></i> <span id="tableTitle">Pending</span> Validations</h2>
+            
+            <table class="validation-table" id="validationTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAllTable"></th>
+                        <th>Shop Owner</th>
+                        <th>Serial Number</th>
+                        <th>Model</th>
+                        <th>Submitted Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Content will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Validation Modal -->
+    <div class="modal" id="validationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Shoe Validation Details</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-grid">
+                    <div>
+                        <div class="form-group">
+                            <label class="form-label">Shop Owner</label>
+                            <p id="modal-shop">Sneaker Haven (ID: SH123)</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Serial Number</label>
+                            <p id="modal-serial">SN12345678</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Shoe Model</label>
+                            <p id="modal-model">Nike Air Jordan 1</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Submitted Date</label>
+                            <p id="modal-date">Oct 15, 2023</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <p id="modal-status"><span class="status-badge status-pending">Pending</span></p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description / Proof of Authenticity</label>
+                            <p id="modal-description">This is a limited edition release with special packaging and extra laces. The quality of materials is exceptional with no visible flaws in stitching or glue marks. The serial number matches the manufacturer's database.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Submitted Images</label>
+                    <div class="modal-images">
+                        <img src="https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View" alt="Front View" class="modal-image" id="modal-front">
+                        <img src="https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View" alt="Back View" class="modal-image" id="modal-back">
+                        <img src="https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View" alt="Top View" class="modal-image" id="modal-top">
+                    </div>
+                </div>
+                
+                <div class="rejection-reason" id="rejectionSection">
+                    <div class="form-group">
+                        <label for="rejectReason" class="form-label">Rejection Reason (if applicable)</label>
+                        <textarea id="rejectReason" class="form-textarea" placeholder="Provide detailed reason for rejection..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="modal-actions" id="modalActions">
+                    <button class="btn btn-reject reject-shoe">
+                        <i class="fas fa-times"></i> Reject
+                    </button>
+                    <button class="btn btn-approve approve-shoe">
+                        <i class="fas fa-check"></i> Approve
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div id="overlay" class="overlay"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const menuBtn = document.querySelector('.menu-btn');
+            const navLinks = document.querySelector('.nav-links');
+            const overlay = document.getElementById('overlay');
+            
+            menuBtn.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+                overlay.style.display = navLinks.classList.contains('active') ? 'block' : 'none';
+            });
+            
+            overlay.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                overlay.style.display = 'none';
+            });
+
+            // Navigation tabs
+            const navTabs = document.querySelectorAll('.nav-tab');
+            const tableTitle = document.getElementById('tableTitle');
+            const tableBody = document.getElementById('tableBody');
+            const bulkActions = document.getElementById('bulkActions');
+            const clearHistoryContainer = document.getElementById('clearHistoryContainer');
+            const clearHistoryBtn = document.getElementById('clearHistory');
+            
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs
+                    navTabs.forEach(t => t.classList.remove('active'));
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+                    
+                    // Update table based on selected tab
+                    const tabName = tab.getAttribute('data-tab');
+                    tableTitle.textContent = tabName.charAt(0).toUpperCase() + tabName.slice(1);
+                    updateTable(tabName);
+                    
+                    // Show/hide bulk actions and clear history button
+                    if (tabName === 'pending') {
+                        bulkActions.style.display = 'flex';
+                        clearHistoryContainer.style.display = 'none';
+                    } else {
+                        bulkActions.style.display = 'none';
+                        clearHistoryContainer.style.display = 'flex';
+                    }
+                });
+            });
+            
+            // Clear history functionality
+            clearHistoryBtn.addEventListener('click', () => {
+                const activeTab = document.querySelector('.nav-tab.active').getAttribute('data-tab');
+                if (confirm(`Are you sure you want to clear all ${activeTab} history? This action cannot be undone.`)) {
+                    // In a real application, this would send a request to the server
+                    alert(`All ${activeTab} history has been cleared.`);
+                    updateTable(activeTab);
+                }
+            });
+            
+            // Sample data for validation details
+            const validationData = {
+                1: {
+                    shop: "Sneaker Haven (ID: SH123)",
+                    serial: "SN12345678",
+                    model: "Nike Air Jordan 1",
+                    date: "Oct 15, 2023",
+                    status: "Pending",
+                    statusClass: "status-pending",
+                    description: "This is a limited edition release with special packaging and extra laces. The quality of materials is exceptional with no visible flaws in stitching or glue marks. The serial number matches the manufacturer's database.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
+                },
+                2: {
+                    shop: "Kicks Kingdom (ID: KK456)",
+                    serial: "SN87654321",
+                    model: "Adidas Yeezy Boost 350",
+                    date: "Oct 14, 2023",
+                    status: "Pending",
+                    statusClass: "status-pending",
+                    description: "Purchased from a third-party retailer. The boost technology feels comfortable but I'm concerned about the stitching on the left shoe. Includes original box and documentation.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
+                },
+                3: {
+                    shop: "Sole Supreme (ID: SS789)",
+                    serial: "SN11223344",
+                    model: "New Balance 550",
+                    date: "Oct 13, 2023",
+                    status: "Pending",
+                    statusClass: "status-pending",
+                    description: "Bought directly from the New Balance website during the last drop. All packaging and documentation included. The shoe has never been worn and is in pristine condition.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
+                },
+                4: {
+                    shop: "Sneaker Haven (ID: SH123)",
+                    serial: "SN55667788",
+                    model: "Nike Dunk Low",
+                    date: "Oct 12, 2023",
+                    status: "Pending",
+                    statusClass: "status-pending",
+                    description: "Vintage pair from 2005, slight wear but well maintained. Original box included. The colorway is rare and highly sought after by collectors.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
+                },
+                5: {
+                    shop: "Kicks Kingdom (ID: KK456)",
+                    serial: "SN99887766",
+                    model: "Converse Chuck Taylor",
+                    date: "Oct 11, 2023",
+                    status: "Pending",
+                    statusClass: "status-pending",
+                    description: "Limited edition collaboration with off-white branding. Purchased from a reseller. The shoe shows minimal signs of wear and comes with original special edition box.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
+                }
+            };
+
+            // Function to update table based on selected tab
+            function updateTable(tabName) {
+                // Clear existing table content
+                tableBody.innerHTML = '';
+                
+                // Sample data for different tabs
+                let data = [];
+                
+                if (tabName === 'pending') {
+                    data = [
+                        { id: 1, shop: "Sneaker Haven (ID: SH123)", serial: "SN12345678", model: "Nike Air Jordan 1", date: "Oct 15, 2023", status: "Pending", statusClass: "status-pending" },
+                        { id: 2, shop: "Kicks Kingdom (ID: KK456)", serial: "SN87654321", model: "Adidas Yeezy Boost 350", date: "Oct 14, 2023", status: "Pending", statusClass: "status-pending" },
+                        { id: 3, shop: "Sole Supreme (ID: SS789)", serial: "SN11223344", model: "New Balance 550", date: "Oct 13, 2023", status: "Pending", statusClass: "status-pending" },
+                        { id: 4, shop: "Sneaker Haven (ID: SH123)", serial: "SN55667788", model: "Nike Dunk Low", date: "Oct 12, 2023", status: "Pending", statusClass: "status-pending" },
+                        { id: 5, shop: "Kicks Kingdom (ID: KK456)", serial: "SN99887766", model: "Converse Chuck Taylor", date: "Oct 11, 2023", status: "Pending", statusClass: "status-pending" }
+                    ];
+                } else if (tabName === 'approved') {
+                    data = [
+                        { id: 6, shop: "Sole Supreme (ID: SS789)", serial: "SN33445566", model: "Nike Air Force 1", date: "Oct 10, 2023", status: "Approved", statusClass: "status-legit" },
+                        { id: 7, shop: "Kicks Kingdom (ID: KK456)", serial: "SN77889900", model: "Adidas Ultraboost", date: "Oct 9, 2023", status: "Approved", statusClass: "status-legit" },
+                        { id: 8, shop: "Sneaker Haven (ID: SH123)", serial: "SN22334455", model: "Jordan 4 Retro", date: "Oct 8, 2023", status: "Approved", statusClass: "status-legit" }
+                    ];
+                } else if (tabName === 'rejected') {
+                    data = [
+                        { id: 9, shop: "Kicks Kingdom (ID: KK456)", serial: "SN66778899", model: "Yeezy 700", date: "Oct 7, 2023", status: "Rejected", statusClass: "status-fake", reason: "Inconsistent stitching patterns" },
+                        { id: 10, shop: "Sneaker Haven (ID: SH123)", serial: "SN44556677", model: "Off-White x Nike", date: "Oct 6, 2023", status: "Rejected", statusClass: "status-fake", reason: "Serial number doesn't match database" }
+                    ];
+                }
+                
+                // Populate table with data
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    
+                    // Add checkbox only for pending items
+                    if (tabName === 'pending') {
+                        row.innerHTML = `
+                            <td><input type="checkbox" class="shoe-checkbox" data-id="${item.id}"></td>
+                            <td>${item.shop}</td>
+                            <td>${item.serial}</td>
+                            <td>${item.model}</td>
+                            <td>${item.date}</td>
+                            <td><span class="status-badge ${item.statusClass}">${item.status}</span></td>
+                            <td>
+                                <button class="btn btn-view view-details" data-id="${item.id}">
+                                    <i class="fas fa-eye"></i> Review
+                                </button>
+                            </td>
+                        `;
+                    } else {
+                        row.innerHTML = `
+                            <td></td>
+                            <td>${item.shop}</td>
+                            <td>${item.serial}</td>
+                            <td>${item.model}</td>
+                            <td>${item.date}</td>
+                            <td><span class="status-badge ${item.statusClass}">${item.status}</span></td>
+                            <td>
+                                <button class="btn btn-view view-details" data-id="${item.id}">
+                                    <i class="fas fa-eye"></i> View Details
+                                </button>
+                            </td>
+                        `;
+                    }
+                    
+                    tableBody.appendChild(row);
+                });
+                
+                // Reattach event listeners to the new buttons
+                attachEventListeners();
+            }
+            
+            // Initialize table with pending data
+            updateTable('pending');
+            
+            // Function to attach event listeners
+            function attachEventListeners() {
+                // Modal functionality
+                const modal = document.getElementById('validationModal');
+                const closeModal = document.querySelector('.modal-close');
+                const viewButtons = document.querySelectorAll('.view-details');
+                
+                viewButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const id = button.getAttribute('data-id');
+                        const data = validationData[id];
+                        
+                        if (data) {
+                            // Populate modal with data
+                            document.getElementById('modal-shop').textContent = data.shop;
+                            document.getElementById('modal-serial').textContent = data.serial;
+                            document.getElementById('modal-model').textContent = data.model;
+                            document.getElementById('modal-date').textContent = data.date;
+                            document.getElementById('modal-description').textContent = data.description;
+                            
+                            // Update status
+                            const statusElement = document.getElementById('modal-status');
+                            statusElement.innerHTML = `<span class="status-badge ${data.statusClass}">${data.status}</span>`;
+                            
+                            // Update images
+                            document.getElementById('modal-front').src = data.images.front;
+                            document.getElementById('modal-back').src = data.images.back;
+                            document.getElementById('modal-top').src = data.images.top;
+                            
+                            // Show/hide rejection section based on status
+                            const rejectionSection = document.getElementById('rejectionSection');
+                            const modalActions = document.getElementById('modalActions');
+                            
+                            if (data.status === 'Pending') {
+                                rejectionSection.style.display = 'block';
+                                modalActions.style.display = 'flex';
+                            } else {
+                                rejectionSection.style.display = 'none';
+                                modalActions.style.display = 'none';
+                            }
+                            
+                            // Show modal
+                            modal.classList.add('active');
+                            overlay.style.display = 'block';
+                        }
+                    });
+                });
+
+                // Close modal
+                closeModal.addEventListener('click', () => {
+                    modal.classList.remove('active');
+                    overlay.style.display = 'none';
+                });
+
+                // Close modal when clicking outside
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.remove('active');
+                        overlay.style.display = 'none';
+                    }
+                });
+
+                // Approve shoe functionality
+                const approveButton = document.querySelector('.approve-shoe');
+                approveButton.addEventListener('click', () => {
+                    // In a real application, this would send a request to the server
+                    alert('Shoe has been approved successfully!');
+                    modal.classList.remove('active');
+                    overlay.style.display = 'none';
+                    
+                    // Update the table to reflect the change
+                    updateTable('pending');
+                });
+
+                // Reject shoe functionality
+                const rejectButton = document.querySelector('.reject-shoe');
+                rejectButton.addEventListener('click', () => {
+                    const reason = document.getElementById('rejectReason').value;
+                    
+                    if (!reason) {
+                        alert('Please provide a reason for rejection.');
+                        return;
+                    }
+                    
+                    // In a real application, this would send a request to the server
+                    alert(`Shoe has been rejected. Reason: ${reason}`);
+                    modal.classList.remove('active');
+                    overlay.style.display = 'none';
+                    
+                    // Clear the rejection reason textarea
+                    document.getElementById('rejectReason').value = '';
+                    
+                    // Update the table to reflect the change
+                    updateTable('pending');
+                });
+
+                // Select all checkboxes functionality
+                const selectAllTable = document.getElementById('selectAllTable');
+                const selectAll = document.getElementById('selectAll');
+
+                selectAllTable.addEventListener('change', () => {
+                    const checkboxes = document.querySelectorAll('.shoe-checkbox');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = selectAllTable.checked;
+                    });
+                    
+                    // Update the main select all checkbox
+                    selectAll.checked = selectAllTable.checked;
+                });
+
+                selectAll.addEventListener('change', () => {
+                    const checkboxes = document.querySelectorAll('.shoe-checkbox');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = selectAll.checked;
+                    });
+                    
+                    // Update the table header checkbox
+                    selectAllTable.checked = selectAll.checked;
+                });
+
+                // Approve selected functionality
+                const approveSelected = document.getElementById('approveSelected');
+                approveSelected.addEventListener('click', () => {
+                    const selectedCheckboxes = document.querySelectorAll('.shoe-checkbox:checked');
+                    
+                    if (selectedCheckboxes.length === 0) {
+                        alert('Please select at least one shoe to approve.');
+                        return;
+                    }
+                    
+                    if (confirm(`Are you sure you want to approve ${selectedCheckboxes.length} selected shoes?`)) {
+                        // In a real application, this would send a request to the server
+                        alert(`${selectedCheckboxes.length} shoes have been approved successfully!`);
+                        
+                        // Update the table to reflect the changes
+                        updateTable('pending');
+                        
+                        // Uncheck select all checkboxes
+                        selectAll.checked = false;
+                        selectAllTable.checked = false;
+                    }
+                });
+
+                // Reject selected functionality
+                const rejectSelected = document.getElementById('rejectSelected');
+                rejectSelected.addEventListener('click', () => {
+                    const selectedCheckboxes = document.querySelectorAll('.shoe-checkbox:checked');
+                    
+                    if (selectedCheckboxes.length === 0) {
+                        alert('Please select at least one shoe to reject.');
+                        return;
+                    }
+                    
+                    if (confirm(`Are you sure you want to reject ${selectedCheckboxes.length} selected shoes?`)) {
+                        // In a real application, this would send a request to the server
+                        alert(`${selectedCheckboxes.length} shoes have been rejected.`);
+                        
+                        // Update the table to reflect the changes
+                        updateTable('pending');
+                        
+                        // Uncheck select all checkboxes
+                        selectAll.checked = false;
+                        selectAllTable.checked = false;
+                    }
+                });
+
+                // Filter functionality
+                const applyFilters = document.getElementById('applyFilters');
+                const clearFilters = document.getElementById('clearFilters');
+
+                applyFilters.addEventListener('click', () => {
+                    const shopFilter = document.getElementById('shopFilter').value;
+                    const statusFilter = document.getElementById('statusFilter').value;
+                    const dateFilter = document.getElementById('dateFilter').value;
+                    
+                    // In a real application, this would send a request to the server with filter parameters
+                    alert(`Filters applied:\nShop: ${shopFilter || 'All'}\nStatus: ${statusFilter || 'All'}\nDate: ${dateFilter || 'Any'}`);
+                    
+                    // Update the table with filtered results
+                    const activeTab = document.querySelector('.nav-tab.active').getAttribute('data-tab');
+                    updateTable(activeTab);
+                });
+
+                clearFilters.addEventListener('click', () => {
+                    document.getElementById('shopFilter').value = '';
+                    document.getElementById('statusFilter').value = '';
+                    document.getElementById('dateFilter').value = '';
+                    
+                    // Update the table with all results
+                    const activeTab = document.querySelector('.nav-tab.active').getAttribute('data-tab');
+                    updateTable(activeTab);
+                });
+
+                // Add some sample data for approved and rejected tabs
+                validationData[6] = {
+                    shop: "Sole Supreme (ID: SS789)",
+                    serial: "SN33445566",
+                    model: "Nike Air Force 1",
+                    date: "Oct 10, 2023",
+                    status: "Approved",
+                    statusClass: "status-legit",
+                    description: "Authentic pair with all original packaging. The quality checks passed all verification points including stitching, materials, and labeling.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
+                };
+
+                validationData[7] = {
+                    shop: "Kicks Kingdom (ID: KK456)",
+                    serial: "SN77889900",
+                    model: "Adidas Ultraboost",
+                    date: "Oct 9, 2023",
+                    status: "Approved",
+                    statusClass: "status-legit",
+                    description: "Direct from Adidas confirmed through verification system. All authenticity markers check out perfectly.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
+                };
+
+                validationData[8] = {
+                    shop: "Sneaker Haven (ID: SH123)",
+                    serial: "SN22334455",
+                    model: "Jordan 4 Retro",
+                    date: "Oct 8, 2023",
+                    status: "Approved",
+                    statusClass: "status-legit",
+                    description: "Limited release with certificate of authenticity. All details match the manufacturer specifications.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
+                };
+
+                validationData[9] = {
+                    shop: "Kicks Kingdom (ID: KK456)",
+                    serial: "SN66778899",
+                    model: "Yeezy 700",
+                    date: "Oct 7, 2023",
+                    status: "Rejected",
+                    statusClass: "status-fake",
+                    description: "Seller claims these are authentic but several red flags were identified during inspection.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
+                };
+
+                validationData[10] = {
+                    shop: "Sneaker Haven (ID: SH123)",
+                    serial: "SN44556677",
+                    model: "Off-White x Nike",
+                    date: "Oct 6, 2023",
+                    status: "Rejected",
+                    statusClass: "status-fake",
+                    description: "Inconsistent details compared to verified authentic pairs. Multiple indicators suggest these are replicas.",
+                    images: {
+                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
+                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
+                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
+                    }
+                };
+            };
+            
+            // Logout functionality
+            const logoutBtn = document.getElementById('logoutBtn');
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (confirm('Are you sure you want to logout?')) {
+                    // In a real application, this would redirect to the logout endpoint
+                    alert('Logout successful');
+                    window.location.href = '/admin/html/admin_login.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
