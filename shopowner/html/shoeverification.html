@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -252,7 +253,9 @@
             color: var(--dark);
         }
 
-        .form-input, .form-textarea, .form-select {
+        .form-input,
+        .form-textarea,
+        .form-select {
             width: 100%;
             padding: 0.75rem 1rem;
             border: 1px solid var(--gray-light);
@@ -261,7 +264,9 @@
             transition: var(--transition);
         }
 
-        .form-input:focus, .form-textarea:focus, .form-select:focus {
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
@@ -604,6 +609,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="dashboard">
         <!-- Sidebar -->
@@ -671,29 +677,35 @@
             <div class="tab-content active" id="validation-form">
                 <div class="form-container">
                     <h2 class="form-title"><i class="fas fa-clipboard-check"></i> Submit Shoe for Validation</h2>
-                    
+
                     <form id="shoeValidationForm">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="serialNumber" class="form-label">Serial Number</label>
-                                <input type="text" id="serialNumber" class="form-input" placeholder="Enter shoe serial number" required>
+                                <input type="text" id="serialNumber" class="form-input"
+                                    placeholder="Enter shoe serial number" required>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="shoeModel" class="form-label">Shoe Model</label>
-                                <input type="text" id="shoeModel" class="form-input" placeholder="Enter shoe model name" required>
+                                <input type="text" id="shoeModel" class="form-input" placeholder="Enter shoe model name"
+                                    required>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
-                            <label for="description" class="form-label">General Description / Proof of Authenticity</label>
-                            <textarea id="description" class="form-textarea" placeholder="Provide detailed description and proof of authenticity..." required></textarea>
+                            <label for="description" class="form-label">General Description / Proof of
+                                Authenticity</label>
+                            <textarea id="description" class="form-textarea"
+                                placeholder="Provide detailed description and proof of authenticity..."
+                                required></textarea>
                         </div>
-                        
+
                         <div class="image-upload-section">
                             <h3 class="form-label">Shoe Images (Required)</h3>
-                            <p style="color: var(--gray-dark); margin-bottom: 1rem;">Please upload clear images of the shoe from different angles</p>
-                            
+                            <p style="color: var(--gray-dark); margin-bottom: 1rem;">Please upload clear images of the
+                                shoe from different angles</p>
+
                             <div class="image-grid">
                                 <div class="image-upload-item" id="frontViewUpload">
                                     <i class="fas fa-camera"></i>
@@ -702,7 +714,7 @@
                                     <span class="remove-image">&times;</span>
                                     <input type="file" id="frontView" accept="image/*" style="display: none;">
                                 </div>
-                                
+
                                 <div class="image-upload-item" id="backViewUpload">
                                     <i class="fas fa-camera"></i>
                                     <p>Back View</p>
@@ -710,7 +722,7 @@
                                     <span class="remove-image">&times;</span>
                                     <input type="file" id="backView" accept="image/*" style="display: none;">
                                 </div>
-                                
+
                                 <div class="image-upload-item" id="topViewUpload">
                                     <i class="fas fa-camera"></i>
                                     <p>Top View</p>
@@ -720,10 +732,11 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="form-actions">
                             <button type="button" class="btn btn-secondary">Cancel</button>
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit for Validation</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit for
+                                Validation</button>
                         </div>
                     </form>
                 </div>
@@ -733,7 +746,7 @@
             <div class="tab-content" id="validation-history">
                 <div class="table-container">
                     <h2 class="form-title"><i class="fas fa-history"></i> Past Validations</h2>
-                    
+
                     <table class="validation-table">
                         <thead>
                             <tr>
@@ -805,29 +818,32 @@
                         <p id="modal-model">Nike Air Jordan 1</p>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">Description</label>
-                    <p id="modal-description">This is a limited edition release with special packaging and extra laces. The quality of materials is exceptional with no visible flaws in stitching or glue marks.</p>
+                    <p id="modal-description">This is a limited edition release with special packaging and extra laces.
+                        The quality of materials is exceptional with no visible flaws in stitching or glue marks.</p>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">Submitted Images</label>
                     <div class="modal-images">
-                        <img src="https://via.placeholder.com/300" alt="Front View" class="modal-image" id="modal-front">
-                        <img src="https://via.placeholder.com/300" alt="Back View" class="modal-image" id="modal-back">
-                        <img src="https://via.placeholder.com/300" alt="Top View" class="modal-image" id="modal-top">
+                        <img src="#" alt="Front View" class="modal-image" id="modal-front">
+                        <img src="#" alt="Back View" class="modal-image" id="modal-back">
+                        <img src="#" alt="Top View" class="modal-image" id="modal-top">
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">Validation Status</label>
                     <p id="modal-status"><span class="status-badge status-legit">Legit</span></p>
                 </div>
-                
+
                 <div class="modal-reason" id="modal-reason">
                     <h4>Validation Notes:</h4>
-                    <p id="modal-reason-text">This shoe passed all authenticity checks. The serial number matches the manufacturer's database, materials are consistent with authentic products, and all design elements are correct for this model.</p>
+                    <p id="modal-reason-text">This shoe passed all authenticity checks. The serial number matches the
+                        manufacturer's database, materials are consistent with authentic products, and all design
+                        elements are correct for this model.</p>
                 </div>
             </div>
         </div>
@@ -836,7 +852,7 @@
     <!-- Sidebar Overlay -->
     <div class="sidebar-overlay"></div>
 
-    <script>
+    <!-- <script>
         // Mobile sidebar toggle
         document.addEventListener('DOMContentLoaded', function() {
             const mobileToggle = document.querySelector('.mobile-menu-toggle');
@@ -1154,7 +1170,8 @@
                 }
             });
         });
-    </script>
+    </script> -->
+    <script src="../js/shoeverification.js" type="module"></script>
 </body>
+
 </html>
-                        
