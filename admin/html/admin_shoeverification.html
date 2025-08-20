@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Shoe Validation</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
     <style>
         :root {
             --primary: #3498db;
@@ -633,6 +634,56 @@
                 transform: translateY(0);
             }
         }
+
+        /* Custom styles for daterangepicker */
+        .daterangepicker {
+            font-size: 14px;
+            min-width: 680px;
+            /* Adjusted for two calendars + ranges */
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .daterangepicker .ranges {
+            width: 140px;
+        }
+
+        .daterangepicker .drp-calendar {
+            padding: 10px;
+            max-width: 260px;
+            /* Control calendar width */
+        }
+
+        .daterangepicker .calendar-table th,
+        .daterangepicker .calendar-table td {
+            width: 32px;
+            /* Consistent width */
+            height: 32px;
+            /* Consistent height */
+            min-width: 32px;
+            line-height: 32px;
+            text-align: center;
+            padding: 0;
+        }
+
+        /* Ensure the component does not overflow the viewport */
+        .daterangepicker {
+            left: auto !important;
+            right: 20px;
+            /* Position from right edge */
+        }
+
+        @media (max-width: 768px) {
+            .daterangepicker {
+                min-width: auto;
+                width: 95vw;
+                /* Full width on mobile */
+            }
+
+            .daterangepicker .drp-calendar.left,
+            .daterangepicker .drp-calendar.right {
+                width: 50%;
+            }
+        }
     </style>
 </head>
 
@@ -691,7 +742,7 @@
                 </div>
                 <div class="form-group">
                     <label for="dateFilter" class="form-label">Date Submitted</label>
-                    <input type="date" id="dateFilter" class="form-input">
+                    <input type="text" id="dateFilter" class="form-input">
                 </div>
             </div>
             <div class="filter-actions">
@@ -826,603 +877,9 @@
     <!-- Overlay -->
     <div id="overlay" class="overlay"></div>
 
-    <!-- <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Mobile menu toggle
-            const menuBtn = document.querySelector('.menu-btn');
-            const navLinks = document.querySelector('.nav-links');
-            const overlay = document.getElementById('overlay');
-
-            menuBtn.addEventListener('click', () => {
-                navLinks.classList.toggle('active');
-                overlay.style.display = navLinks.classList.contains('active') ? 'block' : 'none';
-            });
-
-            overlay.addEventListener('click', () => {
-                navLinks.classList.remove('active');
-                overlay.style.display = 'none';
-            });
-
-            // Navigation tabs
-            const navTabs = document.querySelectorAll('.nav-tab');
-            const tableTitle = document.getElementById('tableTitle');
-            const tableBody = document.getElementById('tableBody');
-            const bulkActions = document.getElementById('bulkActions');
-            const clearHistoryContainer = document.getElementById('clearHistoryContainer');
-            const clearHistoryBtn = document.getElementById('clearHistory');
-
-            navTabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Remove active class from all tabs
-                    navTabs.forEach(t => t.classList.remove('active'));
-                    // Add active class to clicked tab
-                    tab.classList.add('active');
-
-                    // Update table based on selected tab
-                    const tabName = tab.getAttribute('data-tab');
-                    tableTitle.textContent = tabName.charAt(0).toUpperCase() + tabName.slice(1);
-                    updateTable(tabName);
-
-                    // Show/hide bulk actions and clear history button
-                    if (tabName === 'pending') {
-                        bulkActions.style.display = 'flex';
-                        clearHistoryContainer.style.display = 'none';
-                    } else {
-                        bulkActions.style.display = 'none';
-                        clearHistoryContainer.style.display = 'flex';
-                    }
-                });
-            });
-
-            // Clear history functionality
-            clearHistoryBtn.addEventListener('click', () => {
-                const activeTab = document.querySelector('.nav-tab.active').getAttribute('data-tab');
-                if (confirm(`Are you sure you want to clear all ${activeTab} history? This action cannot be undone.`)) {
-                    // In a real application, this would send a request to the server
-                    alert(`All ${activeTab} history has been cleared.`);
-                    updateTable(activeTab);
-                }
-            });
-
-            // Sample data for validation details
-            const validationData = {
-                1: {
-                    shop: "Sneaker Haven (ID: SH123)",
-                    serial: "SN12345678",
-                    model: "Nike Air Jordan 1",
-                    date: "Oct 15, 2023",
-                    status: "Pending",
-                    statusClass: "status-pending",
-                    description: "This is a limited edition release with special packaging and extra laces. The quality of materials is exceptional with no visible flaws in stitching or glue marks. The serial number matches the manufacturer's database.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                },
-                2: {
-                    shop: "Kicks Kingdom (ID: KK456)",
-                    serial: "SN87654321",
-                    model: "Adidas Yeezy Boost 350",
-                    date: "Oct 14, 2023",
-                    status: "Pending",
-                    statusClass: "status-pending",
-                    description: "Purchased from a third-party retailer. The boost technology feels comfortable but I'm concerned about the stitching on the left shoe. Includes original box and documentation.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                },
-                3: {
-                    shop: "Sole Supreme (ID: SS789)",
-                    serial: "SN11223344",
-                    model: "New Balance 550",
-                    date: "Oct 13, 2023",
-                    status: "Pending",
-                    statusClass: "status-pending",
-                    description: "Bought directly from the New Balance website during the last drop. All packaging and documentation included. The shoe has never been worn and is in pristine condition.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                },
-                4: {
-                    shop: "Sneaker Haven (ID: SH123)",
-                    serial: "SN55667788",
-                    model: "Nike Dunk Low",
-                    date: "Oct 12, 2023",
-                    status: "Pending",
-                    statusClass: "status-pending",
-                    description: "Vintage pair from 2005, slight wear but well maintained. Original box included. The colorway is rare and highly sought after by collectors.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                },
-                5: {
-                    shop: "Kicks Kingdom (ID: KK456)",
-                    serial: "SN99887766",
-                    model: "Converse Chuck Taylor",
-                    date: "Oct 11, 2023",
-                    status: "Pending",
-                    statusClass: "status-pending",
-                    description: "Limited edition collaboration with off-white branding. Purchased from a reseller. The shoe shows minimal signs of wear and comes with original special edition box.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                },
-                6: {
-                    shop: "Sole Supreme (ID: SS789)",
-                    serial: "SN33445566",
-                    model: "Nike Air Force 1",
-                    date: "Oct 10, 2023",
-                    status: "Approved",
-                    statusClass: "status-legit",
-                    description: "Authentic pair with all original packaging. The quality checks passed all verification points including stitching, materials, and labeling.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                },
-                7: {
-                    shop: "Kicks Kingdom (ID: KK456)",
-                    serial: "SN77889900",
-                    model: "Adidas Ultraboost",
-                    date: "Oct 9, 2023",
-                    status: "Approved",
-                    statusClass: "status-legit",
-                    description: "Direct from Adidas confirmed through verification system. All authenticity markers check out perfectly.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                },
-                8: {
-                    shop: "Sneaker Haven (ID: SH123)",
-                    serial: "SN22334455",
-                    model: "Jordan 4 Retro",
-                    date: "Oct 8, 2023",
-                    status: "Approved",
-                    statusClass: "status-legit",
-                    description: "Limited release with certificate of authenticity. All details match the manufacturer specifications.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                },
-                9: {
-                    shop: "Kicks Kingdom (ID: KK456)",
-                    serial: "SN66778899",
-                    model: "Yeezy 700",
-                    date: "Oct 7, 2023",
-                    status: "Rejected",
-                    statusClass: "status-fake",
-                    description: "Seller claims these are authentic but several red flags were identified during inspection.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                },
-                10: {
-                    shop: "Sneaker Haven (ID: SH123)",
-                    serial: "SN44556677",
-                    model: "Off-White x Nike",
-                    date: "Oct 6, 2023",
-                    status: "Rejected",
-                    statusClass: "status-fake",
-                    description: "Inconsistent details compared to verified authentic pairs. Multiple indicators suggest these are replicas.",
-                    images: {
-                        front: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View",
-                        back: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View",
-                        top: "https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View"
-                    }
-                }
-            };
-
-            // Function to update table based on selected tab
-            function updateTable(tabName) {
-                // Clear existing table content
-                tableBody.innerHTML = '';
-
-                // Sample data for different tabs
-                let data = [];
-
-                if (tabName === 'pending') {
-                    data = [
-                        { id: 1, shop: "Sneaker Haven (ID: SH123)", serial: "SN12345678", model: "Nike Air Jordan 1", date: "Oct 15, 2023", status: "Pending", statusClass: "status-pending" },
-                        { id: 2, shop: "Kicks Kingdom (ID: KK456)", serial: "SN87654321", model: "Adidas Yeezy Boost 350", date: "Oct 14, 2023", status: "Pending", statusClass: "status-pending" },
-                        { id: 3, shop: "Sole Supreme (ID: SS789)", serial: "SN11223344", model: "New Balance 550", date: "Oct 13, 2023", status: "Pending", statusClass: "status-pending" },
-                        { id: 4, shop: "Sneaker Haven (ID: SH123)", serial: "SN55667788", model: "Nike Dunk Low", date: "Oct 12, 2023", status: "Pending", statusClass: "status-pending" },
-                        { id: 5, shop: "Kicks Kingdom (ID: KK456)", serial: "SN99887766", model: "Converse Chuck Taylor", date: "Oct 11, 2023", status: "Pending", statusClass: "status-pending" }
-                    ];
-                } else if (tabName === 'approved') {
-                    data = [
-                        { id: 6, shop: "Sole Supreme (ID: SS789)", serial: "SN33445566", model: "Nike Air Force 1", date: "Oct 10, 2023", status: "Approved", statusClass: "status-legit" },
-                        { id: 7, shop: "Kicks Kingdom (ID: KK456)", serial: "SN77889900", model: "Adidas Ultraboost", date: "Oct 9, 2023", status: "Approved", statusClass: "status-legit" },
-                        { id: 8, shop: "Sneaker Haven (ID: SH123)", serial: "SN22334455", model: "Jordan 4 Retro", date: "Oct 8, 2023", status: "Approved", statusClass: "status-legit" }
-                    ];
-                } else if (tabName === 'rejected') {
-                    data = [
-                        { id: 9, shop: "Kicks Kingdom (ID: KK456)", serial: "SN66778899", model: "Yeezy 700", date: "Oct 7, 2023", status: "Rejected", statusClass: "status-fake", reason: "Inconsistent stitching patterns" },
-                        { id: 10, shop: "Sneaker Haven (ID: SH123)", serial: "SN44556677", model: "Off-White x Nike", date: "Oct 6, 2023", status: "Rejected", statusClass: "status-fake", reason: "Serial number doesn't match database" }
-                    ];
-                }
-
-                // Populate table with data
-                data.forEach(item => {
-                    const row = document.createElement('tr');
-
-                    // Add checkbox only for pending items
-                    if (tabName === 'pending') {
-                        row.innerHTML = `
-                    <td><input type="checkbox" class="shoe-checkbox" data-id="${item.id}"></td>
-                    <td>${item.shop}</td>
-                    <td>${item.serial}</td>
-                    <td>${item.model}</td>
-                    <td>${item.date}</td>
-                    <td><span class="status-badge ${item.statusClass}">${item.status}</span></td>
-                    <td>
-                        <button class="btn btn-view view-details" data-id="${item.id}">
-                            <i class="fas fa-eye"></i> Review
-                        </button>
-                    </td>
-                `;
-                    } else {
-                        row.innerHTML = `
-                    <td></td>
-                    <td>${item.shop}</td>
-                    <td>${item.serial}</td>
-                    <td>${item.model}</td>
-                    <td>${item.date}</td>
-                    <td><span class="status-badge ${item.statusClass}">${item.status}</span></td>
-                    <td>
-                        <button class="btn btn-view view-details" data-id="${item.id}">
-                            <i class="fas fa-eye"></i> View Details
-                        </button>
-                    </td>
-                `;
-                    }
-
-                    tableBody.appendChild(row);
-                });
-
-                // Reattach event listeners to the new buttons
-                attachEventListeners();
-            }
-
-            // Initialize table with pending data
-            updateTable('pending');
-
-            // Function to attach event listeners
-            function attachEventListeners() {
-                // Modal functionality
-                const modal = document.getElementById('validationModal');
-                const closeModal = document.querySelector('.modal-close');
-                const viewButtons = document.querySelectorAll('.view-details');
-
-                viewButtons.forEach(button => {
-                    button.addEventListener('click', () => {
-                        const id = button.getAttribute('data-id');
-                        const data = validationData[id];
-
-                        if (data) {
-                            // Populate modal with data
-                            document.getElementById('modal-shop').textContent = data.shop;
-                            document.getElementById('modal-serial').textContent = data.serial;
-                            document.getElementById('modal-model').textContent = data.model;
-                            document.getElementById('modal-date').textContent = data.date;
-                            document.getElementById('modal-description').textContent = data.description;
-
-                            // Update status
-                            const statusElement = document.getElementById('modal-status');
-                            statusElement.innerHTML = `<span class="status-badge ${data.statusClass}">${data.status}</span>`;
-
-                            // Update images
-                            document.getElementById('modal-front').src = data.images.front;
-                            document.getElementById('modal-back').src = data.images.back;
-                            document.getElementById('modal-top').src = data.images.top;
-
-                            // Show/hide rejection section based on status
-                            const rejectionSection = document.getElementById('rejectionSection');
-                            const modalActions = document.getElementById('modalActions');
-
-                            if (data.status === 'Pending') {
-                                rejectionSection.style.display = 'block';
-                                modalActions.style.display = 'flex';
-                            } else {
-                                rejectionSection.style.display = 'none';
-                                modalActions.style.display = 'none';
-                            }
-
-                            // Show modal
-                            modal.classList.add('active');
-                            overlay.style.display = 'block';
-                        }
-                    });
-                });
-
-                // Close modal
-                closeModal.addEventListener('click', () => {
-                    modal.classList.remove('active');
-                    overlay.style.display = 'none';
-                });
-
-                // Close modal when clicking outside
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        modal.classList.remove('active');
-                        overlay.style.display = 'none';
-                    }
-                });
-
-                // Approve shoe functionality
-                const approveButton = document.querySelector('.approve-shoe');
-                approveButton.addEventListener('click', () => {
-                    // In a real application, this would send a request to the server
-                    alert('Shoe has been approved successfully!');
-                    modal.classList.remove('active');
-                    overlay.style.display = 'none';
-
-                    // Update the table to reflect the change
-                    updateTable('pending');
-                });
-
-                // Reject shoe functionality
-                const rejectButton = document.querySelector('.reject-shoe');
-                rejectButton.addEventListener('click', () => {
-                    const reason = document.getElementById('rejectReason').value;
-
-                    if (!reason) {
-                        alert('Please provide a reason for rejection.');
-                        return;
-                    }
-
-                    // In a real application, this would send a request to the server
-                    alert(`Shoe has been rejected. Reason: ${reason}`);
-                    modal.classList.remove('active');
-                    overlay.style.display = 'none';
-
-                    // Clear the rejection reason textarea
-                    document.getElementById('rejectReason').value = '';
-
-                    // Update the table to reflect the change
-                    updateTable('pending');
-                });
-
-                // Select all checkboxes functionality
-                const selectAllTable = document.getElementById('selectAllTable');
-                const selectAll = document.getElementById('selectAll');
-
-                selectAllTable.addEventListener('change', () => {
-                    const checkboxes = document.querySelectorAll('.shoe-checkbox');
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = selectAllTable.checked;
-                    });
-
-                    // Update the main select all checkbox
-                    selectAll.checked = selectAllTable.checked;
-                });
-
-                selectAll.addEventListener('change', () => {
-                    const checkboxes = document.querySelectorAll('.shoe-checkbox');
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = selectAll.checked;
-                    });
-
-                    // Update the table header checkbox
-                    selectAllTable.checked = selectAll.checked;
-                });
-
-                // Approve selected functionality
-                const approveSelected = document.getElementById('approveSelected');
-                approveSelected.addEventListener('click', () => {
-                    const selectedCheckboxes = document.querySelectorAll('.shoe-checkbox:checked');
-
-                    if (selectedCheckboxes.length === 0) {
-                        alert('Please select at least one shoe to approve.');
-                        return;
-                    }
-
-                    if (confirm(`Are you sure you want to approve ${selectedCheckboxes.length} selected shoes?`)) {
-                        // In a real application, this would send a request to the server
-                        alert(`${selectedCheckboxes.length} shoes have been approved successfully!`);
-
-                        // Update the table to reflect the changes
-                        updateTable('pending');
-
-                        // Uncheck select all checkboxes
-                        selectAll.checked = false;
-                        selectAllTable.checked = false;
-                    }
-                });
-
-                // Reject selected functionality
-                const rejectSelected = document.getElementById('rejectSelected');
-                rejectSelected.addEventListener('click', () => {
-                    const selectedCheckboxes = document.querySelectorAll('.shoe-checkbox:checked');
-
-                    if (selectedCheckboxes.length === 0) {
-                        alert('Please select at least one shoe to reject.');
-                        return;
-                    }
-
-                    if (confirm(`Are you sure you want to reject ${selectedCheckboxes.length} selected shoes?`)) {
-                        // In a real application, this would send a request to the server
-                        alert(`${selectedCheckboxes.length} shoes have been rejected.`);
-
-                        // Update the table to reflect the changes
-                        updateTable('pending');
-
-                        // Uncheck select all checkboxes
-                        selectAll.checked = false;
-                        selectAllTable.checked = false;
-                    }
-                });
-
-                // Filter functionality
-                const applyFilters = document.getElementById('applyFilters');
-                const clearFilters = document.getElementById('clearFilters');
-
-                applyFilters.addEventListener('click', () => {
-                    const shopFilter = document.getElementById('shopFilter').value;
-                    const statusFilter = document.getElementById('statusFilter').value;
-                    const dateFilter = document.getElementById('dateFilter').value;
-
-                    // Apply status filter
-                    statusFilterFunction(statusFilter);
-
-                    // In a real application, this would also apply shop and date filters
-                    // For this example, we're focusing on the status filter
-                    alert(`Filters applied:\nShop: ${shopFilter || 'All'}\nStatus: ${statusFilter || 'All'}\nDate: ${dateFilter || 'Any'}`);
-                });
-
-                clearFilters.addEventListener('click', () => {
-                    document.getElementById('shopFilter').value = '';
-                    document.getElementById('statusFilter').value = '';
-                    document.getElementById('dateFilter').value = '';
-
-                    // Show all data when filters are cleared
-                    statusFilterFunction('');
-                });
-            }
-
-            // Status Filter Function
-            function statusFilterFunction(status) {
-                const tableBody = document.getElementById('tableBody');
-                const tableTitle = document.getElementById('tableTitle');
-                const clearHistoryContainer = document.getElementById('clearHistoryContainer');
-                const bulkActions = document.getElementById('bulkActions');
-
-                // Clear existing table content
-                tableBody.innerHTML = '';
-
-                // Sample data for different statuses
-                let data = [];
-
-                if (status === 'pending') {
-                    tableTitle.textContent = 'Pending';
-                    data = [
-                        { id: 1, shop: "Sneaker Haven (ID: SH123)", serial: "SN12345678", model: "Nike Air Jordan 1", date: "Oct 15, 2023", status: "Pending", statusClass: "status-pending" },
-                        { id: 2, shop: "Kicks Kingdom (ID: KK456)", serial: "SN87654321", model: "Adidas Yeezy Boost 350", date: "Oct 14, 2023", status: "Pending", statusClass: "status-pending" },
-                        { id: 3, shop: "Sole Supreme (ID: SS789)", serial: "SN11223344", model: "New Balance 550", date: "Oct 13, 2023", status: "Pending", statusClass: "status-pending" },
-                        { id: 4, shop: "Sneaker Haven (ID: SH123)", serial: "SN55667788", model: "Nike Dunk Low", date: "Oct 12, 2023", status: "Pending", statusClass: "status-pending" },
-                        { id: 5, shop: "Kicks Kingdom (ID: KK456)", serial: "SN99887766", model: "Converse Chuck Taylor", date: "Oct 11, 2023", status: "Pending", statusClass: "status-pending" }
-                    ];
-
-                    // Show bulk actions for pending items
-                    bulkActions.style.display = 'flex';
-                    clearHistoryContainer.style.display = 'none';
-                } else if (status === 'approved') {
-                    tableTitle.textContent = 'Approved';
-                    data = [
-                        { id: 6, shop: "Sole Supreme (ID: SS789)", serial: "SN33445566", model: "Nike Air Force 1", date: "Oct 10, 2023", status: "Approved", statusClass: "status-legit" },
-                        { id: 7, shop: "Kicks Kingdom (ID: KK456)", serial: "SN77889900", model: "Adidas Ultraboost", date: "Oct 9, 2023", status: "Approved", statusClass: "status-legit" },
-                        { id: 8, shop: "Sneaker Haven (ID: SH123)", serial: "SN22334455", model: "Jordan 4 Retro", date: "Oct 8, 2023", status: "Approved", statusClass: "status-legit" }
-                    ];
-
-                    // Hide bulk actions for non-pending items
-                    bulkActions.style.display = 'none';
-                    clearHistoryContainer.style.display = 'flex';
-                } else if (status === 'rejected') {
-                    tableTitle.textContent = 'Rejected';
-                    data = [
-                        { id: 9, shop: "Kicks Kingdom (ID: KK456)", serial: "SN66778899", model: "Yeezy 700", date: "Oct 7, 2023", status: "Rejected", statusClass: "status-fake", reason: "Inconsistent stitching patterns" },
-                        { id: 10, shop: "Sneaker Haven (ID: SH123)", serial: "SN44556677", model: "Off-White x Nike", date: "Oct 6, 2023", status: "Rejected", statusClass: "status-fake", reason: "Serial number doesn't match database" }
-                    ];
-
-                    // Hide bulk actions for non-pending items
-                    bulkActions.style.display = 'none';
-                    clearHistoryContainer.style.display = 'flex';
-                } else {
-                    // Show all data if no specific status is selected
-                    tableTitle.textContent = 'All';
-                    data = [
-                        { id: 1, shop: "Sneaker Haven (ID: SH123)", serial: "SN12345678", model: "Nike Air Jordan 1", date: "Oct 15, 2023", status: "Pending", statusClass: "status-pending" },
-                        { id: 2, shop: "Kicks Kingdom (ID: KK456)", serial: "SN87654321", model: "Adidas Yeezy Boost 350", date: "Oct 14, 2023", status: "Pending", statusClass: "status-pending" },
-                        { id: 3, shop: "Sole Supreme (ID: SS789)", serial: "SN11223344", model: "New Balance 550", date: "Oct 13, 2023", status: "Pending", statusClass: "status-pending" },
-                        { id: 4, shop: "Sneaker Haven (ID: SH123)", serial: "SN55667788", model: "Nike Dunk Low", date: "Oct 12, 2023", status: "Pending", statusClass: "status-pending" },
-                        { id: 5, shop: "Kicks Kingdom (ID: KK456)", serial: "SN99887766", model: "Converse Chuck Taylor", date: "Oct 11, 2023", status: "Pending", statusClass: "status-pending" },
-                        { id: 6, shop: "Sole Supreme (ID: SS789)", serial: "SN33445566", model: "Nike Air Force 1", date: "Oct 10, 2023", status: "Approved", statusClass: "status-legit" },
-                        { id: 7, shop: "Kicks Kingdom (ID: KK456)", serial: "SN77889900", model: "Adidas Ultraboost", date: "Oct 9, 2023", status: "Approved", statusClass: "status-legit" },
-                        { id: 8, shop: "Sneaker Haven (ID: SH123)", serial: "SN22334455", model: "Jordan 4 Retro", date: "Oct 8, 2023", status: "Approved", statusClass: "status-legit" },
-                        { id: 9, shop: "Kicks Kingdom (ID: KK456)", serial: "SN66778899", model: "Yeezy 700", date: "Oct 7, 2023", status: "Rejected", statusClass: "status-fake", reason: "Inconsistent stitching patterns" },
-                        { id: 10, shop: "Sneaker Haven (ID: SH123)", serial: "SN44556677", model: "Off-White x Nike", date: "Oct 6, 2023", status: "Rejected", statusClass: "status-fake", reason: "Serial number doesn't match database" }
-                    ];
-
-                    // Show bulk actions only if there are pending items
-                    bulkActions.style.display = data.some(item => item.status === 'Pending') ? 'flex' : 'none';
-                    clearHistoryContainer.style.display = 'none';
-                }
-
-                // Populate table with data
-                data.forEach(item => {
-                    const row = document.createElement('tr');
-
-                    // Add checkbox only for pending items
-                    if (item.status === 'Pending') {
-                        row.innerHTML = `
-                    <td><input type="checkbox" class="shoe-checkbox" data-id="${item.id}"></td>
-                    <td>${item.shop}</td>
-                    <td>${item.serial}</td>
-                    <td>${item.model}</td>
-                    <td>${item.date}</td>
-                    <td><span class="status-badge ${item.statusClass}">${item.status}</span></td>
-                    <td>
-                        <button class="btn btn-view view-details" data-id="${item.id}">
-                            <i class="fas fa-eye"></i> Review
-                        </button>
-                    </td>
-                `;
-                    } else {
-                        row.innerHTML = `
-                    <td></td>
-                    <td>${item.shop}</td>
-                    <td>${item.serial}</td>
-                    <td>${item.model}</td>
-                    <td>${item.date}</td>
-                    <td><span class="status-badge ${item.statusClass}">${item.status}</span></td>
-                    <td>
-                        <button class="btn btn-view view-details" data-id="${item.id}">
-                            <i class="fas fa-eye"></i> View Details
-                        </button>
-                    </td>
-                `;
-                    }
-
-                    tableBody.appendChild(row);
-                });
-
-                // Add animation effect to the table container
-                const tableContainer = document.querySelector('.table-container');
-                tableContainer.classList.remove('animate-fade');
-                void tableContainer.offsetWidth; // Trigger reflow
-                tableContainer.classList.add('animate-fade');
-
-                // Reattach event listeners to the new buttons
-                attachEventListeners();
-            }
-
-            // Logout functionality
-            const logoutBtn = document.getElementById('logoutBtn');
-            logoutBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (confirm('Are you sure you want to logout?')) {
-                    // In a real application, this would redirect to the logout endpoint
-                    alert('Logout successful');
-                    window.location.href = '/admin/html/admin_login.html';
-                }
-            });
-        });
-    </script> -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <script src="../js/admin_shoeverification.js" type="module"></script>
 </body>
 

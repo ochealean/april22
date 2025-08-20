@@ -28,6 +28,37 @@ let shopData = {};
 document.addEventListener('DOMContentLoaded', function() {
     initializeAppFunctionality();
     setupAuthStateListener();
+    
+    // Initialize date range picker
+    $('#dateFilter').daterangepicker({
+        maxDate: moment(), // Disable future dates
+        ranges: {
+           'Today': [moment(), moment()],
+           'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+           'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+           'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+           'This Month': [moment().startOf('month'), moment().endOf('month')],
+           'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        },
+        "alwaysShowCalendars": true,
+        "opens": "left",
+        "autoUpdateInput": false, // Don't auto-update the input value
+        "linkedCalendars": false, // Show two independent calendars
+        "locale": {
+            "cancelLabel": 'Clear',
+            "format": "MM/DD/YYYY"
+        }
+    });
+
+    // Handle date range selection
+    $('#dateFilter').on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+    });
+
+    // Handle clearing the date range
+    $('#dateFilter').on('cancel.daterangepicker', function(ev, picker) {
+        $(this).val('');
+    });
 });
 
 function initializeAppFunctionality() {
@@ -99,13 +130,12 @@ function initializeAppFunctionality() {
             document.getElementById('shopFilter').value = '';
             document.getElementById('statusFilter').value = '';
             document.getElementById('dateFilter').value = '';
+            // Reset daterangepicker
+            $('#dateFilter').data('daterangepicker').setStartDate(moment());
+            $('#dateFilter').data('daterangepicker').setEndDate(moment());
             
-            // Reset to show all data
-            const activeTab = document.querySelector('.nav-tab.active');
-            if (activeTab) {
-                const tabName = activeTab.getAttribute('data-tab');
-                updateTable(tabName);
-            }
+            // Reload all data
+            loadValidationData();
         });
     }
 
@@ -326,10 +356,13 @@ function applyFiltersFunction(shopFilter, statusFilter, dateFilter) {
     
     // Apply date filter
     if (dateFilter) {
-        const filterDate = new Date(dateFilter);
+        const [startDateStr, endDateStr] = dateFilter.split(' - ');
+        const startDate = moment(startDateStr, 'MM/DD/YYYY').startOf('day');
+        const endDate = moment(endDateStr, 'MM/DD/YYYY').endOf('day');
+
         filteredValidations = filteredValidations.filter(v => {
-            const validationDate = new Date(v.submittedDate);
-            return validationDate.toDateString() === filterDate.toDateString();
+            const submittedDate = moment(v.submittedDate);
+            return submittedDate.isBetween(startDate, endDate, null, '[]'); // inclusive
         });
     }
     
