@@ -1,4 +1,4 @@
-// shoeverification.js
+// shoeverification.js - UPDATED VERSION
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
@@ -332,16 +332,23 @@ function loadValidationHistory() {
                     day: 'numeric'
                 });
                 
-                // Determine status class
+                // Determine status class and text based on your existing CSS
                 let statusClass = 'status-pending';
-                if (validation.status === 'legit') statusClass = 'status-legit';
-                if (validation.status === 'fake') statusClass = 'status-fake';
+                let statusText = 'Pending';
+                
+                if (validation.status === 'verified') {
+                    statusClass = 'status-legit'; // Using your existing CSS class
+                    statusText = 'Verified';
+                } else if (validation.status === 'invalid') {
+                    statusClass = 'status-fake'; // Using your existing CSS class
+                    statusText = 'Invalid';
+                }
                 
                 row.innerHTML = `
                     <td>${validation.serialNumber}</td>
                     <td>${validation.shoeModel}</td>
                     <td>${formattedDate}</td>
-                    <td><span class="status-badge ${statusClass}">${validation.status}</span></td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                     <td><button class="action-btn view-details" data-id="${validation.id}">View Details</button></td>
                 `;
                 
@@ -375,15 +382,16 @@ function showValidationDetails(validationId) {
             document.getElementById('modal-model').textContent = data.shoeModel;
             document.getElementById('modal-description').textContent = data.description;
             
-            // Determine status class and text
+            // Determine status class and text based on your existing CSS
             let statusClass = 'status-pending';
             let statusText = 'Pending';
-            if (data.status === 'legit') {
-                statusClass = 'status-legit';
-                statusText = 'Legit';
-            } else if (data.status === 'fake') {
-                statusClass = 'status-fake';
-                statusText = 'Fake';
+            
+            if (data.status === 'verified') {
+                statusClass = 'status-legit'; // Using your existing CSS class
+                statusText = 'Verified';
+            } else if (data.status === 'invalid') {
+                statusClass = 'status-fake'; // Using your existing CSS class
+                statusText = 'Invalid';
             }
             
             document.getElementById('modal-status').innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
