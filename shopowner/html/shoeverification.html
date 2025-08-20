@@ -853,6 +853,65 @@
                 overlay.classList.remove('active');
             });
         });
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getDatabase, ref, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAuPALylh11cTArigeGJZmLwrFwoAsNPSI",
+            authDomain: "opportunity-9d3bf.firebaseapp.com",
+            databaseURL: "https://opportunity-9d3bf-default-rtdb.firebaseio.com",
+            projectId: "opportunity-9d3bf",
+            storageBucket: "opportunity-9d3bf.firebasestorage.app",
+            messagingSenderId: "57906230058",
+            appId: "1:57906230058:web:2d7cd9cc68354722536453",
+            measurementId: "G-QC2JSR1FJW"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const userRef = ref(db, `AR_shoe_users/employees/${user.uid}`);
+            onValue(userRef, async (snapshot) => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    console.log(userData.role);
+
+                    shopLoggedin = userData.shopId;
+
+                    const orders = await getAllOrdersByShopId(shopLoggedin);
+                    document.getElementById("orderValuedisplay").textContent = orders.length || 0;
+
+                    if (userData.role.toLowerCase() === "manager") {
+                        document.getElementById("addemployeebtn").style.display = "none";
+                    } else if (userData.role.toLowerCase() === "salesperson") {
+                        document.getElementById("addemployeebtn").style.display = "none";
+                        document.getElementById("analyticsbtn").style.display = "none";
+                    }
+
+                    await loadShopDashboard();
+                    await loadTopProducts(); // Add this line to load top products
+                } else {
+                    shopLoggedin = user.uid;
+                    try {
+                        const orders = await getAllOrdersByShopId(shopLoggedin);
+                        document.getElementById("orderValuedisplay").textContent = orders.length || 0;
+                        await loadShopDashboard();
+                        await loadTopProducts(); // Add this line to load top products
+                    } catch (error) {
+                        console.error("Error loading dashboard:", error);
+                    }
+                }
+            }, { onlyOnce: true });
+        } else {
+            window.location.href = "/user_login.html";
+        }
+    });
+
     </script>
 
     <script>
