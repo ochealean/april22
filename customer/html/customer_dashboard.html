@@ -122,6 +122,56 @@
             font-size: 1.1rem;
         }
 
+        /* Loading Overlay Styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out, visibility 0.5s;
+        }
+
+        .loader {
+            text-align: center;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--gray-light);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader p {
+            color: var(--dark);
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        /* Hide content initially */
+        .main-content {
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+
+        .main-content.loaded {
+            opacity: 1;
+        }
+
         /* Main Content */
         .main-content {
             padding: 2rem;
@@ -759,6 +809,15 @@
 </head>
 
 <body>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loader">
+            <div class="loader-spinner"></div>
+            <p>Loading your dashboard...</p>
+        </div>
+    </div>
+
     <div class="dashboard">
         <!-- Sidebar - Purple Theme -->
         <div class="sidebar">
@@ -814,8 +873,8 @@
                 <h1>Welcome Back, <span id="userName_display1"></span>!</h1>
                 <!-- <input type="text" class="search-bar" placeholder="Search shoes by name, code or description..."> -->
                 <div class="user-profile">
-                    <img id="imageProfile" src="#" alt="Profile" class="user-avatar">
-                    <span id="userName_display2">Alex Johnson</span>
+                    <img id="imageProfile" src="https://cdn-icons-png.flaticon.com/512/11542/11542598.png" alt="Profile" class="user-avatar">
+                    <span id="userName_display2">Customer Name</span>
                 </div>
             </div>
 
@@ -833,20 +892,6 @@
                     <div class="value">0</div>
                     <div class="change">
                         <i class="fas fa-plus"></i> <span>Start adding items</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <h3>Store Credits</h3>
-                    <div class="value">₱ 0.00</div>
-                    <div class="change">
-                        <i class="fas fa-info-circle"></i> <span>Earn with purchases</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <h3>Saved Items</h3>
-                    <div class="value">0</div>
-                    <div class="change">
-                        <i class="fas fa-eye"></i> <span>Browse products</span>
                     </div>
                 </div>
             </div>
@@ -940,16 +985,24 @@
                 });
             }
 
-            // Initialize with sample data
-            initializeSampleData();
+            // Show loader immediately
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const mainContent = document.querySelector('.main-content');
+            
+            // Show loading overlay
+            loadingOverlay.style.display = 'flex';
+            
+            // Initialize with sample data after a delay (simulating loading)
+            setTimeout(() => {
+                
+                // Hide loader and show content
+                loadingOverlay.style.opacity = '0';
+                loadingOverlay.style.visibility = 'hidden';
+                
+                // Show main content with fade-in effect
+                mainContent.classList.add('loaded');
+            }, 2000); // 2 second delay
         });
-
-        function initializeSampleData() {
-            // This would be replaced with actual API calls in a real application
-            document.getElementById('userName_display1').textContent = 'Alex';
-            document.getElementById('userName_display2').textContent = 'Alex Johnson';
-            document.getElementById('imageProfile').src = 'https://randomuser.me/api/portraits/men/32.jpg';
-        }
 
         function openProductModal(productId) {
             // This would be replaced with actual API call to get product details

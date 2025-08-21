@@ -29,7 +29,7 @@ onAuthStateChanged(auth, (user) => {
                     const userData = snapshot.val();
                     document.getElementById('userName_display1').textContent = userData.firstName;
                     document.getElementById('userName_display2').textContent = userData.firstName + " " + userData.lastName;
-                    document.getElementById('imageProfile').src = userData.profilePhoto?.profilePhoto?.url || "https://firebasestorage.googleapis.com/v0/b/opportunity-9d3bf.appspot.com/o/profile%2Fdefault_profile.png?alt=media&token=5f1a4b8c-7e6b-4f1c-8a2d-0e5f3b7c4a2e";
+                    document.getElementById('imageProfile').src = userData.profilePhoto?.profilePhoto?.url || "https://cdn-icons-png.flaticon.com/512/11542/11542598.png";
                     document.body.style.display = '';
                     Recent_OrdersFunc(user.uid);
                     loadAllShoes();
