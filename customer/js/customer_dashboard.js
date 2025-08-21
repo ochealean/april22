@@ -157,7 +157,7 @@ function displayShoe(shoe) {
 
     shoeCard.innerHTML = `
         <div class="shoe-image">
-            <img src="${shoe.defaultImage || firstVariant.imageUrl || 'https://via.placeholder.com/300'}" alt="${shoe.shoeName}">
+            <img src="${shoe.defaultImage || firstVariant.imageUrl || 'https://cdn-icons-png.flaticon.com/512/11542/11542598.png'}" alt="${shoe.shoeName}">
         </div>
         <div class="shoe-details">
             <h3>${shoe.shoeName}</h3>
@@ -260,7 +260,7 @@ function updateProductModalContent() {
     document.getElementById('productModalBody').innerHTML = `
         <div class="product-details-container">
             <div class="product-main-image">
-                <img src="${variant.imageUrl || shoe.defaultImage || 'https://via.placeholder.com/300'}">
+                <img src="${variant.imageUrl || shoe.defaultImage || 'https://cdn-icons-png.flaticon.com/512/11542/11542598.png'}">
             </div>
             <div class="product-info">
                 <h2 class="product-name">Shop Name: ${shoe.shopName}</h2>

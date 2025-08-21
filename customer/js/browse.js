@@ -194,7 +194,7 @@ function createProductCard(shoeData) {
 
     return `
     <div class="product-card">
-      <img src="${shoeData.imageUrl}" alt="${shoeData.name}" class="product-image">
+      <img src="${shoeData.imageUrl || 'https://cdn-icons-png.flaticon.com/512/11542/11542598.png'}" alt="${shoeData.name}" class="product-image">
       <div class="product-info">
         <div class="product-shop"><h4>Shop Name: ${shoeData.shopName}</h4></div>
         <h3 class="product-name">${shoeData.name}</h3>
@@ -366,24 +366,24 @@ window.toggleWishlist = debouncedToggleWishlist;
 
 // Add CSS for clear button and active tags
 const additionalStyles = `
-.clear-btn {
-    background: transparent;
-    border: none;
-    color: var(--gray-dark);
-    cursor: pointer;
-    padding: 0 10px;
-    font-size: 1rem;
-    transition: color 0.3s;
-}
+    .clear-btn {
+        background: transparent;
+        border: none;
+        color: var(--gray-dark);
+        cursor: pointer;
+        padding: 0 10px;
+        font-size: 1rem;
+        transition: color 0.3s;
+    }
 
-.clear-btn:hover {
-    color: var(--primary);
-}
+    .clear-btn:hover {
+        color: var(--primary);
+    }
 
-.tag.active {
-    background-color: var(--primary);
-    color: white;
-}
+    .tag.active {
+        background-color: var(--primary);
+        color: white;
+    }
 `;
 
 const styleElement = document.createElement('style');
