@@ -25,20 +25,20 @@ let allValidations = [];
 let shopData = {};
 
 // Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializeAppFunctionality();
     setupAuthStateListener();
-    
+
     // Initialize date range picker
     $('#dateFilter').daterangepicker({
         maxDate: moment(), // Disable future dates
         ranges: {
-           'Today': [moment(), moment()],
-           'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-           'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-           'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-           'This Month': [moment().startOf('month'), moment().endOf('month')],
-           'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            'Today': [moment(), moment()],
+            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+            'This Month': [moment().startOf('month'), moment().endOf('month')],
+            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
         },
         "alwaysShowCalendars": true,
         "opens": "left",
@@ -51,12 +51,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handle date range selection
-    $('#dateFilter').on('apply.daterangepicker', function(ev, picker) {
+    $('#dateFilter').on('apply.daterangepicker', function (ev, picker) {
         $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
     });
 
     // Handle clearing the date range
-    $('#dateFilter').on('cancel.daterangepicker', function(ev, picker) {
+    $('#dateFilter').on('cancel.daterangepicker', function (ev, picker) {
         $(this).val('');
     });
 });
@@ -72,7 +72,7 @@ function initializeAppFunctionality() {
             navLinks.classList.toggle('active');
             overlay.style.display = navLinks.classList.contains('active') ? 'block' : 'none';
         });
-        
+
         overlay.addEventListener('click', () => {
             navLinks.classList.remove('active');
             overlay.style.display = 'none';
@@ -81,7 +81,7 @@ function initializeAppFunctionality() {
 
     // Navigation tabs
     const navTabs = document.querySelectorAll('.nav-tab');
-    
+
     if (navTabs.length > 0) {
         navTabs.forEach(tab => {
             tab.addEventListener('click', () => {
@@ -120,7 +120,7 @@ function initializeAppFunctionality() {
             const shopFilter = document.getElementById('shopFilter').value;
             const statusFilter = document.getElementById('statusFilter').value;
             const dateFilter = document.getElementById('dateFilter').value;
-            
+
             applyFiltersFunction(shopFilter, statusFilter, dateFilter);
         });
     }
@@ -133,27 +133,34 @@ function initializeAppFunctionality() {
             // Reset daterangepicker
             $('#dateFilter').data('daterangepicker').setStartDate(moment());
             $('#dateFilter').data('daterangepicker').setEndDate(moment());
-            
+
+            // Reset bulk actions visibility - HIDE when filters are cleared
+            const bulkActions = document.getElementById('bulkActions');
+            const clearHistoryContainer = document.getElementById('clearHistoryContainer');
+            if (bulkActions) bulkActions.style.display = 'none';
+            if (clearHistoryContainer) clearHistoryContainer.style.display = 'none';
+
             // Reload all data
             loadValidationData();
         });
     }
-
-    // Logout functionality
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (confirm('Are you sure you want to logout?')) {
-                signOut(auth).then(() => {
-                    window.location.href = '/admin/html/admin_login.html';
-                }).catch((error) => {
-                    console.error('Logout error:', error);
-                });
-            }
-        });
-    }
 }
+
+// Logout functionality
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (confirm('Are you sure you want to logout?')) {
+            signOut(auth).then(() => {
+                window.location.href = '/admin/html/admin_login.html';
+            }).catch((error) => {
+                console.error('Logout error:', error);
+            });
+        }
+    });
+}
+
 
 function setupAuthStateListener() {
     onAuthStateChanged(auth, async (user) => {
@@ -169,7 +176,7 @@ function setupAuthStateListener() {
 
 function loadShopData() {
     const shopsRef = ref(db, 'AR_shoe_users/shop');
-    
+
     onValue(shopsRef, (snapshot) => {
         if (snapshot.exists()) {
             shopData = snapshot.val();
@@ -182,14 +189,14 @@ function loadShopData() {
 
 function populateShopFilter() {
     const shopFilter = document.getElementById('shopFilter');
-    
+
     if (!shopFilter) return;
-    
+
     // Clear existing options except the first one
     while (shopFilter.options.length > 1) {
         shopFilter.remove(1);
     }
-    
+
     // Add shop options
     Object.entries(shopData).forEach(([shopId, shop]) => {
         if (shop.status === 'approved') {
@@ -203,22 +210,30 @@ function populateShopFilter() {
 
 function loadValidationData() {
     const validationRef = ref(db, 'AR_shoe_users/shoeVerification');
-    
+
     onValue(validationRef, (snapshot) => {
         if (snapshot.exists()) {
             allValidations = Object.entries(snapshot.val()).map(([key, value]) => ({
                 id: key,
                 ...value
             }));
-            
+
             // Initialize with ALL validations instead of just pending
             updateTable('all');
+
+            // Hide bulk actions initially (they'll show when pending tab is selected)
+            const bulkActions = document.getElementById('bulkActions');
+            if (bulkActions) bulkActions.style.display = 'none';
         } else {
             allValidations = [];
             const tableBody = document.getElementById('tableBody');
             if (tableBody) {
                 tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No validation data found</td></tr>';
             }
+
+            // Hide bulk actions if no data
+            const bulkActions = document.getElementById('bulkActions');
+            if (bulkActions) bulkActions.style.display = 'none';
         }
     });
 }
@@ -228,51 +243,63 @@ function updateTable(tabName) {
     const tableTitle = document.getElementById('tableTitle');
     const bulkActions = document.getElementById('bulkActions');
     const clearHistoryContainer = document.getElementById('clearHistoryContainer');
-    
+
     if (!tableBody) return;
-    
+
     // Clear existing table content
     tableBody.innerHTML = '';
-    
+
     // Filter validations based on tab
     let filteredValidations = allValidations;
-    
+    let hasPendingItems = false;
+    let showBulkActions = false;
+
     if (tabName === 'pending') {
         filteredValidations = allValidations.filter(v => v.status === 'pending');
-        if (bulkActions) bulkActions.style.display = 'flex';
+        hasPendingItems = filteredValidations.length > 0;
+        showBulkActions = hasPendingItems; // Only show bulk actions for pending tab
         if (clearHistoryContainer) clearHistoryContainer.style.display = 'none';
     } else if (tabName === 'verified') {
         filteredValidations = allValidations.filter(v => v.status === 'verified');
-        if (bulkActions) bulkActions.style.display = 'none';
+        hasPendingItems = false;
+        showBulkActions = false; // Never show bulk actions for verified tab
         if (clearHistoryContainer) clearHistoryContainer.style.display = 'flex';
     } else if (tabName === 'invalid') {
         filteredValidations = allValidations.filter(v => v.status === 'invalid');
-        if (bulkActions) bulkActions.style.display = 'none';
+        hasPendingItems = false;
+        showBulkActions = false; // Never show bulk actions for invalid tab
         if (clearHistoryContainer) clearHistoryContainer.style.display = 'flex';
     } else if (tabName === 'all') {
         // Show all validations regardless of status
         filteredValidations = allValidations;
-        if (bulkActions) bulkActions.style.display = 'none';
+        // HIDE bulk actions for "All" tab regardless of content
+        hasPendingItems = false;
+        showBulkActions = false;
         if (clearHistoryContainer) clearHistoryContainer.style.display = 'none';
     }
-    
+
     // Update table title
     if (tableTitle) {
         tableTitle.textContent = tabName.charAt(0).toUpperCase() + tabName.slice(1);
     }
-    
+
+    // Show/hide bulk actions based on tab and content
+    if (bulkActions) {
+        bulkActions.style.display = showBulkActions ? 'flex' : 'none';
+    }
+
     if (filteredValidations.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No validation data found</td></tr>';
         return;
     }
-    
+
     // Sort by submission date (newest first)
     filteredValidations.sort((a, b) => new Date(b.submittedDate) - new Date(a.submittedDate));
-    
+
     // Populate table with data
     filteredValidations.forEach(validation => {
         const row = document.createElement('tr');
-        
+
         // Format date for display
         const submittedDate = new Date(validation.submittedDate);
         const formattedDate = submittedDate.toLocaleDateString('en-US', {
@@ -280,16 +307,16 @@ function updateTable(tabName) {
             month: 'short',
             day: 'numeric'
         });
-        
+
         // Get shop name
-        const shopName = shopData[validation.shopId] ? 
-            `${shopData[validation.shopId].shopName} (ID: ${validation.shopId.substring(0, 6)}...)` : 
+        const shopName = shopData[validation.shopId] ?
+            `${shopData[validation.shopId].shopName} (ID: ${validation.shopId.substring(0, 6)}...)` :
             `Unknown Shop (ID: ${validation.shopId})`;
-        
+
         // Determine status class and display text
         let statusClass = 'status-pending';
         let statusText = 'Pending';
-        
+
         if (validation.status === 'verified') {
             statusClass = 'status-legit';
             statusText = 'Verified';
@@ -297,9 +324,9 @@ function updateTable(tabName) {
             statusClass = 'status-fake';
             statusText = 'Invalid';
         }
-        
-        // Add checkbox only for pending items
-        if (validation.status === 'pending') {
+
+        // Add checkbox only for pending items in the pending tab
+        if (validation.status === 'pending' && tabName === 'pending') {
             row.innerHTML = `
                 <td><input type="checkbox" class="shoe-checkbox" data-id="${validation.id}"></td>
                 <td>${shopName}</td>
@@ -328,32 +355,34 @@ function updateTable(tabName) {
                 </td>
             `;
         }
-        
+
         tableBody.appendChild(row);
     });
-    
+
     // Reattach event listeners
     attachEventListeners();
 }
 
 function applyFiltersFunction(shopFilter, statusFilter, dateFilter) {
     let filteredValidations = allValidations;
-    
+    const bulkActions = document.getElementById('bulkActions');
+    const clearHistoryContainer = document.getElementById('clearHistoryContainer');
+
     // Apply shop filter
     if (shopFilter) {
         filteredValidations = filteredValidations.filter(v => v.shopId === shopFilter);
     }
-    
+
     // Apply status filter
     if (statusFilter && statusFilter !== 'all') {
         let statusValue = statusFilter;
         if (statusFilter === 'verified') statusValue = 'verified';
         if (statusFilter === 'invalid') statusValue = 'invalid';
         if (statusFilter === 'pending') statusValue = 'pending';
-        
+
         filteredValidations = filteredValidations.filter(v => v.status === statusValue);
     }
-    
+
     // Apply date filter
     if (dateFilter) {
         const [startDateStr, endDateStr] = dateFilter.split(' - ');
@@ -365,25 +394,39 @@ function applyFiltersFunction(shopFilter, statusFilter, dateFilter) {
             return submittedDate.isBetween(startDate, endDate, null, '[]'); // inclusive
         });
     }
-    
+
+    // Show/hide bulk actions based on whether we're showing pending items
+    if (statusFilter === 'pending') {
+        const hasPendingItems = filteredValidations.length > 0;
+        if (bulkActions) bulkActions.style.display = hasPendingItems ? 'flex' : 'none';
+        if (clearHistoryContainer) clearHistoryContainer.style.display = 'none';
+    } else if (statusFilter === 'verified' || statusFilter === 'invalid') {
+        if (bulkActions) bulkActions.style.display = 'none';
+        if (clearHistoryContainer) clearHistoryContainer.style.display = 'flex';
+    } else {
+        // For "all" or no status filter, HIDE bulk actions completely
+        if (bulkActions) bulkActions.style.display = 'none';
+        if (clearHistoryContainer) clearHistoryContainer.style.display = 'none';
+    }
+
     // Update table with filtered data
     const tableBody = document.getElementById('tableBody');
     if (!tableBody) return;
-    
+
     tableBody.innerHTML = '';
-    
+
     if (filteredValidations.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No matching validations found</td></tr>';
         return;
     }
-    
+
     // Sort by submission date (newest first)
     filteredValidations.sort((a, b) => new Date(b.submittedDate) - new Date(a.submittedDate));
-    
+
     // Populate table with filtered data
     filteredValidations.forEach(validation => {
         const row = document.createElement('tr');
-        
+
         // Format date for display
         const submittedDate = new Date(validation.submittedDate);
         const formattedDate = submittedDate.toLocaleDateString('en-US', {
@@ -391,16 +434,16 @@ function applyFiltersFunction(shopFilter, statusFilter, dateFilter) {
             month: 'short',
             day: 'numeric'
         });
-        
+
         // Get shop name
-        const shopName = shopData[validation.shopId] ? 
-            `${shopData[validation.shopId].shopName} (ID: ${validation.shopId.substring(0, 6)}...)` : 
+        const shopName = shopData[validation.shopId] ?
+            `${shopData[validation.shopId].shopName} (ID: ${validation.shopId.substring(0, 6)}...)` :
             `Unknown Shop (ID: ${validation.shopId})`;
-        
+
         // Determine status class and display text
         let statusClass = 'status-pending';
         let statusText = 'Pending';
-        
+
         if (validation.status === 'verified') {
             statusClass = 'status-legit';
             statusText = 'Verified';
@@ -408,7 +451,7 @@ function applyFiltersFunction(shopFilter, statusFilter, dateFilter) {
             statusClass = 'status-fake';
             statusText = 'Invalid';
         }
-        
+
         // Add checkbox only for pending items
         if (validation.status === 'pending') {
             row.innerHTML = `
@@ -439,10 +482,10 @@ function applyFiltersFunction(shopFilter, statusFilter, dateFilter) {
                 </td>
             `;
         }
-        
+
         tableBody.appendChild(row);
     });
-    
+
     // Reattach event listeners
     attachEventListeners();
 }
@@ -459,15 +502,15 @@ function attachEventListeners() {
         viewButtons.forEach(button => {
             // Remove any existing event listeners
             button.replaceWith(button.cloneNode(true));
-            
+
             // Get the new button reference
             const newButton = document.querySelector(`.view-details[data-id="${button.getAttribute('data-id')}"]`);
-            
+
             // Add click event listener
-            newButton.addEventListener('click', function() {
+            newButton.addEventListener('click', function () {
                 const id = this.getAttribute('data-id');
                 const validation = allValidations.find(v => v.id === id);
-                
+
                 if (validation) {
                     showValidationDetails(validation);
                     if (modal) modal.classList.add('active');
@@ -482,7 +525,7 @@ function attachEventListeners() {
         // Remove any existing event listeners
         closeModal.replaceWith(closeModal.cloneNode(true));
         const newCloseModal = document.querySelector('.modal-close');
-        
+
         newCloseModal.addEventListener('click', () => {
             if (modal) modal.classList.remove('active');
             if (overlay) overlay.style.display = 'none';
@@ -505,8 +548,8 @@ function attachEventListeners() {
         // Remove any existing event listeners
         approveButton.replaceWith(approveButton.cloneNode(true));
         const newApproveButton = document.querySelector('.approve-shoe');
-        
-        newApproveButton.addEventListener('click', function() {
+
+        newApproveButton.addEventListener('click', function () {
             const validationId = this.getAttribute('data-id');
             if (validationId) {
                 verifyValidation(validationId);
@@ -520,18 +563,18 @@ function attachEventListeners() {
         // Remove any existing event listeners
         rejectButton.replaceWith(rejectButton.cloneNode(true));
         const newRejectButton = document.querySelector('.reject-shoe');
-        
-        newRejectButton.addEventListener('click', function() {
+
+        newRejectButton.addEventListener('click', function () {
             const validationId = this.getAttribute('data-id');
             if (validationId) {
                 const reasonInput = document.getElementById('rejectReason');
                 const reason = reasonInput ? reasonInput.value : '';
-                
+
                 if (!reason) {
                     alert('Please provide a reason for marking as invalid.');
                     return;
                 }
-                
+
                 invalidateValidation(validationId, reason);
             }
         });
@@ -545,8 +588,8 @@ function attachEventListeners() {
         // Remove any existing event listeners
         selectAllTable.replaceWith(selectAllTable.cloneNode(true));
         const newSelectAllTable = document.getElementById('selectAllTable');
-        
-        newSelectAllTable.addEventListener('change', function() {
+
+        newSelectAllTable.addEventListener('change', function () {
             const checkboxes = document.querySelectorAll('.shoe-checkbox');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = this.checked;
@@ -563,8 +606,8 @@ function attachEventListeners() {
         // Remove any existing event listeners
         selectAll.replaceWith(selectAll.cloneNode(true));
         const newSelectAll = document.getElementById('selectAll');
-        
-        newSelectAll.addEventListener('change', function() {
+
+        newSelectAll.addEventListener('change', function () {
             const checkboxes = document.querySelectorAll('.shoe-checkbox');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = this.checked;
@@ -583,20 +626,20 @@ function attachEventListeners() {
         // Remove any existing event listeners
         approveSelected.replaceWith(approveSelected.cloneNode(true));
         const newApproveSelected = document.getElementById('approveSelected');
-        
-        newApproveSelected.addEventListener('click', function() {
+
+        newApproveSelected.addEventListener('click', function () {
             const selectedCheckboxes = document.querySelectorAll('.shoe-checkbox:checked');
-            
+
             if (selectedCheckboxes.length === 0) {
                 alert('Please select at least one shoe to verify.');
                 return;
             }
-            
+
             if (confirm(`Are you sure you want to verify ${selectedCheckboxes.length} selected shoes?`)) {
                 const validationIds = Array.from(selectedCheckboxes).map(cb => {
                     return cb.getAttribute('data-id');
                 }).filter(id => id !== null);
-                
+
                 if (validationIds.length > 0) {
                     verifyMultipleValidations(validationIds);
                 }
@@ -610,26 +653,26 @@ function attachEventListeners() {
         // Remove any existing event listeners
         rejectSelected.replaceWith(rejectSelected.cloneNode(true));
         const newRejectSelected = document.getElementById('rejectSelected');
-        
-        newRejectSelected.addEventListener('click', function() {
+
+        newRejectSelected.addEventListener('click', function () {
             const selectedCheckboxes = document.querySelectorAll('.shoe-checkbox:checked');
-            
+
             if (selectedCheckboxes.length === 0) {
                 alert('Please select at least one shoe to mark as invalid.');
                 return;
             }
-            
+
             const reason = prompt('Please provide a reason for marking as invalid:');
             if (!reason) {
                 alert('Action cancelled. Please provide a reason to mark shoes as invalid.');
                 return;
             }
-            
+
             if (confirm(`Are you sure you want to mark ${selectedCheckboxes.length} selected shoes as invalid?`)) {
                 const validationIds = Array.from(selectedCheckboxes).map(cb => {
                     return cb.getAttribute('data-id');
                 }).filter(id => id !== null);
-                
+
                 if (validationIds.length > 0) {
                     invalidateMultipleValidations(validationIds, reason);
                 }
@@ -648,16 +691,16 @@ function showValidationDetails(validation) {
         hour: '2-digit',
         minute: '2-digit'
     });
-    
+
     // Get shop name
-    const shopName = shopData[validation.shopId] ? 
-        `${shopData[validation.shopId].shopName} (ID: ${validation.shopId})` : 
+    const shopName = shopData[validation.shopId] ?
+        `${shopData[validation.shopId].shopName} (ID: ${validation.shopId})` :
         `Unknown Shop (ID: ${validation.shopId})`;
-    
+
     // Determine status class and display text
     let statusClass = 'status-pending';
     let statusText = 'Pending';
-    
+
     if (validation.status === 'verified') {
         statusClass = 'status-legit';
         statusText = 'Verified';
@@ -665,7 +708,7 @@ function showValidationDetails(validation) {
         statusClass = 'status-fake';
         statusText = 'Invalid';
     }
-    
+
     // Populate modal with data - check if elements exist first
     const modalShop = document.getElementById('modal-shop');
     const modalSerial = document.getElementById('modal-serial');
@@ -677,33 +720,33 @@ function showValidationDetails(validation) {
     const modalBack = document.getElementById('modal-back');
     const modalTop = document.getElementById('modal-top');
     const modalReasonText = document.getElementById('modal-reason-text');
-    
+
     if (modalShop) modalShop.textContent = shopName;
     if (modalSerial) modalSerial.textContent = validation.serialNumber;
     if (modalModel) modalModel.textContent = validation.shoeModel;
     if (modalDate) modalDate.textContent = formattedDate;
     if (modalDescription) modalDescription.textContent = validation.description;
-    
+
     // Update status
     if (modalStatus) {
         modalStatus.innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
     }
-    
+
     // Update images
     if (modalFront) modalFront.src = validation.images.front;
     if (modalBack) modalBack.src = validation.images.back;
     if (modalTop) modalTop.src = validation.images.top;
-    
+
     // Show/hide rejection section and action buttons based on status
     const rejectionSection = document.getElementById('rejectionSection');
     const modalActions = document.getElementById('modalActions');
     const approveButton = document.querySelector('.approve-shoe');
     const rejectButton = document.querySelector('.reject-shoe');
-    
+
     if (validation.status === 'pending') {
         if (rejectionSection) rejectionSection.style.display = 'block';
         if (modalActions) modalActions.style.display = 'flex';
-        
+
         // Set data attributes for approve/reject buttons
         if (approveButton) approveButton.setAttribute('data-id', validation.id);
         if (rejectButton) rejectButton.setAttribute('data-id', validation.id);
@@ -711,13 +754,13 @@ function showValidationDetails(validation) {
         if (rejectionSection) rejectionSection.style.display = 'none';
         if (modalActions) modalActions.style.display = 'none';
     }
-    
+
     // Show validation notes if available
-    const reasonText = validation.validationNotes || 
-        (validation.status === 'pending' 
+    const reasonText = validation.validationNotes ||
+        (validation.status === 'pending'
             ? 'This submission is currently under review.'
             : 'No validation notes provided.');
-            
+
     if (modalReasonText) modalReasonText.textContent = reasonText;
 }
 
@@ -727,9 +770,9 @@ function verifyValidation(validationId) {
         validatedDate: new Date().toISOString(),
         validatorId: currentUser.uid
     };
-    
+
     const validationRef = ref(db, `AR_shoe_users/shoeVerification/${validationId}`);
-    
+
     update(validationRef, updates)
         .then(() => {
             alert('Shoe has been verified successfully!');
@@ -737,7 +780,7 @@ function verifyValidation(validationId) {
             const overlay = document.getElementById('overlay');
             if (modal) modal.classList.remove('active');
             if (overlay) overlay.style.display = 'none';
-            
+
             // Refresh the table
             const activeTab = document.querySelector('.nav-tab.active');
             if (activeTab) {
@@ -758,9 +801,9 @@ function invalidateValidation(validationId, reason) {
         validatorId: currentUser.uid,
         validationNotes: reason
     };
-    
+
     const validationRef = ref(db, `AR_shoe_users/shoeVerification/${validationId}`);
-    
+
     update(validationRef, updates)
         .then(() => {
             alert('Shoe has been marked as invalid successfully!');
@@ -768,11 +811,11 @@ function invalidateValidation(validationId, reason) {
             const overlay = document.getElementById('overlay');
             if (modal) modal.classList.remove('active');
             if (overlay) overlay.style.display = 'none';
-            
+
             // Clear the rejection reason textarea
             const rejectReason = document.getElementById('rejectReason');
             if (rejectReason) rejectReason.value = '';
-            
+
             // Refresh the table
             const activeTab = document.querySelector('.nav-tab.active');
             if (activeTab) {
@@ -789,25 +832,25 @@ function invalidateValidation(validationId, reason) {
 function verifyMultipleValidations(validationIds) {
     const updates = {};
     const currentDate = new Date().toISOString();
-    
+
     validationIds.forEach(id => {
         updates[`/AR_shoe_users/shoeVerification/${id}/status`] = 'verified';
         updates[`/AR_shoe_users/shoeVerification/${id}/validatedDate`] = currentDate;
         updates[`/AR_shoe_users/shoeVerification/${id}/validatorId`] = currentUser.uid;
     });
-    
+
     const dbRef = ref(db);
-    
+
     update(dbRef, updates)
         .then(() => {
             alert(`${validationIds.length} shoes have been verified successfully!`);
-            
+
             // Uncheck select all checkboxes
             const selectAll = document.getElementById('selectAll');
             const selectAllTable = document.getElementById('selectAllTable');
             if (selectAll) selectAll.checked = false;
             if (selectAllTable) selectAllTable.checked = false;
-            
+
             // Refresh the table
             const activeTab = document.querySelector('.nav-tab.active');
             if (activeTab) {
@@ -824,26 +867,26 @@ function verifyMultipleValidations(validationIds) {
 function invalidateMultipleValidations(validationIds, reason) {
     const updates = {};
     const currentDate = new Date().toISOString();
-    
+
     validationIds.forEach(id => {
         updates[`/AR_shoe_users/shoeVerification/${id}/status`] = 'invalid';
         updates[`/AR_shoe_users/shoeVerification/${id}/validatedDate`] = currentDate;
         updates[`/AR_shoe_users/shoeVerification/${id}/validatorId`] = currentUser.uid;
         updates[`/AR_shoe_users/shoeVerification/${id}/validationNotes`] = reason;
     });
-    
+
     const dbRef = ref(db);
-    
+
     update(dbRef, updates)
         .then(() => {
             alert(`${validationIds.length} shoes have been marked as invalid.`);
-            
+
             // Uncheck select all checkboxes
             const selectAll = document.getElementById('selectAll');
             const selectAllTable = document.getElementById('selectAllTable');
             if (selectAll) selectAll.checked = false;
             if (selectAllTable) selectAllTable.checked = false;
-            
+
             // Refresh the table
             const activeTab = document.querySelector('.nav-tab.active');
             if (activeTab) {
@@ -861,29 +904,29 @@ function clearHistory(status) {
     let statusValue = status;
     if (status === 'verified') statusValue = 'verified';
     if (status === 'invalid') statusValue = 'invalid';
-    
+
     // Find all validations with the specified status
     const validationsToDelete = allValidations
         .filter(v => v.status === statusValue)
         .map(v => v.id);
-    
+
     if (validationsToDelete.length === 0) {
         alert(`No ${status} validations found to clear.`);
         return;
     }
-    
+
     // Delete all validations with the specified status
     const updates = {};
     validationsToDelete.forEach(id => {
         updates[`/AR_shoe_users/shoeVerification/${id}`] = null;
     });
-    
+
     const dbRef = ref(db);
-    
+
     update(dbRef, updates)
         .then(() => {
             alert(`All ${status} history has been cleared.`);
-            
+
             // Refresh the table
             const activeTab = document.querySelector('.nav-tab.active');
             if (activeTab) {
