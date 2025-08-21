@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Load saved designs from Firebase
     function loadSavedDesigns(userId) {
         const savedDesignsRef = ref(database, `AR_shoe_users/saved_customShoes/${userId}`);
+        const savedDesignsContainer = document.querySelector('.saved-designs-container');
 
         get(savedDesignsRef)
             .then((snapshot) => {
@@ -89,7 +90,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Show empty state if no designs
                     container.appendChild(emptyState);
                     emptyState.style.display = 'block';
+                    savedDesignsContainer.classList.add('hidden'); // Hide container if no designs
                 } else {
+                    // Show the container since we have designs
+                    savedDesignsContainer.classList.remove('hidden');
+
                     // Hide empty state
                     emptyState.style.display = 'none';
 
