@@ -194,18 +194,20 @@ function createProductCard(shoeData) {
 
     return `
     <div class="product-card">
-      <img src="${shoeData.imageUrl || 'https://cdn-icons-png.flaticon.com/512/11542/11542598.png'}" alt="${shoeData.name}" class="product-image">
-      <div class="product-info">
-        <div class="product-shop"><h4>Shop Name: ${shoeData.shopName}</h4></div>
-        <h3 class="product-name">${shoeData.name}</h3>
-        <div class="product-price">₱${shoeData.price.toFixed(2)}</div>
-        <div class="product-actions">
-            <button class="add-to-cart" onclick="viewDetails('${shoeData.shoeID}', '${shoeData.shopID}')">View Details</button>
-            <button class="wishlist-btn" onclick="toggleWishlist('${shoeData.shoeID}', '${shoeData.shopID}', this)">
-                <i class="${heartClass} fa-heart" style="color: ${heartColor};"></i>
-            </button>
+        <img src="${shoeData.imageUrl || 'https://cdn-icons-png.flaticon.com/512/11542/11542598.png'}" alt="${shoeData.name}" class="product-image">
+        <div class="product-info">
+            <div class="product-shop">
+                <h4>Shop Name: ${shoeData.shopName}</h4>
+            </div>
+            <h3 class="product-name">${shoeData.name}</h3>
+            <div class="product-price">₱${shoeData.price.toFixed(2)}</div>
+            <div class="product-actions">
+                <button class="add-to-cart" onclick="viewDetails('${shoeData.shoeID}', '${shoeData.shopID}')">View Details</button>
+                <button class="wishlist-btn" onclick="toggleWishlist('${shoeData.shoeID}', '${shoeData.shopID}', this)">
+                    <i class="${heartClass} fa-heart" style="color: ${heartColor};"></i>
+                </button>
+            </div>
         </div>
-      </div>
     </div>
   `;
 }
