@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -30,60 +30,34 @@ let originalDesignData = null;
 // Initialize selections with default values
 let selections = {
     classic: {
-        sole: {
-            id: 'sole1',
-            price: 0,
-            days: 0,
-            image: 'https://via.placeholder.com/100x60?text=Classic+Sole+1'
-        },
-        upper: {
-            id: 'upper1',
-            price: 0,
-            days: 0,
-            image: 'https://via.placeholder.com/100x60?text=Classic+Upper+1',
-            color: 'gray'
-        },
         laces: {
-            id: 'laces1',
+            id: 'Standard',
             price: 0,
             days: 0,
             image: 'https://via.placeholder.com/100x20?text=Classic+Laces+1',
             color: 'white'
         },
-        bodyColor: 'white',
-        heelColor: 'gray'
+        bodyColor: 'white'
     },
     runner: {
-        sole: {
-            id: 'runnerSole1',
+        laces: {
+            id: 'Standard',
             price: 0,
             days: 0,
-            image: 'https://via.placeholder.com/100x60?text=Runner+Sole+1'
+            image: 'https://via.placeholder.com/100x20?text=Runner+Laces+1',
+            color: 'white'
         },
-        upper: {
-            id: 'runnerUpper1',
-            price: 0,
-            days: 0,
-            image: 'https://via.placeholder.com/100x60?text=Runner+Upper+1'
-        },
-        bodyColor: 'white',
-        collarColor: 'white'
+        bodyColor: 'white'
     },
     basketball: {
-        sole: {
-            id: 'basketballSole1',
+        laces: {
+            id: 'Standard',
             price: 0,
             days: 0,
-            image: 'https://via.placeholder.com/100x60?text=Basketball+Sole+1'
+            image: 'https://via.placeholder.com/100x20?text=Basketball+Laces+1',
+            color: 'white'
         },
-        upper: {
-            id: 'basketballUpper1',
-            price: 0,
-            days: 0,
-            image: 'https://via.placeholder.com/100x60?text=Basketball+Upper+1'
-        },
-        mudguardColor: 'black',
-        heelColor: 'gray'
+        bodyColor: 'white'
     },
     slipon: {
         midsole: {
@@ -182,53 +156,33 @@ function updateAllComponentSelections() {
     
     // Update components based on model
     if (currentModel === 'classic') {
-        selectOption('soleOptions', modelSelections.sole?.id);
-        selectOption('upperOptions', modelSelections.upper?.id);
-        selectOption('lacesOptions', modelSelections.laces?.id);
+        selectOption('classicLacesOptions', modelSelections.laces?.id);
         
-        if (modelSelections.upper?.color) {
-            selectColor('upperColorOptions', modelSelections.upper.color);
-        }
         if (modelSelections.laces?.color) {
-            selectColor('lacesColorOptions', modelSelections.laces.color);
+            selectColor('classiscLacesColorOptions', modelSelections.laces.color);
         }
         if (modelSelections.bodyColor) {
-            selectColor('bodyColorOptions', modelSelections.bodyColor);
-        }
-        if (modelSelections.heelColor) {
-            selectColor('heelColorOptions', modelSelections.heelColor);
+            selectColor('classicBodyColorOptions', modelSelections.bodyColor);
         }
     } 
     else if (currentModel === 'runner') {
-        selectOption('runnerSoleOptions', modelSelections.sole?.id);
-        selectOption('runnerUpperOptions', modelSelections.upper?.id);
+        selectOption('runnerLacesOptions', modelSelections.laces?.id);
         
+        if (modelSelections.laces?.color) {
+            selectColor('runnerLacesColorOptions', modelSelections.laces.color);
+        }
         if (modelSelections.bodyColor) {
             selectColor('runnerBodyColorOptions', modelSelections.bodyColor);
         }
-        if (modelSelections.collarColor) {
-            selectColor('runnerCollarColorOptions', modelSelections.collarColor);
-        }
     } 
     else if (currentModel === 'basketball') {
-        selectOption('basketballSoleOptions', modelSelections.sole?.id);
-        selectOption('basketballUpperOptions', modelSelections.upper?.id);
+        selectOption('basketballLacesOptions', modelSelections.laces?.id);
         
-        if (modelSelections.mudguardColor) {
-            selectColor('basketballMudguardColorOptions', modelSelections.mudguardColor);
+        if (modelSelections.laces?.color) {
+            selectColor('basketballLacesColorOptions', modelSelections.laces.color);
         }
-        if (modelSelections.heelColor) {
-            selectColor('basketballHeelColorOptions', modelSelections.heelColor);
-        }
-    } 
-    else if (currentModel === 'slipon') {
-        selectOption('sliponMidsoleOptions', modelSelections.midsole?.id);
-        
-        if (modelSelections.outsoleColor) {
-            selectColor('sliponOutsoleColorOptions', modelSelections.outsoleColor);
-        }
-        if (modelSelections.midsoleColor) {
-            selectColor('sliponMidsoleColorOptions', modelSelections.midsoleColor);
+        if (modelSelections.bodyColor) {
+            selectColor('basketballBodyColorOptions', modelSelections.bodyColor);
         }
     }
 }
@@ -261,16 +215,16 @@ async function saveDesignToDatabase() {
         let maxDays = 0;
 
         if (currentModel === 'classic') {
-            customizationPrice = selections.classic.sole.price + selections.classic.upper.price + selections.classic.laces.price;
-            maxDays = Math.max(selections.classic.sole.days, selections.classic.upper.days, selections.classic.laces.days);
+            customizationPrice = selections.classic.laces.price;
+            maxDays = selections.classic.laces.days;
         }
         else if (currentModel === 'runner') {
-            customizationPrice = selections.runner.sole.price + selections.runner.upper.price;
-            maxDays = Math.max(selections.runner.sole.days, selections.runner.upper.days);
+            customizationPrice = selections.runner.laces.price;
+            maxDays = selections.runner.laces.days;
         }
         else if (currentModel === 'basketball') {
-            customizationPrice = selections.basketball.sole.price + selections.basketball.upper.price;
-            maxDays = Math.max(selections.basketball.sole.days, selections.basketball.upper.days);
+            customizationPrice = selections.basketball.laces.price;
+            maxDays = selections.basketball.laces.days;
         }
         else if (currentModel === 'slipon') {
             customizationPrice = selections.slipon.midsole.price;
@@ -323,7 +277,7 @@ async function saveDesignToDatabase() {
     }
 }
 
-// Add to cart function (similar to customizeshoe.js but uses existing design ID)
+// Add to cart function
 async function addToCart() {
     try {
         const userId = await getCurrentUserId();
@@ -333,16 +287,16 @@ async function addToCart() {
         let maxDays = 0;
 
         if (currentModel === 'classic') {
-            customizationPrice = selections.classic.sole.price + selections.classic.upper.price + selections.classic.laces.price;
-            maxDays = Math.max(selections.classic.sole.days, selections.classic.upper.days, selections.classic.laces.days);
+            customizationPrice = selections.classic.laces.price;
+            maxDays = selections.classic.laces.days;
         }
         else if (currentModel === 'runner') {
-            customizationPrice = selections.runner.sole.price + selections.runner.upper.price;
-            maxDays = Math.max(selections.runner.sole.days, selections.runner.upper.days);
+            customizationPrice = selections.runner.laces.price;
+            maxDays = selections.runner.laces.days;
         }
         else if (currentModel === 'basketball') {
-            customizationPrice = selections.basketball.sole.price + selections.basketball.upper.price;
-            maxDays = Math.max(selections.basketball.sole.days, selections.basketball.upper.days);
+            customizationPrice = selections.basketball.laces.price;
+            maxDays = selections.basketball.laces.days;
         }
         else if (currentModel === 'slipon') {
             customizationPrice = selections.slipon.midsole.price;
@@ -379,16 +333,122 @@ async function addToCart() {
     }
 }
 
+// Function to handle Buy Now action
+async function buyNow() {
+    try {
+        const userId = await getCurrentUserId();
+
+        // Calculate totals
+        let customizationPrice = 0;
+        let maxDays = 0;
+
+        if (currentModel === 'classic') {
+            customizationPrice = selections.classic.laces.price;
+            maxDays = selections.classic.laces.days;
+        }
+        else if (currentModel === 'runner') {
+            customizationPrice = selections.runner.laces.price;
+            maxDays = selections.runner.laces.days;
+        }
+        else if (currentModel === 'basketball') {
+            customizationPrice = selections.basketball.laces.price;
+            maxDays = selections.basketball.laces.days;
+        }
+        else if (currentModel === 'slipon') {
+            customizationPrice = selections.slipon.midsole.price;
+            maxDays = selections.slipon.midsole.days;
+        }
+
+        const totalPrice = basePrice + customizationPrice;
+        const totalDays = baseDays + maxDays;
+
+        // Clean up the selections object to remove undefined values
+        const cleanSelections = {};
+        Object.keys(selections[currentModel]).forEach(key => {
+            if (selections[currentModel][key] !== undefined) {
+                if (typeof selections[currentModel][key] === 'object') {
+                    cleanSelections[key] = {};
+                    Object.keys(selections[currentModel][key]).forEach(subKey => {
+                        if (selections[currentModel][key][subKey] !== undefined) {
+                            cleanSelections[key][subKey] = selections[currentModel][key][subKey];
+                        }
+                    });
+                } else {
+                    cleanSelections[key] = selections[currentModel][key];
+                }
+            }
+        });
+
+        // Create order data
+        const orderData = {
+            userId: userId,
+            model: currentModel,
+            size: selectedSize,
+            price: totalPrice,
+            quantity: 1,
+            addedAt: Date.now(),
+            image: getPreviewImageUrl(),
+            isCustom: true,
+            designId: designId, // Include the design ID for reference
+            selections: cleanSelections, // Use the cleaned selections
+            basePrice: basePrice,
+            customizationPrice: customizationPrice,
+            productionTime: `${totalDays}-${totalDays + 3} days`,
+            status: "pending",
+            statusUpdates: {
+                initial: {
+                    status: "pending",
+                    timestamp: Date.now(),
+                    message: "Order received and being processed"
+                }
+            },
+            orderDate: new Date().toISOString()
+        };
+
+        // Generate a unique order ID
+        const orderId = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+
+        // Save to boughtshoe in Realtime Database
+        const boughtShoeRef = ref(db, `AR_shoe_users/boughtshoe/${userId}/${orderId}`);
+        await set(boughtShoeRef, orderData);
+
+        // Also save to transactions for order history
+        const transactionRef = ref(db, `AR_shoe_users/customizedtransactions/${userId}/${orderId}`);
+        await set(transactionRef, {
+            date: new Date().toISOString(),
+            item: {
+                name: `Custom ${currentModel} shoe`,
+                price: totalPrice,
+                quantity: 1,
+                size: selectedSize,
+                isCustom: true,
+                image: getPreviewImageUrl(),
+                designId: designId
+            },
+            status: "pending",
+            totalAmount: totalPrice,
+            userId: userId
+        });
+
+        alert(`Your custom ${currentModel} shoe order has been placed successfully! Order ID: ${orderId}`);
+        // Redirect to order confirmation or tracking page
+        window.location.href = `/customer/html/checkoutcustomize.html?orderId=${orderId}`;
+    } catch (error) {
+        console.error('Error during buy now: ', error);
+        alert('There was an error placing your order. Please try again.');
+    }
+}
+
 // Helper function to get preview image URL
 function getPreviewImageUrl() {
     if (currentModel === 'classic') {
-        return selections.classic.upper?.image || 'https://via.placeholder.com/100x60?text=Classic+Upper';
+        return 'https://via.placeholder.com/200x120?text=Classic+Sneaker';
     } else if (currentModel === 'runner') {
-        return selections.runner.upper?.image || 'https://via.placeholder.com/100x60?text=Runner+Upper';
+        return 'https://via.placeholder.com/200x120?text=Performance+Runner';
     } else if (currentModel === 'basketball') {
-        return selections.basketball.upper?.image || 'https://via.placeholder.com/100x60?text=Basketball+Upper';
+        return 'https://via.placeholder.com/200x120?text=High-Top+Basketball';
     } else {
-        return selections.slipon.midsole?.image || 'https://via.placeholder.com/100x60?text=SlipOn+Midsole';
+        return 'https://via.placeholder.com/200x120?text=Slip-On+Comfort';
     }
 }
 
@@ -404,16 +464,16 @@ function updatePreview() {
     let maxDays = 0;
 
     if (currentModel === 'classic') {
-        customizationPrice = selections.classic.sole.price + selections.classic.upper.price + selections.classic.laces.price;
-        maxDays = Math.max(selections.classic.sole.days, selections.classic.upper.days, selections.classic.laces.days);
+        customizationPrice = selections.classic.laces.price;
+        maxDays = selections.classic.laces.days;
     }
     else if (currentModel === 'runner') {
-        customizationPrice = selections.runner.sole.price + selections.runner.upper.price;
-        maxDays = Math.max(selections.runner.sole.days, selections.runner.upper.days);
+        customizationPrice = selections.runner.laces.price;
+        maxDays = selections.runner.laces.days;
     }
     else if (currentModel === 'basketball') {
-        customizationPrice = selections.basketball.sole.price + selections.basketball.upper.price;
-        maxDays = Math.max(selections.basketball.sole.days, selections.basketball.upper.days);
+        customizationPrice = selections.basketball.laces.price;
+        maxDays = selections.basketball.laces.days;
     }
     else if (currentModel === 'slipon') {
         customizationPrice = selections.slipon.midsole.price;
@@ -502,14 +562,9 @@ function initializeEventListeners() {
     }
 
     // Initialize all component options
-    setupComponentOptions('sole', document.getElementById('soleOptions'), 'classic');
-    setupComponentOptions('upper', document.getElementById('upperOptions'), 'classic');
-    setupComponentOptions('laces', document.getElementById('lacesOptions'), 'classic');
-    setupComponentOptions('sole', document.getElementById('runnerSoleOptions'), 'runner');
-    setupComponentOptions('upper', document.getElementById('runnerUpperOptions'), 'runner');
-    setupComponentOptions('sole', document.getElementById('basketballSoleOptions'), 'basketball');
-    setupComponentOptions('upper', document.getElementById('basketballUpperOptions'), 'basketball');
-    setupComponentOptions('midsole', document.getElementById('sliponMidsoleOptions'), 'slipon');
+    setupComponentOptions('laces', document.getElementById('classicLacesOptions'), 'classic');
+    setupComponentOptions('laces', document.getElementById('runnerLacesOptions'), 'runner');
+    setupComponentOptions('laces', document.getElementById('basketballLacesOptions'), 'basketball');
 
     // Color selection
     function setupColorOptions(colorType, optionsContainer, model) {
@@ -532,16 +587,12 @@ function initializeEventListeners() {
     }
 
     // Initialize all color options
-    setupColorOptions('upper.color', document.getElementById('upperColorOptions'), 'classic');
-    setupColorOptions('laces.color', document.getElementById('lacesColorOptions'), 'classic');
-    setupColorOptions('bodyColor', document.getElementById('bodyColorOptions'), 'classic');
-    setupColorOptions('heelColor', document.getElementById('heelColorOptions'), 'classic');
+    setupColorOptions('laces.color', document.getElementById('classiscLacesColorOptions'), 'classic');
+    setupColorOptions('bodyColor', document.getElementById('classicBodyColorOptions'), 'classic');
+    setupColorOptions('laces.color', document.getElementById('runnerLacesColorOptions'), 'runner');
     setupColorOptions('bodyColor', document.getElementById('runnerBodyColorOptions'), 'runner');
-    setupColorOptions('collarColor', document.getElementById('runnerCollarColorOptions'), 'runner');
-    setupColorOptions('mudguardColor', document.getElementById('basketballMudguardColorOptions'), 'basketball');
-    setupColorOptions('heelColor', document.getElementById('basketballHeelColorOptions'), 'basketball');
-    setupColorOptions('outsoleColor', document.getElementById('sliponOutsoleColorOptions'), 'slipon');
-    setupColorOptions('midsoleColor', document.getElementById('sliponMidsoleColorOptions'), 'slipon');
+    setupColorOptions('laces.color', document.getElementById('basketballLacesColorOptions'), 'basketball');
+    setupColorOptions('bodyColor', document.getElementById('basketballBodyColorOptions'), 'basketball');
 
     // Save design button (now updates existing design)
     document.querySelector('.btn-outline').addEventListener('click', async function () {
@@ -555,7 +606,10 @@ function initializeEventListeners() {
     });
 
     // Add to cart button
-    // document.querySelector('.btn-primary').addEventListener('click', addToCart);
+    document.querySelector('.btn-primary').addEventListener('click', addToCart);
+
+    // Buy now button
+    document.querySelector('.btn-buy').addEventListener('click', buyNow);
 
     // Info button functionality
     const partsInfoBtn = document.getElementById('partsInfoBtn');
@@ -591,6 +645,17 @@ function initializeEventListeners() {
             }
         });
     }
+
+    // Logout functionality
+    document.getElementById('logout_btn').addEventListener('click', function() {
+        if (confirm('Are you sure you want to logout?')) {
+            signOut(auth).then(() => {
+                window.location.href = '/user_login.html';
+            }).catch((error) => {
+                console.error('Error signing out:', error);
+            });
+        }
+    });
 }
 
 // Initialize the application when DOM is loaded
@@ -618,7 +683,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         userName.textContent = 'Guest';
 
         // Try to get user data from Realtime Database
-        get(child(ref(db), `users/${userId}`))
+        get(child(ref(db), `AR_shoe_users/customer/${userId}`))
             .then((snapshot) => {
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
@@ -643,6 +708,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 function updateUserProfile(userData, userProfile, userName) {
     if (userData.profilePhoto && userData.profilePhoto.url) {
         userProfile.src = userData.profilePhoto.url;
+    } else if (userData.profilePhoto && userData.profilePhoto.profilePhoto && userData.profilePhoto.profilePhoto.url) {
+        userProfile.src = userData.profilePhoto.profilePhoto.url;
     }
     if (userData.firstName || userData.lastName) {
         userName.textContent = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
