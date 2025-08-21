@@ -183,16 +183,16 @@ function displayValidationResults(validationData) {
     // Set images
     if (validationData.images) {
         resultFrontImage.src = validationData.images.front || 
-                              'https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View';
+                              'https://cdn-icons-png.flaticon.com/512/11542/11542598.png';
         resultBackImage.src = validationData.images.back || 
-                             'https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View';
+                             'https://cdn-icons-png.flaticon.com/512/11542/11542598.png';
         resultTopImage.src = validationData.images.top || 
-                            'https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View';
+                            'https://cdn-icons-png.flaticon.com/512/11542/11542598.png';
     } else {
         // Use placeholder images if no images are available
-        resultFrontImage.src = 'https://via.placeholder.com/300/4cc9f0/ffffff?text=Front+View';
-        resultBackImage.src = 'https://via.placeholder.com/300/4cc9f0/ffffff?text=Back+View';
-        resultTopImage.src = 'https://via.placeholder.com/300/4cc9f0/ffffff?text=Top+View';
+        resultFrontImage.src = 'https://cdn-icons-png.flaticon.com/512/11542/11542598.png';
+        resultBackImage.src = 'https://cdn-icons-png.flaticon.com/512/11542/11542598.png';
+        resultTopImage.src = 'https://cdn-icons-png.flaticon.com/512/11542/11542598.png';
     }
     
     // Set validation reason/notes
