@@ -257,11 +257,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         element.innerHTML = `
         <div class="saved-design-header">
-            <h3 class="saved-design-title">${design.model || 'Custom Design'}</h3>
+            <h3 class="saved-design-title">${design.model || '<img src="https://cdn-icons-png.flaticon.com/512/11542/11542598.png" alt="Custom Design" class="saved-design-image">'}</h3>
             <span class="saved-design-date">Saved: ${formattedDate}</span>
         </div>
         <div class="saved-design-preview">
-            <img src="${previewImage || 'https://cdn-icons-png.flaticon.com/512/11542/11542598.png'}" alt="Custom Design" class="saved-design-image">
+            <img src="${previewImage || 'https://cdn-icons-png.flaticon.com/512/11542/11542598.png'}" alt="Custom Design" class="saved-design-image" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/11542/11542598.png';">
             <div class="saved-design-details">
                 ${detailsHTML}
             </div>
