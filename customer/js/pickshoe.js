@@ -19,23 +19,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const database = getDatabase(app);
     const auth = getAuth(app);
 
-    // Mobile sidebar toggle
-    const mobileToggle = document.querySelector('.mobile-menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
-    const overlay = document.querySelector('.sidebar-overlay');
-
-    if (mobileToggle && sidebar && overlay) {
-        mobileToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-        });
-
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
-        });
-    }
-
     // Model selection functionality
     let selectedModel = null;
     const modelCards = document.querySelectorAll('.model-card');
@@ -260,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function () {
     `;
 
         // Use the first available image or a placeholder
-        let previewImage = 'https://via.placeholder.com/200x150?text=No+Preview';
+        let previewImage = 'https://cdn-icons-png.flaticon.com/512/11542/11542598.png';
         if (design.model === 'slipon') {
             previewImage = midsole.image || previewImage;
         } else {
@@ -273,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <span class="saved-design-date">Saved: ${formattedDate}</span>
         </div>
         <div class="saved-design-preview">
-            <img src="${previewImage}" alt="Custom Design" class="saved-design-image">
+            <img src="${previewImage || 'https://cdn-icons-png.flaticon.com/512/11542/11542598.png'}" alt="Custom Design" class="saved-design-image">
             <div class="saved-design-details">
                 ${detailsHTML}
             </div>
