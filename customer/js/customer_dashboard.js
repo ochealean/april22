@@ -164,8 +164,8 @@ function displayShoe(shoe) {
             <p class="shoe-code">Code: ${shoe.shoeCode}</p>
             <h4>Shop Name: ${shoe.shopName}</h4>
             <div class="product-meta">
-                <span class="product-brand">${shoe.brand || 'No Brand'}</span>
-                <span class="product-type">${shoe.type || 'No Type'}</span>
+                <span class="product-brand">${shoe.shoeBrand || 'No Brand'}</span>
+                <span class="product-type">${shoe.shoeType || 'No Type'}</span>
             </div>
             <p class="shoe-description">${fixedDescription(shoe.generalDescription) || 'No description available'}</p>
             <p class="shoe-price">From ₱${lowestPrice.toFixed(2)}</p>
@@ -266,6 +266,12 @@ function updateProductModalContent() {
                 <h2 class="product-name">Shop Name: ${shoe.shopName}</h2>
                 <div class="product-code">Product Code: ${shoe.shoeCode}</div>
                 <div class="product-price">₱${variant.price}</div>
+                
+                <!-- Add brand and type information -->
+                <div class="product-meta">
+                    <span class="product-brand">${shoe.shoeBrand || 'No Brand'}</span>
+                    <span class="product-type">${shoe.shoeType || 'No Type'}</span>
+                </div>
                 
                 <!-- Add quantity selector -->
                 <div class="quantity-selector" ${!selectedSizeKey ? 'style="display:none;"' : ''}>

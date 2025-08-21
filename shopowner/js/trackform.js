@@ -227,7 +227,22 @@ function updateShippingInfo(data) {
 function renderStatusUpdates(updates) {
     if (!domElements.updateList) return;
 
+    // Get reference to the empty state element
+    const emptyState = document.getElementById("emptyUpdatesState");
+    
+    // Check if there are any updates
+    const hasUpdates = updates && Object.keys(updates).length > 0;
+    
+    // Show/hide empty state based on whether updates exist
+    if (emptyState) {
+        emptyState.style.display = hasUpdates ? "none" : "block";
+    }
+    
+    // Clear the update list
     domElements.updateList.innerHTML = "";
+
+    // If no updates, return early
+    if (!hasUpdates) return;
 
     // Convert updates object to array and sort by timestamp (newest first)
     const sortedUpdates = Object.entries(updates)

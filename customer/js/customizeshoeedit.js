@@ -104,28 +104,82 @@ function applyDesignData(designData) {
     selectedSize = designData.size;
     basePrice = designData.basePrice || basePrice;
     
-    // Update the model selection UI
-    const modelOption = document.querySelector(`.model-option[data-model="${currentModel}"]`);
-    if (modelOption) {
-        modelOption.click();
-    }
-    
-    // Update size selection
-    const sizeOption = document.querySelector(`#sizeOptions .component-option[data-size="${selectedSize}"]`);
-    if (sizeOption) {
-        sizeOption.click();
-    }
-    
     // Apply the selections to our global selections object
     if (designData.selections) {
         selections[currentModel] = {...selections[currentModel], ...designData.selections};
     }
     
-    // Update all UI components based on the selections
-    updateAllComponentSelections();
+    // First, select the model
+    selectModel(currentModel);
     
-    // Update the preview
-    updatePreview();
+    // Then wait for the model-specific UI to update before selecting other options
+    setTimeout(() => {
+        // Select the size
+        selectSize(selectedSize);
+        
+        // Select other components based on the model
+        updateAllComponentSelections();
+        
+        // Update the preview
+        updatePreview();
+    }, 100);
+}
+
+// Helper function to select the size
+function selectSize(size) {
+    // Find the active size options container (visible for the current model)
+    let sizeOptionsContainer = null;
+    
+    // Check each model-specific container to see which one is visible
+    const modelContainers = document.querySelectorAll('.model-specific');
+    for (const container of modelContainers) {
+        if (container.style.display !== 'none') {
+            const options = container.querySelector('#sizeOptions');
+            if (options) {
+                sizeOptionsContainer = options;
+                break;
+            }
+        }
+    }
+    
+    // If we found a visible size options container, select the size
+    if (sizeOptionsContainer) {
+        const sizeOption = sizeOptionsContainer.querySelector(`.component-option[data-size="${size}"]`);
+        if (sizeOption && !sizeOption.classList.contains('selected')) {
+            // Remove selected class from all options
+            sizeOptionsContainer.querySelectorAll('.component-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selected class to the target option
+            sizeOption.classList.add('selected');
+        }
+    } else {
+        // Fallback: try again after a short delay
+        setTimeout(() => selectSize(size), 200);
+    }
+}
+
+// Helper function to select the model
+function selectModel(model) {
+    const modelOption = document.querySelector(`.model-option[data-model="${model}"]`);
+    if (modelOption && !modelOption.classList.contains('selected')) {
+        modelOption.click();
+        
+        // Also manually update UI state since we're programmatically changing it
+        document.querySelectorAll('.model-option').forEach(opt => opt.classList.remove('selected'));
+        modelOption.classList.add('selected');
+        
+        // Hide all model-specific sections
+        document.querySelectorAll('.model-specific').forEach(section => {
+            section.style.display = 'none';
+        });
+        
+        // Show sections for selected model
+        document.querySelectorAll(`.model-specific.${model}`).forEach(section => {
+            section.style.display = 'block';
+        });
+    }
 }
 
 // Update all component selections in the UI
@@ -137,8 +191,14 @@ function updateAllComponentSelections() {
         const container = document.getElementById(containerId);
         if (container) {
             const option = container.querySelector(`.component-option[data-id="${optionId}"]`);
-            if (option) {
-                option.click();
+            if (option && !option.classList.contains('selected')) {
+                // Remove selected class from all options
+                container.querySelectorAll('.component-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Add selected class to the target option
+                option.classList.add('selected');
             }
         }
     };
@@ -148,15 +208,23 @@ function updateAllComponentSelections() {
         const container = document.getElementById(containerId);
         if (container) {
             const colorOption = container.querySelector(`.color-option[data-color="${colorValue}"]`);
-            if (colorOption) {
-                colorOption.click();
+            if (colorOption && !colorOption.classList.contains('selected')) {
+                // Remove selected class from all options
+                container.querySelectorAll('.color-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Add selected class to the target option
+                colorOption.classList.add('selected');
             }
         }
     };
     
     // Update components based on model
     if (currentModel === 'classic') {
-        selectOption('classicLacesOptions', modelSelections.laces?.id);
+        if (modelSelections.laces?.id) {
+            selectOption('classicLacesOptions', modelSelections.laces.id);
+        }
         
         if (modelSelections.laces?.color) {
             selectColor('classiscLacesColorOptions', modelSelections.laces.color);
@@ -166,7 +234,9 @@ function updateAllComponentSelections() {
         }
     } 
     else if (currentModel === 'runner') {
-        selectOption('runnerLacesOptions', modelSelections.laces?.id);
+        if (modelSelections.laces?.id) {
+            selectOption('runnerLacesOptions', modelSelections.laces.id);
+        }
         
         if (modelSelections.laces?.color) {
             selectColor('runnerLacesColorOptions', modelSelections.laces.color);
@@ -176,7 +246,10 @@ function updateAllComponentSelections() {
         }
     } 
     else if (currentModel === 'basketball') {
-        selectOption('basketballLacesOptions', modelSelections.laces?.id);
+        // For basketball model
+        if (modelSelections.laces?.id) {
+            selectOption('basketballLacesOptions', modelSelections.laces.id);
+        }
         
         if (modelSelections.laces?.color) {
             selectColor('basketballLacesColorOptions', modelSelections.laces.color);
@@ -511,39 +584,45 @@ function initializeEventListeners() {
 
     // Model selection
     const modelOptions = document.querySelectorAll('.model-option');
-    modelOptions.forEach(option => {
-        option.addEventListener('click', function () {
-            modelOptions.forEach(opt => opt.classList.remove('selected'));
-            this.classList.add('selected');
-            currentModel = this.dataset.model;
-            basePrice = parseFloat(this.dataset.price);
+    if (modelOptions.length > 0) {
+        modelOptions.forEach(option => {
+            option.addEventListener('click', function () {
+                modelOptions.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                currentModel = this.dataset.model;
+                basePrice = parseFloat(this.dataset.price);
 
-            // Hide all model-specific sections
-            document.querySelectorAll('.model-specific').forEach(section => {
-                section.style.display = 'none';
+                // Hide all model-specific sections
+                document.querySelectorAll('.model-specific').forEach(section => {
+                    section.style.display = 'none';
+                });
+
+                // Show sections for selected model
+                document.querySelectorAll(`.model-specific.${currentModel}`).forEach(section => {
+                    section.style.display = 'block';
+                });
+
+                updatePreview();
             });
-
-            // Show sections for selected model
-            document.querySelectorAll(`.model-specific.${currentModel}`).forEach(section => {
-                section.style.display = 'block';
-            });
-
-            updatePreview();
         });
-    });
+    }
 
     // Size selection
     const sizeOptions = document.querySelectorAll('#sizeOptions .component-option');
-    sizeOptions.forEach(btn => {
-        btn.addEventListener('click', function () {
-            sizeOptions.forEach(b => b.classList.remove('selected'));
-            this.classList.add('selected');
-            selectedSize = this.dataset.size;
+    if (sizeOptions.length > 0) {
+        sizeOptions.forEach(btn => {
+            btn.addEventListener('click', function () {
+                sizeOptions.forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedSize = this.dataset.size;
+            });
         });
-    });
+    }
 
     // Component selection
     function setupComponentOptions(componentType, optionsContainer, model) {
+        if (!optionsContainer) return;
+        
         const options = optionsContainer.querySelectorAll('.component-option');
         options.forEach(option => {
             option.addEventListener('click', function () {
@@ -568,6 +647,8 @@ function initializeEventListeners() {
 
     // Color selection
     function setupColorOptions(colorType, optionsContainer, model) {
+        if (!optionsContainer) return;
+        
         const options = optionsContainer.querySelectorAll('.color-option');
         options.forEach(option => {
             option.addEventListener('click', function () {
@@ -595,21 +676,30 @@ function initializeEventListeners() {
     setupColorOptions('bodyColor', document.getElementById('basketballBodyColorOptions'), 'basketball');
 
     // Save design button (now updates existing design)
-    document.querySelector('.btn-outline').addEventListener('click', async function () {
-        try {
-            await saveDesignToDatabase();
-            alert(`Your ${currentModel} design has been updated!`);
-        } catch (error) {
-            console.error('Error saving design: ', error);
-            alert('There was an error saving your design. Please try again.');
-        }
-    });
+    const saveButton = document.querySelector('.btn-outline');
+    if (saveButton) {
+        saveButton.addEventListener('click', async function () {
+            try {
+                await saveDesignToDatabase();
+                alert(`Your ${currentModel} design has been updated!`);
+            } catch (error) {
+                console.error('Error saving design: ', error);
+                alert('There was an error saving your design. Please try again.');
+            }
+        });
+    }
 
     // Add to cart button
-    document.querySelector('.btn-primary').addEventListener('click', addToCart);
+    const addToCartButton = document.querySelector('.btn-primary');
+    if (addToCartButton) {
+        addToCartButton.addEventListener('click', addToCart);
+    }
 
     // Buy now button
-    document.querySelector('.btn-buy').addEventListener('click', buyNow);
+    const buyNowButton = document.querySelector('.btn-buy');
+    if (buyNowButton) {
+        buyNowButton.addEventListener('click', buyNow);
+    }
 
     // Info button functionality
     const partsInfoBtn = document.getElementById('partsInfoBtn');
@@ -619,23 +709,27 @@ function initializeEventListeners() {
     const closePartsModal = document.getElementById('closePartsModal');
     const closeSizeModal = document.getElementById('closeSizeModal');
 
-    if (partsInfoBtn && sizeInfoBtn && partsModal && sizeModal) {
+    if (partsInfoBtn && partsModal && closePartsModal) {
         partsInfoBtn.addEventListener('click', () => {
             partsModal.style.display = 'flex';
-        });
-
-        sizeInfoBtn.addEventListener('click', () => {
-            sizeModal.style.display = 'flex';
         });
 
         closePartsModal.addEventListener('click', () => {
             partsModal.style.display = 'none';
         });
+    }
+
+    if (sizeInfoBtn && sizeModal && closeSizeModal) {
+        sizeInfoBtn.addEventListener('click', () => {
+            sizeModal.style.display = 'flex';
+        });
 
         closeSizeModal.addEventListener('click', () => {
             sizeModal.style.display = 'none';
         });
+    }
 
+    if (partsModal && sizeModal) {
         window.addEventListener('click', (event) => {
             if (event.target === partsModal) {
                 partsModal.style.display = 'none';
@@ -647,15 +741,18 @@ function initializeEventListeners() {
     }
 
     // Logout functionality
-    document.getElementById('logout_btn').addEventListener('click', function() {
-        if (confirm('Are you sure you want to logout?')) {
-            signOut(auth).then(() => {
-                window.location.href = '/user_login.html';
-            }).catch((error) => {
-                console.error('Error signing out:', error);
-            });
-        }
-    });
+    const logoutButton = document.getElementById('logout_btn');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', function() {
+            if (confirm('Are you sure you want to logout?')) {
+                signOut(auth).then(() => {
+                    window.location.href = '/user_login.html';
+                }).catch((error) => {
+                    console.error('Error signing out:', error);
+                });
+            }
+        });
+    }
 }
 
 // Initialize the application when DOM is loaded
@@ -696,6 +793,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // Load the design data
         const designData = await loadDesignData(designId);
+        
+        // Apply the design data
         applyDesignData(designData);
     } catch (error) {
         console.error('Initialization error:', error);

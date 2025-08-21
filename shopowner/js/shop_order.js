@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, onValue, update, set, get, off } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, onValue, update, set, get, off, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 // Your Firebase config
@@ -138,7 +138,7 @@ function createOrderRow(order) {
     let actionButtons = '';
     if (status === 'pending') {
         actionButtons = `
-            <button class="btn btn-accept" onclick="acceptOrder('${order.orderId}', '${order.userId}')">
+            <button class="btn btn-accept" onclick="showAcceptModal('${order.orderId}', '${order.userId}')">
                 <i class="fas fa-check"></i> Accept
             </button>
             <button class="btn btn-reject" onclick="showRejectModal('${order.orderId}', '${order.userId}')">
@@ -174,15 +174,49 @@ function createOrderRow(order) {
     `;
 }
 
-// Accept order function
-window.acceptOrder = async function (orderId, userId) {
+// Show accept modal
+window.showAcceptModal = function (orderId, userId) {
+    const modal = document.getElementById('acceptModal');
+    if (!modal) return;
+
+    currentOrderId = orderId;
+    currentUserId = userId;
+    
+    // Clear previous input
+    document.getElementById('serialNumber').value = '';
+    
+    modal.style.display = 'block';
+};
+
+// Accept order function with serial number
+window.acceptOrder = async function () {
+    const serialNumber = document.getElementById('serialNumber').value.trim();
+    
+    if (!serialNumber) {
+        alert('Please enter a serial number');
+        return;
+    }
+
     try {
-        const orderRef = ref(db, `AR_shoe_users/transactions/${userId}/${orderId}`);
+        const orderRef = ref(db, `AR_shoe_users/transactions/${currentUserId}/${currentOrderId}`);
+        const orderSnap = await get(orderRef);
+
+        if (!orderSnap.exists()) {
+            alert("Order not found");
+            return;
+        }
+
+        const orderData = orderSnap.val();
+        
+        // Save serial number to the order
         await update(orderRef, {
             status: 'accepted',
+            serialNumber: serialNumber,
             updatedAt: new Date().toISOString()
         });
-        alert('Order accepted successfully');
+
+        document.getElementById('acceptModal').style.display = 'none';
+        alert('Order accepted successfully with serial number: ' + serialNumber);
     } catch (error) {
         console.error("Error accepting order:", error);
         alert("Failed to accept order");
@@ -203,8 +237,6 @@ window.trackbtn = function (orderID, userId) {
     window.location.href = `trackform.html?orderID=${orderID}&userID=${userId}`;
 }
 
-
-// Reject order function
 // Reject order function - UPDATED STOCK PATH
 window.rejectOrder = async function () {
     const reason = document.getElementById('rejectionReason').value.trim();
@@ -275,7 +307,6 @@ window.rejectOrder = async function () {
     }
 };
 
-
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
     // Status filter change
@@ -284,31 +315,57 @@ document.addEventListener('DOMContentLoaded', () => {
         statusFilter.addEventListener('change', loadOrders);
     }
 
-    const confirmBtn = document.getElementById('confirmRejectBtn');
-    const cancelBtn = document.getElementById('cancelRejectBtn');
-    const closeModalBtn = document.querySelector('.close-modal');
+    // Reject modal buttons
+    const confirmRejectBtn = document.getElementById('confirmRejectBtn');
+    const cancelRejectBtn = document.getElementById('cancelRejectBtn');
+    const closeRejectModalBtn = document.querySelector('.close-modal');
     const rejectModal = document.getElementById('rejectModal');
 
-    if (confirmBtn) {
-        confirmBtn.addEventListener('click', rejectOrder);
+    if (confirmRejectBtn) {
+        confirmRejectBtn.addEventListener('click', rejectOrder);
     }
 
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
+    if (cancelRejectBtn) {
+        cancelRejectBtn.addEventListener('click', () => {
             rejectModal.style.display = 'none';
         });
     }
 
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', () => {
+    if (closeRejectModalBtn) {
+        closeRejectModalBtn.addEventListener('click', () => {
             rejectModal.style.display = 'none';
         });
     }
 
-    // Close modal when clicking outside of it
+    // Accept modal buttons
+    const confirmAcceptBtn = document.getElementById('confirmAcceptBtn');
+    const cancelAcceptBtn = document.getElementById('cancelAcceptBtn');
+    const closeAcceptModalBtn = document.querySelector('.close-modal-accept');
+    const acceptModal = document.getElementById('acceptModal');
+
+    if (confirmAcceptBtn) {
+        confirmAcceptBtn.addEventListener('click', acceptOrder);
+    }
+
+    if (cancelAcceptBtn) {
+        cancelAcceptBtn.addEventListener('click', () => {
+            acceptModal.style.display = 'none';
+        });
+    }
+
+    if (closeAcceptModalBtn) {
+        closeAcceptModalBtn.addEventListener('click', () => {
+            acceptModal.style.display = 'none';
+        });
+    }
+
+    // Close modals when clicking outside of them
     window.addEventListener('click', (event) => {
         if (event.target === rejectModal) {
             rejectModal.style.display = 'none';
+        }
+        if (event.target === acceptModal) {
+            acceptModal.style.display = 'none';
         }
     });
 

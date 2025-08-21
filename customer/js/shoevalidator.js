@@ -36,8 +36,9 @@ const resultTopImage = document.getElementById('resultTopImage');
 const resultReason = document.getElementById('resultReason');
 const reasonSection = document.getElementById('reasonSection');
 
-// Hide body until authenticated
+// Hide body until authenticated and hide results container by default
 document.body.style.display = 'none';
+resultsContainer.style.display = 'none';
 
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -52,6 +53,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         document.getElementById('userName_display2').textContent = userData.firstName + " " + userData.lastName;
                         document.getElementById('imageProfile').src = userData.profilePhoto?.profilePhoto?.url || "https://cdn-icons-png.flaticon.com/512/11542/11542598.png";
                         document.body.style.display = '';
+                        
+                        // Check for URL parameter after authentication
+                        checkUrlParameter();
                     } else {
                         alert("Account does not exist");
                         auth.signOut();
@@ -62,6 +66,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Check for URL parameter with serial number
+function checkUrlParameter() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const shoeSerialNumber = urlParams.get('ShoeSerialNumber');
+    
+    if (shoeSerialNumber) {
+        // Set the input value
+        serialNumberInput.value = shoeSerialNumber;
+        
+        // Automatically trigger validation after a short delay
+        setTimeout(() => {
+            validateShoe();
+        }, 500);
+    }
+}
 
 // Initialize all event listeners
 function initializeEventListeners() {
@@ -121,18 +141,30 @@ async function validateShoe() {
     
     try {
         // Query the database for the serial number
-        // CORRECTED PATH: Looking in shoeVerification instead of validations
+        // We need to manually search through all records since we don't have an index
         const validationsRef = ref(db, 'AR_shoe_users/shoeVerification');
-        const validationQuery = query(validationsRef, orderByChild('serialNumber'), equalTo(serialNumber));
         
-        const snapshot = await get(validationQuery);
+        const snapshot = await get(validationsRef);
         
         if (snapshot.exists()) {
-            // Get the first result (should be only one with this serial number)
-            const validationData = Object.values(snapshot.val())[0];
-            displayValidationResults(validationData);
+            // Manually search for the serial number
+            const allValidations = snapshot.val();
+            let foundValidation = null;
+            
+            for (const key in allValidations) {
+                if (allValidations[key].serialNumber === serialNumber) {
+                    foundValidation = allValidations[key];
+                    break;
+                }
+            }
+            
+            if (foundValidation) {
+                displayValidationResults(foundValidation);
+            } else {
+                showError('No validation record found for this serial number');
+            }
         } else {
-            showError('No validation record found for this serial number');
+            showError('No validation records found in database');
         }
     } catch (error) {
         console.error('Error validating shoe:', error);
@@ -257,17 +289,3 @@ function formatDate(timestamp) {
         day: 'numeric'
     });
 }
-
-// Close modal when clicking outside (if you add modals later)
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('modal')) {
-        // Close modal logic if needed
-    }
-});
-
-// Escape key to close modals
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        // Close modal logic if needed
-    }
-});

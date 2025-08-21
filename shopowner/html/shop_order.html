@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,9 +24,9 @@
             --gray-dark: #495057;
             --text-primary: #212529;
             --text-secondary: #343a40;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             --radius-sm: 6px;
             --radius-md: 10px;
@@ -202,7 +203,7 @@
             border-collapse: collapse;
         }
 
-        .order-table th, 
+        .order-table th,
         .order-table td {
             padding: 1rem;
             text-align: left;
@@ -385,6 +386,7 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -430,6 +432,33 @@
             box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
         }
 
+        /* Form elements in modals */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
         .modal-actions {
             display: flex;
             justify-content: flex-end;
@@ -460,7 +489,7 @@
             .dashboard {
                 grid-template-columns: 1fr;
             }
-            
+
             .sidebar {
                 position: fixed;
                 left: -350px;
@@ -468,18 +497,18 @@
                 transition: var(--transition);
                 z-index: 100;
             }
-            
+
             .sidebar.active {
                 left: 0;
             }
-            
+
             .mobile-menu-toggle {
                 display: block;
                 font-size: 1.5rem;
                 cursor: pointer;
                 padding: 0.5rem;
             }
-            
+
             .sidebar-overlay {
                 display: none;
                 position: fixed;
@@ -487,23 +516,23 @@
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: rgba(0,0,0,0.5);
+                background: rgba(0, 0, 0, 0.5);
                 z-index: 99;
             }
-            
+
             .sidebar-overlay.active {
                 display: block;
             }
-            
+
             .container {
                 padding: 1.5rem;
             }
-            
+
             .order-table {
                 display: block;
                 overflow-x: auto;
             }
-            
+
             .filter-section {
                 flex-direction: column;
                 align-items: flex-start;
@@ -514,32 +543,33 @@
             .main-content {
                 padding: 1rem;
             }
-            
-            .order-table th, 
+
+            .order-table th,
             .order-table td {
                 padding: 0.75rem;
             }
-            
+
             .action-buttons {
                 flex-direction: column;
                 gap: 0.5rem;
             }
-            
+
             .btn {
                 width: 100%;
                 justify-content: center;
             }
-            
+
             .modal-actions {
                 flex-direction: column;
             }
-            
+
             .modal-actions .btn {
                 width: 100%;
             }
         }
-        </style>
+    </style>
 </head>
+
 <body>
     <div class="dashboard">
         <!-- Sidebar -->
@@ -650,6 +680,27 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Acceptance Modal -->
+                <div id="acceptModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close-modal-accept">&times;</span>
+                        <h3>Accept Order</h3>
+                        <div class="form-group">
+                            <label for="serialNumber">Shoe Serial Number:</label>
+                            <input type="text" id="serialNumber" placeholder="Enter serial number (e.g., SN12345678)"
+                                class="form-input">
+                        </div>
+                        <div class="modal-actions">
+                            <button id="confirmAcceptBtn" class="btn btn-accept">
+                                <i class="fas fa-check"></i> Confirm Acceptance
+                            </button>
+                            <button id="cancelAcceptBtn" class="btn btn-cancel">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -659,16 +710,16 @@
 
     <script>
         // Mobile sidebar toggle
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const mobileToggle = document.querySelector('.mobile-menu-toggle');
             const sidebar = document.querySelector('.sidebar');
             const overlay = document.querySelector('.sidebar-overlay');
-            
+
             mobileToggle.addEventListener('click', () => {
                 sidebar.classList.toggle('active');
                 overlay.classList.toggle('active');
             });
-            
+
             overlay.addEventListener('click', () => {
                 sidebar.classList.remove('active');
                 overlay.classList.remove('active');
@@ -678,4 +729,5 @@
 
     <script type="module" src="/shopowner/js/shop_order.js"></script>
 </body>
+
 </html>

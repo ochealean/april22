@@ -22,7 +22,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
-const storage = getStorage(app); 
+const storage = getStorage(app);
 
 // Global variables
 let shopLoggedin; // shop ID of the logged-in user
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function setupFileInputValidation() {
     // Main shoe image validation
-    document.getElementById('shoeImage').addEventListener('change', function(e) {
+    document.getElementById('shoeImage').addEventListener('change', function (e) {
         validateFileInput(this);
     });
 
@@ -125,7 +125,7 @@ onAuthStateChanged(auth, (user) => {
                     document.getElementById("addemployeebtn").style.display = "none";
                     document.getElementById("analyticsbtn").style.display = "none";
                 }
-                
+
                 // If shopName isn't set in employee data, fetch it from shop data
                 if (!sname && shopLoggedin) {
                     const shopInfoRef = dbRef(db, `AR_shoe_users/shop/${shopLoggedin}`);
@@ -141,7 +141,7 @@ onAuthStateChanged(auth, (user) => {
                 // This is a shop owner
                 shopLoggedin = user.uid;
                 roleLoggedin = "Shop Owner";
-                
+
                 // Fetch shop name from shop data
                 const shopInfoRef = dbRef(db, `AR_shoe_users/shop/${shopLoggedin}`);
                 onValue(shopInfoRef, (shopSnapshot) => {
@@ -210,6 +210,8 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
         // Get main shoe data
         const shoeCode = document.getElementById('shoeCode').value;
         const shoeName = document.getElementById('shoeName').value;
+        const shoeType = document.getElementById('shoeType').value;        // Added
+        const shoeBrand = document.getElementById('shoeBrand').value;      // Added
         const shoeDescription = document.getElementById('shoeDescription').value;
         const random18CharID = generate18CharID();
 
@@ -281,6 +283,8 @@ document.getElementById('addShoeForm').addEventListener('submit', async (event) 
         await set(dbRef(db, `AR_shoe_users/shoe/${shopLoggedin}/${random18CharID}_${shoeCode}`), {
             shoeName: shoeName,
             shoeCode: shoeCode,
+            shoeType: shoeType,              // Added
+            shoeBrand: shoeBrand,            // Added
             generalDescription: shoeDescription,
             defaultImage: shoeImageUrl,
             variants: processedVariants,
@@ -368,12 +372,12 @@ function addColorVariant() {
     `;
 
     container.appendChild(variant);
-    
+
     // Add validation for the new file input
-    document.getElementById(`variantImage_${variantCount}`).addEventListener('change', function(e) {
+    document.getElementById(`variantImage_${variantCount}`).addEventListener('change', function (e) {
         validateFileInput(this);
     });
-    
+
     addSizeInput(variantCount);
 }
 

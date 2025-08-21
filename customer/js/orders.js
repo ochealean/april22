@@ -75,13 +75,8 @@ function loadOrders(userId) {
             orders.unshift(orderData); // Add to beginning to show newest first
         });
 
-        orders.forEach(order => {
-            const orderCard = createOrderCard(order);
-            if (orderCard) {
-                ordersContainer.appendChild(orderCard);
-            }
-        });
-
+        // Load orders with serial numbers
+        loadOrdersWithSerialNumbers(orders, ordersContainer);
         setupOrderFilters();
     }, (error) => {
         console.error("Error loading orders:", error);
@@ -89,7 +84,16 @@ function loadOrders(userId) {
     });
 }
 
-function createOrderCard(order) {
+async function loadOrdersWithSerialNumbers(orders, ordersContainer) {
+    for (const order of orders) {
+        const orderCard = await createOrderCard(order);
+        if (orderCard) {
+            ordersContainer.appendChild(orderCard);
+        }
+    }
+}
+
+async function createOrderCard(order) {
     if (!order) return null;
 
     const status = order.status.toLowerCase();
@@ -110,10 +114,28 @@ function createOrderCard(order) {
     // Skip if status is not in allowed list
     if (!allowedStatuses.includes(status)) return null;
 
+    // Check if this order has a serial number
+    let serialNumber = order.serialNumber;
+    
+    // If not found in order, check shoeVerification collection
+    if (!serialNumber) {
+        try {
+            const serialNumberData = await getSerialNumberFromVerification(order.id);
+            if (serialNumberData) {
+                serialNumber = serialNumberData.serialNumber;
+            }
+        } catch (error) {
+            console.log("No serial number found in verification collection:", error);
+        }
+    }
+
     const orderCard = document.createElement('div');
     orderCard.className = 'order-card';
     orderCard.dataset.status = status;
     orderCard.dataset.orderId = order.id;
+    if (serialNumber) {
+        orderCard.dataset.serialNumber = serialNumber;
+    }
 
     const orderDate = new Date(order.date || Date.now());
     const formattedDate = orderDate.toLocaleDateString('en-US', {
@@ -173,12 +195,17 @@ function createOrderCard(order) {
         const fallbackImage = "https://cdn-icons-png.flaticon.com/512/11542/11542598.png";
         const itemImage = order.item.imageUrl || fallbackImage;
 
+        // Add serial number to item details if available
+        const serialNumberHTML = serialNumber ? 
+            `<div class="item-serial">Serial Number: <strong>${serialNumber}</strong></div>` : '';
+
         orderItemHTML = `
         <div class="order-item">
             <img src="${itemImage}" alt="Product" class="item-image" onerror="this.onerror=null;this.src='${fallbackImage}'">
             <div class="item-details">
                 <div class="item-name">${order.item.name || 'Unknown Product'}</div>
                 <div class="item-variant">Color: ${order.item.color || 'N/A'}, Size: ${order.item.size || 'N/A'}</div>
+                ${serialNumberHTML}
                 <div class="item-price">₱${(order.item.price || 0).toFixed(2)}</div>
             </div>
             <div class="item-quantity">Qty: ${order.item.quantity || 1}</div>
@@ -200,11 +227,17 @@ function createOrderCard(order) {
                 <i class="fas fa-truck"></i> Track Package
             </button>
         `;
+        
+        // Add validate button if serial number exists
+        if (serialNumber) {
+            actionButtons += `
+                <button class="btn btn-verify" onclick="validateShoe('${serialNumber}')">
+                    <i class="fas fa-check-circle"></i> Validate Shoe
+                </button>
+            `;
+        }
     } else if (status === 'pending') {
         actionButtons = `
-        <button class="btn btn-verify" onclick="validateShoe('${order.id}')">
-                <i class="fas fa-check-circle"></i> Validate Shoe
-            </button>
             <button class="btn btn-track" onclick="trackOrder('${order.id}')">
                 <i class="fas fa-truck"></i> Track Package
             </button>
@@ -212,6 +245,30 @@ function createOrderCard(order) {
                 <i class="fas fa-times"></i> Cancel Order
             </button>
         `;
+        
+        // Add validate button if serial number exists (even for pending orders)
+        if (serialNumber) {
+            actionButtons += `
+                <button class="btn btn-verify" onclick="validateShoe('${serialNumber}')">
+                    <i class="fas fa-check-circle"></i> Validate Shoe
+                </button>
+            `;
+        }
+    } else if (status === 'shipped' || status === 'in transit' || status === 'arrived at facility' || status === 'out for delivery') {
+        actionButtons = `
+            <button class="btn btn-track" onclick="trackOrder('${order.id}')">
+                <i class="fas fa-truck"></i> Track Package
+            </button>
+        `;
+        
+        // Add validate button if serial number exists (even for pending orders)
+        if (serialNumber) {
+            actionButtons += `
+                <button class="btn btn-verify" onclick="validateShoe('${serialNumber}')">
+                    <i class="fas fa-check-circle"></i> Validate Shoe
+                </button>
+            `;
+        }
     } else {
         actionButtons = `
             <button class="btn btn-track" onclick="trackOrder('${order.id}')">
@@ -221,6 +278,15 @@ function createOrderCard(order) {
                 <i class="fas fa-times"></i> Cancel Order
             </button>
         `;
+        
+        // Add validate button if serial number exists
+        if (serialNumber) {
+            actionButtons += `
+                <button class="btn btn-verify" onclick="validateShoe('${serialNumber}')">
+                    <i class="fas fa-check-circle"></i> Validate Shoe
+                </button>
+            `;
+        }
     }
 
     orderCard.innerHTML = `
@@ -245,6 +311,30 @@ function createOrderCard(order) {
     `;
 
     return orderCard;
+}
+
+async function getSerialNumberFromVerification(orderId) {
+    try {
+        const verificationRef = ref(db, 'AR_shoe_users/shoeVerification');
+        const snapshot = await get(verificationRef);
+        
+        if (!snapshot.exists()) return null;
+        
+        const allVerifications = snapshot.val();
+        
+        // Search for verification record with matching orderId
+        for (const key in allVerifications) {
+            const verification = allVerifications[key];
+            if (verification.orderId === orderId) {
+                return verification;
+            }
+        }
+        
+        return null;
+    } catch (error) {
+        console.error("Error fetching serial number from verification:", error);
+        return null;
+    }
 }
 
 function setupOrderFilters() {
@@ -359,6 +449,11 @@ window.startReturn = function (orderId) {
 
 window.leaveReview = function (shopId, productId) {
     alert(`Leaving review for product: ${productId} from shop: ${shopId}`);
+};
+
+// Validate shoe function - redirects to shoe validator with serial number
+window.validateShoe = function(serialNumber) {
+    window.location.href = `http://127.0.0.1:5500/customer/html/shoevalidator.html?ShoeSerialNumber=${encodeURIComponent(serialNumber)}`;
 };
 
 // Logout functionality

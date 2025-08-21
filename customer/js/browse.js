@@ -17,6 +17,10 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 const productsGrid = document.getElementById("productsGrid");
+const searchInput = document.getElementById("searchInput");
+const searchButton = document.getElementById("searchButton");
+const clearSearchButton = document.getElementById("clearSearchButton");
+const sortOptions = document.getElementById("sortOptions");
 
 let USER;
 let wishlistData = {}; 
@@ -47,27 +51,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Search functionality
 function setupSearch() {
-    const searchInput = document.querySelector('.search-input');
-    const searchBtn = document.querySelector('.search-btn');
-    const clearBtn = document.createElement('button');
-    
-    // Create clear button
-    clearBtn.innerHTML = '<i class="fas fa-times"></i>';
-    clearBtn.className = 'clear-btn';
-    clearBtn.style.display = 'none';
-    clearBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        clearBtn.style.display = 'none';
-        clearActiveTag();
-        loadShoes(); // Reload all shoes
-    });
-    
-    // Add clear button after search input
-    searchInput.parentNode.appendChild(clearBtn);
-    
     // Show/hide clear button based on input
     searchInput.addEventListener('input', () => {
-        clearBtn.style.display = searchInput.value ? 'block' : 'none';
+        clearSearchButton.style.display = searchInput.value ? 'block' : 'none';
+    });
+    
+    // Clear search button handler
+    clearSearchButton.addEventListener('click', () => {
+        searchInput.value = '';
+        clearSearchButton.style.display = 'none';
+        clearActiveTag();
+        loadShoes(); // Reload all shoes
     });
     
     // Function to perform search
@@ -84,7 +78,8 @@ function setupSearch() {
                 shoe.name.toLowerCase().includes(searchLower) ||
                 shoe.shopName.toLowerCase().includes(searchLower) ||
                 shoe.type.toLowerCase().includes(searchLower) ||
-                shoe.brand.toLowerCase().includes(searchLower)
+                shoe.brand.toLowerCase().includes(searchLower) ||
+                shoe.code.toLowerCase().includes(searchLower)
             );
         });
         
@@ -92,7 +87,7 @@ function setupSearch() {
     }
     
     // Search button click handler
-    searchBtn.addEventListener('click', () => {
+    searchButton.addEventListener('click', () => {
         const searchTerm = searchInput.value.trim();
         performSearch(searchTerm);
     });
@@ -108,8 +103,6 @@ function setupSearch() {
 
 function setupTagFunctionality() {
     const tags = document.querySelectorAll('.tag');
-    const searchInput = document.querySelector('.search-input');
-    const clearBtn = document.querySelector('.clear-btn');
     
     tags.forEach(tag => {
         tag.addEventListener('click', () => {
@@ -126,7 +119,7 @@ function setupTagFunctionality() {
             searchInput.value = tagText;
             
             // Show clear button
-            if (clearBtn) clearBtn.style.display = 'block';
+            clearSearchButton.style.display = 'block';
             
             // Perform search with the tag
             performTagSearch(tagText);
@@ -160,6 +153,41 @@ function performTagSearch(tagText) {
     displayShoes(filteredShoes);
 }
 
+// Setup sorting functionality
+function setupSorting() {
+    sortOptions.addEventListener('change', () => {
+        const sortValue = sortOptions.value;
+        sortShoes(sortValue);
+    });
+}
+
+function sortShoes(sortBy) {
+    let sortedShoes = [...allShoes];
+    
+    switch(sortBy) {
+        case 'newest':
+            // Assuming shoes have a dateAdded property
+            sortedShoes.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+            break;
+        case 'price-low':
+            sortedShoes.sort((a, b) => a.price - b.price);
+            break;
+        case 'price-high':
+            sortedShoes.sort((a, b) => b.price - a.price);
+            break;
+        case 'rating':
+            // Assuming shoes have a rating property
+            sortedShoes.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            break;
+        case 'popular':
+        default:
+            // Default sorting (no change)
+            break;
+    }
+    
+    displayShoes(sortedShoes);
+}
+
 // Call this function after onAuthStateChanged
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -173,6 +201,7 @@ onAuthStateChanged(auth, async (user) => {
                 await loadShoes();
                 setupSearch();
                 setupTagFunctionality();
+                setupSorting();
                 
                 // Hide loader and show content
                 const loadingOverlay = document.getElementById('loadingOverlay');
@@ -200,6 +229,11 @@ function createProductCard(shoeData) {
                 <h4>Shop Name: ${shoeData.shopName}</h4>
             </div>
             <h3 class="product-name">${shoeData.name}</h3>
+            <p class="product-code">Code: ${shoeData.code}</p>
+            <div class="product-meta">
+                <span class="product-brand">${shoeData.brand || 'No Brand'}</span>
+                <span class="product-type">${shoeData.type || 'No Type'}</span>
+            </div>
             <div class="product-price">₱${shoeData.price.toFixed(2)}</div>
             <div class="product-actions">
                 <button class="add-to-cart" onclick="viewDetails('${shoeData.shoeID}', '${shoeData.shopID}')">View Details</button>
@@ -288,24 +322,28 @@ async function loadShoes() {
                     const shopName = shopNames[shopID] || shopID;
 
                     const shoeName = shoeData.shoeName;
+                    const shoeCode = shoeData.shoeCode || 'N/A';
                     const defaultImage = shoeData.defaultImage;
                     const firstVariant = Object.values(shoeData.variants)[0];
                     const price = firstVariant.price;
-                    const type = shoeData.type || 'Unknown';
-                    const brand = shoeData.brand || 'Unknown';
+                    const type = shoeData.shoeType || 'Unknown';
+                    const brand = shoeData.shoeBrand || 'Unknown';
+                    const dateAdded = shoeData.dateAdded || new Date().toISOString();
 
                     const isWishlisted = wishlistData?.[shopID]?.[shoeID] === true;
 
                     allShoes.push({
                         shoeID: shoeID,
                         name: shoeName,
+                        code: shoeCode,
                         price: price,
                         imageUrl: defaultImage,
                         shopName: shopName,
                         shopID: shopID,
                         isWishlisted: isWishlisted,
                         type: type,
-                        brand: brand
+                        brand: brand,
+                        dateAdded: dateAdded
                     });
                 });
             });
@@ -365,32 +403,6 @@ const debouncedToggleWishlist = debounce(async (shoeID, shopID, btnElement) => {
 
 // Update the window.toggleWishlist assignment
 window.toggleWishlist = debouncedToggleWishlist;
-
-// Add CSS for clear button and active tags
-const additionalStyles = `
-    .clear-btn {
-        background: transparent;
-        border: none;
-        color: var(--gray-dark);
-        cursor: pointer;
-        padding: 0 10px;
-        font-size: 1rem;
-        transition: color 0.3s;
-    }
-
-    .clear-btn:hover {
-        color: var(--primary);
-    }
-
-    .tag.active {
-        background-color: var(--primary);
-        color: white;
-    }
-`;
-
-const styleElement = document.createElement('style');
-styleElement.textContent = additionalStyles;
-document.head.appendChild(styleElement);
 
 // Function to show toast messages
 function showToast(message, isError = false) {
