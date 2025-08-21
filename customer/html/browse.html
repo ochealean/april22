@@ -121,6 +121,57 @@
             font-size: 1.1rem;
         }
 
+        
+        /* Loading Overlay Styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out, visibility 0.5s;
+        }
+
+        .loader {
+            text-align: center;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--gray-light);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader p {
+            color: var(--dark);
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        /* Hide content initially */
+        .main-content {
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+
+        .main-content.loaded {
+            opacity: 1;
+        }
+
         /* Main Content */
         .main-content {
             padding: 2rem;
@@ -468,6 +519,15 @@
     </style>
 </head>
 <body>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loader">
+            <div class="loader-spinner"></div>
+            <p>Loading your browse shoe...</p>
+        </div>
+    </div>
+
     <div class="dashboard">
         <!-- Sidebar - Purple Theme -->
         <div class="sidebar">
@@ -612,138 +672,25 @@
                 });
             }
 
-            // Search functionality
-            const searchInput = document.querySelector('.search-input');
-            const searchBtn = document.querySelector('.search-btn');
+            // Show loader immediately
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const mainContent = document.querySelector('.main-content');
             
-            if (searchBtn && searchInput) {
-                searchBtn.addEventListener('click', function() {
-                    const searchTerm = searchInput.value.trim();
-                    if (searchTerm) {
-                        alert(`Searching for: ${searchTerm}`);
-                        // In real implementation, this would filter products
-                    }
-                });
-            }
+            // Show loading overlay
+            loadingOverlay.style.display = 'flex';
             
-            // Tag click functionality
-            const tags = document.querySelectorAll('.tag');
-            tags.forEach(tag => {
-                tag.addEventListener('click', function() {
-                    const tagText = this.textContent;
-                    if (searchInput) searchInput.value = tagText;
-                    alert(`Filtering by: ${tagText}`);
-                    // In real implementation, this would filter products
-                });
-            });
-            
-            // Logout button
-            const logoutBtn = document.getElementById('logout_btn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', function() {
-                    alert('Logging out...');
-                    // In real implementation, this would call your logout function
-                });
-            }
+            // Initialize with sample data after a delay (simulating loading)
+            setTimeout(() => {
+                
+                // Hide loader and show content
+                loadingOverlay.style.opacity = '0';
+                loadingOverlay.style.visibility = 'hidden';
+                
+                // Show main content with fade-in effect
+                mainContent.classList.add('loaded');
+            }, 2000); // 2 second delay
         });
 
-        // Sample product data - would be replaced with API calls in real implementation
-        function loadSampleProducts() {
-            const productsGrid = document.getElementById('productsGrid');
-            if (!productsGrid) return;
-
-            // Clear existing content
-            productsGrid.innerHTML = '';
-
-            // Sample product data
-            const sampleProducts = [
-                {
-                    id: 1,
-                    shop: "Nike Store",
-                    name: "Nike Air Max 270",
-                    price: 6495.00,
-                    image: "#"
-                },
-                {
-                    id: 2,
-                    shop: "Adidas Store",
-                    name: "Adidas Ultraboost 22",
-                    price: 7995.00,
-                    image: "#"
-                },
-                {
-                    id: 3,
-                    shop: "New Balance",
-                    name: "New Balance 574",
-                    price: 4295.00,
-                    image: "#"
-                },
-                {
-                    id: 4,
-                    shop: "Vans Store",
-                    name: "Vans Old Skool",
-                    price: 3495.00,
-                    image: "#"
-                },
-                {
-                    id: 5,
-                    shop: "Converse",
-                    name: "Converse Chuck 70",
-                    price: 3995.00,
-                    image: "#"
-                },
-                {
-                    id: 6,
-                    shop: "Puma Store",
-                    name: "Puma RS-X",
-                    price: 5495.00,
-                    image: "#"
-                }
-            ];
-
-            // Add products to grid
-            sampleProducts.forEach(product => {
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                productCard.innerHTML = `
-                    <img src="${product.image}" alt="${product.name}" class="product-image">
-                    <div class="product-info">
-                        <div class="product-shop">${product.shop}</div>
-                        <h3 class="product-name">${product.name}</h3>
-                        <div class="product-price">₱ ${product.price.toFixed(2)}</div>
-                        <div class="product-actions">
-                            <button class="add-to-cart">
-                                <i class="fas fa-cart-plus"></i> Add to Cart
-                            </button>
-                            <button class="wishlist-btn">
-                                <i class="far fa-heart"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                productsGrid.appendChild(productCard);
-            });
-
-            // Add event listeners to new buttons
-            document.querySelectorAll('.add-to-cart').forEach(button => {
-                button.addEventListener('click', function() {
-                    const productName = this.closest('.product-card').querySelector('.product-name').textContent;
-                    alert(`Added ${productName} to cart`);
-                });
-            });
-
-            document.querySelectorAll('.wishlist-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const icon = this.querySelector('i');
-                    icon.classList.toggle('far');
-                    icon.classList.toggle('fas');
-                    this.classList.toggle('active');
-                });
-            });
-        }
-
-        // Load sample products when DOM is ready
-        document.addEventListener('DOMContentLoaded', loadSampleProducts);
     </script>
     <script src="/customer/js/browse.js" type="module"></script>
 </body>
