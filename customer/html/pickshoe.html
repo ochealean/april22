@@ -122,6 +122,56 @@
             font-size: 1.1rem;
         }
 
+        /* Loading Overlay Styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out, visibility 0.5s;
+        }
+
+        .loader {
+            text-align: center;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--gray-light);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader p {
+            color: var(--dark);
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        /* Hide content initially */
+        .main-content {
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+
+        .main-content.loaded {
+            opacity: 1;
+        }
+
         /* Main Content */
         .main-content {
             padding: 2rem;
@@ -248,6 +298,7 @@
         /* Saved Designs Styles */
         .saved-designs-container {
             margin-top: 3rem;
+            display: none; /* Hide by default until we have saved designs */
         }
 
         .saved-design {
@@ -426,6 +477,7 @@
             font-size: 1.5rem;
             cursor: pointer;
             padding: 0.5rem;
+            color: var(--dark); /* Added this line */
         }
 
         /* Sidebar Overlay */
@@ -487,10 +539,6 @@
 
             .mobile-menu-toggle {
                 display: block;
-                font-size: 1.5rem;
-                cursor: pointer;
-                padding: 0.5rem;
-                color: var(--dark);
             }
 
             .sidebar-overlay {
@@ -545,6 +593,15 @@
     </style>
 </head>
 <body>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loader">
+            <div class="loader-spinner"></div>
+            <p>Loading your Customize Shoe...</p>
+        </div>
+    </div>
+
     <div class="dashboard">
         <!-- Sidebar - Purple Theme -->
         <div class="sidebar">
@@ -673,9 +730,9 @@
     <!-- Sidebar Overlay -->
     <div class="sidebar-overlay"></div>
 
-    <!-- <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mobile sidebar toggle
+    <script>
+        // Mobile sidebar toggle
+        document.addEventListener('DOMContentLoaded', function () {
             const mobileToggle = document.querySelector('.mobile-menu-toggle');
             const sidebar = document.querySelector('.sidebar');
             const overlay = document.querySelector('.sidebar-overlay');
@@ -692,161 +749,25 @@
                 });
             }
 
-            let selectedModel = null;
-            const modelCards = document.querySelectorAll('.model-card');
-            const customizeBtn = document.getElementById('customizeBtn');
+            // Show loader immediately
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const mainContent = document.querySelector('.main-content');
             
-            // Handle model selection
-            modelCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    // Remove selected class from all cards
-                    modelCards.forEach(c => c.classList.remove('selected'));
-                    
-                    // Add selected class to clicked card
-                    this.classList.add('selected');
-                    
-                    // Store selected model data
-                    selectedModel = {
-                        id: this.dataset.model,
-                        basePrice: parseFloat(this.dataset.basePrice),
-                        baseDays: parseInt(this.dataset.baseDays),
-                        baseImage: this.dataset.baseImage,
-                        name: this.querySelector('.model-name').textContent
-                    };
-                    
-                    // Enable customize button
-                    customizeBtn.disabled = false;
-                });
-            });
+            // Show loading overlay
+            loadingOverlay.style.display = 'flex';
             
-            // Handle customize button click
-            customizeBtn.addEventListener('click', function() {
-                if (selectedModel) {
-                    // Store the selected model in sessionStorage to pass to the next page
-                    sessionStorage.setItem('selectedShoeModel', JSON.stringify(selectedModel));
-                    
-                    // Redirect to customization page
-                    window.location.href = 'customizeshoe.html';
-                }
-            });
-
-            // In a real application, you would load saved designs from a database
-            // Here's how you might handle that:
-            function loadSavedDesigns() {
-                // This would typically be an API call to your backend
-                fetch('/api/saved-designs')
-                    .then(response => response.json())
-                    .then(data => {
-                        const container = document.getElementById('savedDesignsList');
-                        const emptyState = document.getElementById('emptySavedDesigns');
-                        
-                        if (data.length === 0) {
-                            // Show empty state if no designs
-                            container.innerHTML = '';
-                            container.appendChild(emptyState);
-                            emptyState.style.display = 'block';
-                        } else {
-                            // Hide empty state
-                            emptyState.style.display = 'none';
-                            
-                            // Generate HTML for each saved design
-                            data.forEach(design => {
-                                const designElement = createSavedDesignElement(design);
-                                container.appendChild(designElement);
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading saved designs:', error);
-                    });
-            }
-
-            // Helper function to create a saved design element
-            function createSavedDesignElement(design) {
-                const element = document.createElement('div');
-                element.className = 'saved-design';
-                element.innerHTML = `
-                    <div class="saved-design-header">
-                        <h3 class="saved-design-title">${design.name}</h3>
-                        <span class="saved-design-date">Saved: ${new Date(design.date).toLocaleDateString()}</span>
-                    </div>
-                    <div class="saved-design-preview">
-                        <img src="${design.previewImage}" alt="${design.name}" class="saved-design-image">
-                        <div class="saved-design-details">
-                            <div class="design-detail-row">
-                                <span class="design-detail-label">Model:</span>
-                                <span class="design-detail-value">${design.modelName}</span>
-                            </div>
-                            <div class="design-detail-row">
-                                <span class="design-detail-label">Sole:</span>
-                                <span class="design-detail-value">${design.sole.name}${design.sole.price > 0 ? ' (+₱' + design.sole.price + ')' : ''}</span>
-                            </div>
-                            <div class="design-detail-row">
-                                <span class="design-detail-label">Upper:</span>
-                                <span class="design-detail-value">${design.upper.name}, Color: ${design.upper.colorName}${design.upper.price > 0 ? ' (+₱' + design.upper.price + ')' : ''}</span>
-                            </div>
-                            <div class="design-detail-row">
-                                <span class="design-detail-label">Laces:</span>
-                                <span class="design-detail-value">${design.laces.name}, Color: ${design.laces.colorName}${design.laces.price > 0 ? ' (+₱' + design.laces.price + ')' : ''}</span>
-                            </div>
-                            <div class="design-detail-row">
-                                <span class="design-detail-label">Total Price:</span>
-                                <span class="design-detail-value" style="font-weight: 600; color: var(--primary);">₱${design.totalPrice.toFixed(2)}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="saved-design-actions">
-                        <button class="btn btn-outline btn-sm edit-design" data-id="${design.id}">
-                            <i class="fas fa-edit"></i> Edit Design
-                        </button>
-                        <button class="btn btn-primary btn-sm add-to-cart" data-id="${design.id}">
-                            <i class="fas fa-cart-plus"></i> Add to Cart
-                        </button>
-                        <button class="btn btn-danger btn-sm delete-design" data-id="${design.id}">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </div>
-                `;
-                return element;
-            }
-
-            // Event delegation for saved design actions
-            document.getElementById('savedDesignsList').addEventListener('click', function(e) {
-                if (e.target.closest('.edit-design')) {
-                    const designId = e.target.closest('.edit-design').dataset.id;
-                    editSavedDesign(designId);
-                } else if (e.target.closest('.add-to-cart')) {
-                    const designId = e.target.closest('.add-to-cart').dataset.id;
-                    addDesignToCart(designId);
-                } else if (e.target.closest('.delete-design')) {
-                    const designId = e.target.closest('.delete-design').dataset.id;
-                    deleteSavedDesign(designId);
-                }
-            });
-
-            function editSavedDesign(designId) {
-                // In a real app, this would load the design for editing
-                alert(`Editing design ${designId} - would load in customization editor`);
-            }
-
-            function addDesignToCart(designId) {
-                // In a real app, this would add the design to cart
-                alert(`Adding design ${designId} to cart`);
-            }
-
-            function deleteSavedDesign(designId) {
-                if (confirm('Are you sure you want to delete this saved design?')) {
-                    // In a real app, this would make an API call to delete
-                    alert(`Deleting design ${designId} - would remove from database`);
-                    // Then reload the designs
-                    loadSavedDesigns();
-                }
-            }
-
-            // Load saved designs when page loads
-            // loadSavedDesigns(); // Uncomment in your real implementation
+            // Initialize with sample data after a delay (simulating loading)
+            setTimeout(() => {
+                
+                // Hide loader and show content
+                loadingOverlay.style.opacity = '0';
+                loadingOverlay.style.visibility = 'hidden';
+                
+                // Show main content with fade-in effect
+                mainContent.classList.add('loaded');
+            }, 2000); // 2 second delay
         });
-    </script> -->
+    </script>
 
     <script src="../js/pickshoe.js" type="module"></script>
 </body>
