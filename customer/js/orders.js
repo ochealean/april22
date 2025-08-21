@@ -202,6 +202,9 @@ function createOrderCard(order) {
         `;
     } else if (status === 'pending') {
         actionButtons = `
+        <button class="btn btn-verify" onclick="validateShoe('${order.id}')">
+                <i class="fas fa-check-circle"></i> Validate Shoe
+            </button>
             <button class="btn btn-track" onclick="trackOrder('${order.id}')">
                 <i class="fas fa-truck"></i> Track Package
             </button>
@@ -213,6 +216,9 @@ function createOrderCard(order) {
         actionButtons = `
             <button class="btn btn-track" onclick="trackOrder('${order.id}')">
                 <i class="fas fa-truck"></i> Track Package
+            </button>
+            <button class="btn btn-cancel" onclick="cancelOrder('${order.id}')">
+                <i class="fas fa-times"></i> Cancel Order
             </button>
         `;
     }

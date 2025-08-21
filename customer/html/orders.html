@@ -13,6 +13,7 @@
             --accent: #ff6b6b;
             --success: #48cfad;
             --warning: #ffaa00;
+            --warning-dark: #e6a600;
             --error: #ff6b6b;
             --light: #f8f9fa;
             --dark: #2c3e50;
@@ -407,6 +408,17 @@
 
         .btn-track:hover {
             background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-verify {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-verify:hover {
+            background-color: var(--warning-dark);
             transform: translateY(-2px);
             box-shadow: var(--shadow-sm);
         }
