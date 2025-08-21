@@ -188,15 +188,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (design.model === 'classic') {
             detailsHTML += `
             ${createDetailRow('Body Color', bodyColor, true)}
-            ${createDetailRow('Heel Color', heelColor, true)}
         `;
-
-            if (upperId) {
-                detailsHTML += createDetailRow('Upper', `${upperId}${upperColor ? ` (${upperColor})` : ''}`);
-            }
-            if (soleId) {
-                detailsHTML += createDetailRow('Sole', soleId);
-            }
             if (lacesId) {
                 detailsHTML += createDetailRow('Laces', `${lacesId}${lacesColor ? ` (${lacesColor})` : ''}`);
             }
@@ -204,39 +196,22 @@ document.addEventListener('DOMContentLoaded', function () {
         else if (design.model === 'runner') {
             detailsHTML += `
             ${createDetailRow('Body Color', bodyColor, true)}
-            ${createDetailRow('Collar Color', collarColor, true)}
         `;
 
-            if (upperId) {
-                detailsHTML += createDetailRow('Upper', upperId);
-            }
-            if (soleId) {
-                detailsHTML += createDetailRow('Sole', soleId);
+            if (lacesId) {
+                detailsHTML += createDetailRow('Laces', `${lacesId}${lacesColor ? ` (${lacesColor})` : ''}`);
             }
         }
         else if (design.model === 'basketball') {
             detailsHTML += `
-            ${createDetailRow('Mudguard Color', mudguardColor, true)}
-            ${createDetailRow('Heel Color', heelColor, true)}
+            ${createDetailRow('Body Color', bodyColor, true)}
         `;
 
-            if (upperId) {
-                detailsHTML += createDetailRow('Upper', upperId);
-            }
-            if (soleId) {
-                detailsHTML += createDetailRow('Sole', soleId);
+            if (lacesId) {
+                detailsHTML += createDetailRow('Laces', `${lacesId}${lacesColor ? ` (${lacesColor})` : ''}`);
             }
         }
-        else if (design.model === 'slipon') {
-            detailsHTML += `
-            ${createDetailRow('Outsole Color', outsoleColor, true)}
-            ${createDetailRow('Midsole Color', midsoleColor, true)}
-        `;
 
-            if (midsoleId) {
-                detailsHTML += createDetailRow('Midsole', midsoleId);
-            }
-        }
 
         // Add production time and price (always shown)
         detailsHTML += `
