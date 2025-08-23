@@ -146,6 +146,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const lacesColor = laces.color || null;
         const lacesImage = laces.image || null;
 
+        // NEW: Access insole properties
+        const insole = selections.insole || {};
+        const insoleId = insole.id || null;
+        const insolePrice = insole.price || 0;
+        const insoleImage = insole.image || null;
+
         // Model-specific properties with fallbacks
         const bodyColor = selections.bodyColor || null;
         const heelColor = selections.heelColor || null;
@@ -162,20 +168,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (isColor) {
                 return `
-            <div class="design-detail-row">
-                <span class="design-detail-label">${label}:</span>
-                <span class="design-detail-value" style="background-color: ${value}; width: 20px; height: 20px; display: inline-block; border: 1px solid #ddd;"></span>
-                <span class="design-detail-value">${value}</span>
-            </div>
-        `;
-            }
-
-            return `
         <div class="design-detail-row">
             <span class="design-detail-label">${label}:</span>
+            <span class="design-detail-value" style="background-color: ${value}; width: 20px; height: 20px; display: inline-block; border: 1px solid #ddd;"></span>
             <span class="design-detail-value">${value}</span>
         </div>
     `;
+            }
+
+            return `
+    <div class="design-detail-row">
+        <span class="design-detail-label">${label}:</span>
+        <span class="design-detail-value">${value}</span>
+    </div>
+`;
         };
 
         // Build the common details HTML
@@ -183,6 +189,11 @@ document.addEventListener('DOMContentLoaded', function () {
         ${createDetailRow('Model', design.model)}
         ${createDetailRow('Size', design.size)}
     `;
+
+        // Add insole details if available
+        if (insoleId) {
+            detailsHTML += createDetailRow('Insole', `${insoleId}${insolePrice ? ` (+₱${insolePrice})` : ''}`);
+        }
 
         // Add model-specific details
         if (design.model === 'classic') {
@@ -212,7 +223,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-
         // Add production time and price (always shown)
         detailsHTML += `
         ${createDetailRow('Production Time', design.productionTime)}
@@ -227,12 +237,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (design.model === 'slipon') {
             previewImage = midsole.image || previewImage;
         } else {
-            previewImage = upperImage || soleImage || lacesImage || previewImage;
+            previewImage = upperImage || soleImage || lacesImage || insoleImage || previewImage;
         }
 
         element.innerHTML = `
         <div class="saved-design-header">
-            <h3 class="saved-design-title">${design.model || '<img src="https://cdn-icons-png.flaticon.com/512/11542/11542598.png" alt="Custom Design" class="saved-design-image">'}</h3>
+            <h3 class="saved-design-title">${design.model || 'Custom Design'}</h3>
             <span class="saved-design-date">Saved: ${formattedDate}</span>
         </div>
         <div class="saved-design-preview">
