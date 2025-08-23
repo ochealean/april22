@@ -254,7 +254,7 @@ async function createOrderCard(order) {
                 </button>
             `;
         }
-    } else if (status === 'shipped' || status === 'in transit' || status === 'arrived at facility' || status === 'out for delivery') {
+    } else if (status === 'shipped' || status === 'in transit' || status === 'arrived at facility' || status === 'out for delivery' || status === 'accepted') { // tanggalin lang yung status accepted pag gusto i cancel
         actionButtons = `
             <button class="btn btn-track" onclick="trackOrder('${order.id}')">
                 <i class="fas fa-truck"></i> Track Package
