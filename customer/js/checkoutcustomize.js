@@ -231,7 +231,6 @@ async function loadOrderData(orderId) {
 }
 
 // Display order details on the page
-// Display order details on the page
 function displayOrderDetails(order) {
     console.log('Displaying order details:', order);
     
@@ -257,7 +256,7 @@ function displayOrderDetails(order) {
     document.getElementById('checkoutTongueImage').src = '';
     
     const selections = order.selections;
-    
+     
     if (order.model === 'classic') {
         // Classic shoe customization
         // Sole
