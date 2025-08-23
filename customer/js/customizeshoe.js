@@ -36,6 +36,12 @@ let selections = {
             days: 0,
             image: 'https://via.placeholder.com/100x20?text=Classic+Laces+1',
             color: 'white'
+        },
+        insole: {
+            id: 'Foam',
+            price: 0,
+            days: 0,
+            image: 'https://via.placeholder.com/100x20?text=Classic+Insole+1'
         }
     },
     runner: {
@@ -46,6 +52,12 @@ let selections = {
             days: 0,
             image: 'https://via.placeholder.com/100x20?text=Runner+Laces+1',
             color: 'white'
+        },
+        insole: {
+            id: 'Foam',
+            price: 0,
+            days: 0,
+            image: 'https://via.placeholder.com/100x20?text=Runner+Insole+1'
         }
     },
     basketball: {
@@ -56,6 +68,12 @@ let selections = {
             days: 0,
             image: 'https://via.placeholder.com/100x20?text=Basketball+Laces+1',
             color: 'white'
+        },
+        insole: {
+            id: 'Foam',
+            price: 0,
+            days: 0,
+            image: 'https://via.placeholder.com/100x20?text=Basketball+Insole+1'
         }
     }
 };
@@ -63,28 +81,24 @@ let selections = {
 // Check URL parameters for model selection
 function checkUrlParameters() {
     const urlParams = new URLSearchParams(window.location.search);
-    const modelParam = urlParams.get('model')?.toLowerCase(); // Make case-insensitive
+    const modelParam = urlParams.get('model')?.toLowerCase();
 
-    // Map URL parameter values to our internal model names
     const modelMap = {
         'classic': 'classic',
         'runner': 'runner',
         'basketball': 'basketball'
     };
 
-    // Default to classic if no parameter or invalid parameter
     let modelToSelect = 'classic';
     
     if (modelParam && modelMap[modelParam]) {
         modelToSelect = modelMap[modelParam];
     }
 
-    // Find and click the corresponding model option
     const modelOption = document.querySelector(`.model-option[data-model="${modelToSelect}"]`);
     if (modelOption) {
         modelOption.click();
     } else {
-        // Fallback to classic if the specified model option isn't found
         document.querySelector('.model-option[data-model="classic"]').click();
     }
 }
@@ -103,6 +117,115 @@ function getCurrentUserId() {
     });
 }
 
+// Update the shoe preview and summary
+function updatePreview() {
+    // Calculate totals
+    let customizationPrice = 0;
+    let maxDays = 0;
+
+    if (currentModel === 'classic') {
+        customizationPrice = selections.classic.laces.price + selections.classic.insole.price;
+        maxDays = Math.max(selections.classic.laces.days, selections.classic.insole.days);
+    }
+    else if (currentModel === 'runner') {
+        customizationPrice = selections.runner.laces.price + selections.runner.insole.price;
+        maxDays = Math.max(selections.runner.laces.days, selections.runner.insole.days);
+    }
+    else if (currentModel === 'basketball') {
+        customizationPrice = selections.basketball.laces.price + selections.basketball.insole.price;
+        maxDays = Math.max(selections.basketball.laces.days, selections.basketball.insole.days);
+    }
+
+    const totalDays = baseDays + maxDays;
+    const totalPrice = basePrice + customizationPrice;
+
+    // Update summary
+    document.getElementById('basePrice').textContent = `₱${basePrice.toFixed(2)}`;
+    document.getElementById('customizationPrice').textContent = `+₱${customizationPrice.toFixed(2)}`;
+    document.getElementById('productionTime').textContent = `${totalDays}-${totalDays + 3} days`;
+    document.getElementById('totalPrice').textContent = `₱${totalPrice.toFixed(2)}`;
+}
+
+// Setup insole options
+function setupInsoleOptions(model) {
+    const optionsContainer = document.getElementById(`${model}InsoleOptions`);
+    if (!optionsContainer) return;
+    
+    const options = optionsContainer.querySelectorAll('.component-option');
+    options.forEach(option => {
+        option.addEventListener('click', function () {
+            options.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            selections[model].insole = {
+                id: this.dataset.id,
+                price: parseFloat(this.dataset.price),
+                days: parseInt(this.dataset.days),
+                image: this.dataset.image
+            };
+            updatePreview();
+        });
+    });
+}
+
+// Setup laces options
+function setupLacesOptions(model) {
+    const optionsContainer = document.getElementById(`${model}LacesOptions`);
+    if (!optionsContainer) return;
+    
+    const options = optionsContainer.querySelectorAll('.component-option');
+    options.forEach(option => {
+        option.addEventListener('click', function () {
+            options.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            selections[model].laces = {
+                id: this.dataset.id,
+                price: parseFloat(this.dataset.price),
+                days: parseInt(this.dataset.days),
+                image: this.dataset.image,
+                color: selections[model].laces.color
+            };
+            updatePreview();
+        });
+    });
+}
+
+// Setup color options
+function setupColorOptions(colorType, optionsContainer, model) {
+    const options = optionsContainer.querySelectorAll('.color-option');
+    options.forEach(option => {
+        option.addEventListener('click', function () {
+            options.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            if (colorType === 'bodyColor') {
+                selections[model].bodyColor = this.dataset.color;
+            } else if (colorType === 'lacesColor') {
+                selections[model].laces.color = this.dataset.color;
+            }
+            updatePreview();
+        });
+    });
+}
+
+// Generate unique ID
+function generateUniqueId() {
+    return (
+        Date.now().toString(36) +
+        Math.random().toString(36).substr(2, 9)
+    );
+}
+
+// Get preview image URL
+function getPreviewImageUrl() {
+    if (currentModel === 'classic') {
+        return 'https://via.placeholder.com/200x120?text=Classic+Sneaker';
+    } else if (currentModel === 'runner') {
+        return 'https://via.placeholder.com/200x120?text=Performance+Runner';
+    } else {
+        return 'https://via.placeholder.com/200x120?text=High-Top+Basketball';
+    }
+}
+
 // Save design to Realtime Database
 async function saveDesignToDatabase() {
     try {
@@ -113,22 +236,22 @@ async function saveDesignToDatabase() {
         let maxDays = 0;
 
         if (currentModel === 'classic') {
-            customizationPrice = selections.classic.laces.price;
-            maxDays = selections.classic.laces.days;
+            customizationPrice = selections.classic.laces.price + selections.classic.insole.price;
+            maxDays = Math.max(selections.classic.laces.days, selections.classic.insole.days);
         }
         else if (currentModel === 'runner') {
-            customizationPrice = selections.runner.laces.price;
-            maxDays = selections.runner.laces.days;
+            customizationPrice = selections.runner.laces.price + selections.runner.insole.price;
+            maxDays = Math.max(selections.runner.laces.days, selections.runner.insole.days);
         }
         else if (currentModel === 'basketball') {
-            customizationPrice = selections.basketball.laces.price;
-            maxDays = selections.basketball.laces.days;
+            customizationPrice = selections.basketball.laces.price + selections.basketball.insole.price;
+            maxDays = Math.max(selections.basketball.laces.days, selections.basketball.insole.days);
         }
 
         const totalPrice = basePrice + customizationPrice;
         const totalDays = baseDays + maxDays;
 
-        // Clean up data to remove undefined values
+        // Clean up data
         const cleanSelections = {};
         Object.keys(selections[currentModel]).forEach(key => {
             if (selections[currentModel][key] !== undefined) {
@@ -159,7 +282,7 @@ async function saveDesignToDatabase() {
             updatedAt: Date.now()
         };
 
-        // Save to Realtime Database
+        // Save to database
         const newDesignRef = ref(db, 'AR_shoe_users/saved_customShoes/' + userId + '/' + generateUniqueId());
         await set(newDesignRef, designData);
         console.log('Design saved with ID: ', newDesignRef.key);
@@ -172,31 +295,32 @@ async function saveDesignToDatabase() {
     }
 }
 
+// Add to cart
 async function addToCart() {
     try {
         const userId = await getCurrentUserId();
 
-        // Calculate totals directly without saving to saved_customShoes first
+        // Calculate totals
         let customizationPrice = 0;
         let maxDays = 0;
 
         if (currentModel === 'classic') {
-            customizationPrice = selections.classic.laces.price;
-            maxDays = selections.classic.laces.days;
+            customizationPrice = selections.classic.laces.price + selections.classic.insole.price;
+            maxDays = Math.max(selections.classic.laces.days, selections.classic.insole.days);
         }
         else if (currentModel === 'runner') {
-            customizationPrice = selections.runner.laces.price;
-            maxDays = selections.runner.laces.days;
+            customizationPrice = selections.runner.laces.price + selections.runner.insole.price;
+            maxDays = Math.max(selections.runner.laces.days, selections.runner.insole.days);
         }
         else if (currentModel === 'basketball') {
-            customizationPrice = selections.basketball.laces.price;
-            maxDays = selections.basketball.laces.days;
+            customizationPrice = selections.basketball.laces.price + selections.basketball.insole.price;
+            maxDays = Math.max(selections.basketball.laces.days, selections.basketball.insole.days);
         }
 
         const totalPrice = basePrice + customizationPrice;
         const totalDays = baseDays + maxDays;
 
-        // Create cart item directly
+        // Create cart item
         const cartItem = {
             model: currentModel,
             size: selectedSize,
@@ -205,14 +329,13 @@ async function addToCart() {
             addedAt: Date.now(),
             image: getPreviewImageUrl(),
             isCustom: true,
-            // Include all the customization details
             selections: selections[currentModel],
             basePrice: basePrice,
             customizationPrice: customizationPrice,
             productionTime: `${totalDays}-${totalDays + 3} days`
         };
 
-        // Save to customized_cart in Realtime Database
+        // Save to cart
         const newCartItemRef = ref(db, `AR_shoe_users/customized_cart/${userId}/${generateUniqueId()}`);
         await set(newCartItemRef, cartItem);
         alert(`Your custom ${currentModel} shoe has been added to your cart!`);
@@ -222,7 +345,7 @@ async function addToCart() {
     }
 }
 
-// Function to handle Buy Now action
+// Buy now
 async function buyNow() {
     try {
         const userId = await getCurrentUserId();
@@ -232,22 +355,22 @@ async function buyNow() {
         let maxDays = 0;
 
         if (currentModel === 'classic') {
-            customizationPrice = selections.classic.laces.price;
-            maxDays = selections.classic.laces.days;
+            customizationPrice = selections.classic.laces.price + selections.classic.insole.price;
+            maxDays = Math.max(selections.classic.laces.days, selections.classic.insole.days);
         }
         else if (currentModel === 'runner') {
-            customizationPrice = selections.runner.laces.price;
-            maxDays = selections.runner.laces.days;
+            customizationPrice = selections.runner.laces.price + selections.runner.insole.price;
+            maxDays = Math.max(selections.runner.laces.days, selections.runner.insole.days);
         }
         else if (currentModel === 'basketball') {
-            customizationPrice = selections.basketball.laces.price;
-            maxDays = selections.basketball.laces.days;
+            customizationPrice = selections.basketball.laces.price + selections.basketball.insole.price;
+            maxDays = Math.max(selections.basketball.laces.days, selections.basketball.insole.days);
         }
 
         const totalPrice = basePrice + customizationPrice;
         const totalDays = baseDays + maxDays;
 
-        // Clean up the selections object to remove undefined values
+        // Clean up selections
         const cleanSelections = {};
         Object.keys(selections[currentModel]).forEach(key => {
             if (selections[currentModel][key] !== undefined) {
@@ -274,7 +397,7 @@ async function buyNow() {
             addedAt: Date.now(),
             image: getPreviewImageUrl(),
             isCustom: true,
-            selections: cleanSelections, // Use the cleaned selections
+            selections: cleanSelections,
             basePrice: basePrice,
             customizationPrice: customizationPrice,
             productionTime: `${totalDays}-${totalDays + 3} days`,
@@ -289,14 +412,14 @@ async function buyNow() {
             orderDate: new Date().toISOString()
         };
 
-        // Generate a unique order ID
+        // Generate order ID
         const orderId = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
 
-        // Save to boughtshoe in Realtime Database
+        // Save to boughtshoe
         const boughtShoeRef = ref(db, `AR_shoe_users/boughtshoe/${userId}/${orderId}`);
         await set(boughtShoeRef, orderData);
 
-        // Also save to transactions for order history
+        // Save to transactions
         const transactionRef = ref(db, `AR_shoe_users/customizedtransactions/${userId}/${orderId}`);
         await set(transactionRef, {
             date: new Date().toISOString(),
@@ -314,7 +437,6 @@ async function buyNow() {
         });
 
         alert(`Your custom ${currentModel} shoe order has been placed successfully! Order ID: ${orderId}`);
-        // Redirect to order confirmation or tracking page
         window.location.href = `/customer/html/checkoutcustomize.html?orderId=${orderId}`;
     } catch (error) {
         console.error('Error during buy now: ', error);
@@ -322,56 +444,26 @@ async function buyNow() {
     }
 }
 
-function generateUniqueId() {
-    // Generates a unique ID using current timestamp and a random string
-    return (
-        Date.now().toString(36) +
-        Math.random().toString(36).substr(2, 9)
-    );
-}
-
-// Helper function to get preview image URL
-function getPreviewImageUrl() {
-    if (currentModel === 'classic') {
-        return 'https://via.placeholder.com/200x120?text=Classic+Sneaker';
-    } else if (currentModel === 'runner') {
-        return 'https://via.placeholder.com/200x120?text=Performance+Runner';
-    } else {
-        return 'https://via.placeholder.com/200x120?text=High-Top+Basketball';
+// Update user profile
+function updateUserProfile(userData, userProfile, userName) {
+    if (userData.profilePhoto && userData.profilePhoto.url) {
+        userProfile.src = userData.profilePhoto.url;
     }
-}
-
-// Update the shoe preview and summary
-function updatePreview() {
-    // Calculate totals
-    let customizationPrice = 0;
-    let maxDays = 0;
-
-    if (currentModel === 'classic') {
-        customizationPrice = selections.classic.laces.price;
-        maxDays = selections.classic.laces.days;
+    if (userData.firstName || userData.lastName) {
+        userName.textContent = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
     }
-    else if (currentModel === 'runner') {
-        customizationPrice = selections.runner.laces.price;
-        maxDays = selections.runner.laces.days;
-    }
-    else if (currentModel === 'basketball') {
-        customizationPrice = selections.basketball.laces.price;
-        maxDays = selections.basketball.laces.days;
-    }
-
-    const totalDays = baseDays + maxDays;
-    const totalPrice = basePrice + customizationPrice;
-
-    // Update summary
-    document.getElementById('basePrice').textContent = `₱${basePrice.toFixed(2)}`;
-    document.getElementById('customizationPrice').textContent = `+₱${customizationPrice.toFixed(2)}`;
-    document.getElementById('productionTime').textContent = `${totalDays}-${totalDays + 3} days`;
-    document.getElementById('totalPrice').textContent = `₱${totalPrice.toFixed(2)}`;
 }
 
 // Initialize all event listeners
 function initializeEventListeners() {
+    // Initialize all options
+    setupInsoleOptions('classic');
+    setupInsoleOptions('runner');
+    setupInsoleOptions('basketball');
+    setupLacesOptions('classic');
+    setupLacesOptions('runner');
+    setupLacesOptions('basketball');
+
     // Mobile sidebar toggle
     const mobileToggle = document.querySelector('.mobile-menu-toggle');
     const sidebar = document.querySelector('.sidebar');
@@ -422,53 +514,7 @@ function initializeEventListeners() {
         });
     });
 
-    // Laces selection
-    function setupLacesOptions(model) {
-        const optionsContainer = document.getElementById(`${model}LacesOptions`);
-        if (!optionsContainer) return;
-        
-        const options = optionsContainer.querySelectorAll('.component-option');
-        options.forEach(option => {
-            option.addEventListener('click', function () {
-                options.forEach(opt => opt.classList.remove('selected'));
-                this.classList.add('selected');
-                selections[model].laces = {
-                    id: this.dataset.id,
-                    price: parseFloat(this.dataset.price),
-                    days: parseInt(this.dataset.days),
-                    image: this.dataset.image,
-                    color: selections[model].laces.color
-                };
-                updatePreview();
-            });
-        });
-    }
-
-    // Initialize all laces options
-    setupLacesOptions('classic');
-    setupLacesOptions('runner');
-    setupLacesOptions('basketball');
-
     // Color selection
-    function setupColorOptions(colorType, optionsContainer, model) {
-        const options = optionsContainer.querySelectorAll('.color-option');
-        options.forEach(option => {
-            option.addEventListener('click', function () {
-                options.forEach(opt => opt.classList.remove('selected'));
-                this.classList.add('selected');
-                
-                // Update color in selections
-                if (colorType === 'bodyColor') {
-                    selections[model].bodyColor = this.dataset.color;
-                } else if (colorType === 'lacesColor') {
-                    selections[model].laces.color = this.dataset.color;
-                }
-                updatePreview();
-            });
-        });
-    }
-
-    // Initialize all color options
     setupColorOptions('bodyColor', document.getElementById('classicBodyColorOptions'), 'classic');
     setupColorOptions('lacesColor', document.getElementById('classiscLacesColorOptions'), 'classic');
     setupColorOptions('bodyColor', document.getElementById('runnerBodyColorOptions'), 'runner');
@@ -556,13 +602,3 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
-
-// Helper function to update user profile display
-function updateUserProfile(userData, userProfile, userName) {
-    if (userData.profilePhoto && userData.profilePhoto.url) {
-        userProfile.src = userData.profilePhoto.url;
-    }
-    if (userData.firstName || userData.lastName) {
-        userName.textContent = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
-    }
-}

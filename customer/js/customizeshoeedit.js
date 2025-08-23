@@ -37,6 +37,12 @@ let selections = {
             image: 'https://via.placeholder.com/100x20?text=Classic+Laces+1',
             color: 'white'
         },
+        insole: {
+            id: 'Foam',
+            price: 0,
+            days: 0,
+            image: 'https://via.placeholder.com/100x20?text=Classic+Insole+1'
+        },
         bodyColor: 'white'
     },
     runner: {
@@ -47,6 +53,12 @@ let selections = {
             image: 'https://via.placeholder.com/100x20?text=Runner+Laces+1',
             color: 'white'
         },
+        insole: {
+            id: 'Foam',
+            price: 0,
+            days: 0,
+            image: 'https://via.placeholder.com/100x20?text=Runner+Insole+1'
+        },
         bodyColor: 'white'
     },
     basketball: {
@@ -56,6 +68,12 @@ let selections = {
             days: 0,
             image: 'https://via.placeholder.com/100x20?text=Basketball+Laces+1',
             color: 'white'
+        },
+        insole: {
+            id: 'Foam',
+            price: 0,
+            days: 0,
+            image: 'https://via.placeholder.com/100x20?text=Basketball+Insole+1'
         },
         bodyColor: 'white'
     },
@@ -226,6 +244,10 @@ function updateAllComponentSelections() {
             selectOption('classicLacesOptions', modelSelections.laces.id);
         }
         
+        if (modelSelections.insole?.id) {
+            selectOption('classicInsoleOptions', modelSelections.insole.id);
+        }
+        
         if (modelSelections.laces?.color) {
             selectColor('classiscLacesColorOptions', modelSelections.laces.color);
         }
@@ -236,6 +258,10 @@ function updateAllComponentSelections() {
     else if (currentModel === 'runner') {
         if (modelSelections.laces?.id) {
             selectOption('runnerLacesOptions', modelSelections.laces.id);
+        }
+        
+        if (modelSelections.insole?.id) {
+            selectOption('runnerInsoleOptions', modelSelections.insole.id);
         }
         
         if (modelSelections.laces?.color) {
@@ -249,6 +275,10 @@ function updateAllComponentSelections() {
         // For basketball model
         if (modelSelections.laces?.id) {
             selectOption('basketballLacesOptions', modelSelections.laces.id);
+        }
+        
+        if (modelSelections.insole?.id) {
+            selectOption('basketballInsoleOptions', modelSelections.insole.id);
         }
         
         if (modelSelections.laces?.color) {
@@ -288,16 +318,16 @@ async function saveDesignToDatabase() {
         let maxDays = 0;
 
         if (currentModel === 'classic') {
-            customizationPrice = selections.classic.laces.price;
-            maxDays = selections.classic.laces.days;
+            customizationPrice = selections.classic.laces.price + selections.classic.insole.price;
+            maxDays = Math.max(selections.classic.laces.days, selections.classic.insole.days);
         }
         else if (currentModel === 'runner') {
-            customizationPrice = selections.runner.laces.price;
-            maxDays = selections.runner.laces.days;
+            customizationPrice = selections.runner.laces.price + selections.runner.insole.price;
+            maxDays = Math.max(selections.runner.laces.days, selections.runner.insole.days);
         }
         else if (currentModel === 'basketball') {
-            customizationPrice = selections.basketball.laces.price;
-            maxDays = selections.basketball.laces.days;
+            customizationPrice = selections.basketball.laces.price + selections.basketball.insole.price;
+            maxDays = Math.max(selections.basketball.laces.days, selections.basketball.insole.days);
         }
         else if (currentModel === 'slipon') {
             customizationPrice = selections.slipon.midsole.price;
@@ -360,16 +390,16 @@ async function addToCart() {
         let maxDays = 0;
 
         if (currentModel === 'classic') {
-            customizationPrice = selections.classic.laces.price;
-            maxDays = selections.classic.laces.days;
+            customizationPrice = selections.classic.laces.price + selections.classic.insole.price;
+            maxDays = Math.max(selections.classic.laces.days, selections.classic.insole.days);
         }
         else if (currentModel === 'runner') {
-            customizationPrice = selections.runner.laces.price;
-            maxDays = selections.runner.laces.days;
+            customizationPrice = selections.runner.laces.price + selections.runner.insole.price;
+            maxDays = Math.max(selections.runner.laces.days, selections.runner.insole.days);
         }
         else if (currentModel === 'basketball') {
-            customizationPrice = selections.basketball.laces.price;
-            maxDays = selections.basketball.laces.days;
+            customizationPrice = selections.basketball.laces.price + selections.basketball.insole.price;
+            maxDays = Math.max(selections.basketball.laces.days, selections.basketball.insole.days);
         }
         else if (currentModel === 'slipon') {
             customizationPrice = selections.slipon.midsole.price;
@@ -416,16 +446,16 @@ async function buyNow() {
         let maxDays = 0;
 
         if (currentModel === 'classic') {
-            customizationPrice = selections.classic.laces.price;
-            maxDays = selections.classic.laces.days;
+            customizationPrice = selections.classic.laces.price + selections.classic.insole.price;
+            maxDays = Math.max(selections.classic.laces.days, selections.classic.insole.days);
         }
         else if (currentModel === 'runner') {
-            customizationPrice = selections.runner.laces.price;
-            maxDays = selections.runner.laces.days;
+            customizationPrice = selections.runner.laces.price + selections.runner.insole.price;
+            maxDays = Math.max(selections.runner.laces.days, selections.runner.insole.days);
         }
         else if (currentModel === 'basketball') {
-            customizationPrice = selections.basketball.laces.price;
-            maxDays = selections.basketball.laces.days;
+            customizationPrice = selections.basketball.laces.price + selections.basketball.insole.price;
+            maxDays = Math.max(selections.basketball.laces.days, selections.basketball.insole.days);
         }
         else if (currentModel === 'slipon') {
             customizationPrice = selections.slipon.midsole.price;
@@ -537,16 +567,16 @@ function updatePreview() {
     let maxDays = 0;
 
     if (currentModel === 'classic') {
-        customizationPrice = selections.classic.laces.price;
-        maxDays = selections.classic.laces.days;
+        customizationPrice = selections.classic.laces.price + selections.classic.insole.price;
+        maxDays = Math.max(selections.classic.laces.days, selections.classic.insole.days);
     }
     else if (currentModel === 'runner') {
-        customizationPrice = selections.runner.laces.price;
-        maxDays = selections.runner.laces.days;
+        customizationPrice = selections.runner.laces.price + selections.runner.insole.price;
+        maxDays = Math.max(selections.runner.laces.days, selections.runner.insole.days);
     }
     else if (currentModel === 'basketball') {
-        customizationPrice = selections.basketball.laces.price;
-        maxDays = selections.basketball.laces.days;
+        customizationPrice = selections.basketball.laces.price + selections.basketball.insole.price;
+        maxDays = Math.max(selections.basketball.laces.days, selections.basketball.insole.days);
     }
     else if (currentModel === 'slipon') {
         customizationPrice = selections.slipon.midsole.price;
@@ -628,13 +658,18 @@ function initializeEventListeners() {
             option.addEventListener('click', function () {
                 options.forEach(opt => opt.classList.remove('selected'));
                 this.classList.add('selected');
-                selections[model][componentType] = {
-                    id: this.dataset.id,
-                    price: parseFloat(this.dataset.price),
-                    days: parseInt(this.dataset.days),
-                    image: this.dataset.image,
-                    color: selections[model][componentType]?.color
-                };
+                
+                // Update the selections object based on component type
+                if (componentType === 'laces' || componentType === 'insole') {
+                    selections[model][componentType] = {
+                        id: this.dataset.id,
+                        price: parseFloat(this.dataset.price),
+                        days: parseInt(this.dataset.days),
+                        image: this.dataset.image,
+                        color: componentType === 'laces' ? selections[model][componentType]?.color : undefined
+                    };
+                }
+                
                 updatePreview();
             });
         });
@@ -642,8 +677,11 @@ function initializeEventListeners() {
 
     // Initialize all component options
     setupComponentOptions('laces', document.getElementById('classicLacesOptions'), 'classic');
+    setupComponentOptions('insole', document.getElementById('classicInsoleOptions'), 'classic');
     setupComponentOptions('laces', document.getElementById('runnerLacesOptions'), 'runner');
+    setupComponentOptions('insole', document.getElementById('runnerInsoleOptions'), 'runner');
     setupComponentOptions('laces', document.getElementById('basketballLacesOptions'), 'basketball');
+    setupComponentOptions('insole', document.getElementById('basketballInsoleOptions'), 'basketball');
 
     // Color selection
     function setupColorOptions(colorType, optionsContainer, model) {
