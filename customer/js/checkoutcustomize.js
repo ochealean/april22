@@ -231,6 +231,7 @@ async function loadOrderData(orderId) {
 }
 
 // Display order details on the page
+// Display order details on the page
 function displayOrderDetails(order) {
     console.log('Displaying order details:', order);
     
@@ -283,6 +284,16 @@ function displayOrderDetails(order) {
             document.getElementById('checkoutLacesImage').src = selections.laces.image;
         }
         
+        // NEW: Insole
+        if (selections.insole) {
+            addCustomizationDetail(customizationDetails, 'Insole', selections.insole.id, selections.insole.price);
+            // If insole has an image, you could display it
+            if (selections.insole.image && selections.insole.image !== '#') {
+                // You might want to add a new image element for insole or use an existing one
+                document.getElementById('checkoutTongueImage').src = selections.insole.image;
+            }
+        }
+        
         // Body and Heel colors
         if (selections.bodyColor) {
             addColorDetail(customizationDetails, 'Body Color', selections.bodyColor);
@@ -303,6 +314,14 @@ function displayOrderDetails(order) {
         if (selections.upper) {
             addCustomizationDetail(customizationDetails, 'Upper', selections.upper.id, selections.upper.price);
             document.getElementById('checkoutUpperImage').src = selections.upper.image;
+        }
+        
+        // NEW: Insole
+        if (selections.insole) {
+            addCustomizationDetail(customizationDetails, 'Insole', selections.insole.id, selections.insole.price);
+            if (selections.insole.image && selections.insole.image !== '#') {
+                document.getElementById('checkoutTongueImage').src = selections.insole.image;
+            }
         }
         
         // Colors
@@ -336,6 +355,14 @@ function displayOrderDetails(order) {
             document.getElementById('checkoutUpperImage').src = selections.upper.image;
         }
         
+        // NEW: Insole
+        if (selections.insole) {
+            addCustomizationDetail(customizationDetails, 'Insole', selections.insole.id, selections.insole.price);
+            if (selections.insole.image && selections.insole.image !== '#') {
+                document.getElementById('checkoutTongueImage').src = selections.insole.image;
+            }
+        }
+        
         // Colors
         if (selections.mudguardColor) {
             addColorDetail(customizationDetails, 'Mudguard Color', selections.mudguardColor);
@@ -362,6 +389,14 @@ function displayOrderDetails(order) {
         if (selections.midsole) {
             addCustomizationDetail(customizationDetails, 'Midsole', selections.midsole.id, selections.midsole.price);
             document.getElementById('checkoutSoleImage').src = selections.midsole.image;
+        }
+        
+        // NEW: Insole
+        if (selections.insole) {
+            addCustomizationDetail(customizationDetails, 'Insole', selections.insole.id, selections.insole.price);
+            if (selections.insole.image && selections.insole.image !== '#') {
+                document.getElementById('checkoutTongueImage').src = selections.insole.image;
+            }
         }
         
         // Colors
