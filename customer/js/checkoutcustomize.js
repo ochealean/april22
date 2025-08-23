@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, get, child, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, get, child, set, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 // Initialize Firebase
@@ -24,33 +24,74 @@ const confirmOrderBtn = document.getElementById('confirmOrderBtn');
 const backToCustomizeBtn = document.getElementById('backToCustomizeBtn');
 const orderConfirmationModal = document.getElementById('orderConfirmationModal');
 const viewOrderBtn = document.getElementById('viewOrderBtn');
+const backButton = document.querySelector('.back-button');
 
 // Order data from URL parameters
 const urlParams = new URLSearchParams(window.location.search);
 const orderId = urlParams.get('orderId');
 let orderData = null;
+let orderConfirmed = false;
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded, loading user profile...');
     // Load user profile
     loadUserProfile();
     
     // Load order data if orderId exists in URL
     if (orderId) {
+        console.log('Order ID found:', orderId);
         loadOrderData(orderId);
     } else {
+        console.log('No order ID found, redirecting...');
         // If no orderId, redirect back to customize page
         window.location.href = '/customer/html/customizeshoe.html';
     }
     
     // Initialize event listeners
     initializeEventListeners();
+    
+    // Add beforeunload event to handle browser/tab closing
+    window.addEventListener('beforeunload', handleBeforeUnload);
 });
+
+// Handle beforeunload event
+function handleBeforeUnload(e) {
+    if (!orderConfirmed && orderId) {
+        // Delete the order if not confirmed
+        deleteOrderFromDatabase();
+        
+        // Standard way to show confirmation dialog
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+    }
+}
+
+// Delete order from database
+async function deleteOrderFromDatabase() {
+    try {
+        const userId = await getCurrentUserId();
+        
+        // Remove from boughtshoe
+        const boughtshoeRef = ref(db, `AR_shoe_users/boughtshoe/${userId}/${orderId}`);
+        await remove(boughtshoeRef);
+        
+        // Remove from customizedtransactions if exists
+        const transactionRef = ref(db, `AR_shoe_users/customizedtransactions/${userId}/${orderId}`);
+        await remove(transactionRef);
+        
+        console.log('Order deleted successfully');
+    } catch (error) {
+        console.error('Error deleting order:', error);
+    }
+}
 
 // Load user profile data
 function loadUserProfile() {
     onAuthStateChanged(auth, (user) => {
         if (user) {
+            console.log('User authenticated:', user.uid);
             const userProfile = document.getElementById('imageProfile');
             const userName = document.getElementById('userName_display2');
             
@@ -63,13 +104,38 @@ function loadUserProfile() {
                 .then((snapshot) => {
                     if (snapshot.exists()) {
                         const userData = snapshot.val();
+                        console.log('User data retrieved:', userData);
                         updateUserProfile(userData, userProfile, userName);
                         prefillShippingForm(userData);
+                    } else {
+                        console.log('No user data found in database');
+                        // Remove readonly if no user data exists
+                        removeReadOnlyFromForm();
                     }
                 })
                 .catch((error) => {
                     console.error('Error getting user data:', error);
+                    // Remove readonly on error
+                    removeReadOnlyFromForm();
                 });
+        } else {
+            console.log('No user authenticated');
+            // Remove readonly if no user is authenticated
+            removeReadOnlyFromForm();
+        }
+    });
+}
+
+function removeReadOnlyFromForm() {
+    const formFields = [
+        'firstName', 'lastName', 'address', 'city', 'zip', 
+        'state', 'country', 'phone', 'email'
+    ];
+    
+    formFields.forEach(field => {
+        const element = document.getElementById(field);
+        if (element) {
+            element.removeAttribute('readonly');
         }
     });
 }
@@ -84,17 +150,62 @@ function updateUserProfile(userData, userProfile, userName) {
     }
 }
 
-// Prefill shipping form with user data
+// Prefill shipping form with user data and function with fallbacks
 function prefillShippingForm(userData) {
-    document.getElementById('firstName').value = userData.firstName || '';
-    document.getElementById('lastName').value = userData.lastName || '';
-    document.getElementById('address').value = userData.address || '';
-    document.getElementById('city').value = userData.city || '';
-    document.getElementById('zip').value = userData.zip || '';
-    document.getElementById('state').value = userData.state || 'Bataan';
-    document.getElementById('country').value = userData.country || 'Philippines';
-    document.getElementById('phone').value = userData.phone || '';
-    document.getElementById('email').value = userData.email || '';
+    console.log('Prefilling form with:', userData);
+    
+    // Default values
+    const defaults = {
+        'firstName': '',
+        'lastName': '',
+        'address': '',
+        'city': '',
+        'zip': '',
+        'state': 'Bataan',
+        'country': 'Philippines',
+        'phone': '',
+        'email': ''
+    };
+    
+    // Merge user data with defaults
+    const formData = { ...defaults, ...userData };
+    
+    // Fill text input fields
+    const textFields = ['firstName', 'lastName', 'address', 'city', 'zip', 'state', 'phone', 'email'];
+    
+    textFields.forEach(field => {
+        const element = document.getElementById(field);
+        if (element) {
+            element.value = formData[field] || '';
+        }
+    });
+    
+    // Handle country select
+    const countrySelect = document.getElementById('country');
+    if (countrySelect) {
+        // Try to find the option with the user's country
+        const options = countrySelect.options;
+        let found = false;
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].value === formData.country) {
+                countrySelect.selectedIndex = i;
+                found = true;
+                break;
+            }
+        }
+        
+        // If country not found in options, select Philippines as default
+        if (!found) {
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].value === 'Philippines') {
+                    countrySelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+    }
+    
+    console.log('Form pre-filled successfully');
 }
 
 // Load order data from Firebase
@@ -106,6 +217,7 @@ async function loadOrderData(orderId) {
         get(orderRef).then((snapshot) => {
             if (snapshot.exists()) {
                 orderData = snapshot.val();
+                console.log('Order data loaded:', orderData);
                 displayOrderDetails(orderData);
             } else {
                 console.error('Order not found');
@@ -120,6 +232,8 @@ async function loadOrderData(orderId) {
 
 // Display order details on the page
 function displayOrderDetails(order) {
+    console.log('Displaying order details:', order);
+    
     // Set model name
     document.getElementById('checkoutModelName').textContent = getModelDisplayName(order.model);
     document.getElementById('checkoutSize').textContent = order.size;
@@ -135,79 +249,128 @@ function displayOrderDetails(order) {
     const customizationDetails = document.getElementById('customizationDetails');
     customizationDetails.innerHTML = '';
     
+    // Clear all preview images first
+    document.getElementById('checkoutSoleImage').src = '';
+    document.getElementById('checkoutUpperImage').src = '';
+    document.getElementById('checkoutLacesImage').src = '';
+    document.getElementById('checkoutTongueImage').src = '';
+    
+    const selections = order.selections;
+    
     if (order.model === 'classic') {
         // Classic shoe customization
-        const selections = order.selections;
-        
         // Sole
-        addCustomizationDetail(customizationDetails, 'Sole', selections.sole.id, selections.sole.price);
+        if (selections.sole) {
+            addCustomizationDetail(customizationDetails, 'Sole', selections.sole.id, selections.sole.price);
+            document.getElementById('checkoutSoleImage').src = selections.sole.image;
+        }
         
         // Upper
-        addCustomizationDetail(customizationDetails, 'Upper', selections.upper.id, selections.upper.price);
-        addColorDetail(customizationDetails, 'Upper Color', selections.upper.color);
+        if (selections.upper) {
+            addCustomizationDetail(customizationDetails, 'Upper', selections.upper.id, selections.upper.price);
+            if (selections.upper.color) {
+                addColorDetail(customizationDetails, 'Upper Color', selections.upper.color);
+            }
+            document.getElementById('checkoutUpperImage').src = selections.upper.image;
+        }
         
         // Laces
-        addCustomizationDetail(customizationDetails, 'Laces', selections.laces.id, selections.laces.price);
-        addColorDetail(customizationDetails, 'Laces Color', selections.laces.color);
+        if (selections.laces) {
+            addCustomizationDetail(customizationDetails, 'Laces', selections.laces.id, selections.laces.price);
+            if (selections.laces.color) {
+                addColorDetail(customizationDetails, 'Laces Color', selections.laces.color);
+            }
+            document.getElementById('checkoutLacesImage').src = selections.laces.image;
+        }
         
         // Body and Heel colors
-        addColorDetail(customizationDetails, 'Body Color', selections.bodyColor);
-        addColorDetail(customizationDetails, 'Heel Color', selections.heelColor);
-        
-        // Set preview images
-        document.getElementById('checkoutSoleImage').src = selections.sole.image;
-        document.getElementById('checkoutUpperImage').src = selections.upper.image;
-        document.getElementById('checkoutLacesImage').src = selections.laces.image;
+        if (selections.bodyColor) {
+            addColorDetail(customizationDetails, 'Body Color', selections.bodyColor);
+        }
+        if (selections.heelColor) {
+            addColorDetail(customizationDetails, 'Heel Color', selections.heelColor);
+        }
         
     } else if (order.model === 'runner') {
         // Runner shoe customization
-        const selections = order.selections;
-        
         // Sole
-        addCustomizationDetail(customizationDetails, 'Sole', selections.sole.id, selections.sole.price);
+        if (selections.sole) {
+            addCustomizationDetail(customizationDetails, 'Sole', selections.sole.id, selections.sole.price);
+            document.getElementById('checkoutSoleImage').src = selections.sole.image;
+        }
         
         // Upper
-        addCustomizationDetail(customizationDetails, 'Upper', selections.upper.id, selections.upper.price);
+        if (selections.upper) {
+            addCustomizationDetail(customizationDetails, 'Upper', selections.upper.id, selections.upper.price);
+            document.getElementById('checkoutUpperImage').src = selections.upper.image;
+        }
         
         // Colors
-        addColorDetail(customizationDetails, 'Body Color', selections.bodyColor);
-        addColorDetail(customizationDetails, 'Collar Color', selections.collarColor);
+        if (selections.bodyColor) {
+            addColorDetail(customizationDetails, 'Body Color', selections.bodyColor);
+        }
+        if (selections.collarColor) {
+            addColorDetail(customizationDetails, 'Collar Color', selections.collarColor);
+        }
         
-        // Set preview images
-        document.getElementById('checkoutSoleImage').src = selections.sole.image;
-        document.getElementById('checkoutUpperImage').src = selections.upper.image;
+        // Laces
+        if (selections.laces) {
+            addCustomizationDetail(customizationDetails, 'Laces', selections.laces.id, selections.laces.price);
+            if (selections.laces.color) {
+                addColorDetail(customizationDetails, 'Laces Color', selections.laces.color);
+            }
+            document.getElementById('checkoutLacesImage').src = selections.laces.image;
+        }
         
     } else if (order.model === 'basketball') {
         // Basketball shoe customization
-        const selections = order.selections;
-        
         // Sole
-        addCustomizationDetail(customizationDetails, 'Sole', selections.sole.id, selections.sole.price);
+        if (selections.sole) {
+            addCustomizationDetail(customizationDetails, 'Sole', selections.sole.id, selections.sole.price);
+            document.getElementById('checkoutSoleImage').src = selections.sole.image;
+        }
         
         // Upper
-        addCustomizationDetail(customizationDetails, 'Upper', selections.upper.id, selections.upper.price);
+        if (selections.upper) {
+            addCustomizationDetail(customizationDetails, 'Upper', selections.upper.id, selections.upper.price);
+            document.getElementById('checkoutUpperImage').src = selections.upper.image;
+        }
         
         // Colors
-        addColorDetail(customizationDetails, 'Mudguard Color', selections.mudguardColor);
-        addColorDetail(customizationDetails, 'Heel Color', selections.heelColor);
+        if (selections.mudguardColor) {
+            addColorDetail(customizationDetails, 'Mudguard Color', selections.mudguardColor);
+        }
+        if (selections.heelColor) {
+            addColorDetail(customizationDetails, 'Heel Color', selections.heelColor);
+        }
+        if (selections.bodyColor) {
+            addColorDetail(customizationDetails, 'Body Color', selections.bodyColor);
+        }
         
-        // Set preview images
-        document.getElementById('checkoutSoleImage').src = selections.sole.image;
-        document.getElementById('checkoutUpperImage').src = selections.upper.image;
+        // Laces
+        if (selections.laces) {
+            addCustomizationDetail(customizationDetails, 'Laces', selections.laces.id, selections.laces.price);
+            if (selections.laces.color) {
+                addColorDetail(customizationDetails, 'Laces Color', selections.laces.color);
+            }
+            document.getElementById('checkoutLacesImage').src = selections.laces.image;
+        }
         
     } else if (order.model === 'slipon') {
         // Slipon shoe customization
-        const selections = order.selections;
-        
         // Midsole
-        addCustomizationDetail(customizationDetails, 'Midsole', selections.midsole.id, selections.midsole.price);
+        if (selections.midsole) {
+            addCustomizationDetail(customizationDetails, 'Midsole', selections.midsole.id, selections.midsole.price);
+            document.getElementById('checkoutSoleImage').src = selections.midsole.image;
+        }
         
         // Colors
-        addColorDetail(customizationDetails, 'Midsole Color', selections.midsoleColor);
-        addColorDetail(customizationDetails, 'Outsole Color', selections.outsoleColor);
-        
-        // Set preview images
-        document.getElementById('checkoutSoleImage').src = selections.midsole.image;
+        if (selections.midsoleColor) {
+            addColorDetail(customizationDetails, 'Midsole Color', selections.midsoleColor);
+        }
+        if (selections.outsoleColor) {
+            addColorDetail(customizationDetails, 'Outsole Color', selections.outsoleColor);
+        }
     }
 }
 
@@ -284,8 +447,30 @@ function initializeEventListeners() {
     }
     
     // Back to customize button
-    backToCustomizeBtn.addEventListener('click', () => {
-        window.location.href = '/customer/html/customizeshoe.html';
+    backToCustomizeBtn.addEventListener('click', async () => {
+        if (!orderConfirmed) {
+            const confirmCancel = confirm('Are you sure you want to cancel this order? Your custom design will be lost.');
+            if (confirmCancel) {
+                await deleteOrderFromDatabase();
+                window.location.href = '/customer/html/customizeshoe.html';
+            }
+        } else {
+            window.location.href = '/customer/html/customizeshoe.html';
+        }
+    });
+    
+    // Back button (arrow)
+    backButton.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!orderConfirmed) {
+            const confirmCancel = confirm('Are you sure you want to cancel this order? Your custom design will be lost.');
+            if (confirmCancel) {
+                await deleteOrderFromDatabase();
+                window.location.href = '/customer/html/customizeshoe.html';
+            }
+        } else {
+            window.location.href = '/customer/html/customizeshoe.html';
+        }
     });
     
     // View order button in modal
@@ -304,6 +489,9 @@ function initializeEventListeners() {
             // Update order with shipping and payment info
             await updateOrderWithShippingInfo();
             
+            // Mark order as confirmed
+            orderConfirmed = true;
+            
             // Show confirmation modal
             orderConfirmationModal.style.display = 'flex';
             
@@ -312,6 +500,16 @@ function initializeEventListeners() {
             alert('There was an error confirming your order. Please try again.');
             confirmOrderBtn.disabled = false;
             confirmOrderBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Order';
+        }
+    });
+    
+    // Handle browser back button
+    window.addEventListener('popstate', async () => {
+        if (!orderConfirmed) {
+            const confirmCancel = confirm('Are you sure you want to cancel this order? Your custom design will be lost.');
+            if (confirmCancel) {
+                await deleteOrderFromDatabase();
+            }
         }
     });
 }
