@@ -3,35 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pending Orders</title>
+    <title>My Custom Orders</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --primary: #a777e3;
+            --primary-dark: #8e5fd5;
+            --secondary: #8a4fff;
+            --secondary-dark: #7a3ed1;
+            --accent: #ff6b6b;
+            --success: #48cfad;
+            --warning: #ffaa00;
+            --error: #ff6b6b;
+            --light: #f8f9fa;
+            --dark: #2c3e50;
+            --gray: #bdc3c7;
+            --gray-light: #ecf0f1;
+            --gray-dark: #7f8c8d;
+            --text-primary: #2c3e50;
+            --text-secondary: #34495e;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
-            color: #333;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--text-primary);
+            line-height: 1.6;
         }
-        
-        h1 {
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar - Purple Theme */
+        .sidebar {
+            background: linear-gradient(180deg, var(--secondary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-item i {
+            width: 24px;
             text-align: center;
-            margin-bottom: 30px;
-            color: #2c3e50;
+            font-size: 1.1rem;
         }
-        
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            overflow-x: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Order Tabs */
+        .order-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .order-tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .order-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .order-tab:hover:not(.active) {
+            color: var(--dark);
+            border-bottom-color: var(--gray);
+        }
+
+        /* Orders Container */
         .orders-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 20px;
         }
-        
+
         .order-card {
             background-color: white;
             border-radius: 8px;
@@ -39,12 +200,12 @@
             padding: 20px;
             transition: transform 0.3s ease;
         }
-        
+
         .order-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-        
+
         .order-header {
             display: flex;
             justify-content: space-between;
@@ -53,36 +214,36 @@
             padding-bottom: 10px;
             margin-bottom: 15px;
         }
-        
+
         .order-id {
             font-weight: bold;
             color: #3498db;
         }
-        
+
         .order-date {
             color: #7f8c8d;
             font-size: 0.9em;
         }
-        
+
         .order-details {
             margin-bottom: 15px;
         }
-        
+
         .detail-row {
             display: flex;
             margin-bottom: 8px;
         }
-        
+
         .detail-label {
             font-weight: bold;
             width: 120px;
             color: #7f8c8d;
         }
-        
+
         .detail-value {
             flex: 1;
         }
-        
+
         .status-badge {
             display: inline-block;
             padding: 4px 10px;
@@ -91,12 +252,22 @@
             font-weight: bold;
             text-transform: uppercase;
         }
-        
+
         .status-pending {
             background-color: #f39c12;
             color: white;
         }
         
+        .status-processing {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .status-completed {
+            background-color: #2ecc71;
+            color: white;
+        }
+
         .order-image {
             width: 100%;
             height: 150px;
@@ -105,7 +276,7 @@
             margin-top: 10px;
             background-color: #f9f9f9;
         }
-        
+
         .order-actions {
             display: flex;
             justify-content: space-between;
@@ -113,7 +284,7 @@
             border-top: 1px solid #eee;
             padding-top: 15px;
         }
-        
+
         .btn {
             padding: 8px 15px;
             border: none;
@@ -122,52 +293,746 @@
             font-weight: bold;
             transition: background-color 0.3s;
         }
-        
-        .btn-process {
-            background-color: #2ecc71;
+
+        .btn-view {
+            background-color: #3498db;
             color: white;
         }
-        
-        .btn-process:hover {
-            background-color: #27ae60;
+
+        .btn-view:hover {
+            background-color: #2980b9;
         }
-        
+
         .btn-cancel {
             background-color: #e74c3c;
             color: white;
         }
-        
+
         .btn-cancel:hover {
             background-color: #c0392b;
         }
-        
+
         .empty-state {
             text-align: center;
             padding: 50px;
             color: #7f8c8d;
+            grid-column: 1 / -1;
         }
-        
+
         .empty-state i {
             font-size: 50px;
             margin-bottom: 20px;
             color: #bdc3c7;
         }
-        
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--radius-md);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 1;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--error);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .order-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .detail-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-section h3 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .shoe-preview-container {
+            width: 100%;
+            height: 250px;
+            background-color: #f9f9f9;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .component-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        /* Mobile navigation */
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+        }
+
         @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -350px;
+                transition: var(--transition);
+                z-index: 100;
+                height: 100vh;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 0.5rem;
+                color: var(--dark);
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 99;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
             .orders-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .order-details-grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1><i class="fas fa-clock"></i> Pending Orders</h1>
-        <div class="orders-container" id="ordersContainer">
-            <!-- Orders will be inserted here by JavaScript -->
+    <div class="dashboard">
+        <!-- Sidebar - Purple Theme -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <span>SHOE PORTAL</span>
+            </div>
+            <div class="nav-items">
+                <a href="/customer/html/customer_dashboard.html" class="nav-item">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="/customer/html/browse.html" class="nav-item">
+                    <i class="fas fa-shopping-bag"></i> Browse Shoes
+                </a>
+                <a href="/customer/html/shoevalidator.html" class="nav-item">
+                    <i class="fas fa-check-circle"></i> Shoe Validation
+                </a>
+                <a href="/customer/html/pickshoe.html" class="nav-item">
+                    <i class="fas fa-shoe-prints"></i> Customize Shoes
+                </a>
+                <a href="/customer/html/customization_pendingOrders.html" class="nav-item active">
+                    <i class="fas fa-receipt"></i> My Custom Orders
+                </a>
+                <a href="/customer/html/orders.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i> Regular Orders
+                </a>
+                <a href="/customer/html/history.html" class="nav-item">
+                    <i class="fas fa-history"></i> Order History
+                </a>
+                <a href="/customer/html/issue_response.html" class="nav-item">
+                    <i class="fas fa-reply"></i> Issue Response
+                </a>
+                <a href="/customer/html/wishlist.html" class="nav-item">
+                    <i class="fas fa-heart"></i> Wishlist
+                </a>
+                <a href="/chatbot/html/chatbot.html" class="nav-item">
+                    <i class="fas fa-comment"></i> Chatbot
+                </a>
+                <a href="/customer/html/customerprofile.html" class="nav-item">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a id="logout_btn" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <h1><i class="fas fa-receipt"></i> My Custom Orders</h1>
+                <div class="user-profile">
+                    <img id="imageProfile" src="#" alt="Profile" class="user-avatar">
+                    <span id="userName_display2">Customer name</span>
+                </div>
+            </div>
+
+            <!-- Order Tabs -->
+            <div class="order-tabs">
+                <div class="order-tab active" data-tab="pending">
+                    <i class="fas fa-clock"></i> Pending
+                </div>
+                <div class="order-tab" data-tab="processing">
+                    <i class="fas fa-cog"></i> In Process
+                </div>
+                <div class="order-tab" data-tab="completed">
+                    <i class="fas fa-check-circle"></i> Completed
+                </div>
+            </div>
+
+            <div class="orders-container" id="ordersContainer">
+                <!-- Orders will be inserted here by JavaScript -->
+            </div>
         </div>
     </div>
 
-    <script src="../js/customization_pendingOrders.js" type="module"></script>
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay"></div>
+
+    <!-- Order Details Modal -->
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Order Details - <span id="modalOrderId">CS-20230810-001</span></h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="order-details-grid">
+                    <div>
+                        <div class="detail-section">
+                            <h3><i class="fas fa-info-circle"></i> Order Information</h3>
+                            <div class="detail-row">
+                                <div class="detail-label">Order Date:</div>
+                                <div class="detail-value" id="modalOrderDate">Aug 10, 2023</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Order Status:</div>
+                                <div class="detail-value"><span class="status-badge status-pending" id="modalOrderStatus">Pending Payment</span></div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Payment Method:</div>
+                                <div class="detail-value" id="modalPaymentMethod">GCash</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Payment Status:</div>
+                                <div class="detail-value" id="modalPaymentStatus">Pending</div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h3><i class="fas fa-truck"></i> Shipping Information</h3>
+                            <div class="detail-row">
+                                <div class="detail-label">Name:</div>
+                                <div class="detail-value" id="modalCustomerName">John Doe</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Address:</div>
+                                <div class="detail-value" id="modalCustomerAddress">123 Main St, Quezon City, Metro Manila</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Contact:</div>
+                                <div class="detail-value" id="modalCustomerContact">+63 912 345 6789</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Est. Delivery:</div>
+                                <div class="detail-value" id="modalEstDelivery">Aug 20, 2023</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="detail-section">
+                            <h3><i class="fas fa-shoe-prints"></i> Custom Design</h3>
+                            <div class="shoe-preview-container">
+                                <img src="" alt="Shoe Preview" class="component-preview" id="modalShoeImage">
+                            </div>
+                            
+                            <div class="detail-row">
+                                <div class="detail-label">Model:</div>
+                                <div class="detail-value" id="modalShoeModel">Classic Sneaker</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Size:</div>
+                                <div class="detail-value" id="modalShoeSize">9</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Color:</div>
+                                <div class="detail-value" id="modalShoeColor">White/Black</div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h3><i class="fas fa-palette"></i> Customization Details</h3>
+                            <div class="detail-row">
+                                <div class="detail-label">Sole Type:</div>
+                                <div class="detail-value" id="modalSoleType">Premium (+₱500)</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Upper Material:</div>
+                                <div class="detail-value" id="modalUpperMaterial">Leather (+₱400)</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Laces Type:</div>
+                                <div class="detail-value" id="modalLacesType">Elastic (+₱200)</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Additional Features:</div>
+                                <div class="detail-value" id="modalAdditionalFeatures">Custom logo embroidery</div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h3><i class="fas fa-receipt"></i> Order Summary</h3>
+                            <div class="detail-row">
+                                <div class="detail-label">Base Price:</div>
+                                <div class="detail-value">₱2,499.00</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Customization:</div>
+                                <div class="detail-value">+₱1,100.00</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Shipping:</div>
+                                <div class="detail-value">₱200.00</div>
+                            </div>
+                            <div class="detail-row" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-light);">
+                                <div class="detail-label" style="font-weight: 600;">Total:</div>
+                                <div class="detail-value" style="font-weight: 600;">₱3,799.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="btn btn-view" id="closeModalBtn">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- <script type="module">
+        // Sample order data
+        const orders = [
+            {
+                id: "CS-20230810-001",
+                date: "Aug 10, 2023",
+                status: "pending",
+                title: "Classic Sneaker Custom Design",
+                image: "errorimage.jpg",
+                total: "₱2,799.00",
+                payment: "GCash (Pending)",
+                model: "Classic Sneaker",
+                size: "9",
+                color: "White/Black",
+                soleType: "Premium (+₱500)",
+                upperMaterial: "Leather (+₱400)",
+                lacesType: "Elastic (+₱200)",
+                additionalFeatures: "Custom logo embroidery",
+                customerName: "John Doe",
+                customerAddress: "123 Main St, Quezon City, Metro Manila",
+                customerContact: "+63 912 345 6789",
+                estDelivery: "Aug 20, 2023"
+            },
+            {
+                id: "PR-20230805-002",
+                date: "Aug 5, 2023",
+                status: "processing",
+                title: "Performance Runner Custom Design",
+                image: "errorimage.jpg",
+                total: "₱3,299.00",
+                payment: "Credit Card (Paid)",
+                completion: "Aug 15, 2023",
+                statusDetail: "Sole construction in progress",
+                model: "Performance Runner",
+                size: "10",
+                color: "Blue/White",
+                soleType: "Performance (+₱600)",
+                upperMaterial: "Mesh (+₱300)",
+                lacesType: "Standard (+₱100)",
+                additionalFeatures: "Extra cushioning",
+                customerName: "John Doe",
+                customerAddress: "123 Main St, Quezon City, Metro Manila",
+                customerContact: "+63 912 345 6789",
+                estDelivery: "Aug 25, 2023"
+            },
+            {
+                id: "SO-20230720-003",
+                date: "Jul 20, 2023",
+                status: "completed",
+                title: "Slip-On Comfort Custom Design",
+                image: "errorimage.jpg",
+                total: "₱2,499.00",
+                payment: "PayPal (Paid)",
+                delivered: "Jul 30, 2023",
+                model: "Slip-On Comfort",
+                size: "8",
+                color: "Black/Gray",
+                soleType: "Comfort (+₱400)",
+                upperMaterial: "Canvas (+₱200)",
+                lacesType: "None (Slip-on)",
+                additionalFeatures: "Memory foam insole",
+                customerName: "John Doe",
+                customerAddress: "123 Main St, Quezon City, Metro Manila",
+                customerContact: "+63 912 345 6789",
+                estDelivery: "Jul 30, 2023"
+            }
+        ];
+
+        // DOM elements
+        const ordersContainer = document.getElementById('ordersContainer');
+        const orderTabs = document.querySelectorAll('.order-tab');
+        const orderModal = document.getElementById('orderModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarOverlay = document.querySelector('.sidebar-overlay');
+
+        // Function to render orders based on status
+        function renderOrders(status) {
+            ordersContainer.innerHTML = '';
+            
+            const filteredOrders = orders.filter(order => order.status === status);
+            
+            if (filteredOrders.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                emptyState.innerHTML = `
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>No ${status.charAt(0).toUpperCase() + status.slice(1)} Orders</h3>
+                    <p>You don't have any ${status} custom orders at this time.</p>
+                `;
+                ordersContainer.appendChild(emptyState);
+                return;
+            }
+            
+            filteredOrders.forEach(order => {
+                const orderCard = document.createElement('div');
+                orderCard.className = 'order-card';
+                orderCard.setAttribute('data-status', order.status);
+                
+                let statusBadge = '';
+                if (order.status === 'pending') {
+                    statusBadge = '<span class="status-badge status-pending">Pending Payment</span>';
+                } else if (order.status === 'processing') {
+                    statusBadge = '<span class="status-badge status-processing">In Production</span>';
+                } else {
+                    statusBadge = '<span class="status-badge status-completed">Delivered</span>';
+                }
+                
+                let additionalInfo = '';
+                if (order.status === 'processing') {
+                    additionalInfo = `
+                        <div class="detail-row">
+                            <span class="detail-label">Est. Completion:</span>
+                            <span class="detail-value">${order.completion}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value">${order.statusDetail}</span>
+                        </div>
+                    `;
+                } else if (order.status === 'completed') {
+                    additionalInfo = `
+                        <div class="detail-row">
+                            <span class="detail-label">Delivered On:</span>
+                            <span class="detail-value">${order.delivered}</span>
+                        </div>
+                    `;
+                }
+                
+                orderCard.innerHTML = `
+                    <div class="order-header">
+                        <div class="order-id">${order.id}</div>
+                        <div class="order-date">${order.date}</div>
+                    </div>
+                    <div class="order-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Product:</span>
+                            <span class="detail-value">${order.title}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value">${statusBadge}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Model:</span>
+                            <span class="detail-value">${order.model}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Size:</span>
+                            <span class="detail-value">${order.size}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Total:</span>
+                            <span class="detail-value">${order.total}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Payment:</span>
+                            <span class="detail-value">${order.payment}</span>
+                        </div>
+                        ${additionalInfo}
+                        <img src="${order.image}" alt="Order Preview" class="order-image">
+                    </div>
+                    <div class="order-actions">
+                        <button class="btn btn-view view-order-btn" data-order='${JSON.stringify(order)}'>
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                        ${order.status === 'pending' ? 
+                        `<button class="btn btn-cancel cancel-order-btn" data-id="${order.id}">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>` : ''}
+                    </div>
+                `;
+                
+                ordersContainer.appendChild(orderCard);
+            });
+            
+            // Add event listeners to view buttons
+            document.querySelectorAll('.view-order-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const orderData = JSON.parse(this.getAttribute('data-order'));
+                    showOrderDetails(orderData);
+                });
+            });
+            
+            // Add event listeners to cancel buttons
+            document.querySelectorAll('.cancel-order-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const orderId = this.getAttribute('data-id');
+                    if (confirm(`Are you sure you want to cancel order ${orderId}?`)) {
+                        // In a real app, you would send a request to the server here
+                        alert(`Order ${orderId} has been cancelled.`);
+                        // Remove the order from the list
+                        const orderIndex = orders.findIndex(order => order.id === orderId);
+                        if (orderIndex !== -1) {
+                            orders.splice(orderIndex, 1);
+                            renderOrders('pending');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Function to show order details in modal
+        function showOrderDetails(order) {
+            document.getElementById('modalOrderId').textContent = order.id;
+            document.getElementById('modalOrderDate').textContent = order.date;
+            
+            // Set status badge
+            const statusBadge = document.getElementById('modalOrderStatus');
+            statusBadge.textContent = order.status === 'pending' ? 'Pending Payment' : 
+                                     order.status === 'processing' ? 'In Production' : 'Delivered';
+            statusBadge.className = 'status-badge ' + 
+                                   (order.status === 'pending' ? 'status-pending' : 
+                                    order.status === 'processing' ? 'status-processing' : 'status-completed');
+            
+            document.getElementById('modalPaymentMethod').textContent = order.payment.split(' (')[0];
+            document.getElementById('modalPaymentStatus').textContent = order.payment.split('(')[1].replace(')', '');
+            document.getElementById('modalShoeImage').src = order.image;
+            document.getElementById('modalShoeModel').textContent = order.model;
+            document.getElementById('modalShoeSize').textContent = order.size;
+            document.getElementById('modalShoeColor').textContent = order.color;
+            document.getElementById('modalSoleType').textContent = order.soleType;
+            document.getElementById('modalUpperMaterial').textContent = order.upperMaterial;
+            document.getElementById('modalLacesType').textContent = order.lacesType;
+            document.getElementById('modalAdditionalFeatures').textContent = order.additionalFeatures;
+            document.getElementById('modalCustomerName').textContent = order.customerName;
+            document.getElementById('modalCustomerAddress').textContent = order.customerAddress;
+            document.getElementById('modalCustomerContact').textContent = order.customerContact;
+            document.getElementById('modalEstDelivery').textContent = order.estDelivery;
+            
+            // Show the modal
+            orderModal.style.display = 'flex';
+        }
+
+        // Initialize with pending orders
+        renderOrders('pending');
+
+        // Add event listeners to tabs
+        orderTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                orderTabs.forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Get the tab to show
+                const tabToShow = this.getAttribute('data-tab');
+                
+                // Render orders for this tab
+                renderOrders(tabToShow);
+            });
+        });
+
+        // Close modal when clicking close button
+        closeModalBtn.addEventListener('click', function() {
+            orderModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target === orderModal) {
+                orderModal.style.display = 'none';
+            }
+        });
+
+        // Mobile menu toggle
+        mobileMenuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking overlay
+        sidebarOverlay.addEventListener('click', function() {
+            sidebar.classList.remove('active');
+            this.classList.remove('active');
+        });
+    </script> -->
+
+    <!-- <script type="module">
+        // Close modal when clicking close button
+        closeModalBtn.addEventListener('click', function() {
+            orderModal.style.display = 'none';
+        });
+
+        // Close modal when clicking X button
+        closeModalX.addEventListener('click', function() {
+            orderModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target === orderModal) {
+                orderModal.style.display = 'none';
+            }
+        });
+
+        // Mobile menu toggle
+        mobileMenuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking overlay
+        sidebarOverlay.addEventListener('click', function() {
+            sidebar.classList.remove('active');
+            this.classList.remove('active');
+        });
+    </script> -->
+
+    <script type="module" src="/customer/js/customization_pendingOrders.js"></script>
+
 </body>
 </html>
