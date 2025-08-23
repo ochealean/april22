@@ -91,6 +91,9 @@ onAuthStateChanged(auth, (user) => {
                     if (document.getElementById('city')) {
                         document.getElementById('city').value = userData.city || '';
                     }
+                    if (document.getElementById('state')) {
+                        document.getElementById('state').value = userData.state || '';
+                    }
                     if (document.getElementById('zip')) {
                         document.getElementById('zip').value = userData.zip || '';
                     }

@@ -91,6 +91,7 @@ function prefillShippingForm(userData) {
     document.getElementById('address').value = userData.address || '';
     document.getElementById('city').value = userData.city || '';
     document.getElementById('zip').value = userData.zip || '';
+    document.getElementById('state').value = userData.state || 'Bataan';
     document.getElementById('country').value = userData.country || 'Philippines';
     document.getElementById('phone').value = userData.phone || '';
     document.getElementById('email').value = userData.email || '';
