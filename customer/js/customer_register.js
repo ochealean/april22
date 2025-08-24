@@ -146,3 +146,14 @@ registerButton.addEventListener("click", (e) => {
   e.preventDefault();
   registerUser();
 });
+
+// Logout functionality
+document.getElementById('logout_btn').addEventListener('click', function() {
+    if (confirm('Are you sure you want to logout?')) {
+        auth.signOut().then(() => {
+            window.location.href = '/user_login.html';
+        }).catch((error) => {
+            console.error('Error signing out:', error);
+        });
+    }
+});

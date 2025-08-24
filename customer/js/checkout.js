@@ -136,13 +136,15 @@ function setupEventListeners() {
         }
     });
 
-    // Logout button if exists
-    document.getElementById('logout_btn')?.addEventListener('click', () => {
-        signOut(auth).then(() => {
-            console.log("User signed out");
-        }).catch((error) => {
-            console.error("Error signing out: ", error);
-        });
+    // Logout functionality
+    document.getElementById('logout_btn').addEventListener('click', function() {
+        if (confirm('Are you sure you want to logout?')) {
+            auth.signOut().then(() => {
+                window.location.href = '/user_login.html';
+            }).catch((error) => {
+                console.error('Error signing out:', error);
+            });
+        }
     });
 }
 
