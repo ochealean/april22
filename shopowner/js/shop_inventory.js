@@ -46,6 +46,7 @@ onAuthStateChanged(auth, (user) => {
                 userSession.role = shopData.role;
                 userSession.shopId = shopData.shopId;
                 userSession.shopName = shopData.shopName || '';
+                updateProfileHeader(shopData);
 
                 if (shopData.role.toLowerCase() === "manager") {
                     document.getElementById("addemployeebtn").style.display = "none";
@@ -57,6 +58,16 @@ onAuthStateChanged(auth, (user) => {
                 userSession.shopId = user.uid;
                 userSession.role = "Shop Owner";
                 userSession.shopName = 'Shop Owner';
+
+                // This is a shop owner, fetch shop data
+                const shopRef = ref(db, `AR_shoe_users/shop/${user.uid}`);
+                onValue(shopRef, (shopSnapshot) => {
+                    if (shopSnapshot.exists()) {
+                        const shopData = shopSnapshot.val();
+                        // Update profile header for shop owners
+                        updateProfileHeader(shopData);
+                    }
+                }, { onlyOnce: true });
             }
             loadInventory('inventoryTableBody');
         }, (error) => {
@@ -69,6 +80,28 @@ onAuthStateChanged(auth, (user) => {
         window.location.href = "/user_login.html";
     }
 });
+
+function updateProfileHeader(userData) {
+    const profilePicture = document.getElementById('profilePicture');
+    const userFullname = document.getElementById('userFullname');
+
+    // Set profile name
+    if (userData.name) {
+        userFullname.textContent = userData.name;
+    } else if (userData.shopName) {
+        userFullname.textContent = userData.shopName;
+    }
+
+    // Set profile picture
+    if (userData.profilePhoto && userData.profilePhoto.url) {
+        profilePicture.src = userData.profilePhoto.url;
+    } else if (userData.uploads && userData.uploads.shopLogo && userData.uploads.shopLogo.url) {
+        profilePicture.src = userData.uploads.shopLogo.url;
+    } else {
+        // Set default avatar if no image available
+        profilePicture.src = "#";
+    }
+}
 
 function addNewShoe() {
     window.location.href = "/shopowner/html/shopowner_addshoe.html";
@@ -262,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Logout functionality
-    document.getElementById('logout_btn').addEventListener('click', function() {
+    document.getElementById('logout_btn').addEventListener('click', function () {
         if (confirm('Are you sure you want to logout?')) {
             auth.signOut().then(() => {
                 window.location.href = '/user_login.html';
@@ -337,8 +370,8 @@ async function showReviews(shoeId) {
 
         // Calculate average rating
         const averageRating = calculateAverageRating(feedbacks, shoeId);
-        const ratingCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
-        
+        const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
         // Count ratings
         reviewsToDisplay.forEach(review => {
             const rating = review.feedback.rating;
@@ -370,7 +403,7 @@ async function showReviews(shoeId) {
         for (const review of reviewsToDisplay) {
             try {
                 const username = await getCustomernameUsingID(review.userId);
-                
+
                 reviewsHtml += `
                     <div class="review-item" data-rating="${review.feedback.rating}">
                         <div class="review-header">
@@ -425,21 +458,21 @@ function generateStarRating(rating) {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-    
+
     let starsHtml = '';
-    
+
     for (let i = 0; i < fullStars; i++) {
         starsHtml += '<i class="fas fa-star"></i>';
     }
-    
+
     if (hasHalfStar) {
         starsHtml += '<i class="fas fa-star-half-alt"></i>';
     }
-    
+
     for (let i = 0; i < emptyStars; i++) {
         starsHtml += '<i class="far fa-star"></i>';
     }
-    
+
     return starsHtml;
 }
 
@@ -485,20 +518,20 @@ function formatTimestamp(timestamp) {
     return `${month}/${day}/${year} ${hours}:${minutes}`;
 }
 
-window.filterReviewsModal = function(rating) {
+window.filterReviewsModal = function (rating) {
     const reviewItems = document.querySelectorAll('#shoeDetailsContent .review-item');
     const filters = document.querySelectorAll('#shoeDetailsContent .stars-filter');
-    
+
     filters.forEach(filter => {
         filter.classList.remove('active');
         if (parseInt(filter.dataset.rating) === rating) {
             filter.classList.add('active');
         }
     });
-    
+
     reviewItems.forEach(item => {
-        item.style.display = (rating === 0 || parseInt(item.dataset.rating) === rating) 
-            ? 'block' 
+        item.style.display = (rating === 0 || parseInt(item.dataset.rating) === rating)
+            ? 'block'
             : 'none';
     });
 }
@@ -506,7 +539,7 @@ window.filterReviewsModal = function(rating) {
 function testFeedback(shoeId) {
     const modalContent = document.getElementById('shoeDetailsContent');
     const modalElement = document.getElementById('shoeDetailsModal');
-    
+
     const sampleFeedbacks = [
         {
             rating: 5,
@@ -536,7 +569,7 @@ function testFeedback(shoeId) {
     ];
 
     const averageRating = sampleFeedbacks.reduce((sum, feedback) => sum + feedback.rating, 0) / sampleFeedbacks.length;
-    const ratingCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+    const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     sampleFeedbacks.forEach(feedback => {
         ratingCounts[feedback.rating]++;
     });

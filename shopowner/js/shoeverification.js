@@ -167,6 +167,9 @@ function setupAuthStateListener() {
                     const userData = snapshot.val();
                     shopLoggedin = userData.shopId;
                     
+                    // Update profile header for employees
+                    updateProfileHeader(userData);
+                    
                     // Role-based UI adjustments
                     if (userData.role.toLowerCase() === "manager") {
                         document.getElementById("addemployeebtn").style.display = "none";
@@ -176,12 +179,49 @@ function setupAuthStateListener() {
                     }
                 } else {
                     shopLoggedin = user.uid;
+                    
+                    // This is a shop owner, fetch shop data
+                    const shopRef = ref(db, `AR_shoe_users/shop/${user.uid}`);
+                    onValue(shopRef, (shopSnapshot) => {
+                        if (shopSnapshot.exists()) {
+                            const shopData = shopSnapshot.val();
+                            // Update profile header for shop owners
+                            updateProfileHeader(shopData);
+                        }
+                    }, { onlyOnce: true });
                 }
             }, { onlyOnce: true });
         } else {
             window.location.href = "/user_login.html";
         }
     });
+}
+
+// Function to update profile header
+function updateProfileHeader(userData) {
+    const profilePicture = document.getElementById('profilePicture');
+    const userFullname = document.getElementById('userFullname');
+    
+    if (!profilePicture || !userFullname) return;
+    
+    // Set profile name
+    if (userData.name) {
+        userFullname.textContent = userData.name;
+    } else if (userData.shopName) {
+        userFullname.textContent = userData.shopName;
+    } else if (userData.ownerName) {
+        userFullname.textContent = userData.ownerName;
+    }
+    
+    // Set profile picture
+    if (userData.profilePhoto && userData.profilePhoto.url) {
+        profilePicture.src = userData.profilePhoto.url;
+    } else if (userData.uploads && userData.uploads.shopLogo && userData.uploads.shopLogo.url) {
+        profilePicture.src = userData.uploads.shopLogo.url;
+    } else {
+        // Set default avatar if no image available
+        profilePicture.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23ddd'%3E%3Crect width='100' height='100'/%3E%3Ctext x='50%' y='50%' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='%23666'%3EProfile%3C/text%3E%3C/svg%3E";
+    }
 }
 
 async function submitShoeForValidation() {

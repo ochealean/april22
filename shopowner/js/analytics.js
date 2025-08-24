@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     loadShopProfile(shopLoggedin);
                     setupEventListeners();
+                    updateProfileHeader(shopData);
                 } else {
                     // this will run if the user is a shop owner
                     roleLoggedin = "Shop Owner"; // Default role
@@ -69,6 +70,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     employeeEmail = 'Shop Owner'; // Get employee email if available
                     loadShopProfile(shopLoggedin);
                     setupEventListeners();
+
+                    // This is a shop owner, fetch shop data
+                    const shopRef = ref(db, `AR_shoe_users/shop/${user.uid}`);
+                    onValue(shopRef, (shopSnapshot) => {
+                        if (shopSnapshot.exists()) {
+                            const shopData = shopSnapshot.val();
+                            // Update profile header for shop owners
+                            updateProfileHeader(shopData);
+                        }
+                    }, { onlyOnce: true });
                 }
             }, (error) => {
                 console.error("Error fetching shop data:", error);
@@ -82,8 +93,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
+// Function to update profile header
+function updateProfileHeader(userData) {
+    const profilePicture = document.getElementById('profilePicture');
+    const userFullname = document.getElementById('userFullname');
+    
+    if (!profilePicture || !userFullname) return;
+    
+    // Set profile name
+    if (userData.name) {
+        userFullname.textContent = userData.name;
+    } else if (userData.shopName) {
+        userFullname.textContent = userData.shopName;
+    } else if (userData.ownerName) {
+        userFullname.textContent = userData.ownerName;
+    }
+    
+    // Set profile picture
+    if (userData.profilePhoto && userData.profilePhoto.url) {
+        profilePicture.src = userData.profilePhoto.url;
+    } else if (userData.uploads && userData.uploads.shopLogo && userData.uploads.shopLogo.url) {
+        profilePicture.src = userData.uploads.shopLogo.url;
+    } else {
+        // Set default avatar if no image available
+        profilePicture.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23ddd'%3E%3Crect width='100' height='100'/%3E%3Ctext x='50%' y='50%' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='%23666'%3EProfile%3C/text%3E%3C/svg%3E";
+    }
+}
+
 // Logout functionality
-document.getElementById('logout_btn').addEventListener('click', function() {
+document.getElementById('logout_btn').addEventListener('click', function () {
     if (confirm('Are you sure you want to logout?')) {
         auth.signOut().then(() => {
             window.location.href = '/user_login.html';
@@ -582,18 +620,18 @@ document.getElementById('printInventoryBtn').addEventListener('click', async () 
         header.style.marginBottom = '20px';
         header.style.borderBottom = '1px solid #ddd';
         header.style.paddingBottom = '20px';
-        
+
         const shopTitle = document.createElement('h1');
         shopTitle.textContent = `${sname || 'Shop'} Analytics Report`;
         shopTitle.style.margin = '0';
         shopTitle.style.fontSize = '24px';
         shopTitle.style.color = '#333';
-        
+
         const reportDate = document.createElement('div');
         reportDate.textContent = `Report Date: ${new Date().toLocaleDateString()}`;
         reportDate.style.fontSize = '14px';
         reportDate.style.color = '#666';
-        
+
         header.appendChild(shopTitle);
         header.appendChild(reportDate);
         printContainer.appendChild(header);
@@ -659,14 +697,14 @@ document.getElementById('printInventoryBtn').addEventListener('click', async () 
                 table.style.width = '100%';
                 table.style.fontSize = '10pt';
                 table.style.borderCollapse = 'collapse';
-                
+
                 const ths = table.querySelectorAll('th');
                 ths.forEach(th => {
                     th.style.backgroundColor = '#f5f5f5';
                     th.style.padding = '8px';
                     th.style.textAlign = 'left';
                 });
-                
+
                 const tds = table.querySelectorAll('td');
                 tds.forEach(td => {
                     td.style.padding = '8px';
@@ -689,7 +727,7 @@ document.getElementById('printInventoryBtn').addEventListener('click', async () 
                 allowTaint: true,
                 letterRendering: true,
                 // Ensure footer is rendered
-                onclone: function(clonedDoc) {
+                onclone: function (clonedDoc) {
                     const footer = clonedDoc.createElement('div');
                     footer.style.position = 'fixed';
                     footer.style.bottom = '0';
@@ -703,9 +741,9 @@ document.getElementById('printInventoryBtn').addEventListener('click', async () 
                     clonedDoc.body.appendChild(footer);
                 }
             },
-            jsPDF: { 
-                unit: 'mm', 
-                format: 'a4', 
+            jsPDF: {
+                unit: 'mm',
+                format: 'a4',
                 orientation: 'landscape' // Changed to landscape
             },
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
@@ -721,7 +759,7 @@ document.getElementById('printInventoryBtn').addEventListener('click', async () 
                 height: '15mm',
                 contents: {
                     first: '',
-                    default: function(pageNum, numPages) {
+                    default: function (pageNum, numPages) {
                         return `<div style="text-align: center; font-size: 10px; color: #666; border-top: 1px solid #eee; padding-top: 5px; margin-top: 10px;">
                             Page ${pageNum} of ${numPages}
                         </div>`;

@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, get, set, update, onValue} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-storage.js";
 // Firebase config
@@ -53,6 +53,7 @@ onAuthStateChanged(auth, (user) => {
                 shopLoggedin = shopData.shopId;
                 console.log("shopLoggedin: ", shopLoggedin);
                 sname = shopData.shopName || ''; // Initialize with empty string if not available
+                updateProfileHeader(shopData);
 
                 // Set role-based UI elements
                 if (shopData.role.toLowerCase() === "manager") {
@@ -66,6 +67,15 @@ onAuthStateChanged(auth, (user) => {
                 shopLoggedin = user.uid;
                 roleLoggedin = "Shop Owner"; // Default role
                 sname = 'Shop Owner'; // Default shop name
+                // This is a shop owner, fetch shop data
+                const shopRef = ref(db, `AR_shoe_users/shop/${user.uid}`);
+                onValue(shopRef, (shopSnapshot) => {
+                    if (shopSnapshot.exists()) {
+                        const shopData = shopSnapshot.val();
+                        // Update profile header for shop owners
+                        updateProfileHeader(shopData);
+                    }
+                }, { onlyOnce: true });
             }
 
             // Load shoe data to edit (moved inside the onValue callback)
@@ -107,6 +117,32 @@ onAuthStateChanged(auth, (user) => {
         window.location.href = "/user_login.html";
     }
 });
+// Function to update profile header
+function updateProfileHeader(userData) {
+    const profilePicture = document.getElementById('profilePicture');
+    const userFullname = document.getElementById('userFullname');
+
+    if (!profilePicture || !userFullname) return;
+
+    // Set profile name
+    if (userData.name) {
+        userFullname.textContent = userData.name;
+    } else if (userData.shopName) {
+        userFullname.textContent = userData.shopName;
+    } else if (userData.ownerName) {
+        userFullname.textContent = userData.ownerName;
+    }
+
+    // Set profile picture
+    if (userData.profilePhoto && userData.profilePhoto.url) {
+        profilePicture.src = userData.profilePhoto.url;
+    } else if (userData.uploads && userData.uploads.shopLogo && userData.uploads.shopLogo.url) {
+        profilePicture.src = userData.uploads.shopLogo.url;
+    } else {
+        // Set default avatar if no image available
+        profilePicture.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23ddd'%3E%3Crect width='100' height='100'/%3E%3Ctext x='50%' y='50%' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='%23666'%3EProfile%3C/text%3E%3C/svg%3E";
+    }
+}
 
 
 // for update
@@ -201,12 +237,15 @@ document.getElementById('updateShoeBtn').addEventListener('click', async () => {
                     newTotalStock = currentStock + addedStock;
                 }
 
-                sizes[`size_${size}`] = { [size]: { 
-                    LastUpdatedBy: roleLoggedin,
-                    userId: USERID,
-                    actionValue: "Stock Updated",
-                    LastUpdatedAt: new Date().toISOString(),
-                    stock: newTotalStock } };
+                sizes[`size_${size}`] = {
+                    [size]: {
+                        LastUpdatedBy: roleLoggedin,
+                        userId: USERID,
+                        actionValue: "Stock Updated",
+                        LastUpdatedAt: new Date().toISOString(),
+                        stock: newTotalStock
+                    }
+                };
             }
             stockInput.dataset.reset = 'false';
         });
@@ -415,7 +454,7 @@ window.addColorVariantWithData = addColorVariantWithData;
 window.resetStock = resetStock;
 
 // Logout functionality
-document.getElementById('logout_btn').addEventListener('click', function() {
+document.getElementById('logout_btn').addEventListener('click', function () {
     if (confirm('Are you sure you want to logout?')) {
         auth.signOut().then(() => {
             window.location.href = '/user_login.html';

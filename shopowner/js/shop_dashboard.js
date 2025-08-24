@@ -456,9 +456,11 @@ onAuthStateChanged(auth, async (user) => {
                 console.log(userData.role);
 
                 shopLoggedin = userData.shopId;
-
+                
+                // Update profile picture and name for employees
+                updateProfileHeader(userData);
+                
                 const orders = await getAllOrdersByShopId(shopLoggedin);
-                document.getElementById("orderValuedisplay").textContent = orders.length || 0;
 
                 if (userData.role.toLowerCase() === "manager") {
                     document.getElementById("addemployeebtn").style.display = "none";
@@ -468,14 +470,23 @@ onAuthStateChanged(auth, async (user) => {
                 }
 
                 await loadShopDashboard();
-                await loadTopProducts(); // Add this line to load top products
+                await loadTopProducts();
             } else {
                 shopLoggedin = user.uid;
+                
+                // Load shop owner data for profile header
+                const shopRef = ref(db, `AR_shoe_users/shop/${user.uid}`);
+                onValue(shopRef, (shopSnapshot) => {
+                    if (shopSnapshot.exists()) {
+                        const shopData = shopSnapshot.val();
+                        updateProfileHeader(shopData);
+                    }
+                });
+                
                 try {
                     const orders = await getAllOrdersByShopId(shopLoggedin);
-                    document.getElementById("orderValuedisplay").textContent = orders.length || 0;
                     await loadShopDashboard();
-                    await loadTopProducts(); // Add this line to load top products
+                    await loadTopProducts();
                 } catch (error) {
                     console.error("Error loading dashboard:", error);
                 }
@@ -485,6 +496,28 @@ onAuthStateChanged(auth, async (user) => {
         window.location.href = "/user_login.html";
     }
 });
+
+function updateProfileHeader(userData) {
+    const profilePicture = document.getElementById('profilePicture');
+    const userFullname = document.getElementById('userFullname');
+    
+    // Set profile name
+    if (userData.name) {
+        userFullname.textContent = userData.name;
+    } else if (userData.shopName) {
+        userFullname.textContent = userData.shopName;
+    }
+    
+    // Set profile picture
+    if (userData.profilePhoto && userData.profilePhoto.url) {
+        profilePicture.src = userData.profilePhoto.url;
+    } else if (userData.uploads && userData.uploads.shopLogo && userData.uploads.shopLogo.url) {
+        profilePicture.src = userData.uploads.shopLogo.url;
+    } else {
+        // Set default avatar if no image available
+        profilePicture.src = "#";
+    }
+}
 
 window.acceptOrder = acceptOrder;
 window.rejectOrder = rejectOrder;

@@ -40,6 +40,7 @@ onAuthStateChanged(auth, (user) => {
                 shopLoggedin = shopData.shopId;
                 console.log("shopLoggedin: ", shopLoggedin);
                 sname = shopData.shopName || ''; // Initialize with empty string if not available
+                updateProfileHeader(shopData);
 
                 // Set role-based UI elements
                 if (shopData.role.toLowerCase() === "manager") {
@@ -56,6 +57,15 @@ onAuthStateChanged(auth, (user) => {
                 sname = 'Shop Owner'; // Default shop name
                 shopLoggedin = user.uid;
                 loadOrders();
+                // This is a shop owner, fetch shop data
+                const shopRef = ref(db, `AR_shoe_users/shop/${user.uid}`);
+                onValue(shopRef, (shopSnapshot) => {
+                    if (shopSnapshot.exists()) {
+                        const shopData = shopSnapshot.val();
+                        // Update profile header for shop owners
+                        updateProfileHeader(shopData);
+                    }
+                }, { onlyOnce: true });
             }
         }, (error) => {
             console.error("Error fetching shop data:", error);
@@ -66,6 +76,33 @@ onAuthStateChanged(auth, (user) => {
         window.location.href = "/user_login.html";
     }
 });
+
+// Function to update profile header
+function updateProfileHeader(userData) {
+    const profilePicture = document.getElementById('profilePicture');
+    const userFullname = document.getElementById('userFullname');
+    
+    if (!profilePicture || !userFullname) return;
+    
+    // Set profile name
+    if (userData.name) {
+        userFullname.textContent = userData.name;
+    } else if (userData.shopName) {
+        userFullname.textContent = userData.shopName;
+    } else if (userData.ownerName) {
+        userFullname.textContent = userData.ownerName;
+    }
+    
+    // Set profile picture
+    if (userData.profilePhoto && userData.profilePhoto.url) {
+        profilePicture.src = userData.profilePhoto.url;
+    } else if (userData.uploads && userData.uploads.shopLogo && userData.uploads.shopLogo.url) {
+        profilePicture.src = userData.uploads.shopLogo.url;
+    } else {
+        // Set default avatar if no image available
+        profilePicture.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23ddd'%3E%3Crect width='100' height='100'/%3E%3Ctext x='50%' y='50%' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='%23666'%3EProfile%3C/text%3E%3C/svg%3E";
+    }
+}
 
 // Load orders with filtering
 function loadOrders() {
@@ -149,13 +186,13 @@ function createOrderRow(order) {
         actionButtons = `<span class="no-actions">No actions available</span>`;
     }
     else if (status === 'completed' || status === 'delivered') {
-    actionButtons = `
+        actionButtons = `
         <button class="btn btn-track" onclick="trackbtn('${order.orderId}', '${order.userId}')">
             <i class="fas fa-eye"></i> View Details
         </button>
     `;
     } else { // line 123 redirect to track.html
-    actionButtons = `
+        actionButtons = `
         <button class="btn btn-track" onclick="trackbtn('${order.orderId}', '${order.userId}')">
             <i class="fas fa-plus"></i> Add Track Status
         </button>
@@ -181,17 +218,17 @@ window.showAcceptModal = function (orderId, userId) {
 
     currentOrderId = orderId;
     currentUserId = userId;
-    
+
     // Clear previous input
     document.getElementById('serialNumber').value = '';
-    
+
     modal.style.display = 'block';
 };
 
 // Accept order function with serial number
 window.acceptOrder = async function () {
     const serialNumber = document.getElementById('serialNumber').value.trim();
-    
+
     if (!serialNumber) {
         alert('Please enter a serial number');
         return;
@@ -207,7 +244,7 @@ window.acceptOrder = async function () {
         }
 
         const orderData = orderSnap.val();
-        
+
         // Save serial number to the order
         await update(orderRef, {
             status: 'accepted',
@@ -370,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Logout functionality
-    document.getElementById('logout_btn').addEventListener('click', function() {
+    document.getElementById('logout_btn').addEventListener('click', function () {
         if (confirm('Are you sure you want to logout?')) {
             auth.signOut().then(() => {
                 window.location.href = '/user_login.html';

@@ -1,6 +1,6 @@
 // shopowner_addemployee.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import { getApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 
@@ -56,10 +56,45 @@ function setupAuthStateListener() {
     onAuthStateChanged(auth, (user) => {
         if (user) {
             shopOwnerUid = user.uid;
+            updateProfileHeader(user.uid);
             loadShopData(user.uid);
             loadLastEmployeeNumber(user.uid);
         } else {
             window.location.href = '/user_login.html';
+        }
+    });
+}
+
+
+// Function to update profile header
+function updateProfileHeader(userUID) {
+    const shopRef = ref(db, `AR_shoe_users/shop/${userUID}`);
+    onValue(shopRef, (shopSnapshot) => {
+        if (shopSnapshot.exists()) {
+            const shopData = shopSnapshot.val();
+            const profilePicture = document.getElementById('profilePicture');
+            const userFullname = document.getElementById('userFullname');
+
+            if (!profilePicture || !userFullname) return;
+
+            // Set profile name
+            if (shopData.name) {
+                userFullname.textContent = shopData.name;
+            } else if (shopData.shopName) {shopData
+                userFullname.textContent = shopData.shopName;
+            } else if (shopData.ownerName) {
+                userFullname.textContent = shopData.ownerName;
+            }
+
+            // Set profile picture
+            if (shopData.profilePhoto && shopData.profilePhoto.url) {
+                profilePicture.src = shopData.profilePhoto.url;
+            } else if (shopData.uploads && shopData.uploads.shopLogo && shopData.uploads.shopLogo.url) {
+                profilePicture.src = shopData.uploads.shopLogo.url;
+            } else {
+                // Set default avatar if no image available
+                profilePicture.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23ddd'%3E%3Crect width='100' height='100'/%3E%3Ctext x='50%' y='50%' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='%23666'%3EProfile%3C/text%3E%3C/svg%3E";
+            }
         }
     });
 }
@@ -110,6 +145,7 @@ function setupEventListeners() {
         logoutBtn.addEventListener('click', handleLogout);
     }
 
+
     if (generateEmployeesBtn) {
         generateEmployeesBtn.addEventListener('click', generateBatchEmployees);
     }
@@ -157,6 +193,18 @@ function setupBatchCreation() {
             }
         });
     });
+}
+
+
+// Logout handler function
+function handleLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+        auth.signOut().then(() => {
+            window.location.href = '/user_login.html';
+        }).catch((error) => {
+            console.error('Error signing out:', error);
+        });
+    }
 }
 
 // Handle form submission
@@ -327,11 +375,11 @@ async function generateBatchEmployees() {
 async function createBatchEmployees() {
     const accounts = [];
     const accountDivs = batchPreview.querySelectorAll('.batch-account');
-    
+
     // Show loading state
     createBatchEmployeesBtn.disabled = true;
     createBatchEmployeesBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Employees...';
-    
+
     accountDivs.forEach(div => {
         accounts.push({
             username: div.querySelector('input[name="batchUsername[]"]').value,
@@ -340,13 +388,13 @@ async function createBatchEmployees() {
             role: div.querySelector('input[name="batchRole[]"]').value
         });
     });
-    
+
     try {
         // Create all accounts as default accounts (not in Firebase Auth)
         for (const account of accounts) {
             // Generate a unique ID for the default account
             const employeeId = `default_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-            
+
             await set(ref(db, `AR_shoe_users/employees/${employeeId}`), {
                 name: account.username,
                 email: account.email,
@@ -364,9 +412,9 @@ async function createBatchEmployees() {
         // Update the last employee number
         const newLastNumber = lastEmployeeNumber + accounts.length;
         await updateLastEmployeeNumber(shopOwnerUid, newLastNumber);
-        
+
         alert(`Successfully created ${accounts.length} default employee accounts!`);
-        
+
         // Reset the form
         batchPreview.innerHTML = '';
         batchPreview.classList.remove('active');
@@ -456,7 +504,7 @@ function handleEmployeeCreationError(error) {
 }
 
 // Logout functionality
-document.getElementById('logout_btn').addEventListener('click', function() {
+document.getElementById('logout_btn').addEventListener('click', function () {
     if (confirm('Are you sure you want to logout?')) {
         auth.signOut().then(() => {
             window.location.href = '/user_login.html';
