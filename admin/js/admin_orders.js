@@ -5,7 +5,7 @@ import {
     ref, 
     get, 
     update,
-    onValue  // Added onValue for real-time updates
+    onValue
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
