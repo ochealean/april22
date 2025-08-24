@@ -47,25 +47,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll(".shopowner").forEach(el => el.style.display = "none");
     }
 
-    const logoutBtn = document.getElementById('logout_btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            // Show loading state if you have a loader
-            logoutBtn.disabled = true;
-            logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
-
+    // Logout functionality
+    document.getElementById('logout_btn').addEventListener('click', function() {
+        if (confirm('Are you sure you want to logout?')) {
             auth.signOut().then(() => {
-                // Redirect to login page after successful signout
-                window.location.href = "/user_login.html";
+                window.location.href = '/user_login.html';
             }).catch((error) => {
-                console.error("Logout error:", error);
-                alert("Failed to logout. Please try again.");
-                // Reset button state
-                logoutBtn.disabled = false;
-                logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+                console.error('Error signing out:', error);
             });
-        });
-    }
+        }
+    });
 
     // Add first color variant by default
     addColorVariant();

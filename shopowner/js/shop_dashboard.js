@@ -505,20 +505,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logout_btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            // Show loading state if you have a loader
-            logoutBtn.disabled = true;
-            logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
-
-            auth.signOut().then(() => {
-                // Redirect to login page after successful signout
-                window.location.href = "/user_login.html";
-            }).catch((error) => {
-                console.error("Logout error:", error);
-                alert("Failed to logout. Please try again.");
-                // Reset button state
-                logoutBtn.disabled = false;
-                logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
-            });
+            if (confirm('Are you sure you want to logout?')) {
+                auth.signOut().then(() => {
+                    window.location.href = '/user_login.html';
+                }).catch((error) => {
+                    console.error('Error signing out:', error);
+                });
+            }
         });
     }
 
