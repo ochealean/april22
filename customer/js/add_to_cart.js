@@ -216,7 +216,7 @@ function setupCartEventListeners() {
             const cartId = e.target.dataset.cartid;
             const item = cartItems.find(i => i.cartId === cartId);
             if (item) {
-                window.location.href = `/customer/html/product_details.html?shopId=${item.shopId}&shoeId=${item.shoeId}`;
+                window.location.href = `/customer/html/shoedetails.html?shopID=${item.shopId}&shoeID=${item.shoeId}`;
             }
         });
     });

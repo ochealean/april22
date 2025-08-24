@@ -53,12 +53,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Handle user authentication state
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // User is signed in
-            document.getElementById('userName_display2').textContent = user.displayName || 'Customer';
 
             // Load user profile image if available
-            if (user.photoURL) {
-                document.getElementById('imageProfile').src = user.photoURL;
+            if (user.uid) {
+                loadUserProfile(user.uid);
             }
 
             // Load saved designs for this user
@@ -71,6 +69,30 @@ document.addEventListener('DOMContentLoaded', function () {
             window.location.href = '/login.html';
         }
     });
+
+    // Load user profile
+    function loadUserProfile(userId) {
+        const userRef = ref(database, `AR_shoe_users/customer/${userId}`);
+        
+        let userNameDisplay = document.getElementById('userName_display2');
+        let userAvatar = document.getElementById('imageProfile');
+        
+        get(userRef).then(snapshot => {
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                userNameDisplay.textContent = `${userData.firstName} ${userData.lastName}`;
+                
+                // Set user avatar if available
+                if (userData.profilePhoto) {
+                    userAvatar.src = userData.profilePhoto.profilePhoto.url;
+                } else {
+                    userAvatar.src = "https://randomuser.me/api/portraits/men/32.jpg";
+                }
+            }
+        }).catch(error => {
+            console.error("Error loading user profile:", error);
+        });
+    }
 
     // Load saved designs from Firebase
     function loadSavedDesigns(userId) {

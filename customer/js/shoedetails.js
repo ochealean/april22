@@ -137,8 +137,8 @@ function loadUserProfile(userId) {
             userNameDisplay.textContent = `${userData.firstName} ${userData.lastName}`;
             
             // Set user avatar if available
-            if (userData.profilePicture) {
-                userAvatar.src = userData.profilePicture;
+            if (userData.profilePhoto) {
+                userAvatar.src = userData.profilePhoto.profilePhoto.url;
             } else {
                 userAvatar.src = "https://randomuser.me/api/portraits/men/32.jpg";
             }

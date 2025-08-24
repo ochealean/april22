@@ -595,7 +595,8 @@
                 </div>
                 <h1>Chatbot Assistant</h1>
                 <div class="user-profile">
-                    <img id="imageProfile" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile" class="user-avatar">
+                    <img id="imageProfile" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile"
+                        class="user-avatar">
                     <span id="userName_display2">Alex Johnson</span>
                 </div>
             </div>
@@ -681,15 +682,15 @@
 
         // Chat messages array
         let messages = [
-            { 
-                role: "system", 
+            {
+                role: "system",
                 content: "You are a helpful assistant for SmartFit Shoes. Help customers with:" +
-                        "\n- AR shoe try-on features" +
-                        "\n- Product customization options" +
-                        "\n- Order status and shipping" +
-                        "\n- Returns and exchanges" +
-                        "\n- Product information and sizing" +
-                        "\n\nAlways be polite, helpful, and provide detailed answers."
+                    "\n- AR shoe try-on features" +
+                    "\n- Product customization options" +
+                    "\n- Order status and shipping" +
+                    "\n- Returns and exchanges" +
+                    "\n- Product information and sizing" +
+                    "\n\nAlways be polite, helpful, and provide detailed answers."
             }
         ];
 
@@ -746,6 +747,8 @@
                         if (!snapshot.exists()) {
                             alert("Account does not exist");
                             auth.signOut();
+                        } else {
+                            loadUserProfile(user.uid);
                         }
                     });
             } else {
@@ -753,17 +756,41 @@
             }
         });
 
+        // Load user profile
+        function loadUserProfile(userId) {
+            const userRef = ref(db, `AR_shoe_users/customer/${userId}`);
+
+            let userNameDisplay = document.getElementById('userName_display2');
+            let userAvatar = document.getElementById('imageProfile');
+
+            get(userRef).then(snapshot => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    userNameDisplay.textContent = `${userData.firstName} ${userData.lastName}`;
+
+                    // Set user avatar if available
+                    if (userData.profilePhoto) {
+                        userAvatar.src = userData.profilePhoto.profilePhoto.url;
+                    } else {
+                        userAvatar.src = "https://randomuser.me/api/portraits/men/32.jpg";
+                    }
+                }
+            }).catch(error => {
+                console.error("Error loading user profile:", error);
+            });
+        }
+
         function loadResponsesFromFirebase() {
             return new Promise((resolve) => {
                 onValue(chatbotResponsesRef, (snapshot) => {
                     const responses = snapshot.val() || {};
-                    
+
                     responseKeys = responses;
                     faqResponses = Object.entries(responses).reduce((acc, [key, response]) => {
                         if (response.keyword && response.responses) {
                             const keyword = response.keyword.toLowerCase();
                             acc[keyword] = {
-                                response: Array.isArray(response.responses) 
+                                response: Array.isArray(response.responses)
                                     ? response.responses.join('<br>')
                                     : response.responses,
                                 firebaseKey: key,
@@ -774,7 +801,7 @@
                         }
                         return acc;
                     }, {});
-                    
+
                     faqResponses.default = {
                         response: createDefaultResponse(),
                         firebaseKey: null,
@@ -782,10 +809,10 @@
                         lastQuestionSentence: "Help topics",
                         category: 'general'
                     };
-                    
+
                     updateQuickQuestions();
                     resolve(); // Resolve the promise when data is loaded
-                    
+
                 }, (error) => {
                     console.error("Error loading responses:", error);
                     resolve(); // Still resolve even if there's an error
@@ -797,7 +824,7 @@
         async function askQuestion(question) {
             // First check Firebase for a response
             const firebaseResponse = getBestResponse(question);
-            
+
             if (firebaseResponse && firebaseResponse !== faqResponses.default.response) {
                 // If found in Firebase, use that
                 addMessageToChat('user', question);
@@ -806,7 +833,7 @@
                 // If not found, use AI
                 addMessageToChat("user", question);
                 messages.push({ role: "user", content: question });
-                
+
                 // Show typing indicator
                 const typingIndicator = document.createElement('div');
                 typingIndicator.id = "typing-indicator";
@@ -829,16 +856,16 @@
                         },
                         body: JSON.stringify({ messages })
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     // Remove typing indicator
                     chatMessages.removeChild(typingIndicator);
-                    
+
                     // Add assistant response
                     addMessageToChat("assistant", data.response);
                     messages.push({ role: "assistant", content: data.response });
-                    
+
                 } catch (error) {
                     console.error("Error:", error);
                     chatMessages.removeChild(typingIndicator);
@@ -875,27 +902,27 @@
             }
 
             const lowerInput = input.toLowerCase().trim();
-            
+
             if (faqResponses[lowerInput]) {
                 updateResponseUsage(faqResponses[lowerInput].firebaseKey, input);
                 return faqResponses[lowerInput].response;
             }
-            
-            const matchingKey = Object.keys(faqResponses).find(key => 
+
+            const matchingKey = Object.keys(faqResponses).find(key =>
                 key !== 'default' && lowerInput.includes(key)
             );
-            
+
             if (matchingKey) {
                 updateResponseUsage(faqResponses[matchingKey].firebaseKey, input);
                 return faqResponses[matchingKey].response;
             }
-            
+
             return faqResponses.default.response;
         }
 
         function updateResponseUsage(responseKey, question) {
             if (!responseKey) return;
-            
+
             const responseRef = ref(db, `AR_shoe_users/chatbot/responses/${responseKey}`);
             get(responseRef).then((snapshot) => {
                 const response = snapshot.val();
@@ -920,7 +947,7 @@
 
             // First check if we have a Firebase response
             const firebaseResponse = getBestResponse(userMessage);
-            
+
             if (firebaseResponse && firebaseResponse !== faqResponses.default.response) {
                 // If found in Firebase, use that
                 addMessageToChat('user', userMessage);
@@ -954,16 +981,16 @@
                         },
                         body: JSON.stringify({ messages })
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     // Remove typing indicator
                     chatMessages.removeChild(typingIndicator);
-                    
+
                     // Add assistant response
                     addMessageToChat("assistant", data.response);
                     messages.push({ role: "assistant", content: data.response });
-                    
+
                 } catch (error) {
                     console.error("Error:", error);
                     chatMessages.removeChild(typingIndicator);
@@ -999,31 +1026,31 @@
                 .replace(/####\s?(.*)/g, '<h4>$1</h4>')
                 // Convert newlines to <br>
                 .replace(/\n/g, '<br>');
-            
+
             // Basic HTML safety - only allow certain tags
             formatted = formatted.replace(/<\/?(?!br|strong|h4|a\b)[^>]+>/g, '');
-            
+
             return formatted;
         }
 
         function addMessageToChat(role, content) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', `${role}-message`);
-            
+
             const contentWrapper = document.createElement('div');
             contentWrapper.classList.add('message-content');
-            
+
             // Process the content through our simplified formatter
             contentWrapper.innerHTML = formatMessageText(content);
-            
+
             messageDiv.appendChild(contentWrapper);
             chatMessages.appendChild(messageDiv);
-            
+
             // Animation effects
             messageDiv.style.opacity = '0';
             messageDiv.style.transform = 'translateY(10px)';
             messageDiv.style.transition = 'all 0.3s ease-out';
-            
+
             setTimeout(() => {
                 messageDiv.style.opacity = '1';
                 messageDiv.style.transform = 'translateY(0)';
@@ -1054,15 +1081,15 @@
 
             // Initialize with sample data
             document.getElementById('userName_display2').textContent = 'Alex Johnson';
-            
+
             // Add event listeners for quick question buttons
             document.querySelectorAll('.quick-questions button').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     document.getElementById('user-input').value = this.textContent;
                     document.getElementById('send-button').click();
                 });
             });
-            
+
             // Initialize the chatbot
             initChatbot();
         });

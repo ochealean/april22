@@ -97,12 +97,38 @@ onAuthStateChanged(auth, (user) => {
                 if (!snapshot.exists()) {
                     alert("Account does not exist");
                     auth.signOut();
+                }else{
+                    loadUserProfile(user.uid);
                 }
             });
     } else {
         window.location.href = "/user_login.html";
     }
 });
+
+// Load user profile
+function loadUserProfile(userId) {
+    const userRef = ref(db, `AR_shoe_users/customer/${userId}`);
+
+    let userNameDisplay = document.getElementById('userName_display2');
+    let userAvatar = document.getElementById('imageProfile');
+    
+    get(userRef).then(snapshot => {
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            userNameDisplay.textContent = `${userData.firstName} ${userData.lastName}`;
+            
+            // Set user avatar if available
+            if (userData.profilePhoto) {
+                userAvatar.src = userData.profilePhoto.profilePhoto.url;
+            } else {
+                userAvatar.src = "https://randomuser.me/api/portraits/men/32.jpg";
+            }
+        }
+    }).catch(error => {
+        console.error("Error loading user profile:", error);
+    });
+}
 
 
 function loadResponsesFromFirebase() {

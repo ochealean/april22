@@ -45,12 +45,36 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!user) {
             window.location.href = "/shopowner/html/shopowner_login.html";
         } else {
+            loadUserProfile(user.uid); // Load user profile
             loadIssueResponses(); // Call this only after user is confirmed
             setupEventListeners();
         }
     });
 });
 
+// Load user profile
+function loadUserProfile(userId) {
+    const userRef = ref(database, `AR_shoe_users/customer/${userId}`);
+
+    let userNameDisplay = document.getElementById('userName_display');
+    let userAvatar = document.getElementById('imageProfile');
+    
+    get(userRef).then(snapshot => {
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            userNameDisplay.textContent = `${userData.firstName} ${userData.lastName}`;
+            
+            // Set user avatar if available
+            if (userData.profilePhoto) {
+                userAvatar.src = userData.profilePhoto.profilePhoto.url;
+            } else {
+                userAvatar.src = "https://randomuser.me/api/portraits/men/32.jpg";
+            }
+        }
+    }).catch(error => {
+        console.error("Error loading user profile:", error);
+    });
+}
 
 function checkAuthState() {
     onAuthStateChanged(auth, (user) => {
