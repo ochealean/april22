@@ -5,7 +5,7 @@ import {
     ref, 
     get, 
     update,
-    set
+    onValue  // Added onValue for real-time updates
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
@@ -44,6 +44,7 @@ let currentTab = 'pending';
 let currentPage = 1;
 const ordersPerPage = 10;
 let currentRejectOrderId = null;
+let realtimeListener = null; // To store the real-time listener
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
@@ -52,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (user) {
             loadAllOrders();
             setupEventListeners();
+            setupRealtimeListeners(); // Setup real-time listeners
         } else {
             console.log("No user is signed in.");
             // Show login prompt or redirect
@@ -59,7 +61,22 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Load all orders from both customizedtransactions and boughtshoe
+// Set up real-time listeners for database changes
+function setupRealtimeListeners() {
+    // Remove existing listener if any
+    if (realtimeListener) {
+        realtimeListener(); // This is the unsubscribe function returned by onValue
+    }
+    
+    // Listen for changes in customizedtransactions
+    const customizedTransactionsRef = ref(database, 'AR_shoe_users/customizedtransactions');
+    realtimeListener = onValue(customizedTransactionsRef, (snapshot) => {
+        console.log("Real-time update detected in customizedtransactions");
+        loadAllOrders(); // Reload orders when changes occur
+    });
+}
+
+// Load all orders from customizedtransactions only
 async function loadAllOrders() {
     try {
         // Show loading state
@@ -71,47 +88,27 @@ async function loadAllOrders() {
             </tr>
         `;
 
-        // Fetch all orders from customizedtransactions
+        // Fetch all orders from customizedtransactions only
         const customizedTransactionsRef = ref(database, 'AR_shoe_users/customizedtransactions');
         const customizedTransactionsSnapshot = await get(customizedTransactionsRef);
         
-        // Fetch all orders from boughtshoe
-        const boughtShoeRef = ref(database, 'AR_shoe_users/boughtshoe');
-        const boughtShoeSnapshot = await get(boughtShoeRef);
-
         allOrders = [];
 
         // Process customizedtransactions orders
         if (customizedTransactionsSnapshot.exists()) {
             customizedTransactionsSnapshot.forEach((userOrders) => {
-                userOrders.forEach((order) => {
-                    const orderData = order.val();
+                const userId = userOrders.key;
+                const orders = userOrders.val();
+                
+                Object.keys(orders).forEach(orderId => {
+                    const orderData = orders[orderId];
                     allOrders.push({
                         ...orderData,
-                        orderId: order.key,
-                        userId: userOrders.key,
+                        orderId: orderId,
+                        userId: userId,
                         source: 'customizedtransactions',
                         isCustom: true
                     });
-                });
-            });
-        }
-
-        // Process boughtshoe orders
-        if (boughtShoeSnapshot.exists()) {
-            boughtShoeSnapshot.forEach((userOrders) => {
-                userOrders.forEach((order) => {
-                    const orderData = order.val();
-                    // Only add if not already in customizedtransactions
-                    if (!allOrders.some(o => o.orderId === order.key)) {
-                        allOrders.push({
-                            ...orderData,
-                            orderId: order.key,
-                            userId: userOrders.key,
-                            source: 'boughtshoe',
-                            isCustom: orderData.isCustom || false
-                        });
-                    }
                 });
             });
         }
@@ -204,7 +201,7 @@ function renderOrders() {
             `${order.shippingInfo.firstName || ''} ${order.shippingInfo.lastName || ''}`.trim() : 
             'Unknown Customer';
         
-        const orderType = order.isCustom ? 'Custom Shoe' : 'Pre-made';
+        const orderType = 'Custom Shoe'; // All orders from customizedtransactions are custom
         
         let statusBadge = '';
         if (order.status === 'pending') {
@@ -213,8 +210,10 @@ function renderOrders() {
             statusBadge = '<span class="status-badge status-processing">In Process</span>';
         } else if (order.status === 'completed') {
             statusBadge = '<span class="status-badge status-completed">Completed</span>';
-        } else if (order.status === 'cancelled' || order.status === 'rejected') {
+        } else if (order.status === 'cancelled') {
             statusBadge = '<span class="status-badge status-cancelled">Cancelled</span>';
+        } else if (order.status === 'rejected') {
+            statusBadge = '<span class="status-badge status-cancelled">Rejected</span>';
         }
         
         // Action buttons based on status
@@ -306,14 +305,13 @@ async function processOrder(orderId) {
         };
         
         // Update in Firebase
-        const orderRef = ref(database, `AR_shoe_users/${order.source}/${order.userId}/${orderId}`);
+        const orderRef = ref(database, `AR_shoe_users/customizedtransactions/${order.userId}/${orderId}`);
         await update(orderRef, {
             status: 'processing',
             statusUpdates: order.statusUpdates
         });
         
-        // Refresh display
-        filterAndRenderOrders();
+        // Show success message but don't refresh - real-time listener will handle the update
         alert(`Order #${orderId} is now being processed!`);
         
     } catch (error) {
@@ -338,14 +336,13 @@ async function completeOrder(orderId) {
         };
         
         // Update in Firebase
-        const orderRef = ref(database, `AR_shoe_users/${order.source}/${order.userId}/${orderId}`);
+        const orderRef = ref(database, `AR_shoe_users/customizedtransactions/${order.userId}/${orderId}`);
         await update(orderRef, {
             status: 'completed',
             statusUpdates: order.statusUpdates
         });
         
-        // Refresh display
-        filterAndRenderOrders();
+        // Show success message but don't refresh - real-time listener will handle the update
         alert(`Order #${orderId} has been marked as completed!`);
         
     } catch (error) {
@@ -370,19 +367,13 @@ async function rejectOrder(orderId, reason) {
         };
         
         // Update in Firebase
-        const orderRef = ref(database, `AR_shoe_users/${order.source}/${order.userId}/${orderId}`);
+        const orderRef = ref(database, `AR_shoe_users/customizedtransactions/${order.userId}/${orderId}`);
         await update(orderRef, {
             status: 'rejected',
             statusUpdates: order.statusUpdates
         });
         
-        // If it's a non-custom order, restore stock
-        if (!order.isCustom && order.shoeId && order.shopId) {
-            await restoreStock(order);
-        }
-        
-        // Refresh display
-        filterAndRenderOrders();
+        // Show success message but don't refresh - real-time listener will handle the update
         alert(`Order #${orderId} has been rejected successfully!`);
         
     } catch (error) {
@@ -391,55 +382,7 @@ async function rejectOrder(orderId, reason) {
     }
 }
 
-// Restore stock for non-custom orders
-async function restoreStock(order) {
-    try {
-        const { shoeId, shopId, size, quantity = 1 } = order;
-        
-        // Get current stock
-        const shoeRef = ref(database, `AR_shoe_users/shoe/${shopId}/${shoeId}`);
-        const shoeSnapshot = await get(shoeRef);
-        
-        if (shoeSnapshot.exists()) {
-            const shoeData = shoeSnapshot.val();
-            const variantKey = order.variantKey || 'variant_0';
-            const sizeKey = order.sizeKey || `size_${size}`;
-            
-            if (shoeData.variants && shoeData.variants[variantKey] && shoeData.variants[variantKey].sizes) {
-                const sizes = shoeData.variants[variantKey].sizes;
-                
-                // Find the size object (handles both numeric and string size keys)
-                let sizeObj = null;
-                for (const key in sizes) {
-                    if (sizes[key][size] !== undefined) {
-                        sizeObj = sizes[key][size];
-                        break;
-                    }
-                }
-                
-                if (sizeObj) {
-                    // Update stock
-                    const newStock = (sizeObj.stock || 0) + quantity;
-                    
-                    // Need to update the specific size object in the nested structure
-                    const updates = {};
-                    for (const key in sizes) {
-                        if (sizes[key][size] !== undefined) {
-                            updates[`variants/${variantKey}/sizes/${key}/${size}/stock`] = newStock;
-                            break;
-                        }
-                    }
-                    
-                    await update(ref(database, `AR_shoe_users/shoe/${shopId}/${shoeId}`), updates);
-                }
-            }
-        }
-    } catch (error) {
-        console.error('Error restoring stock:', error);
-        // Don't fail the whole rejection if stock restore fails
-    }
-}
-
+// View order details
 // View order details
 async function viewOrderDetails(orderId) {
     try {
@@ -452,293 +395,198 @@ async function viewOrderDetails(orderId) {
         // Get modal body elements
         const modalBody = document.querySelector('.modal-body');
         
-        // Create order details HTML based on the order type
-        let orderDetailsHTML = '';
+        // Create order details HTML for custom orders
+        const selections = order.selections || {};
         
-        if (order.isCustom) {
-            // Custom order details
-            const selections = order.selections || {};
-            
-            orderDetailsHTML = `
-                <div class="order-details-grid">
-                    <div>
-                        <div class="detail-section">
-                            <h3><i class="fas fa-user"></i> Customer Information</h3>
-                            <div class="detail-row">
-                                <div class="detail-label">Name:</div>
-                                <div class="detail-value">${order.shippingInfo?.firstName || ''} ${order.shippingInfo?.lastName || ''}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Email:</div>
-                                <div class="detail-value">${order.shippingInfo?.email || 'N/A'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Phone:</div>
-                                <div class="detail-value">${order.shippingInfo?.phone || 'N/A'}</div>
-                            </div>
+        // Create order details HTML
+        const orderDetailsHTML = `
+            <div class="order-details-grid">
+                <div>
+                    <div class="detail-section">
+                        <h3><i class="fas fa-user"></i> Customer Information</h3>
+                        <div class="detail-row">
+                            <div class="detail-label">Name:</div>
+                            <div class="detail-value">${order.shippingInfo?.firstName || ''} ${order.shippingInfo?.lastName || ''}</div>
                         </div>
-                        
-                        <div class="detail-section">
-                            <h3><i class="fas fa-truck"></i> Shipping Information</h3>
-                            <div class="detail-row">
-                                <div class="detail-label">Address:</div>
-                                <div class="detail-value">${order.shippingInfo?.address || 'N/A'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">City:</div>
-                                <div class="detail-value">${order.shippingInfo?.city || 'N/A'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">ZIP Code:</div>
-                                <div class="detail-value">${order.shippingInfo?.zip || 'N/A'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Country:</div>
-                                <div class="detail-value">${order.shippingInfo?.country || 'N/A'}</div>
-                            </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Email:</div>
+                            <div class="detail-value">${order.shippingInfo?.email || 'N/A'}</div>
                         </div>
-                        
-                        <div class="detail-section">
-                            <h3><i class="fas fa-credit-card"></i> Payment Information</h3>
-                            <div class="detail-row">
-                                <div class="detail-label">Method:</div>
-                                <div class="detail-value">${order.paymentMethod || 'N/A'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Status:</div>
-                                <div class="detail-value">Paid</div>
-                            </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Phone:</div>
+                            <div class="detail-value">${order.shippingInfo?.phone || 'N/A'}</div>
                         </div>
                     </div>
                     
-                    <div>
-                        <div class="detail-section">
-                            <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
-                            <div class="shoe-preview-container">
-                                <img src="${order.image || 'https://via.placeholder.com/200x120?text=No+Image'}" alt="Shoe Preview" class="component-preview">
-                            </div>
-                            
-                            <div class="detail-row">
-                                <div class="detail-label">Order Type:</div>
-                                <div class="detail-value">Custom Shoe</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Model:</div>
-                                <div class="detail-value">${order.model ? order.model.charAt(0).toUpperCase() + order.model.slice(1) : 'N/A'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Size:</div>
-                                <div class="detail-value">${order.size || 'N/A'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Production Time:</div>
-                                <div class="detail-value">${order.productionTime || 'N/A'}</div>
-                            </div>
-                            
-                            <h3 style="margin-top: 1.5rem;"><i class="fas fa-palette"></i> Customization</h3>
-            `;
-            
-            // Add customization details based on model type
-            if (order.model === 'classic') {
-                orderDetailsHTML += `
-                    <div class="detail-row">
-                        <div class="detail-label">Body Color:</div>
-                        <div class="detail-value">${selections.bodyColor || 'N/A'}</div>
+                    <div class="detail-section">
+                        <h3><i class="fas fa-truck"></i> Shipping Information</h3>
+                        <div class="detail-row">
+                            <div class="detail-label">Address:</div>
+                            <div class="detail-value">${order.shippingInfo?.address || 'N/A'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">City:</div>
+                            <div class="detail-value">${order.shippingInfo?.city || 'N/A'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">ZIP Code:</div>
+                            <div class="detail-value">${order.shippingInfo?.zip || 'N/A'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Country:</div>
+                            <div class="detail-value">${order.shippingInfo?.country || 'N/A'}</div>
+                        </div>
                     </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Laces:</div>
-                        <div class="detail-value">${selections.laces?.id || 'Standard'}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Laces Color:</div>
-                        <div class="detail-value">${selections.laces?.color || 'N/A'}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Insole Type:</div>
-                        <div class="detail-value">${selections.insole?.id || 'N/A'}</div>
-                    </div>
-                `;
-            } else if (order.model === 'runner') {
-                orderDetailsHTML += `
-                    <div class="detail-row">
-                        <div class="detail-label">Body Color:</div>
-                        <div class="detail-value">${selections.bodyColor || 'N/A'}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Laces:</div>
-                        <div class="detail-value">${selections.laces?.id || 'Standard'}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Laces Color:</div>
-                        <div class="detail-value">${selections.laces?.color || 'N/A'}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Insole Type:</div>
-                        <div class="detail-value">${selections.insole?.id || 'N/A'}</div>
-                    </div>
-                `;
-            } else if (order.model === 'basketball') {
-                orderDetailsHTML += `
-                    <div class="detail-row">
-                        <div class="detail-label">Body Color:</div>
-                        <div class="detail-value">${selections.bodyColor || 'N/A'}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Laces:</div>
-                        <div class="detail-value">${selections.laces?.id || 'Standard'}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Laces Color:</div>
-                        <div class="detail-value">${selections.laces?.color || 'N/A'}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Insole Type:</div>
-                        <div class="detail-value">${selections.insole?.id || 'N/A'}</div>
-                    </div>
-                `;
-            } else if (order.model === 'slipon') {
-                orderDetailsHTML += `
-                    <div class="detail-row">
-                        <div class="detail-label">Midsole:</div>
-                        <div class="detail-value">${selections.midsole?.id || 'Standard'}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Midsole Color:</div>
-                        <div class="detail-value">${selections.midsoleColor || 'N/A'}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Outsole Color:</div>
-                        <div class="detail-value">${selections.outsoleColor || 'N/A'}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Insole Type:</div>
-                        <div class="detail-value">${selections.insole?.id || 'N/A'}</div>
-                    </div>
-                `;
-            }
-            
-            orderDetailsHTML += `
-                            <div class="detail-row" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-light);">
-                                <div class="detail-label" style="font-weight: 600;">Total:</div>
-                                <div class="detail-value" style="font-weight: 600;">₱${order.price?.toFixed(2) || '0.00'}</div>
-                            </div>
+                    
+                    <div class="detail-section">
+                        <h3><i class="fas fa-credit-card"></i> Payment Information</h3>
+                        <div class="detail-row">
+                            <div class="detail-label">Method:</div>
+                            <div class="detail-value">${order.paymentMethod || 'N/A'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Status:</div>
+                            <div class="detail-value">Paid</div>
                         </div>
                     </div>
                 </div>
+                
+                <div>
+                    <div class="detail-section">
+                        <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
+                        <div class="shoe-preview-container">
+                            <img src="${order.image || 'https://via.placeholder.com/200x120?text=No+Image'}" alt="Shoe Preview" class="component-preview">
+                        </div>
+                        
+                        <div class="detail-row">
+                            <div class="detail-label">Order Type:</div>
+                            <div class="detail-value">Custom Shoe</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Model:</div>
+                            <div class="detail-value">${order.model ? order.model.charAt(0).toUpperCase() + order.model.slice(1) : 'N/A'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Size:</div>
+                            <div class="detail-value">${order.size || 'N/A'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Production Time:</div>
+                            <div class="detail-value">${order.productionTime || 'N/A'}</div>
+                        </div>
+                        
+                        <h3 style="margin-top: 1.5rem;"><i class="fas fa-palette"></i> Customization</h3>
+        `;
+        
+        // Add customization details based on model type
+        let customizationDetails = '';
+        if (order.model === 'classic') {
+            customizationDetails = `
+                <div class="detail-row">
+                    <div class="detail-label">Body Color:</div>
+                    <div class="detail-value">${selections.bodyColor || 'N/A'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Laces:</div>
+                    <div class="detail-value">${selections.laces?.id || 'Standard'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Laces Color:</div>
+                    <div class="detail-value">${selections.laces?.color || 'N/A'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Insole Type:</div>
+                    <div class="detail-value">${selections.insole?.id || 'N/A'}</div>
+                </div>
             `;
-        } else {
-            // Pre-made order details
-            orderDetailsHTML = `
-                <div class="order-details-grid">
-                    <div>
-                        <div class="detail-section">
-                            <h3><i class="fas fa-user"></i> Customer Information</h3>
-                            <div class="detail-row">
-                                <div class="detail-label">Name:</div>
-                                <div class="detail-value">${order.shippingInfo?.firstName || ''} ${order.shippingInfo?.lastName || ''}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Email:</div>
-                                <div class="detail-value">${order.shippingInfo?.email || 'N/A'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Phone:</div>
-                                <div class="detail-value">${order.shippingInfo?.phone || 'N/A'}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="detail-section">
-                            <h3><i class="fas fa-truck"></i> Shipping Information</h3>
-                            <div class="detail-row">
-                                <div class="detail-label">Address:</div>
-                                <div class="detail-value">${order.shippingInfo?.address || 'N/A'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">City:</div>
-                                <div class="detail-value">${order.shippingInfo?.city || 'N/A'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">ZIP Code:</div>
-                                <div class="detail-value">${order.shippingInfo?.zip || 'N/A'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Country:</div>
-                                <div class="detail-value">${order.shippingInfo?.country || 'N/A'}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="detail-section">
-                            <h3><i class="fas fa-credit-card"></i> Payment Information</h3>
-                            <div class="detail-row">
-                                <div class="detail-label">Method:</div>
-                                <div class="detail-value">${order.paymentMethod || 'N/A'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Status:</div>
-                                <div class="detail-value">Paid</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <div class="detail-section">
-                            <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
-                            <div class="shoe-preview-container">
-                                <img src="${order.imageUrl || order.image || 'https://via.placeholder.com/200x120?text=No+Image'}" alt="Shoe Preview" class="component-preview">
-                            </div>
-                            
-                            <div class="detail-row">
-                                <div class="detail-label">Order Type:</div>
-                                <div class="detail-value">Pre-made Shoe</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Product:</div>
-                                <div class="detail-value">${order.shoeName || 'Unknown Product'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Variant:</div>
-                                <div class="detail-value">${order.variantName || 'Standard'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Size:</div>
-                                <div class="detail-value">${order.size || 'N/A'}</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Color:</div>
-                                <div class="detail-value">${order.color || 'N/A'}</div>
-                            </div>
-                            
-                            <div class="detail-row" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-light);">
-                                <div class="detail-label" style="font-weight: 600;">Total:</div>
-                                <div class="detail-value" style="font-weight: 600;">₱${order.price?.toFixed(2) || '0.00'}</div>
-                            </div>
-                        </div>
-                    </div>
+        } else if (order.model === 'runner') {
+            customizationDetails = `
+                <div class="detail-row">
+                    <div class="detail-label">Body Color:</div>
+                    <div class="detail-value">${selections.bodyColor || 'N/A'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Laces:</div>
+                    <div class="detail-value">${selections.laces?.id || 'Standard'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Laces Color:</div>
+                    <div class="detail-value">${selections.laces?.color || 'N/A'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Insole Type:</div>
+                    <div class="detail-value">${selections.insole?.id || 'N/A'}</div>
+                </div>
+            `;
+        } else if (order.model === 'basketball') {
+            customizationDetails = `
+                <div class="detail-row">
+                    <div class="detail-label">Body Color:</div>
+                    <div class="detail-value">${selections.bodyColor || 'N/A'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Laces:</div>
+                    <div class="detail-value">${selections.laces?.id || 'Standard'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Laces Color:</div>
+                    <div class="detail-value">${selections.laces?.color || 'N/A'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Insole Type:</div>
+                    <div class="detail-value">${selections.insole?.id || 'N/A'}</div>
+                </div>
+            `;
+        } else if (order.model === 'slipon') {
+            customizationDetails = `
+                <div class="detail-row">
+                    <div class="detail-label">Midsole:</div>
+                    <div class="detail-value">${selections.midsole?.id || 'Standard'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Midsole Color:</div>
+                    <div class="detail-value">${selections.midsoleColor || 'N/A'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Outsole Color:</div>
+                    <div class="detail-value">${selections.outsoleColor || 'N/A'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Insole Type:</div>
+                    <div class="detail-value">${selections.insole?.id || 'N/A'}</div>
                 </div>
             `;
         }
         
-        // Add action buttons
-        orderDetailsHTML += `
+        const orderSummaryHTML = `
+                        <div class="detail-row" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-light);">
+                            <div class="detail-label" style="font-weight: 600;">Total:</div>
+                            <div class="detail-value" style="font-weight: 600;">₱${order.price?.toFixed(2) || '0.00'}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="modal-actions">
                 <button class="action-btn btn-cancel" id="closeModalBtn"><i class="fas fa-times"></i> Close</button>
         `;
         
+        let actionButtonsHTML = '';
         if (order.status === 'pending') {
-            orderDetailsHTML += `
+            actionButtonsHTML = `
                 <button class="action-btn btn-process" id="processOrderBtn" data-order-id="${order.orderId}"><i class="fas fa-cog"></i> Mark as Processing</button>
                 <button class="action-btn btn-reject" id="modalRejectBtn" data-order-id="${order.orderId}"><i class="fas fa-times"></i> Reject</button>
             `;
         } else if (order.status === 'processing') {
-            orderDetailsHTML += `
+            actionButtonsHTML = `
                 <button class="action-btn btn-complete" id="completeOrderBtn" data-order-id="${order.orderId}"><i class="fas fa-check"></i> Mark as Completed</button>
             `;
         }
         
-        orderDetailsHTML += `</div>`;
+        const finalHTML = orderDetailsHTML + customizationDetails + orderSummaryHTML + actionButtonsHTML + `</div>`;
         
-        // Update modal content
-        modalBody.innerHTML = orderDetailsHTML;
+        // Update modal content safely
+        modalBody.innerHTML = finalHTML;
         
         // Add event listeners to action buttons
         const processBtn = document.getElementById('processOrderBtn');
@@ -901,3 +749,10 @@ function setupEventListeners() {
         });
     }
 }
+
+// Clean up when page is unloaded
+window.addEventListener('beforeunload', () => {
+    if (realtimeListener) {
+        realtimeListener();
+    }
+});
