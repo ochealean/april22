@@ -306,8 +306,8 @@ function displayRecentProducts(shoes, container) {
             <div class="product-info">
                 <h3 class="product-title">${shoe.shoeName || 'No Name'}</h3>
                 <div class="product-meta">
-                    <span class="product-brand">${shoe.brand || 'No Brand'}</span>
-                    <span class="product-type">${shoe.type || 'No Type'}</span>
+                    <span class="product-brand">${shoe.shoeBrand || 'No Brand'}</span>
+                    <span class="product-type">${shoe.shoeType || 'No Type'}</span>
                 </div>
                 <div class="product-code">Code: ${shoe.shoeCode || 'N/A'}</div>
                 <div class="product-price">${price}</div>
@@ -681,6 +681,8 @@ function displayTopProducts(products) {
                 : Object.values(product.variants || {}))
             : [];
 
+            console.log(variants);
+            console.log(product);
         const firstVariant = variants[0] || null;
         const price = firstVariant ? `₱${firstVariant.price}` : '₱0.00';
         
@@ -706,8 +708,8 @@ function displayTopProducts(products) {
             <div class="product-info">
                 <h3 class="product-title">${product.shoeName || 'No Name'}</h3>
                 <div class="product-meta">
-                    <span class="product-brand">${product.brand || 'No Brand'}</span>
-                    <span class="product-type">${product.type || 'No Type'}</span>
+                    <span class="product-brand">${product.shoeBrand || 'No Brand'}</span>
+                    <span class="product-type">${product.shoeType || 'No Type'}</span>
                 </div>
                 <div class="product-code">Code: ${product.shoeCode || 'N/A'}</div>
                 <div class="product-price">${price}</div>
